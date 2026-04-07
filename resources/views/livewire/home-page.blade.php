@@ -8,7 +8,7 @@
         <div class="max-w-7xl mx-auto px-4 relative z-10">
             <div class="max-w-2xl">
                 <div class="inline-block bg-brand-yellow text-brand-black text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">
-                    #1 Lanjiao store
+                    #1 Store
                 </div>
                 <h1 class="text-5xl md:text-6xl font-black mb-6 leading-tight">
                     Upgrade Your
