@@ -19,6 +19,20 @@ Route::get('/products/{slug}', ProductDetail::class)->name('product.show');
 Route::get('/about', AboutPage::class)->name('about');
 Route::get('/contact', ContactPage::class)->name('contact');
 
+// Language switcher — stores locale in session then redirects back
+Route::get('/lang/{locale}', function (string $locale) {
+    if (in_array($locale, ['en', 'ms', 'zh'])) {
+        session(['locale' => $locale]);
+    }
+    $referrer = request()->server('HTTP_REFERER', '');
+    // Only redirect to same-origin URLs to prevent open-redirect
+    $appUrl = rtrim(config('app.url'), '/');
+    if ($referrer && str_starts_with($referrer, $appUrl)) {
+        return redirect($referrer);
+    }
+    return redirect()->route('home');
+})->name('lang');
+
 // Admin Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
