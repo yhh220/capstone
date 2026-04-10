@@ -6,6 +6,8 @@
         $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($storeAddress);
     @endphp
 
+    <x-compatibility-checker />
+
     <section class="hero-gradient text-white py-24 relative overflow-hidden" aria-label="Hero">
         <div class="absolute inset-0 opacity-10 pointer-events-none" aria-hidden="true">
             <div class="absolute top-10 left-10 w-64 h-64 bg-brand-yellow rounded-full blur-3xl"></div>
@@ -13,29 +15,34 @@
         </div>
         <div class="max-w-7xl mx-auto px-4 relative z-10">
             <div class="max-w-2xl">
-                <div class="inline-block bg-brand-yellow text-brand-black text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">
+                <div class="inline-block bg-brand-yellow/90 backdrop-blur-sm text-brand-black text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-5 shadow-sm transform transition-transform hover:scale-105 cursor-default">
                     {{ __('Product showcase and showroom experience') }}
                 </div>
-                <h1 class="text-4xl sm:text-5xl md:text-6xl font-black mb-6 leading-tight">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-black mb-6 leading-tight drop-shadow-md">
                     {{ __('Discover accessories') }}
-                    <span class="text-brand-yellow">{{ __('for your car') }}</span>
+                    <span class="text-brand-yellow relative inline-block">
+                        {{ __('for your car') }}
+                        <!-- Subtle underline stroke animation -->
+                        <div class="absolute -bottom-1 left-0 w-full h-1 bg-brand-yellow rounded-full transform origin-left scale-x-0 transition-transform duration-1000 ease-out" x-intersect="$el.classList.remove('scale-x-0')"></div>
+                    </span>
                     {{ __('with confidence') }}
                 </h1>
-                <p class="text-base sm:text-lg text-gray-300 mb-8 leading-relaxed">
+                <p class="text-base sm:text-lg text-gray-200 mb-8 leading-relaxed max-w-xl font-medium">
                     {{ __('Browse our featured products online, then visit our showroom or contact us on WhatsApp for recommendations, fitting advice, and availability.') }}
                 </p>
-                <div class="flex flex-wrap gap-4">
-                    <a href="{{ $whatsAppUrl }}"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="bg-brand-red text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-red-700 transition-colors shadow-lg">
-                        {{ __('Chat on WhatsApp') }}
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{{ route('products') }}"
+                       class="group inline-flex items-center justify-center px-8 py-4 bg-brand-yellow text-brand-black font-extrabold rounded-full transition-all duration-300 ease-out shadow-lg hover:shadow-brand-yellow/30 hover:-translate-y-1 hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-brand-yellow/50">
+                        {{ __('Browse Products') }}
+                        <!-- Lucide Animated Arrow (Moves right on hover) -->
+                        <svg class="w-5 h-5 ml-2 transform transition-transform duration-300 group-hover:translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </a>
                     <a href="{{ $mapUrl }}"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="border-2 border-white text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-white hover:text-brand-black transition-colors">
-                        {{ __('Visit Our Store') }}
+                       target="_blank" rel="noopener noreferrer"
+                       class="group inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur-md text-white font-bold rounded-full border border-white/20 transition-all duration-300 ease-out shadow-md hover:bg-white/20 hover:border-white/40 hover:-translate-y-1 hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-white/20">
+                        <!-- Lucide Animated Map Pin (Bounces on hover) -->
+                        <svg class="w-5 h-5 mr-2 transform transition-transform duration-300 group-hover:-translate-y-1 group-hover:text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        {{ __('Visit Showroom') }}
                     </a>
                 </div>
             </div>

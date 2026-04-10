@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Car Loading Animation</title>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #050505;
+      /* Try to match the store's dark theme */
+      color: #f5f5f5;
+      font-family: Inter, system-ui, sans-serif;
+    }
+
+    .demo {
+      display: grid;
+      gap: 20px;
+      justify-items: center;
+      padding: 32px;
+    }
+
+    .frame {
+      width: min(72vmin, 200px);
+      aspect-ratio: 1.5;
+      /* Cars are usually wider than they are tall */
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .meta {
+      display: grid;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ff2a2a;
+      /* Brand Red */
+    }
+
+    .tag {
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.58);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="demo">
+    <div class="frame">
+      <!-- 
+        We use a viewBox roughly matching a car silhouette.
+        Width 300, Height 150.
+      -->
+      <svg viewBox="0 0 300 150" fill="none" aria-hidden="true">
+        <g id="group">
+          <!-- A continuous path of a sleek sports car profile -->
+          <path id="path" d="M 50 100 
+                   C 30 100, 20 90, 20 80 
+                   L 20 70 
+                   C 20 50, 40 40, 60 40 
+                   L 90 35 
+                   C 120 20, 150 15, 180 20 
+                   L 230 40 
+                   C 260 45, 275 55, 280 75 
+                   C 285 95, 270 100, 250 100 
+                   L 220 100 
+                   A 25 25 0 0 0 170 100 
+                   L 130 100 
+                   A 25 25 0 0 0 80 100 
+                   Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" opacity="0.05">
+          </path>
+        </g>
+      </svg>
+    </div>
+    <div class="meta">
+      <div class="title">Car Parts Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+
+    // Grab the car path to calculate coordinates
+    const referencePath = document.querySelector('#path');
+    const pathTotalLength = referencePath.getTotalLength();
+
+    const config = {
+      particleCount: 50, // Number of glowing dots in the trail
+      trailSpan: 0.4, // How much of the car outline the trail covers at once
+      durationMs: 3000, // How fast the trail goes around the car (ms)
+      strokeWidth: 4,
+      point(progress) {
+        // Instead of a math formula, we extract the exact X,Y from the SVG path!
+        // We wrap the progress to handle loop around seamless.
+        // progress is between 0 and 1
+        const pt = referencePath.getPointAtLength(progress * pathTotalLength);
+        return {
+          x: pt.x,
+          y: pt.y
+        };
+      }
+    };
+
+    const group = document.querySelector('#group');
+    const path = document.querySelector('#path');
+
+    path.setAttribute('stroke-width', String(config.strokeWidth));
+
+    // Create the particles
+    const particles = Array.from({ length: config.particleCount }, () => {
+      const circle = document.createElementNS(SVG_NS, 'circle');
+      circle.setAttribute('fill', '#ff2a2a'); // Brand Red glowing particles
+      group.appendChild(circle);
+      return circle;
+    });
+
+    function normalizeProgress(progress) {
+      return ((progress % 1) + 1) % 1;
+    }
+
+    function getParticle(index, progress) {
+      // Create a smooth trailing effect
+      const tailOffset = index / (config.particleCount - 1);
+      const point = config.point(normalizeProgress(progress - tailOffset * config.trailSpan));
+      const fade = Math.pow(1 - tailOffset, 0.6); // Particle fades out towards the tail
+
+      return {
+        x: point.x,
+        y: point.y,
+        radius: 1 + fade * 3, // Head particle is bigger (r=4), tail goes to 1
+        opacity: 0.05 + fade * 0.95, // Head is solid, tail fades to transparent
+      };
+    }
+
+    const startedAt = performance.now();
+
+    function render(now) {
+      const time = now - startedAt;
+      const progress = (time % config.durationMs) / config.durationMs;
+
+      // Update particle positions along the car outline
+      particles.forEach((node, index) => {
+        const particle = getParticle(index, progress);
+        node.setAttribute('cx', particle.x.toFixed(2));
+        node.setAttribute('cy', particle.y.toFixed(2));
+        node.setAttribute('r', particle.radius.toFixed(2));
+        node.setAttribute('opacity', particle.opacity.toFixed(3));
+      });
+
+      requestAnimationFrame(render);
+    }
+
+    requestAnimationFrame(render);
+  </script>
+</body>
+
+</html>
