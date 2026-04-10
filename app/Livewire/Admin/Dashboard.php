@@ -2,27 +2,33 @@
 
 namespace App\Livewire\Admin;
 
-use Livewire\Component;
-use App\Models\Product;
-use App\Models\Order;
-use App\Models\Contact;
 use App\Models\Category;
+use App\Models\Contact;
+use App\Models\Feedback;
+use App\Models\Product;
+use Illuminate\Support\Facades\Schema;
+use Livewire\Component;
 
 class Dashboard extends Component
 {
     public function render()
     {
+        $hasProducts = Schema::hasTable('products');
+        $hasCategories = Schema::hasTable('categories');
+        $hasContacts = Schema::hasTable('contacts');
+        $hasFeedback = Schema::hasTable('feedback');
+
         return view('livewire.admin.dashboard', [
             'stats' => [
-                'total_products' => Product::count(),
-                'total_orders' => Order::count(),
-                'pending_orders' => Order::where('status', 'pending')->count(),
-                'unread_messages' => Contact::where('is_read', false)->count(),
-                'total_categories' => Category::count(),
-                'total_revenue' => Order::whereIn('status', ['delivered', 'shipped'])->sum('total'),
+                'products' => $hasProducts ? Product::count() : 0,
+                'categories' => $hasCategories ? Category::count() : 0,
+                'messages' => $hasContacts ? Contact::count() : 0,
+                'unread_messages' => $hasContacts ? Contact::where('is_read', false)->count() : 0,
+                'feedback' => $hasFeedback ? Feedback::count() : 0,
             ],
-            'recentOrders' => Order::latest()->take(5)->get(),
-            'recentMessages' => Contact::where('is_read', false)->latest()->take(5)->get(),
+            'recentProducts' => $hasProducts ? Product::latest()->take(5)->get() : collect(),
+            'recentMessages' => $hasContacts ? Contact::latest()->take(5)->get() : collect(),
+            'recentFeedback' => $hasFeedback ? Feedback::latest()->take(5)->get() : collect(),
         ])->layout('layouts.admin');
     }
 }

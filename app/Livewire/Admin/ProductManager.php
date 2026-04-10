@@ -2,23 +2,23 @@
 
 namespace App\Livewire\Admin;
 
-use Livewire\Component;
-use Livewire\WithPagination;
-use Livewire\WithFileUploads;
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Support\Str;
+use Livewire\Component;
+use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 
 class ProductManager extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithFileUploads;
+    use WithPagination;
 
     public string $search = '';
     public bool $showModal = false;
     public bool $isEditing = false;
     public ?int $editingId = null;
 
-    // Form fields
     public string $name = '';
     public string $description = '';
     public string $short_description = '';
@@ -58,12 +58,13 @@ class ProductManager extends Component
     public function openEdit(int $id): void
     {
         $product = Product::findOrFail($id);
+
         $this->editingId = $id;
         $this->name = $product->name;
         $this->description = $product->description ?? '';
         $this->short_description = $product->short_description ?? '';
-        $this->price = $product->price;
-        $this->sale_price = $product->sale_price ?? '';
+        $this->price = (string) $product->price;
+        $this->sale_price = $product->sale_price !== null ? (string) $product->sale_price : '';
         $this->sku = $product->sku ?? '';
         $this->stock = $product->stock;
         $this->category_id = $product->category_id;
@@ -139,10 +140,10 @@ class ProductManager extends Component
     {
         return view('livewire.admin.product-manager', [
             'products' => Product::with('category')
-                ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
+                ->when($this->search, fn ($query) => $query->where('name', 'like', '%' . $this->search . '%'))
                 ->latest()
                 ->paginate(15),
-            'categories' => Category::where('is_active', true)->get(),
+            'categories' => Category::where('is_active', true)->orderBy('name')->get(),
         ])->layout('layouts.admin');
     }
 }
