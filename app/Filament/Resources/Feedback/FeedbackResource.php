@@ -18,6 +18,8 @@ class FeedbackResource extends Resource
 {
     protected static ?string $model = Feedback::class;
 
+    protected static \UnitEnum|string|null $navigationGroup = 'Customer Interactions';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema
