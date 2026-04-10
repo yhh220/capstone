@@ -13,7 +13,7 @@ class ContactsTable
 {
     public static function configure(Table $table): Table
     {
-        return $table
+        return $table->paginated([10, 25, 50, 100, 'all'])
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),

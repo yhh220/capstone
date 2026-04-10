@@ -1,34 +1,26 @@
 <?php
 
-namespace App\Filament\Resources\Feedback\Tables;
+namespace App\Filament\Resources\Users\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class FeedbackTable
+class UsersTable
 {
     public static function configure(Table $table): Table
     {
         return $table->paginated([10, 25, 50, 100, 'all'])
             ->columns([
-                ImageColumn::make('image')
-                    ->circular(),
                 TextColumn::make('name')
                     ->searchable(),
-                TextColumn::make('location')
+                TextColumn::make('email')
+                    ->label('Email address')
                     ->searchable(),
-                TextColumn::make('rating')
-                    ->numeric()
-                    ->sortable(),
-                IconColumn::make('is_active')
-                    ->boolean(),
-                TextColumn::make('sort_order')
-                    ->numeric()
+                TextColumn::make('email_verified_at')
+                    ->dateTime()
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -38,6 +30,8 @@ class FeedbackTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('role')
+                    ->searchable(),
             ])
             ->filters([
                 //

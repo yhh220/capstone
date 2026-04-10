@@ -9,12 +9,23 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
+use App\Models\User;
+
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
     public function run(): void
     {
+        User::firstOrCreate(
+            ['email' => env('DEFAULT_ADMIN_EMAIL', 'admin@example.com')],
+            [
+                'name' => 'Admin', 
+                'password' => bcrypt(env('DEFAULT_ADMIN_PASSWORD', 'password')), 
+                'role' => 'owner'
+            ]
+        );
+
         $categories = [
             ['name' => 'Seat Covers', 'description' => 'Premium seat covers for all car models'],
             ['name' => 'Audio Systems', 'description' => 'Car audio and entertainment systems'],
