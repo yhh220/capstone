@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Admin;
 
-use Livewire\Component;
 use App\Models\Category;
 use Illuminate\Support\Str;
+use Livewire\Component;
 
 class CategoryManager extends Component
 {
@@ -32,11 +32,12 @@ class CategoryManager extends Component
 
     public function openEdit(int $id): void
     {
-        $cat = Category::findOrFail($id);
+        $category = Category::findOrFail($id);
+
         $this->editingId = $id;
-        $this->name = $cat->name;
-        $this->description = $cat->description ?? '';
-        $this->is_active = $cat->is_active;
+        $this->name = $category->name;
+        $this->description = $category->description ?? '';
+        $this->is_active = $category->is_active;
         $this->isEditing = true;
         $this->showModal = true;
     }
@@ -88,7 +89,7 @@ class CategoryManager extends Component
     {
         return view('livewire.admin.category-manager', [
             'categories' => Category::withCount('products')
-                ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
+                ->when($this->search, fn ($query) => $query->where('name', 'like', '%' . $this->search . '%'))
                 ->latest()
                 ->paginate(15),
         ])->layout('layouts.admin');

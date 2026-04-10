@@ -1,12 +1,6 @@
 <div>
     @section('page-title', 'Categories')
 
-    @if(session('success'))
-    <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-6 text-sm">
-        {{ session('success') }}
-    </div>
-    @endif
-
     <div class="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center mb-6">
         <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search categories..."
                class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-red w-full sm:w-64">
@@ -28,25 +22,22 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
-                @forelse($categories as $cat)
+                @forelse($categories as $category)
                 <tr class="hover:bg-gray-50 transition">
-                    <td class="px-4 py-3 font-semibold text-gray-800">{{ $cat->name }}</td>
-                    <td class="px-4 py-3 hidden md:table-cell text-gray-500 text-xs">{{ Str::limit($cat->description, 60) ?? '—' }}</td>
+                    <td class="px-4 py-3 font-semibold text-gray-800">{{ $category->name }}</td>
+                    <td class="px-4 py-3 hidden md:table-cell text-gray-500 text-xs">{{ \Illuminate\Support\Str::limit($category->description, 60) ?: '—' }}</td>
                     <td class="px-4 py-3">
-                        <span class="bg-gray-100 text-gray-700 text-xs font-bold px-2 py-1 rounded-full">{{ $cat->products_count }}</span>
+                        <span class="bg-gray-100 text-gray-700 text-xs font-bold px-2 py-1 rounded-full">{{ $category->products_count }}</span>
                     </td>
                     <td class="px-4 py-3">
-                        <span class="text-xs px-2 py-0.5 rounded-full font-semibold {{ $cat->is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
-                            {{ $cat->is_active ? 'Active' : 'Inactive' }}
+                        <span class="text-xs px-2 py-0.5 rounded-full font-semibold {{ $category->is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
+                            {{ $category->is_active ? 'Active' : 'Inactive' }}
                         </span>
                     </td>
                     <td class="px-4 py-3 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <button wire:click="openEdit({{ $cat->id }})"
-                                    class="text-blue-600 hover:text-blue-800 font-medium text-xs px-2 py-1 rounded hover:bg-blue-50 transition">Edit</button>
-                            <button wire:click="delete({{ $cat->id }})"
-                                    wire:confirm="Delete this category?"
-                                    class="text-red-600 hover:text-red-800 font-medium text-xs px-2 py-1 rounded hover:bg-red-50 transition">Delete</button>
+                            <button wire:click="openEdit({{ $category->id }})" class="text-blue-600 hover:text-blue-800 font-medium text-xs px-2 py-1 rounded hover:bg-blue-50 transition">Edit</button>
+                            <button wire:click="delete({{ $category->id }})" wire:confirm="Delete this category?" class="text-red-600 hover:text-red-800 font-medium text-xs px-2 py-1 rounded hover:bg-red-50 transition">Delete</button>
                         </div>
                     </td>
                 </tr>
@@ -60,6 +51,7 @@
                 @endforelse
             </tbody>
         </table>
+
         <div class="p-4 border-t border-gray-100">{{ $categories->links() }}</div>
     </div>
 

@@ -1,30 +1,22 @@
 <div>
     @section('page-title', 'Products')
 
-    @if(session('success'))
-    <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-6 text-sm">
-        {{ session('success') }}
-    </div>
-    @endif
-
-    <!-- Toolbar -->
     <div class="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center mb-6">
         <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search products..."
-               class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-red w-full sm:w-64">
+               class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-red w-full sm:w-72">
         <button wire:click="openCreate"
                 class="bg-brand-red text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-700 transition whitespace-nowrap">
             + Add Product
         </button>
     </div>
 
-    <!-- Table -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
                 <tr>
                     <th class="px-4 py-3 text-left">Product</th>
                     <th class="px-4 py-3 text-left hidden md:table-cell">Category</th>
-                    <th class="px-4 py-3 text-left">Price</th>
+                    <th class="px-4 py-3 text-left">Price Range</th>
                     <th class="px-4 py-3 text-left hidden sm:table-cell">Stock</th>
                     <th class="px-4 py-3 text-left hidden lg:table-cell">Status</th>
                     <th class="px-4 py-3 text-right">Actions</th>
@@ -37,13 +29,13 @@
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-xl overflow-hidden flex-shrink-0">
                                 @if($product->image)
-                                <img src="{{ Storage::url($product->image) }}" class="w-full h-full object-cover">
+                                <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                                 @else
                                 🚗
                                 @endif
                             </div>
                             <div>
-                                <div class="font-semibold text-gray-800">{{ Str::limit($product->name, 30) }}</div>
+                                <div class="font-semibold text-gray-800">{{ \Illuminate\Support\Str::limit($product->name, 40) }}</div>
                                 @if($product->sku)
                                 <div class="text-xs text-gray-400">SKU: {{ $product->sku }}</div>
                                 @endif
@@ -52,15 +44,13 @@
                     </td>
                     <td class="px-4 py-3 hidden md:table-cell text-gray-600">{{ $product->category?->name ?? '—' }}</td>
                     <td class="px-4 py-3">
-                        <div class="font-bold text-gray-800">RM {{ number_format($product->current_price, 2) }}</div>
-                        @if($product->is_on_sale)
-                        <div class="text-xs text-gray-400 line-through">RM {{ number_format($product->price, 2) }}</div>
+                        <div class="font-bold text-gray-800">RM {{ number_format($product->price, 2) }}</div>
+                        @if($product->sale_price)
+                        <div class="text-xs text-gray-500">Promo: RM {{ number_format($product->sale_price, 2) }}</div>
                         @endif
                     </td>
                     <td class="px-4 py-3 hidden sm:table-cell">
-                        <span class="font-semibold {{ $product->stock > 0 ? 'text-green-600' : 'text-red-500' }}">
-                            {{ $product->stock }}
-                        </span>
+                        <span class="font-semibold {{ $product->stock > 0 ? 'text-green-600' : 'text-red-500' }}">{{ $product->stock }}</span>
                     </td>
                     <td class="px-4 py-3 hidden lg:table-cell">
                         <div class="flex flex-col gap-1">
@@ -74,15 +64,8 @@
                     </td>
                     <td class="px-4 py-3 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <button wire:click="openEdit({{ $product->id }})"
-                                    class="text-blue-600 hover:text-blue-800 font-medium text-xs px-2 py-1 rounded hover:bg-blue-50 transition">
-                                Edit
-                            </button>
-                            <button wire:click="delete({{ $product->id }})"
-                                    wire:confirm="Are you sure you want to delete this product?"
-                                    class="text-red-600 hover:text-red-800 font-medium text-xs px-2 py-1 rounded hover:bg-red-50 transition">
-                                Delete
-                            </button>
+                            <button wire:click="openEdit({{ $product->id }})" class="text-blue-600 hover:text-blue-800 font-medium text-xs px-2 py-1 rounded hover:bg-blue-50 transition">Edit</button>
+                            <button wire:click="delete({{ $product->id }})" wire:confirm="Are you sure you want to delete this product?" class="text-red-600 hover:text-red-800 font-medium text-xs px-2 py-1 rounded hover:bg-red-50 transition">Delete</button>
                         </div>
                     </td>
                 </tr>
@@ -102,7 +85,6 @@
         </div>
     </div>
 
-    <!-- Modal -->
     @if($showModal)
     <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" wire:click.self="closeModal">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -126,7 +108,7 @@
                     </div>
 
                     <div>
-                        <label class="text-sm font-semibold text-gray-700 mb-1 block">Sale Price (RM)</label>
+                        <label class="text-sm font-semibold text-gray-700 mb-1 block">Promo / Min Price (RM)</label>
                         <input wire:model="sale_price" type="number" step="0.01" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-red">
                         @error('sale_price') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
@@ -147,8 +129,8 @@
                         <label class="text-sm font-semibold text-gray-700 mb-1 block">Category</label>
                         <select wire:model="category_id" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-red">
                             <option value="">— No Category —</option>
-                            @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                            @foreach($categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
                         </select>
                     </div>

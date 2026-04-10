@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@php
+    $storeName = config('services.store.name');
+@endphp
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
-    <title>@yield('title', 'Admin') — Win Win Car Studio</title>
+    <title>@yield('title', 'Admin') - {{ $storeName }}</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -25,54 +28,43 @@
     </script>
 
     <style>
-        /* Focus ring */
         *:focus-visible {
             outline: 3px solid #DC2626;
             outline-offset: 2px;
             border-radius: 4px;
         }
-        /* Smooth sidebar transition */
+
         #admin-sidebar {
-            transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+            transition: transform 0.25s cubic-bezier(.4, 0, .2, 1);
         }
+
         @media (prefers-reduced-motion: reduce) {
-            #admin-sidebar { transition: none; }
+            #admin-sidebar {
+                transition: none;
+            }
         }
     </style>
 
     @livewireStyles
 </head>
 <body class="bg-gray-100 font-sans antialiased" id="admin-body">
-
 <div class="flex h-screen overflow-hidden">
+    <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/50 z-30 md:hidden" aria-hidden="true"></div>
 
-    {{-- ── Mobile overlay backdrop ── --}}
-    <div id="sidebar-overlay"
-         class="hidden fixed inset-0 bg-black/50 z-30 md:hidden"
-         aria-hidden="true"></div>
-
-    {{-- ── Sidebar ── --}}
     <aside id="admin-sidebar"
-           class="fixed md:relative -translate-x-full md:translate-x-0
-                  z-40 w-72 md:w-64 h-full
-                  bg-brand-black text-gray-200
-                  flex flex-col flex-shrink-0
-                  shadow-2xl md:shadow-none"
+           class="fixed md:relative -translate-x-full md:translate-x-0 z-40 w-72 md:w-64 h-full bg-brand-black text-gray-200 flex flex-col flex-shrink-0 shadow-2xl md:shadow-none"
            role="navigation"
            aria-label="Admin navigation">
-
-        {{-- Logo --}}
         <div class="px-6 py-5 border-b border-gray-700 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <div class="w-9 h-9 bg-brand-red rounded-full flex items-center justify-center flex-shrink-0" aria-hidden="true">
                     <span class="text-brand-yellow font-black">W</span>
                 </div>
                 <div class="leading-tight">
-                    <div class="font-bold text-white text-sm">Win Win Admin</div>
-                    <div class="text-xs text-brand-yellow">Car Studio</div>
+                    <div class="font-bold text-white text-sm">Content Admin</div>
+                    <div class="text-xs text-brand-yellow">{{ $storeName }}</div>
                 </div>
             </div>
-            {{-- Close button (mobile only) --}}
             <button id="sidebar-close"
                     class="md:hidden p-1.5 rounded-lg hover:bg-gray-700 transition text-gray-400 hover:text-white"
                     aria-label="Close navigation">
@@ -82,63 +74,47 @@
             </button>
         </div>
 
-        {{-- Nav links --}}
         <nav class="flex-1 px-4 py-6 space-y-0.5 overflow-y-auto" aria-label="Admin menu">
-
-            <p class="text-xs text-gray-500 uppercase tracking-widest mb-2 px-2 mt-1">Main</p>
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-2 px-2 mt-1">Overview</p>
             <a href="{{ route('admin.dashboard') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                      {{ request()->routeIs('admin.dashboard') ? 'bg-brand-red text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}"
-               @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-brand-red text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
                 <span aria-hidden="true">📊</span> Dashboard
             </a>
 
-            <p class="text-xs text-gray-500 uppercase tracking-widest mt-5 mb-2 px-2">Catalog</p>
+            <p class="text-xs text-gray-500 uppercase tracking-widest mt-5 mb-2 px-2">Content</p>
             <a href="{{ route('admin.products') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                      {{ request()->routeIs('admin.products') ? 'bg-brand-red text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}"
-               @if(request()->routeIs('admin.products')) aria-current="page" @endif>
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.products') ? 'bg-brand-red text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
                 <span aria-hidden="true">🚗</span> Products
             </a>
             <a href="{{ route('admin.categories') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                      {{ request()->routeIs('admin.categories') ? 'bg-brand-red text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}"
-               @if(request()->routeIs('admin.categories')) aria-current="page" @endif>
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.categories') ? 'bg-brand-red text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
                 <span aria-hidden="true">📂</span> Categories
             </a>
-
-            <p class="text-xs text-gray-500 uppercase tracking-widest mt-5 mb-2 px-2">Operations</p>
-            <a href="{{ route('admin.orders') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                      {{ request()->routeIs('admin.orders') ? 'bg-brand-red text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}"
-               @if(request()->routeIs('admin.orders')) aria-current="page" @endif>
-                <span aria-hidden="true">📦</span> Orders
+            <a href="{{ route('admin.feedback') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.feedback') ? 'bg-brand-red text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                <span aria-hidden="true">⭐</span> Feedback
             </a>
+
+            <p class="text-xs text-gray-500 uppercase tracking-widest mt-5 mb-2 px-2">Leads</p>
             <a href="{{ route('admin.contacts') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                      {{ request()->routeIs('admin.contacts') ? 'bg-brand-red text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}"
-               @if(request()->routeIs('admin.contacts')) aria-current="page" @endif>
-                <span aria-hidden="true">✉️</span> Messages
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.contacts') ? 'bg-brand-red text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                <span aria-hidden="true">✉</span> Messages
             </a>
         </nav>
 
-        {{-- Bottom links --}}
         <div class="px-4 py-4 border-t border-gray-700 space-y-1">
             <a href="{{ route('home') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
-               target="_blank" rel="noopener">
+               target="_blank"
+               rel="noopener">
                 <span aria-hidden="true">🌐</span> View Website
             </a>
         </div>
     </aside>
 
-    {{-- ── Main area ── --}}
     <div class="flex-1 flex flex-col overflow-hidden min-w-0">
-
-        {{-- Top bar --}}
         <header class="bg-white shadow-sm px-4 md:px-6 py-3 flex items-center justify-between gap-4 flex-shrink-0">
             <div class="flex items-center gap-3">
-                {{-- Hamburger (mobile only) --}}
                 <button id="sidebar-open"
                         class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
                         aria-label="Open navigation menu"
@@ -151,35 +127,29 @@
                 <h1 class="text-lg font-bold text-gray-800 truncate">@yield('page-title', 'Dashboard')</h1>
             </div>
 
-            {{-- Admin badge --}}
             <div class="flex items-center gap-2 text-sm text-gray-600 flex-shrink-0">
-                <div class="w-8 h-8 bg-brand-red text-white rounded-full flex items-center justify-center font-bold text-sm"
-                     aria-hidden="true">A</div>
+                <div class="w-8 h-8 bg-brand-red text-white rounded-full flex items-center justify-center font-bold text-sm" aria-hidden="true">A</div>
                 <span class="hidden sm:inline">Admin</span>
             </div>
         </header>
 
-        {{-- Flash messages --}}
         @if(session('success'))
-        <div class="mx-4 md:mx-6 mt-4 bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm"
-             role="alert" aria-live="polite">
+        <div class="mx-4 md:mx-6 mt-4 bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm" role="alert" aria-live="polite">
             {{ session('success') }}
         </div>
         @endif
 
-        {{-- Page content --}}
         <main class="flex-1 overflow-y-auto p-4 md:p-6" id="admin-main">
             {{ $slot }}
         </main>
     </div>
-
-</div>{{-- end flex wrapper --}}
+</div>
 
 <script>
-    const sidebar        = document.getElementById('admin-sidebar');
-    const overlay        = document.getElementById('sidebar-overlay');
-    const btnOpen        = document.getElementById('sidebar-open');
-    const btnClose       = document.getElementById('sidebar-close');
+    const sidebar = document.getElementById('admin-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const btnOpen = document.getElementById('sidebar-open');
+    const btnClose = document.getElementById('sidebar-close');
 
     function openSidebar() {
         sidebar.classList.remove('-translate-x-full');
@@ -187,6 +157,7 @@
         btnOpen.setAttribute('aria-expanded', 'true');
         document.body.style.overflow = 'hidden';
     }
+
     function closeSidebar() {
         sidebar.classList.add('-translate-x-full');
         overlay.classList.add('hidden');
@@ -194,16 +165,15 @@
         document.body.style.overflow = '';
     }
 
-    btnOpen.addEventListener('click', openSidebar);
-    btnClose.addEventListener('click', closeSidebar);
-    overlay.addEventListener('click', closeSidebar);
+    btnOpen?.addEventListener('click', openSidebar);
+    btnClose?.addEventListener('click', closeSidebar);
+    overlay?.addEventListener('click', closeSidebar);
 
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeSidebar();
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeSidebar();
+        }
     });
-
-    // Auto-close sidebar on navigation (Livewire page transitions)
-    window.addEventListener('popstate', closeSidebar);
 </script>
 
 @livewireScripts
