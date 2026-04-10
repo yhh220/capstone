@@ -219,9 +219,13 @@
                     </div>
                     <blockquote class="text-gray-600 dark:text-gray-400 italic mb-4 leading-relaxed text-sm">"{{ $testimonial['message'] ?? $testimonial->message }}"</blockquote>
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-brand-red text-white rounded-full flex items-center justify-center font-bold flex-shrink-0" aria-hidden="true">
-                            {{ substr($testimonial['name'] ?? $testimonial->name, 0, 1) }}
-                        </div>
+                        @if(!empty($testimonial['image']) || !empty($testimonial->image))
+                            <img src="{{ Storage::url($testimonial['image'] ?? $testimonial->image) }}" alt="{{ $testimonial['name'] ?? $testimonial->name }}" class="w-10 h-10 rounded-full object-cover flex-shrink-0" loading="lazy">
+                        @else
+                            <div class="w-10 h-10 bg-brand-red text-white rounded-full flex items-center justify-center font-bold flex-shrink-0" aria-hidden="true">
+                                {{ substr($testimonial['name'] ?? $testimonial->name, 0, 1) }}
+                            </div>
+                        @endif
                         <div>
                             <div class="font-semibold text-gray-800 dark:text-gray-200 text-sm">{{ $testimonial['name'] ?? $testimonial->name }}</div>
                             <div class="text-xs text-gray-400 dark:text-gray-500">{{ $testimonial['location'] ?? $testimonial->location }}</div>

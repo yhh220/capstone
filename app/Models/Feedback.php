@@ -13,6 +13,7 @@ class Feedback extends Model
         'rating',
         'is_active',
         'sort_order',
+        'image',
     ];
 
     protected $casts = [

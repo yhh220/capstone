@@ -135,7 +135,6 @@
                         [route('home'), __('Home'), request()->routeIs('home')],
                         [route('products'), __('Products'), request()->routeIs('products*')],
                         [route('about'), __('About Us'), request()->routeIs('about')],
-                        [route('home') . '#testimonials-heading', __('Customer Reviews'), false],
                         [route('contact'), __('Contact'), request()->routeIs('contact')],
                     ] as [$href, $label, $active])
                     <a href="{{ $href }}"
@@ -232,7 +231,6 @@
                     [route('home'), __('Home'), request()->routeIs('home')],
                     [route('products'), __('Products'), request()->routeIs('products*')],
                     [route('about'), __('About Us'), request()->routeIs('about')],
-                    [route('home') . '#testimonials-heading', __('Customer Reviews'), false],
                     [route('contact'), __('Contact'), request()->routeIs('contact')],
                 ] as [$href, $label, $active])
                 <a href="{{ $href }}"
