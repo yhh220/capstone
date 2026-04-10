@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Feedback\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -13,6 +14,10 @@ class FeedbackForm
     {
         return $schema
             ->components([
+                FileUpload::make('image')
+                    ->image()
+                    ->directory('feedback-images')
+                    ->columnSpanFull(),
                 TextInput::make('name')
                     ->required(),
                 TextInput::make('location'),
