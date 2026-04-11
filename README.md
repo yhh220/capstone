@@ -1,58 +1,98 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Win Win Capstone Project (Powered by Laravel)
 
-## About Laravel
+Welcome to the **Win Win Capstone Project**, a modern web application built for an auto accessories showroom. The platform allows customers to discover products, read testimonials, contact the store via WhatsApp, and enables administrators to manage the store cleanly using a powerful admin panel.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Storefront (Customer Facing)**
+  - Beautiful, responsive Homepage with hero sections, categories, and new arrivals.
+  - Featured product highlights and full product catalog.
+  - WhatsApp integration for seamless customer inquiries.
+  - Real-time customer reviews and testimonials.
+  - Multi-language support (English, Malay, Chinese) built-in.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Admin Dashboard (Filament)**
+  - Complete Content Management System accessible at `/admin`.
+  - **Products**: Manage catalog, set featured items, update pricing and inventory.
+  - **Categories**: Organize products efficiently.
+  - **Feedback**: Review and approve customer testimonials to be shown on the homepage.
+  - **Contacts**: Manage customer inquiries submitted through the contact form.
 
-## Learning Laravel
+## 🛠️ Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Backend framework**: Laravel 13
+- **Frontend / Fullstack**: Livewire v3
+- **Styling**: Tailwind CSS
+- **Admin Panel**: Filament v3 (v5.x)
+- **Database**: SQLite / MySQL (Configurable via `.env`)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 📦 Getting Started
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### Prerequisites
 
-## Agentic Development
+Ensure you have the following installed on your local machine:
+- PHP >= 8.3
+- Composer
+- Node.js & NPM
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### Installation
 
-```bash
-composer require laravel/boost --dev
+1. **Clone the repository** (if applicable) and navigate to the project directory:
+   ```bash
+   cd capstone
+   ```
 
-php artisan boost:install
-```
+2. **Install PHP dependencies**:
+   ```bash
+   composer install
+   ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+3. **Install NPM dependencies and build assets**:
+   ```bash
+   npm install
+   npm run build
+   ```
 
-## Contributing
+4. **Environment Setup**:
+   Copy the example environment file and generate your application key:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+5. **Database Migration & Seeding**:
+   Setup the database structure:
+   ```bash
+   php artisan migrate
+   ```
+   *(Optional)* If you have seeders ready, run `php artisan db:seed` to populate dummy data.
 
-## Code of Conduct
+6. **Serve the Application**:
+   Start the Laravel local development server:
+   ```bash
+   php artisan serve
+   ```
+   The application will be available at `http://localhost:8000`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Accessing the Admin Panel
 
-## Security Vulnerabilities
+- Navigate to `http://localhost:8000/admin`.
+- If you haven't created an admin user yet, you can create one using the artisan command:
+  ```bash
+  php artisan make:filament-user
+  ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 💖 About Laravel
 
-## License
+This project is proudly built on **Laravel**, a web application framework with expressive, elegant syntax. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Simple, fast routing engine
+- Expressive, intuitive database ORM
+- Database agnostic schema migrations
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Learn more about Laravel at [laravel.com](https://laravel.com/).
+
+## 📝 License
+
+This project is open-source and available under the [MIT license](https://opensource.org/licenses/MIT).

@@ -2,12 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Category;
+use App\Models\Feedback;
 use App\Models\Product;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
+
+use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +17,14 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@winwincar.com',
-            'role' => 'admin',
-        ]);
+        User::firstOrCreate(
+            ['email' => env('DEFAULT_ADMIN_EMAIL', 'admin@winwincar.com')],
+            [
+                'name' => 'Admin', 
+                'password' => bcrypt(env('DEFAULT_ADMIN_PASSWORD', 'password')), 
+                'role' => 'owner'
+            ]
+        );
 
         $categories = [
             ['name' => 'Seat Covers', 'description' => 'Premium seat covers for all car models'],
@@ -32,11 +37,11 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Steering Covers', 'description' => 'Steering wheel covers and accessories'],
         ];
 
-        foreach ($categories as $cat) {
+        foreach ($categories as $category) {
             Category::create([
-                'name' => $cat['name'],
-                'slug' => Str::slug($cat['name']),
-                'description' => $cat['description'],
+                'name' => $category['name'],
+                'slug' => Str::slug($category['name']),
+                'description' => $category['description'],
                 'is_active' => true,
             ]);
         }
@@ -56,20 +61,36 @@ class DatabaseSeeder extends Seeder
             ['name' => 'LED Headlight Bulb H4 Pair', 'category' => 'LED Lighting', 'price' => 89.90, 'sale_price' => 69.90, 'stock' => 80, 'featured' => false, 'short' => 'Super bright H4 LED headlight bulbs, 6000K white, 12000LM total output.'],
         ];
 
-        foreach ($products as $p) {
-            $category = Category::where('name', $p['category'])->first();
+        foreach ($products as $product) {
+            $category = Category::where('name', $product['category'])->first();
+
             Product::create([
                 'category_id' => $category?->id,
-                'name' => $p['name'],
-                'slug' => Str::slug($p['name']),
-                'short_description' => $p['short'],
-                'description' => $p['short'] . "\n\nThis product is available at Win Win Car Studio Accessories. Visit our store or contact us for installation services.",
-                'price' => $p['price'],
-                'sale_price' => $p['sale_price'],
+                'name' => $product['name'],
+                'slug' => Str::slug($product['name']),
+                'short_description' => $product['short'],
+                'description' => $product['short'] . "\n\nVisit our showroom to view this product in person or contact us on WhatsApp for recommendations and installation availability.",
+                'price' => $product['price'],
+                'sale_price' => $product['sale_price'],
                 'sku' => 'WW-' . strtoupper(Str::random(6)),
-                'stock' => $p['stock'],
+                'stock' => $product['stock'],
                 'is_active' => true,
-                'is_featured' => $p['featured'],
+                'is_featured' => $product['featured'],
+            ]);
+        }
+
+        foreach ([
+            ['name' => 'Ahmad Rizal', 'location' => 'KL', 'message' => "The staff explained the options clearly on WhatsApp before I came over. The showroom visit was smooth and helpful.", 'rating' => 5, 'sort_order' => 1],
+            ['name' => 'Siti Nurul', 'location' => 'Selangor', 'message' => 'Very helpful team and excellent product guidance. I could compare models in person before deciding.', 'rating' => 5, 'sort_order' => 2],
+            ['name' => 'Tan Wei Ming', 'location' => 'Penang', 'message' => 'I liked that the website showed the products first, then the store team helped me choose the right fit.', 'rating' => 5, 'sort_order' => 3],
+        ] as $feedback) {
+            Feedback::create([
+                'name' => $feedback['name'],
+                'location' => $feedback['location'],
+                'message' => $feedback['message'],
+                'rating' => $feedback['rating'],
+                'is_active' => true,
+                'sort_order' => $feedback['sort_order'],
             ]);
         }
     }
