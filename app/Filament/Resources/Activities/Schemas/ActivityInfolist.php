@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Activities\Schemas;
 
+use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class ActivityInfolist
@@ -21,12 +23,12 @@ class ActivityInfolist
                 TextEntry::make('subject_type')
                     ->label('Model')
                     ->formatStateUsing(fn (string $state): string => class_basename($state)),
-                \Filament\Infolists\Components\Section::make('Data Changes (After vs Before)')
+                Section::make('Data Changes (After vs Before)')
                     ->schema([
-                        \Filament\Infolists\Components\KeyValueEntry::make('properties.attributes')
+                        KeyValueEntry::make('properties.attributes')
                             ->label('New Values (After)')
                             ->columnSpan(1),
-                        \Filament\Infolists\Components\KeyValueEntry::make('properties.old')
+                        KeyValueEntry::make('properties.old')
                             ->label('Old Values (Before)')
                             ->columnSpan(1),
                     ])->columns(2),
