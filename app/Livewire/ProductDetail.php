@@ -2,31 +2,18 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\Product;
+use Livewire\Component;
 
 class ProductDetail extends Component
 {
     public Product $product;
-    public int $quantity = 1;
 
-    public function mount(string $slug)
+    public function mount(string $slug): void
     {
-        $this->product = Product::where('slug', $slug)->where('is_active', true)->firstOrFail();
-    }
-
-    public function incrementQty(): void
-    {
-        if ($this->quantity < $this->product->stock) {
-            $this->quantity++;
-        }
-    }
-
-    public function decrementQty(): void
-    {
-        if ($this->quantity > 1) {
-            $this->quantity--;
-        }
+        $this->product = Product::where('slug', $slug)
+            ->where('is_active', true)
+            ->firstOrFail();
     }
 
     public function render()
@@ -35,7 +22,8 @@ class ProductDetail extends Component
             'related' => Product::where('category_id', $this->product->category_id)
                 ->where('id', '!=', $this->product->id)
                 ->where('is_active', true)
-                ->take(4)->get(),
+                ->take(4)
+                ->get(),
         ])->layout('layouts.app');
     }
 }
