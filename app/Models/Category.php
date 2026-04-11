@@ -14,8 +14,9 @@ class Category extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logAll()
-            ->logOnlyDirty();
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 
     protected $fillable = ['name', 'slug', 'description', 'image', 'is_active'];

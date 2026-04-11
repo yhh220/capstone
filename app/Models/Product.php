@@ -14,8 +14,9 @@ class Product extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logAll()
-            ->logOnlyDirty();
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
     }
 
     protected $fillable = [

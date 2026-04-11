@@ -25,10 +25,10 @@ class ActivityInfolist
                     ->formatStateUsing(fn (string $state): string => class_basename($state)),
                 Section::make('Data Changes (After vs Before)')
                     ->schema([
-                        KeyValueEntry::make('properties.attributes')
+                        KeyValueEntry::make('attribute_changes.attributes')
                             ->label('New Values (After)')
                             ->columnSpan(1),
-                        KeyValueEntry::make('properties.old')
+                        KeyValueEntry::make('attribute_changes.old')
                             ->label('Old Values (Before)')
                             ->columnSpan(1),
                     ])->columns(2),
