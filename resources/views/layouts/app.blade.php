@@ -61,10 +61,25 @@
                     <a href="{{ route('contact') }}" class="nav-link font-medium text-gray-700 {{ request()->routeIs('contact') ? 'text-brand-red font-bold' : '' }}">Contact</a>
                 </div>
 
-                <!-- CTA Button -->
-                <a href="{{ route('products') }}" class="hidden md:inline-block bg-brand-red text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-red-700 transition">
-                    Shop Now
-                </a>
+                <!-- Auth Buttons -->
+                <div class="hidden md:flex items-center gap-3">
+                    @auth
+                        <span class="text-sm text-gray-600">Hi, <strong class="text-brand-black">{{ Auth::user()->name }}</strong></span>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-200 transition">
+                                Logout
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="text-sm font-semibold text-gray-700 hover:text-brand-red transition">
+                            Sign In
+                        </a>
+                        <a href="{{ route('login') }}" class="bg-brand-red text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-red-700 transition">
+                            Register
+                        </a>
+                    @endauth
+                </div>
 
                 <!-- Mobile Menu Button -->
                 <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-700">
@@ -80,6 +95,17 @@
                 <a href="{{ route('products') }}" class="block py-2 font-medium text-gray-700 hover:text-brand-red">Products</a>
                 <a href="{{ route('about') }}" class="block py-2 font-medium text-gray-700 hover:text-brand-red">About Us</a>
                 <a href="{{ route('contact') }}" class="block py-2 font-medium text-gray-700 hover:text-brand-red">Contact</a>
+                <div class="border-t border-gray-200 my-2 pt-2">
+                    @auth
+                        <span class="block py-2 text-sm text-gray-500">Signed in as <strong>{{ Auth::user()->name }}</strong></span>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="block w-full text-left py-2 font-medium text-red-600 hover:text-red-700">Logout</button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="block py-2 font-medium text-brand-red hover:text-red-700">Sign In / Register</a>
+                    @endauth
+                </div>
             </div>
         </div>
     </nav>

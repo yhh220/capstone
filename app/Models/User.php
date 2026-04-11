@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'role'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -20,6 +20,11 @@ class User extends Authenticatable
     /**
      * Get the attributes that should be cast.
      *
+     * CYBERSECURITY: The 'hashed' cast ensures that any value
+     * assigned to 'password' is automatically hashed using bcrypt
+     * before being stored in the database. This prevents plaintext
+     * password storage under all circumstances.
+     *
      * @return array<string, string>
      */
     protected function casts(): array
@@ -28,5 +33,15 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Check if the user has admin role.
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
     }
 }
