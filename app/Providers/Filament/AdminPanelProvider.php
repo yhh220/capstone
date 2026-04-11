@@ -27,7 +27,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login(\App\Livewire\Auth\AdminLogin::class)
+            ->login()
             ->defaultThemeMode(\Filament\Enums\ThemeMode::Dark)
             ->colors([
                 'primary' => Color::Fuchsia,
