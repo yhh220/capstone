@@ -45,6 +45,11 @@ class ActivityResource extends Resource
         return ActivitiesTable::configure($table);
     }
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     public static function getRelations(): array
     {
         return [
@@ -56,9 +61,7 @@ class ActivityResource extends Resource
     {
         return [
             'index' => ListActivities::route('/'),
-            'create' => CreateActivity::route('/create'),
             'view' => ViewActivity::route('/{record}'),
-            'edit' => EditActivity::route('/{record}/edit'),
         ];
     }
 }
