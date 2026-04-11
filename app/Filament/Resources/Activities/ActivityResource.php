@@ -20,9 +20,15 @@ class ActivityResource extends Resource
 {
     protected static ?string $model = Activity::class;
 
-    protected static ?string $navigationGroup = 'System Settings';
+    public static function getNavigationGroup(): ?string
+    {
+        return 'System Settings';
+    }
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-shield-check';
+    }
 
     public static function form(Schema $schema): Schema
     {
