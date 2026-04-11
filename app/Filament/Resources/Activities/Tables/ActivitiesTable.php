@@ -48,9 +48,7 @@ class ActivitiesTable
                 ViewAction::make(),
             ])
             ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                //
             ]);
     }
 }
