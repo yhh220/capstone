@@ -11,18 +11,15 @@ class ProductsPage extends Component
 {
     use WithPagination;
 
-    public string $search = '';
+    public string $search   = '';
     public string $category = '';
+    public string $minPrice = '';
+    public string $maxPrice = '';
 
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatedCategory(): void
-    {
-        $this->resetPage();
-    }
+    public function updatedSearch(): void   { $this->resetPage(); }
+    public function updatedCategory(): void { $this->resetPage(); }
+    public function updatedMinPrice(): void { $this->resetPage(); }
+    public function updatedMaxPrice(): void { $this->resetPage(); }
 
     public function render()
     {
@@ -36,6 +33,14 @@ class ProductsPage extends Component
 
         if ($this->category !== '') {
             $query->where('category_id', $this->category);
+        }
+
+        if ($this->minPrice !== '' && is_numeric($this->minPrice)) {
+            $query->where('price', '>=', (float) $this->minPrice);
+        }
+
+        if ($this->maxPrice !== '' && is_numeric($this->maxPrice)) {
+            $query->where('price', '<=', (float) $this->maxPrice);
         }
 
         return view('livewire.products-page', [

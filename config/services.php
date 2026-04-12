@@ -35,6 +35,10 @@ return [
         ],
     ],
 
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+    ],
+
     'store' => [
         'name' => env('STORE_NAME', 'WIN WIN CAR AUDIO AUTO ACCESSORIES'),
         'short_name' => env('STORE_SHORT_NAME', 'WIN WIN'),

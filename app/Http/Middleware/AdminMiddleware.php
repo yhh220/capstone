@@ -23,7 +23,7 @@ class AdminMiddleware
                 Auth::logout();
             }
 
-            return redirect()->route('admin.login')
+            return redirect()->route('filament.admin.auth.login')
                 ->with('error', 'Unauthorized access. Admin credentials required.');
         }
 

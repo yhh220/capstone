@@ -48,6 +48,11 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function carModels()
+    {
+        return $this->belongsToMany(CarModel::class, 'product_compatibilities');
+    }
+
     public function getCurrentPriceAttribute()
     {
         return $this->sale_price ?? $this->price;

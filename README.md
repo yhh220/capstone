@@ -1,98 +1,168 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Win Win Car Studio — Auto Accessories Platform
 
-# Win Win Capstone Project (Powered by Laravel)
+**Win Win Car Studio** is a full-stack e-commerce and booking platform built for a Malaysian car accessories showroom. Customers can browse products, book installation services, check vehicle compatibility, view the gallery, and chat with an AI assistant — all in English, Malay, or Chinese.
 
-Welcome to the **Win Win Capstone Project**, a modern web application built for an auto accessories showroom. The platform allows customers to discover products, read testimonials, contact the store via WhatsApp, and enables administrators to manage the store cleanly using a powerful admin panel.
+---
 
-## 🚀 Features
+## Features
 
-- **Storefront (Customer Facing)**
-  - Beautiful, responsive Homepage with hero sections, categories, and new arrivals.
-  - Featured product highlights and full product catalog.
-  - WhatsApp integration for seamless customer inquiries.
-  - Real-time customer reviews and testimonials.
-  - Multi-language support (English, Malay, Chinese) built-in.
+### Customer-Facing Storefront
 
-- **Admin Dashboard (Filament)**
-  - Complete Content Management System accessible at `/admin`.
-  - **Products**: Manage catalog, set featured items, update pricing and inventory.
-  - **Categories**: Organize products efficiently.
-  - **Feedback**: Review and approve customer testimonials to be shown on the homepage.
-  - **Contacts**: Manage customer inquiries submitted through the contact form.
+| Feature | Description |
+|---|---|
+| Homepage | Hero section, featured products, category browsing, stats |
+| Products | Full catalog with category filter, price range filter, search |
+| Product Detail | Image gallery, compatibility info, WhatsApp inquiry button |
+| Services | List of available installation/modification services |
+| Booking | Book a service by date/time slot, with booking tracker by phone |
+| Gallery | Filterable photo gallery (audio, tint, accessories, modification) |
+| Compatibility Checker | Select brand → model → year to find compatible products |
+| AI Chatbot | Floating chat powered by Claude (Anthropic API) |
+| Feedback / Reviews | Customer testimonials approved via admin |
+| Contact | Enquiry form with spam honeypot protection |
+| Multi-language | English / Bahasa Melayu / 中文 (session-based switcher) |
+| Dark Mode | System-aware dark/light toggle |
+| User Auth | Register, login, remember me, password strength indicator |
 
-## 🛠️ Tech Stack
+### Admin Panel (`/admin`)
 
-- **Backend framework**: Laravel 13
-- **Frontend / Fullstack**: Livewire v3
-- **Styling**: Tailwind CSS
-- **Admin Panel**: Filament v3 (v5.x)
-- **Database**: SQLite / MySQL (Configurable via `.env`)
+| Resource | Capabilities |
+|---|---|
+| Products | Create/edit with image upload, featured flag, stock, pricing |
+| Categories | Manage product categories |
+| Services | Manage bookable services with price, duration, active toggle |
+| Bookings | View/manage appointments, badge count for pending bookings |
+| Gallery | Upload and organize gallery images by category |
+| Feedback | Approve/reject customer reviews |
+| Contacts | View and mark enquiries as read |
+| Audit Log | Read-only activity log powered by Spatie ActivityLog |
+| Dashboard | Stats widget (revenue, pending bookings, enquiries, appointments) |
 
-## 📦 Getting Started
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Laravel 13.4 (PHP 8.3+) |
+| Reactive UI | Livewire 4.2 |
+| Admin Panel | Filament 5.5 |
+| Styling | Tailwind CSS (CDN — no build step required) |
+| Database | SQLite (dev) / MySQL (production) |
+| Activity Log | Spatie Laravel ActivityLog v5 |
+| AI Chatbot | Anthropic Claude API (`claude-haiku-4-5`) |
+| Local Dev | Laravel Herd (Windows/macOS) |
+
+---
+
+## Getting Started
 
 ### Prerequisites
 
-Ensure you have the following installed on your local machine:
-- PHP >= 8.3
+- PHP >= 8.3 with extensions: `pdo_sqlite`, `mbstring`, `openssl`, `tokenizer`, `xml`
 - Composer
-- Node.js & NPM
+- No Node.js or npm required — Tailwind is loaded via CDN
 
 ### Installation
 
-1. **Clone the repository** (if applicable) and navigate to the project directory:
+1. **Clone and enter the project:**
    ```bash
+   git clone <repo-url> capstone
    cd capstone
    ```
 
-2. **Install PHP dependencies**:
+2. **Install PHP dependencies:**
    ```bash
    composer install
    ```
 
-3. **Install NPM dependencies and build assets**:
-   ```bash
-   npm install
-   npm run build
-   ```
-
-4. **Environment Setup**:
-   Copy the example environment file and generate your application key:
+3. **Set up environment:**
    ```bash
    cp .env.example .env
    php artisan key:generate
    ```
 
-5. **Database Migration & Seeding**:
-   Setup the database structure:
+4. **Run migrations and seed data:**
    ```bash
-   php artisan migrate
+   php artisan migrate --seed
    ```
-   *(Optional)* If you have seeders ready, run `php artisan db:seed` to populate dummy data.
+   This creates all tables and seeds 31 Malaysian car models (Proton, Perodua, Honda, Toyota, Mazda).
 
-6. **Serve the Application**:
-   Start the Laravel local development server:
+5. **Create an admin user:**
+   ```bash
+   php artisan make:filament-user
+   ```
+
+6. **Start the server:**
    ```bash
    php artisan serve
    ```
-   The application will be available at `http://localhost:8000`.
+   App available at `http://localhost:8000` — admin panel at `http://localhost:8000/admin`.
 
-### Accessing the Admin Panel
+### Optional: AI Chatbot
 
-- Navigate to `http://localhost:8000/admin`.
-- If you haven't created an admin user yet, you can create one using the artisan command:
-  ```bash
-  php artisan make:filament-user
-  ```
+Add your Anthropic API key to `.env` to enable the AI chatbot:
+```env
+ANTHROPIC_API_KEY=sk-ant-...
+```
+Without a key the chatbot gracefully falls back to a contact prompt.
 
-## 💖 About Laravel
+---
 
-This project is proudly built on **Laravel**, a web application framework with expressive, elegant syntax. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-- Simple, fast routing engine
-- Expressive, intuitive database ORM
-- Database agnostic schema migrations
+## Environment Notes
 
-Learn more about Laravel at [laravel.com](https://laravel.com/).
+### Session Driver (Windows / Herd)
 
-## 📝 License
+If running on **Laravel Herd on Windows**, use `SESSION_DRIVER=cookie` to avoid PHP-FPM file-locking issues that cause "This page has expired" on login:
 
-This project is open-source and available under the [MIT license](https://opensource.org/licenses/MIT).
+```env
+SESSION_DRIVER=cookie
+SESSION_SECURE_COOKIE=false
+SESSION_SAME_SITE=lax
+```
+
+### Storage Permissions (Windows)
+
+If you see `rename(): Access is denied` errors, grant write permissions to the storage folder:
+```cmd
+icacls storage /grant Everyone:(OI)(CI)F /T
+php artisan view:clear
+```
+
+---
+
+## Project Structure (Key Directories)
+
+```
+app/
+├── Filament/Resources/     # Admin panel resources (Products, Bookings, etc.)
+├── Filament/Widgets/       # Dashboard stats + activity log widget
+├── Http/Middleware/        # AdminMiddleware, SetLocale, SecurityHeaders
+├── Livewire/               # All frontend reactive components
+│   ├── AiChatbot.php
+│   ├── BookingForm.php
+│   ├── CompatibilityChecker.php
+│   ├── GalleryPage.php
+│   ├── ServicesPage.php
+│   └── ...
+└── Models/                 # Eloquent models with activity logging
+
+database/
+├── migrations/             # All schema migrations
+└── seeders/
+    └── CarModelSeeder.php  # 31 Malaysian car models
+
+lang/
+├── ms.json                 # Bahasa Melayu translations
+└── zh.json                 # Chinese translations
+
+resources/views/
+├── layouts/app.blade.php   # Main layout (nav, dark mode, language switcher)
+└── livewire/               # All Blade views for Livewire components
+```
+
+---
+
+## License
+
+This project is for educational/capstone purposes.

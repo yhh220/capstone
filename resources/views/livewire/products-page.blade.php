@@ -44,6 +44,24 @@
                         </select>
                     </div>
 
+                    <div class="mb-5">
+                        <label class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2 block">
+                            {{ __('Price Range (RM)') }}
+                        </label>
+                        <div class="flex gap-2">
+                            <input wire:model.live.debounce.400ms="minPrice"
+                                   type="number"
+                                   min="0"
+                                   placeholder="{{ __('Min') }}"
+                                   class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-red transition">
+                            <input wire:model.live.debounce.400ms="maxPrice"
+                                   type="number"
+                                   min="0"
+                                   placeholder="{{ __('Max') }}"
+                                   class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-red transition">
+                        </div>
+                    </div>
+
                     <div class="space-y-3 pt-5 border-t border-gray-100 dark:border-gray-700">
                         <a href="{{ $whatsAppUrl }}"
                            target="_blank"
@@ -71,31 +89,47 @@
                 @if($products->count() > 0)
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                     @foreach($products as $product)
-                    <a href="{{ route('product.show', $product->slug) }}"
-                       class="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-shadow overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div class="relative bg-gray-100 dark:bg-gray-700 h-52 overflow-hidden">
-                            @if($product->image)
-                            <img src="{{ Storage::url($product->image) }}"
-                                 alt="{{ $product->name }}"
-                                 loading="lazy"
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                            @else
-                            <div class="w-full h-full flex items-center justify-center text-6xl" aria-hidden="true">🚗</div>
-                            @endif
-                        </div>
-                        <div class="p-4">
-                            <div class="text-xs text-gray-400 dark:text-gray-500 mb-1">
-                                {{ $product->category?->name ?? 'Accessories' }}
+                    @php
+                        $productWaUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hi Win Win Car Studio! I\'m interested in ' . $product->name . '. Can you provide more details?');
+                    @endphp
+                    <div class="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-shadow overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col">
+                        <a href="{{ route('product.show', $product->slug) }}" class="block flex-1">
+                            <div class="relative bg-gray-100 dark:bg-gray-700 h-52 overflow-hidden">
+                                @if($product->image)
+                                <img src="{{ Storage::url($product->image) }}"
+                                     alt="{{ $product->name }}"
+                                     loading="lazy"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                @else
+                                <div class="w-full h-full flex items-center justify-center text-6xl" aria-hidden="true">🚗</div>
+                                @endif
                             </div>
-                            <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-2 group-hover:text-brand-red transition-colors line-clamp-2">
-                                {{ $product->name }}
-                            </h3>
-                            @if($product->short_description)
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">{{ $product->short_description }}</p>
-                            @endif
-                            <div class="text-brand-red font-semibold text-sm">{{ __('View details and enquire') }}</div>
+                            <div class="p-4 pb-3">
+                                <div class="text-xs text-gray-400 dark:text-gray-500 mb-1">
+                                    {{ $product->category?->name ?? 'Accessories' }}
+                                </div>
+                                <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-2 group-hover:text-brand-red transition-colors line-clamp-2">
+                                    {{ $product->name }}
+                                </h3>
+                                @if($product->short_description)
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">{{ $product->short_description }}</p>
+                                @endif
+                            </div>
+                        </a>
+                        <div class="px-4 pb-4 flex gap-2">
+                            <a href="{{ route('product.show', $product->slug) }}"
+                               class="flex-1 text-center text-sm font-semibold text-brand-red border border-brand-red rounded-lg py-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                {{ __('Details') }}
+                            </a>
+                            <a href="{{ $productWaUrl }}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="flex-1 text-center text-sm font-semibold bg-brand-red text-white rounded-lg py-2 hover:bg-red-700 transition-colors"
+                               aria-label="{{ __('Enquire about') }} {{ $product->name }} {{ __('on WhatsApp') }}">
+                                WhatsApp
+                            </a>
                         </div>
-                    </a>
+                    </div>
                     @endforeach
                 </div>
 
