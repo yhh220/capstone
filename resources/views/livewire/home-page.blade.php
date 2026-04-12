@@ -6,7 +6,7 @@
         $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($storeAddress);
     @endphp
 
-    <x-compatibility-checker />
+    @livewire('compatibility-checker')
 
     <section class="hero-gradient text-white py-24 relative overflow-hidden" aria-label="Hero">
         <div class="absolute inset-0 opacity-10 pointer-events-none" aria-hidden="true">

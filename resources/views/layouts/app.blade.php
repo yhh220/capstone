@@ -139,10 +139,13 @@
                 <!-- Desktop Nav -->
                 <div class="hidden md:flex items-center gap-1" role="list">
                     @foreach([
-                        [route('home'), __('Home'), request()->routeIs('home')],
+                        [route('home'),     __('Home'),     request()->routeIs('home')],
                         [route('products'), __('Products'), request()->routeIs('products*')],
-                        [route('about'), __('About Us'), request()->routeIs('about')],
-                        [route('contact'), __('Contact'), request()->routeIs('contact')],
+                        [route('services'), __('Services'), request()->routeIs('services')],
+                        [route('gallery'),  __('Gallery'),  request()->routeIs('gallery')],
+                        [route('booking'),  __('Booking'),  request()->routeIs('booking*')],
+                        [route('about'),    __('About'),    request()->routeIs('about')],
+                        [route('contact'),  __('Contact'),  request()->routeIs('contact')],
                     ] as [$href, $label, $active])
                     <a href="{{ $href }}"
                        class="px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 ease-out active:scale-95
@@ -265,10 +268,13 @@
                  class="hidden md:hidden pb-4 space-y-1 border-t border-gray-100 dark:border-gray-700 pt-3"
                  role="menu">
                 @foreach([
-                    [route('home'), __('Home'), request()->routeIs('home')],
+                    [route('home'),     __('Home'),     request()->routeIs('home')],
                     [route('products'), __('Products'), request()->routeIs('products*')],
-                    [route('about'), __('About Us'), request()->routeIs('about')],
-                    [route('contact'), __('Contact'), request()->routeIs('contact')],
+                    [route('services'), __('Services'), request()->routeIs('services')],
+                    [route('gallery'),  __('Gallery'),  request()->routeIs('gallery')],
+                    [route('booking'),  __('Booking'),  request()->routeIs('booking*')],
+                    [route('about'),    __('About'),    request()->routeIs('about')],
+                    [route('contact'),  __('Contact'),  request()->routeIs('contact')],
                 ] as [$href, $label, $active])
                 <a href="{{ $href }}"
                    role="menuitem"
@@ -337,10 +343,13 @@
                 <div>
                     <h4 class="font-bold text-white mb-4 uppercase text-sm tracking-wider">{{ __('Quick Links') }}</h4>
                     <ul class="space-y-2 text-sm" role="list">
-                        <li><a href="{{ route('home') }}" class="hover:text-brand-yellow transition-colors">{{ __('Home') }}</a></li>
+                        <li><a href="{{ route('home') }}"     class="hover:text-brand-yellow transition-colors">{{ __('Home') }}</a></li>
                         <li><a href="{{ route('products') }}" class="hover:text-brand-yellow transition-colors">{{ __('Products') }}</a></li>
-                        <li><a href="{{ route('about') }}" class="hover:text-brand-yellow transition-colors">{{ __('About Us') }}</a></li>
-                        <li><a href="{{ route('contact') }}" class="hover:text-brand-yellow transition-colors">{{ __('Contact') }}</a></li>
+                        <li><a href="{{ route('services') }}" class="hover:text-brand-yellow transition-colors">{{ __('Services') }}</a></li>
+                        <li><a href="{{ route('gallery') }}"  class="hover:text-brand-yellow transition-colors">{{ __('Gallery') }}</a></li>
+                        <li><a href="{{ route('booking') }}"  class="hover:text-brand-yellow transition-colors">{{ __('Book Appointment') }}</a></li>
+                        <li><a href="{{ route('about') }}"    class="hover:text-brand-yellow transition-colors">{{ __('About Us') }}</a></li>
+                        <li><a href="{{ route('contact') }}"  class="hover:text-brand-yellow transition-colors">{{ __('Contact') }}</a></li>
                     </ul>
                 </div>
 
@@ -479,8 +488,8 @@
         });
     </script>
     
-    <x-chatbot />
-    
+    @livewire('ai-chatbot')
+
     @livewireScripts
 </body>
 </html>

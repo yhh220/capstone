@@ -2,7 +2,7 @@
     @php
         $storePhoneRaw = config('services.store.phone_raw');
         $storeAddress = config('services.store.address');
-        $whatsAppUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hello, I would like to ask about ' . $product->name . '.');
+        $whatsAppUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hi Win Win Car Studio! I\'m interested in ' . $product->name . '. Can you provide more details?');
         $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($storeAddress);
     @endphp
 

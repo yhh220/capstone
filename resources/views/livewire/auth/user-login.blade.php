@@ -303,7 +303,7 @@
 
             {{-- Admin Link --}}
             <div class="text-center mt-6">
-                <a href="{{ route('admin.login') }}" class="text-xs text-gray-400 hover:text-brand-red transition">
+                <a href="{{ route('filament.admin.auth.login') }}" class="text-xs text-gray-400 hover:text-brand-red transition">
                     Admin Portal →
                 </a>
             </div>

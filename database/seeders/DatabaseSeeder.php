@@ -79,6 +79,8 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        $this->call(CarModelSeeder::class);
+
         foreach ([
             ['name' => 'Ahmad Rizal', 'location' => 'KL', 'message' => "The staff explained the options clearly on WhatsApp before I came over. The showroom visit was smooth and helpful.", 'rating' => 5, 'sort_order' => 1],
             ['name' => 'Siti Nurul', 'location' => 'Selangor', 'message' => 'Very helpful team and excellent product guidance. I could compare models in person before deciding.', 'rating' => 5, 'sort_order' => 2],
