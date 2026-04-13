@@ -47,8 +47,8 @@
                     {{ $product->name }}
                 </h1>
 
-                <div class="inline-flex items-center gap-2 bg-red-50 dark:bg-red-900/20 text-brand-red px-4 py-2 rounded-full text-sm font-semibold mb-6">
-                    <span aria-hidden="true">💬</span>
+                <div class="flex items-start gap-2 bg-red-50 dark:bg-red-900/20 text-brand-red px-4 py-2.5 rounded-xl text-sm font-semibold mb-6">
+                    <span class="flex-shrink-0 mt-0.5" aria-hidden="true">💬</span>
                     <span>{{ __('Enquire on WhatsApp or visit the showroom for pricing and compatibility.') }}</span>
                 </div>
 

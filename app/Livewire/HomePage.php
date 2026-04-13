@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\SetsSeo;
 use App\Models\Category;
 use App\Models\Feedback;
 use App\Models\Product;
@@ -11,6 +12,8 @@ use Livewire\Component;
 
 class HomePage extends Component
 {
+    use SetsSeo;
+
     private function fallbackTestimonials(): Collection
     {
         return collect([
@@ -18,6 +21,15 @@ class HomePage extends Component
             ['name' => 'Siti Nurul', 'location' => 'Selangor', 'message' => 'Very helpful team and excellent product guidance. I could compare models in person before deciding.', 'rating' => 5],
             ['name' => 'Tan Wei Ming', 'location' => 'Penang', 'message' => 'I liked that the website showed the products first, then the store team helped me choose the right fit.', 'rating' => 5],
         ]);
+    }
+
+    public function mount(): void
+    {
+        $storeName = config('services.store.name', 'Win Win Car Studio');
+        $this->setSeo(
+            title: $storeName,
+            description: 'Browse car audio, window tint, and accessories online. Visit our showroom in Kuala Lumpur or chat on WhatsApp for expert advice and installation.',
+        );
     }
 
     public function render()

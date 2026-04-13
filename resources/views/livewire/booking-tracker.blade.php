@@ -7,7 +7,7 @@
     </div>
 
     <div class="max-w-2xl mx-auto px-4 py-12">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 sm:p-8">
             <div class="flex gap-3 mb-8">
                 <input wire:model="phone"
                        wire:keydown.enter="search"

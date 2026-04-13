@@ -3,12 +3,12 @@
 namespace App\Filament\Resources\Gallery\Schemas;
 
 use App\Models\GalleryItem;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class GalleryItemForm
 {
@@ -25,9 +25,11 @@ class GalleryItemForm
                     ->required(),
                 Textarea::make('description')
                     ->columnSpanFull(),
-                FileUpload::make('image')
+                SpatieMediaLibraryFileUpload::make('images')
+                    ->collection('images')
                     ->image()
-                    ->directory('gallery')
+                    ->imageEditor()
+                    ->optimize('webp')
                     ->required()
                     ->columnSpanFull(),
                 TextInput::make('sort_order')

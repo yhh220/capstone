@@ -51,6 +51,15 @@ Route::post('/logout', function () {
     return redirect()->route('home');
 })->name('logout');
 
+// ─── Sitemap ───────────────────────────────────────────────────
+Route::get('/sitemap.xml', function () {
+    $path = public_path('sitemap.xml');
+    if (!file_exists($path)) {
+        \Artisan::call('sitemap:generate');
+    }
+    return response()->file($path, ['Content-Type' => 'application/xml']);
+})->name('sitemap');
+
 // ─── Admin Panel ───────────────────────────────────────────────
 // Admin dashboard is now powered by Filament and auto-registered
 // at /admin via AdminPanelProvider. No manual routes needed.
