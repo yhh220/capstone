@@ -90,8 +90,13 @@
 
 5. **Create an admin user:**
    ```bash
-   php artisan make:filament-user
+   php artisan tinker --execute="\App\Models\User::create(['name'=>'Owner','email'=>'admin@example.com','password'=>bcrypt('password'),'role'=>'owner']);"
    ```
+   This creates an owner account with:
+   - **Email:** `admin@example.com`
+   - **Password:** `password`
+
+   > Change the password after first login.
 
 6. **Start the server:**
    ```bash
