@@ -64,7 +64,7 @@
         </div>
         @endif
 
-        <div class="mt-12 bg-brand-black text-white rounded-2xl p-8 text-center">
+        <div class="mt-12 bg-brand-black text-white rounded-2xl p-6 sm:p-8 text-center">
             <h2 class="text-2xl font-black mb-2">{{ __('Need a custom service?') }}</h2>
             <p class="text-gray-400 mb-6">{{ __('Contact us on WhatsApp and our team will advise you on the best options for your car.') }}</p>
             @php $wa = 'https://wa.me/' . config('services.store.phone_raw') . '?text=' . rawurlencode('Hi Win Win Car Studio! I would like to enquire about your services.'); @endphp

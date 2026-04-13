@@ -8,7 +8,7 @@
 
     @livewire('compatibility-checker')
 
-    <section class="hero-gradient text-white py-24 relative overflow-hidden" aria-label="Hero">
+    <section class="hero-gradient text-white py-14 sm:py-20 md:py-24 relative overflow-hidden" aria-label="Hero">
         <div class="absolute inset-0 opacity-10 pointer-events-none" aria-hidden="true">
             <div class="absolute top-10 left-10 w-64 h-64 bg-brand-yellow rounded-full blur-3xl"></div>
             <div class="absolute bottom-10 right-10 w-80 h-80 bg-brand-red rounded-full blur-3xl"></div>

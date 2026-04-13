@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\SetsSeo;
 use App\Models\Category;
 use App\Models\Product;
 use Livewire\Component;
@@ -9,12 +10,20 @@ use Livewire\WithPagination;
 
 class ProductsPage extends Component
 {
-    use WithPagination;
+    use SetsSeo, WithPagination;
 
     public string $search   = '';
     public string $category = '';
     public string $minPrice = '';
     public string $maxPrice = '';
+
+    public function mount(): void
+    {
+        $this->setSeo(
+            title: 'Our Products',
+            description: 'Browse our full range of car audio, window tint, and accessories. Filter by category and enquire on WhatsApp.',
+        );
+    }
 
     public function updatedSearch(): void   { $this->resetPage(); }
     public function updatedCategory(): void { $this->resetPage(); }

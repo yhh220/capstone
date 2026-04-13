@@ -21,7 +21,7 @@
             </a>
         </div>
         @else
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 sm:p-8">
             <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6">{{ __('Appointment Details') }}</h2>
 
             <div class="space-y-5">

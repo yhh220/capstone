@@ -3,13 +3,49 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Product extends Model
+class Product extends Model implements HasMedia
 {
-    use LogsActivity;
+    use InteractsWithMedia, LogsActivity;
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('images')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(400)
+            ->height(300)
+            ->sharpen(5)
+            ->optimize()
+            ->performOnCollections('images');
+
+        $this->addMediaConversion('card')
+            ->width(800)
+            ->height(600)
+            ->optimize()
+            ->performOnCollections('images');
+    }
+
+    /** Returns the best available image URL: medialibrary first, then legacy Storage path */
+    public function getImageUrl(string $conversion = ''): ?string
+    {
+        if ($this->hasMedia('images')) {
+            return $this->getFirstMediaUrl('images', $conversion) ?: null;
+        }
+        return $this->image ? Storage::url($this->image) : null;
+    }
 
     public function getActivitylogOptions(): LogOptions
     {

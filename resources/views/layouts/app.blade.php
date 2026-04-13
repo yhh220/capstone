@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
 @php
+    use Artesaos\SEOTools\Facades\SEOMeta;
+    use Artesaos\SEOTools\Facades\OpenGraph;
+    use Artesaos\SEOTools\Facades\Twitter;
+    use Artesaos\SEOTools\Facades\JsonLd;
     $storeName = config('services.store.name');
     $storeShortName = config('services.store.short_name');
     $storeTagline = config('services.store.tagline');
@@ -18,11 +22,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="{{ $storeName }} showcases car audio and auto accessories, invites customers to visit the showroom, and makes it easy to connect on WhatsApp.">
     <meta name="theme-color" content="#DC2626" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
-    <meta name="robots" content="index, follow">
-    <title>@yield('title', $storeName)</title>
+    {!! SEOMeta::generate() !!}
+    {!! OpenGraph::generate() !!}
+    {!! Twitter::generate() !!}
+    {!! JsonLd::generate() !!}
 
     <script>
         (function () {
@@ -103,7 +108,7 @@
 
     <div class="bg-brand-black text-xs text-gray-400 py-1.5" role="banner">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-            <span>{{ __('Product showcase, showroom visits, and WhatsApp consultation') }}</span>
+            <span class="hidden sm:inline">{{ __('Product showcase, showroom visits, and WhatsApp consultation') }}</span>
             <a href="{{ $whatsAppUrl }}"
                target="_blank"
                rel="noopener noreferrer"

@@ -2,12 +2,15 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\SetsSeo;
 use Livewire\Component;
 use App\Models\Contact;
 use Illuminate\Support\Facades\RateLimiter;
 
 class ContactPage extends Component
 {
+    use SetsSeo;
+
     public string $name     = '';
     public string $email    = '';
     public string $phone    = '';
@@ -16,6 +19,14 @@ class ContactPage extends Component
 
     /** Honeypot — must stay empty; bots fill this field */
     public string $honeypot = '';
+
+    public function mount(): void
+    {
+        $this->setSeo(
+            title: 'Contact Us',
+            description: 'Get in touch with Win Win Car Studio. Send us a message, chat on WhatsApp, or visit our showroom in Kuala Lumpur.',
+        );
+    }
 
     protected array $rules = [
         'name'     => 'required|min:2|max:100',

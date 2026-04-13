@@ -2,11 +2,12 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
-use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ProductForm
 {
@@ -14,8 +15,11 @@ class ProductForm
     {
         return $schema
             ->components([
-                TextInput::make('category_id')
-                    ->numeric(),
+                Select::make('category_id')
+                    ->relationship('category', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->label('Category'),
                 TextInput::make('name')
                     ->required(),
                 TextInput::make('slug')
@@ -37,9 +41,11 @@ class ProductForm
                     ->required()
                     ->numeric()
                     ->default(0),
-                FileUpload::make('image')
-                    ->image(),
-                Textarea::make('images')
+                SpatieMediaLibraryFileUpload::make('images')
+                    ->collection('images')
+                    ->image()
+                    ->imageEditor()
+                    ->optimize('webp')
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->required(),
