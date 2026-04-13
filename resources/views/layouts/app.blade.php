@@ -38,6 +38,7 @@
         })();
     </script>
 
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -98,6 +99,46 @@
         body {
             transition: background-color 0.2s, color 0.2s;
         }
+
+        /* ── Hero orb floating animation ─────────────────── */
+        @keyframes floatOrb {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50%       { transform: translateY(-28px) scale(1.06); }
+        }
+        @keyframes floatOrbAlt {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50%       { transform: translateY(22px) scale(0.95); }
+        }
+        .orb-float     { animation: floatOrb    8s ease-in-out infinite; }
+        .orb-float-alt { animation: floatOrbAlt 11s ease-in-out infinite; }
+
+        /* ── Page-load hero text reveal ──────────────────── */
+        @keyframes heroReveal {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .hero-reveal        { animation: heroReveal 0.7s ease-out both; }
+        .hero-reveal-delay1 { animation: heroReveal 0.7s 0.15s ease-out both; }
+        .hero-reveal-delay2 { animation: heroReveal 0.7s 0.3s  ease-out both; }
+        .hero-reveal-delay3 { animation: heroReveal 0.7s 0.45s ease-out both; }
+
+        /* ── Card lift on hover ──────────────────────────── */
+        .card-hover {
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+        }
+
+        /* ── Shimmer skeleton (optional, future use) ─────── */
+        @keyframes shimmer {
+            from { background-position: -200% 0; }
+            to   { background-position:  200% 0; }
+        }
+
+        /* ── AOS customisation ───────────────────────────── */
+        [data-aos] { will-change: transform, opacity; }
     </style>
 
     @livewireStyles
@@ -496,5 +537,58 @@
     @livewire('ai-chatbot')
 
     @livewireScripts
+
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        // ── AOS init ─────────────────────────────────────────
+        AOS.init({
+            duration: 650,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 60,
+            delay: 0,
+        });
+
+        // Re-init after Livewire navigations keep animations fresh
+        document.addEventListener('livewire:navigated', () => AOS.refresh());
+
+        // ── Animated counter ─────────────────────────────────
+        // Usage: <span data-count="500" data-suffix="+">500+</span>
+        function animateCounters(root) {
+            const els = (root || document).querySelectorAll('[data-count]');
+            if (!els.length) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    observer.unobserve(entry.target);
+
+                    const el     = entry.target;
+                    const target = parseInt(el.dataset.count, 10);
+                    const suffix = el.dataset.suffix || '';
+                    const prefix = el.dataset.prefix || '';
+                    const dur    = 1400;
+                    const start  = performance.now();
+
+                    function tick(now) {
+                        const progress = Math.min((now - start) / dur, 1);
+                        // ease-out-expo
+                        const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                        const val  = Math.floor(ease * target);
+                        el.textContent = prefix + val.toLocaleString() + suffix;
+                        if (progress < 1) requestAnimationFrame(tick);
+                    }
+                    requestAnimationFrame(tick);
+                });
+            }, { threshold: 0.4 });
+
+            els.forEach(el => observer.observe(el));
+        }
+
+        animateCounters();
+
+        // Re-run after Livewire re-renders
+        document.addEventListener('livewire:navigated', () => animateCounters());
+    </script>
 </body>
 </html>
