@@ -3,7 +3,7 @@
 @php
     use Artesaos\SEOTools\Facades\SEOMeta;
     use Artesaos\SEOTools\Facades\OpenGraph;
-    use Artesaos\SEOTools\Facades\Twitter;
+    use Artesaos\SEOTools\Facades\TwitterCard;
     use Artesaos\SEOTools\Facades\JsonLd;
     $storeName = config('services.store.name');
     $storeShortName = config('services.store.short_name');
@@ -26,7 +26,7 @@
     <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
     {!! SEOMeta::generate() !!}
     {!! OpenGraph::generate() !!}
-    {!! Twitter::generate() !!}
+    {!! TwitterCard::generate() !!}
     {!! JsonLd::generate() !!}
 
     <script>
