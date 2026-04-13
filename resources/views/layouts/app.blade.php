@@ -137,7 +137,7 @@
                 </a>
 
                 <!-- Desktop Nav -->
-                <div class="hidden md:flex items-center gap-1" role="list">
+                <div class="hidden md:flex items-center gap-0.5" role="list">
                     @foreach([
                         [route('home'),     __('Home'),     request()->routeIs('home')],
                         [route('products'), __('Products'), request()->routeIs('products*')],
@@ -148,7 +148,7 @@
                         [route('contact'),  __('Contact'),  request()->routeIs('contact')],
                     ] as [$href, $label, $active])
                     <a href="{{ $href }}"
-                       class="px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 ease-out active:scale-95
+                       class="px-2.5 py-1.5 lg:px-4 lg:py-2 rounded-full text-xs lg:text-sm font-bold transition-all duration-300 ease-out active:scale-95 whitespace-nowrap
                               {{ $active ? 'text-brand-red bg-red-50 dark:bg-red-900/10' : 'text-gray-600 dark:text-gray-300 hover:text-brand-red hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:shadow-sm' }}"
                        @if($active) aria-current="page" @endif>
                         {{ $label }}
@@ -157,26 +157,26 @@
                 </div>
 
                 <!-- Auth & Action Buttons -->
-                <div class="hidden md:flex items-center gap-3">
+                <div class="hidden md:flex items-center gap-2 lg:gap-3">
                     <a href="{{ $whatsAppUrl }}"
                        target="_blank"
                        rel="noopener noreferrer"
-                       class="bg-brand-red text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-red-700 transition-colors">
+                       class="hidden lg:inline-flex bg-brand-red text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-red-700 transition-colors whitespace-nowrap">
                         {{ __('WhatsApp us') }}
                     </a>
                     @auth
-                        <span class="text-sm text-gray-600 dark:text-gray-300">Hi, <strong class="text-brand-black dark:text-white">{{ Auth::user()->name }}</strong></span>
+                        <span class="hidden lg:inline text-sm text-gray-600 dark:text-gray-300">Hi, <strong class="text-brand-black dark:text-white">{{ Auth::user()->name }}</strong></span>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                            <button type="submit" class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full text-xs lg:text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition whitespace-nowrap">
                                 {{ __('Logout') }}
                             </button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-brand-red transition">
+                        <a href="{{ route('login') }}" class="text-xs lg:text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-brand-red transition whitespace-nowrap">
                             {{ __('Sign In') }}
                         </a>
-                        <a href="{{ route('login') }}" class="bg-gray-800 dark:bg-gray-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-gray-900 dark:hover:bg-gray-500 transition">
+                        <a href="{{ route('login') }}" class="bg-gray-800 dark:bg-gray-600 text-white px-3 py-1.5 lg:px-5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold hover:bg-gray-900 dark:hover:bg-gray-500 transition whitespace-nowrap">
                             {{ __('Register') }}
                         </a>
                     @endauth
