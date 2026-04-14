@@ -30,14 +30,7 @@ Route::get('/lang/{locale}', function (string $locale) {
         session(['locale' => $locale]);
     }
 
-    $referrer = request()->server('HTTP_REFERER', '');
-    $appUrl = rtrim(config('app.url'), '/');
-
-    if ($referrer && str_starts_with($referrer, $appUrl)) {
-        return redirect($referrer);
-    }
-
-    return redirect()->route('home');
+    return back();
 })->name('lang');
 
 // ─── Authentication Routes ─────────────────────────────────────
