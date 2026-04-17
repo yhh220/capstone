@@ -26,9 +26,19 @@
 
     <div class="max-w-7xl mx-auto px-4 py-10">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div>
+            <div data-aos="fade-right">
                 <div class="bg-gray-100 dark:bg-gray-700 rounded-2xl h-80 sm:h-96 flex items-center justify-center overflow-hidden">
-                    @if($product->image)
+                    @if($product->getImageUrl('card'))
+                    <img src="{{ $product->getImageUrl('card') }}"
+                         alt="{{ $product->name }}"
+                         class="w-full h-full object-cover rounded-2xl"
+                         fetchpriority="high">
+                    @elseif($product->getImageUrl())
+                    <img src="{{ $product->getImageUrl() }}"
+                         alt="{{ $product->name }}"
+                         class="w-full h-full object-cover rounded-2xl"
+                         fetchpriority="high">
+                    @elseif($product->image)
                     <img src="{{ Storage::url($product->image) }}"
                          alt="{{ $product->name }}"
                          class="w-full h-full object-cover rounded-2xl"
@@ -39,7 +49,7 @@
                 </div>
             </div>
 
-            <div>
+            <div data-aos="fade-left" data-aos-delay="80">
                 <div class="text-sm text-brand-red font-semibold mb-2">
                     {{ $product->category?->name ?? 'Accessories' }}
                 </div>
@@ -47,8 +57,8 @@
                     {{ $product->name }}
                 </h1>
 
-                <div class="inline-flex items-center gap-2 bg-red-50 dark:bg-red-900/20 text-brand-red px-4 py-2 rounded-full text-sm font-semibold mb-6">
-                    <span aria-hidden="true">💬</span>
+                <div class="flex items-start gap-2 bg-red-50 dark:bg-red-900/20 text-brand-red px-4 py-2.5 rounded-xl text-sm font-semibold mb-6">
+                    <span class="flex-shrink-0 mt-0.5" aria-hidden="true">💬</span>
                     <span>{{ __('Enquire on WhatsApp or visit the showroom for pricing and compatibility.') }}</span>
                 </div>
 
@@ -104,7 +114,7 @@
         </div>
 
         @if($product->description)
-        <div class="mt-12 bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div class="mt-12 bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700" data-aos="fade-up">
             <h2 class="text-2xl font-black text-brand-black dark:text-white mb-4">{{ __('Product Overview') }}</h2>
             <div class="text-gray-600 dark:text-gray-400 leading-relaxed prose dark:prose-invert max-w-none">
                 {!! nl2br(e($product->description)) !!}
@@ -114,19 +124,25 @@
 
         @if($related->count() > 0)
         <div class="mt-12" aria-labelledby="related-heading">
-            <h2 id="related-heading" class="text-2xl sm:text-3xl font-black text-brand-black dark:text-white mb-8">
+            <h2 id="related-heading" class="text-2xl sm:text-3xl font-black text-brand-black dark:text-white mb-8" data-aos="fade-up">
                 {{ __('More Products to Explore') }}
             </h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                @foreach($related as $item)
+                @foreach($related as $i => $item)
                 <a href="{{ route('product.show', $item->slug) }}"
-                   class="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow border border-gray-100 dark:border-gray-700">
+                   class="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700"
+                   data-aos="fade-up" data-aos-delay="{{ $i * 80 }}">
                     <div class="bg-gray-100 dark:bg-gray-700 h-40 flex items-center justify-center overflow-hidden">
-                        @if($item->image)
+                        @if($item->getImageUrl('thumb'))
+                        <img src="{{ $item->getImageUrl('thumb') }}"
+                             alt="{{ $item->name }}"
+                             loading="lazy"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        @elseif($item->image)
                         <img src="{{ Storage::url($item->image) }}"
                              alt="{{ $item->name }}"
                              loading="lazy"
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         @else
                         <span class="text-4xl" aria-hidden="true">🚗</span>
                         @endif

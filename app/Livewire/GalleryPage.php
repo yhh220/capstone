@@ -2,12 +2,23 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\SetsSeo;
 use App\Models\GalleryItem;
 use Livewire\Component;
 
 class GalleryPage extends Component
 {
+    use SetsSeo;
+
     public string $activeCategory = '';
+
+    public function mount(): void
+    {
+        $this->setSeo(
+            title: 'Gallery',
+            description: 'Browse our portfolio of car audio installations, window tinting, and custom modifications done at Win Win Car Studio.',
+        );
+    }
 
     public function updatedActiveCategory(): void
     {

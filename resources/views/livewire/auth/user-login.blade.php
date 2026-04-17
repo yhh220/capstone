@@ -7,18 +7,18 @@
         </div>
     </div>
 
-    <div class="min-h-[60vh] flex items-center justify-center py-12 px-4 bg-gray-50">
+    <div class="min-h-[60vh] flex items-center justify-center py-12 px-4 bg-gray-50 dark:bg-gray-900">
         <div class="w-full max-w-md">
 
             {{-- Card --}}
-            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
 
                 {{-- Tab Buttons --}}
-                <div class="flex border-b border-gray-200">
+                <div class="flex border-b border-gray-200 dark:border-gray-700">
                     <button
                         wire:click="switchTab(true)"
                         class="flex-1 py-4 text-center font-bold text-sm uppercase tracking-wider transition-all duration-300
-                            {{ $isLoginTab ? 'text-brand-red border-b-2 border-brand-red bg-red-50/50' : 'text-gray-400 hover:text-gray-600' }}"
+                            {{ $isLoginTab ? 'text-brand-red border-b-2 border-brand-red bg-red-50/50 dark:bg-red-900/20' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}"
                         id="tab-sign-in"
                     >
                         🔐 Sign In
@@ -26,14 +26,14 @@
                     <button
                         wire:click="switchTab(false)"
                         class="flex-1 py-4 text-center font-bold text-sm uppercase tracking-wider transition-all duration-300
-                            {{ !$isLoginTab ? 'text-brand-red border-b-2 border-brand-red bg-red-50/50' : 'text-gray-400 hover:text-gray-600' }}"
+                            {{ !$isLoginTab ? 'text-brand-red border-b-2 border-brand-red bg-red-50/50 dark:bg-red-900/20' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}"
                         id="tab-register"
                     >
                         ✨ Register
                     </button>
                 </div>
 
-                <div class="p-8">
+                <div class="p-6 sm:p-8">
 
                     {{-- ============ SIGN IN FORM ============ --}}
                     @if($isLoginTab)
@@ -42,13 +42,13 @@
                             <div class="w-16 h-16 bg-brand-red rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-red-200">
                                 <span class="text-brand-yellow font-black text-2xl">W</span>
                             </div>
-                            <h2 class="text-2xl font-black text-brand-black">Welcome Back</h2>
-                            <p class="text-gray-400 text-sm mt-1">Sign in to your Win Win account</p>
+                            <h2 class="text-2xl font-black text-brand-black dark:text-white">Welcome Back</h2>
+                            <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Sign in to your Win Win account</p>
                         </div>
 
                         {{-- Email --}}
                         <div class="mb-4">
-                            <label for="login-email" class="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+                            <label for="login-email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Email Address</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">✉️</span>
                                 <input
@@ -56,7 +56,7 @@
                                     type="email"
                                     id="login-email"
                                     placeholder="your@email.com"
-                                    class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition text-sm"
+                                    class="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition text-sm"
                                     autocomplete="email"
                                 >
                             </div>
@@ -69,7 +69,7 @@
 
                         {{-- Password --}}
                         <div class="mb-4">
-                            <label for="login-password" class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                            <label for="login-password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Password</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
                                 <input
@@ -77,7 +77,7 @@
                                     type="{{ $showPassword ? 'text' : 'password' }}"
                                     id="login-password"
                                     placeholder="••••••••"
-                                    class="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition text-sm"
+                                    class="w-full pl-10 pr-12 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition text-sm"
                                     autocomplete="current-password"
                                 >
                                 <button
@@ -103,7 +103,7 @@
                                     type="checkbox"
                                     class="w-4 h-4 rounded border-gray-300 text-brand-red focus:ring-brand-red"
                                 >
-                                <span class="text-sm text-gray-600">Remember me</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
                             </label>
                         </div>
 
@@ -132,13 +132,13 @@
                             <div class="w-16 h-16 bg-brand-black rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-gray-300">
                                 <span class="text-brand-yellow font-black text-2xl">✨</span>
                             </div>
-                            <h2 class="text-2xl font-black text-brand-black">Create Account</h2>
-                            <p class="text-gray-400 text-sm mt-1">Join the Win Win family today</p>
+                            <h2 class="text-2xl font-black text-brand-black dark:text-white">Create Account</h2>
+                            <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Join the Win Win family today</p>
                         </div>
 
                         {{-- Name --}}
                         <div class="mb-4">
-                            <label for="reg-name" class="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
+                            <label for="reg-name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Full Name</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">👤</span>
                                 <input
@@ -146,7 +146,7 @@
                                     type="text"
                                     id="reg-name"
                                     placeholder="Your full name"
-                                    class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition text-sm"
+                                    class="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition text-sm"
                                     autocomplete="name"
                                 >
                             </div>
@@ -157,7 +157,7 @@
 
                         {{-- Email --}}
                         <div class="mb-4">
-                            <label for="reg-email" class="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+                            <label for="reg-email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Email Address</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">✉️</span>
                                 <input
@@ -165,7 +165,7 @@
                                     type="email"
                                     id="reg-email"
                                     placeholder="your@email.com"
-                                    class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition text-sm"
+                                    class="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition text-sm"
                                     autocomplete="email"
                                 >
                             </div>
@@ -176,7 +176,7 @@
 
                         {{-- Password --}}
                         <div class="mb-4">
-                            <label for="reg-password" class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                            <label for="reg-password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Password</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
                                 <input
@@ -184,7 +184,7 @@
                                     type="{{ $showPassword ? 'text' : 'password' }}"
                                     id="reg-password"
                                     placeholder="Min. 8 characters"
-                                    class="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition text-sm"
+                                    class="w-full pl-10 pr-12 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition text-sm"
                                     autocomplete="new-password"
                                 >
                                 <button
@@ -253,7 +253,7 @@
 
                         {{-- Confirm Password --}}
                         <div class="mb-6">
-                            <label for="reg-password-confirm" class="block text-sm font-semibold text-gray-700 mb-1.5">Confirm Password</label>
+                            <label for="reg-password-confirm" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Confirm Password</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
                                 <input
@@ -261,7 +261,7 @@
                                     type="{{ $showPassword ? 'text' : 'password' }}"
                                     id="reg-password-confirm"
                                     placeholder="Re-enter password"
-                                    class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition text-sm"
+                                    class="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-brand-red focus:border-brand-red outline-none transition text-sm"
                                     autocomplete="new-password"
                                 >
                             </div>
@@ -292,10 +292,10 @@
                 </div>
 
                 {{-- Security Badge --}}
-                <div class="bg-gray-50 px-8 py-4 border-t border-gray-100">
-                    <div class="flex items-center justify-center gap-2 text-xs text-gray-400">
+                <div class="bg-gray-50 dark:bg-gray-900/50 px-8 py-4 border-t border-gray-100 dark:border-gray-700">
+                    <div class="flex items-center justify-center gap-2 text-xs text-gray-400 dark:text-gray-500">
                         <span>🔐</span>
-                        <span>Protected with <strong class="text-gray-500">bcrypt</strong> hashing • <strong class="text-gray-500">SSL</strong> encrypted</span>
+                        <span>Protected with <strong class="text-gray-500 dark:text-gray-400">bcrypt</strong> hashing • <strong class="text-gray-500 dark:text-gray-400">SSL</strong> encrypted</span>
                     </div>
                 </div>
 

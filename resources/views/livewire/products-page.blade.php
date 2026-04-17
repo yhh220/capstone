@@ -14,9 +14,24 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 py-10">
+
+        {{-- Mobile filter toggle --}}
+        <div class="lg:hidden mb-4">
+            <button id="filter-toggle"
+                    class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-200 shadow-sm w-full justify-between"
+                    aria-expanded="false"
+                    aria-controls="filter-sidebar">
+                <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/></svg>
+                    {{ __('Filters') }}
+                </span>
+                <svg id="filter-chevron" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+        </div>
+
         <div class="flex flex-col lg:flex-row gap-8">
-            <aside class="w-full lg:w-64 flex-shrink-0" aria-label="Product filters">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 sticky top-24">
+            <aside id="filter-sidebar" class="hidden lg:block w-full lg:w-64 flex-shrink-0" aria-label="Product filters">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 lg:sticky lg:top-24">
                     <h3 class="font-bold text-gray-800 dark:text-gray-200 text-lg mb-4">{{ __('Find products') }}</h3>
 
                     <div class="mb-5">
@@ -150,4 +165,19 @@
             </div>
         </div>
     </div>
+
+    <script>
+        (function () {
+            var btn = document.getElementById('filter-toggle');
+            var sidebar = document.getElementById('filter-sidebar');
+            var chevron = document.getElementById('filter-chevron');
+            if (!btn) return;
+            btn.addEventListener('click', function () {
+                var open = sidebar.classList.contains('hidden');
+                sidebar.classList.toggle('hidden', !open);
+                chevron.style.transform = open ? 'rotate(180deg)' : '';
+                btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            });
+        })();
+    </script>
 </div>

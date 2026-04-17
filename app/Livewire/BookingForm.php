@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\SetsSeo;
 use App\Models\Booking;
 use App\Models\Service;
 use Carbon\Carbon;
@@ -9,6 +10,7 @@ use Livewire\Component;
 
 class BookingForm extends Component
 {
+    use SetsSeo;
     public string $customer_name    = '';
     public string $customer_phone   = '';
     public string $customer_email   = '';
@@ -23,6 +25,11 @@ class BookingForm extends Component
         if ($service) {
             $this->service_id = (string) $service;
         }
+
+        $this->setSeo(
+            title: 'Book an Appointment',
+            description: 'Book a car audio installation, window tint, or modification service at Win Win Car Studio. Choose your date and time online.',
+        );
     }
 
     protected function rules(): array
