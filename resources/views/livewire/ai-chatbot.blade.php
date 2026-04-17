@@ -88,6 +88,7 @@
                        wire:keydown.enter="sendMessage"
                        type="text"
                        id="chatbot-input"
+                       maxlength="500"
                        placeholder="{{ __('Ask about products, services...') }}"
                        {{ $isLoading ? 'disabled' : '' }}
                        class="w-full bg-gray-100 dark:bg-gray-800 border-transparent focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-brand-red focus:border-transparent rounded-full px-4 py-2.5 text-sm text-gray-800 dark:text-gray-200 transition-all disabled:opacity-60">

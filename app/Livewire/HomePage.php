@@ -45,20 +45,25 @@ class HomePage extends Component
             }
         }
 
+        $featuredProducts = Product::where('is_active', true)
+            ->where('is_featured', true)
+            ->latest()
+            ->take(6)
+            ->get();
+
+        $newArrivals = Product::where('is_active', true)
+            ->whereNotIn('id', $featuredProducts->pluck('id'))
+            ->latest()
+            ->take(4)
+            ->get();
+
         return view('livewire.home-page', [
-            'featuredProducts' => Product::where('is_active', true)
-                ->where('is_featured', true)
-                ->latest()
-                ->take(6)
-                ->get(),
+            'featuredProducts' => $featuredProducts,
             'categories' => Category::where('is_active', true)
                 ->withCount('products')
                 ->take(6)
                 ->get(),
-            'newArrivals' => Product::where('is_active', true)
-                ->latest()
-                ->take(4)
-                ->get(),
+            'newArrivals' => $newArrivals,
             'testimonials' => $testimonials,
         ])->layout('layouts.app');
     }
