@@ -26,8 +26,14 @@ class BookingTracker extends Component
             return collect();
         }
 
-        return Booking::where('customer_phone', $this->phone)
-            ->with('service')
+        // Normalize to digits only so "012-3456789" matches "0123456789"
+        $digits = preg_replace('/\D+/', '', $this->phone);
+        if ($digits === '') {
+            return collect();
+        }
+
+        return Booking::with('service')
+            ->whereRaw("REPLACE(REPLACE(REPLACE(REPLACE(customer_phone, '-', ''), ' ', ''), '+', ''), '.', '') = ?", [$digits])
             ->orderBy('preferred_date', 'desc')
             ->get();
     }

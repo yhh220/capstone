@@ -45,13 +45,20 @@ class CompatibilityChecker extends Component
     {
         if ($this->selectedBrand === '' || $this->selectedModel === '') return [];
 
-        $carModel = CarModel::where('brand', $this->selectedBrand)
+        // Aggregate ranges across multiple generations (e.g. Civic FD 2006-2011 + FC 2016-2021)
+        $ranges = CarModel::where('brand', $this->selectedBrand)
             ->where('model', $this->selectedModel)
-            ->first();
+            ->get(['year_from', 'year_to']);
 
-        if (!$carModel) return [];
+        $years = [];
+        foreach ($ranges as $range) {
+            for ($y = $range->year_from; $y <= $range->year_to; $y++) {
+                $years[$y] = $y;
+            }
+        }
 
-        return range($carModel->year_from, $carModel->year_to);
+        krsort($years);
+        return array_values($years);
     }
 
     public function findParts(): void
@@ -65,15 +72,16 @@ class CompatibilityChecker extends Component
             return collect();
         }
 
-        $carModel = CarModel::where('brand', $this->selectedBrand)
+        // Find all matching CarModel rows (a year may sit in multiple generations)
+        $carModelIds = CarModel::where('brand', $this->selectedBrand)
             ->where('model', $this->selectedModel)
             ->where('year_from', '<=', $this->selectedYear)
             ->where('year_to', '>=', $this->selectedYear)
-            ->first();
+            ->pluck('id');
 
-        if (!$carModel) return collect();
+        if ($carModelIds->isEmpty()) return collect();
 
-        return Product::whereHas('carModels', fn ($q) => $q->where('car_model_id', $carModel->id))
+        return Product::whereHas('carModels', fn ($q) => $q->whereIn('car_model_id', $carModelIds))
             ->where('is_active', true)
             ->with('category')
             ->get();

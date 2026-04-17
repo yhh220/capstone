@@ -16,6 +16,19 @@ class ProductsPage extends Component
     public string $minPrice = '';
     public string $maxPrice = '';
 
+    protected $queryString = [
+        'category' => ['except' => ''],
+        'search'   => ['except' => ''],
+    ];
+
+    public function mount(): void
+    {
+        $category = request()->query('category', '');
+        if ($category !== '' && is_numeric($category)) {
+            $this->category = (string) $category;
+        }
+    }
+
     public function updatedSearch(): void   { $this->resetPage(); }
     public function updatedCategory(): void { $this->resetPage(); }
     public function updatedMinPrice(): void { $this->resetPage(); }
@@ -23,24 +36,36 @@ class ProductsPage extends Component
 
     public function render()
     {
+        // Normalize price range — swap if user entered min > max
+        $min = ($this->minPrice !== '' && is_numeric($this->minPrice)) ? (float) $this->minPrice : null;
+        $max = ($this->maxPrice !== '' && is_numeric($this->maxPrice)) ? (float) $this->maxPrice : null;
+        if ($min !== null && $max !== null && $min > $max) {
+            [$min, $max] = [$max, $min];
+        }
+
         $query = Product::where('is_active', true)
             ->with('category')
             ->latest();
 
         if ($this->search !== '') {
-            $query->where('name', 'like', '%' . $this->search . '%');
+            $term = '%' . $this->search . '%';
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', $term)
+                  ->orWhere('short_description', 'like', $term)
+                  ->orWhere('sku', 'like', $term);
+            });
         }
 
         if ($this->category !== '') {
             $query->where('category_id', $this->category);
         }
 
-        if ($this->minPrice !== '' && is_numeric($this->minPrice)) {
-            $query->where('price', '>=', (float) $this->minPrice);
+        if ($min !== null) {
+            $query->where('price', '>=', $min);
         }
 
-        if ($this->maxPrice !== '' && is_numeric($this->maxPrice)) {
-            $query->where('price', '<=', (float) $this->maxPrice);
+        if ($max !== null) {
+            $query->where('price', '<=', $max);
         }
 
         return view('livewire.products-page', [
