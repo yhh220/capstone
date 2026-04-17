@@ -30,14 +30,7 @@ Route::get('/lang/{locale}', function (string $locale) {
         session(['locale' => $locale]);
     }
 
-    $referrer = request()->server('HTTP_REFERER', '');
-    $appUrl = rtrim(config('app.url'), '/');
-
-    if ($referrer && str_starts_with($referrer, $appUrl)) {
-        return redirect($referrer);
-    }
-
-    return redirect()->route('home');
+    return back();
 })->name('lang');
 
 // ─── Authentication Routes ─────────────────────────────────────
@@ -50,6 +43,15 @@ Route::post('/logout', function () {
     session()->regenerateToken();
     return redirect()->route('home');
 })->name('logout');
+
+// ─── Sitemap ───────────────────────────────────────────────────
+Route::get('/sitemap.xml', function () {
+    $path = public_path('sitemap.xml');
+    if (!file_exists($path)) {
+        \Artisan::call('sitemap:generate');
+    }
+    return response()->file($path, ['Content-Type' => 'application/xml']);
+})->name('sitemap');
 
 // ─── Admin Panel ───────────────────────────────────────────────
 // Admin dashboard is now powered by Filament and auto-registered

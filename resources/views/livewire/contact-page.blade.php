@@ -13,16 +13,16 @@
 
     <div class="bg-brand-black text-white py-16">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <h1 class="text-4xl sm:text-5xl font-black mb-4">
+            <h1 class="text-4xl sm:text-5xl font-black mb-4" data-aos="fade-up">
                 {{ __('Contact') }} <span class="text-brand-yellow">{{ __('Us') }}</span>
             </h1>
-            <p class="text-gray-400">{{ __('Use WhatsApp for quick questions or visit our store for a closer look at the products.') }}</p>
+            <p class="text-gray-400" data-aos="fade-up" data-aos-delay="100">{{ __('Use WhatsApp for quick questions or visit our store for a closer look at the products.') }}</p>
         </div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 py-16">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <div class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+            <div class="space-y-6" data-aos="fade-right">
                 <h2 class="text-2xl font-black text-brand-black dark:text-white mb-6">{{ __('Get In Touch') }}</h2>
 
                 <div class="flex items-start gap-4">
@@ -86,7 +86,7 @@
                 </div>
             </div>
 
-            <div class="lg:col-span-2">
+            <div class="lg:col-span-2" data-aos="fade-left" data-aos-delay="100">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 sm:p-8">
                     <h2 class="text-2xl font-black text-brand-black dark:text-white mb-6">{{ __('Leave us a message') }}</h2>
 
@@ -187,7 +187,8 @@
     <a href="{{ $mapUrl }}"
        target="_blank"
        rel="noopener noreferrer"
-       class="block bg-gray-200 dark:bg-gray-700 h-64">
+       class="block bg-gray-200 dark:bg-gray-700 h-64"
+       data-aos="fade-up">
         <div class="h-full flex items-center justify-center text-center text-gray-500 dark:text-gray-400">
             <div>
                 <div class="text-5xl mb-2" aria-hidden="true">📍</div>
