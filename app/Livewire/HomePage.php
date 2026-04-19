@@ -40,6 +40,7 @@ class HomePage extends Component
                 'categories' => new Collection(),
                 'newArrivals' => new Collection(),
                 'testimonials' => $this->fallbackTestimonials(),
+                'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
             ])->layout('layouts.app');
         }
 
@@ -77,6 +78,7 @@ class HomePage extends Component
                 ->get(),
             'newArrivals' => $newArrivals,
             'testimonials' => $testimonials,
+            'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
         ])->layout('layouts.app');
     }
 }

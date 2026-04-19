@@ -11,7 +11,13 @@ use App\Livewire\ServicesPage;
 use App\Livewire\BookingForm;
 use App\Livewire\BookingTracker;
 use App\Livewire\GalleryPage;
+use App\Livewire\CartPage;
+use App\Livewire\CheckoutPage;
+use App\Livewire\OrderTracker;
+use App\Livewire\ProfilePage;
+use App\Livewire\MyOrdersPage;
 use App\Livewire\Auth\UserLogin;
+use App\Http\Middleware\ShoppingEnabled;
 
 // ─── Public Routes ─────────────────────────────────────────────
 Route::get('/', HomePage::class)->name('home');
@@ -23,6 +29,17 @@ Route::get('/services', ServicesPage::class)->name('services');
 Route::get('/booking', BookingForm::class)->name('booking');
 Route::get('/booking/track', BookingTracker::class)->name('booking.track');
 Route::get('/gallery', GalleryPage::class)->name('gallery');
+Route::get('/track-order', OrderTracker::class)->name('track-order');
+
+// ─── Authenticated User Routes ────────────────────────────────
+Route::get('/profile', ProfilePage::class)->name('profile');
+Route::get('/my-orders', MyOrdersPage::class)->name('my-orders');
+
+// ─── Shopping Routes (protected by ShoppingEnabled middleware) ──
+Route::middleware(ShoppingEnabled::class)->group(function () {
+    Route::get('/cart', CartPage::class)->name('cart');
+    Route::get('/checkout', CheckoutPage::class)->name('checkout');
+});
 
 // ─── Language Switcher ─────────────────────────────────────────
 Route::get('/lang/{locale}', function (string $locale) {
@@ -56,3 +73,4 @@ Route::get('/sitemap.xml', function () {
 // ─── Admin Panel ───────────────────────────────────────────────
 // Admin dashboard is now powered by Filament and auto-registered
 // at /admin via AdminPanelProvider. No manual routes needed.
+

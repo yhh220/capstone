@@ -40,6 +40,12 @@ class ProductsPage extends Component
     public function updatedMinPrice(): void { $this->resetPage(); }
     public function updatedMaxPrice(): void { $this->resetPage(); }
 
+    public function addToCart(int $productId): void
+    {
+        CartPage::addToCart($productId);
+        session()->flash('success', __('Added to cart!'));
+    }
+
     public function render()
     {
         // Normalize price range — swap if user entered min > max
@@ -75,8 +81,9 @@ class ProductsPage extends Component
         }
 
         return view('livewire.products-page', [
-            'products' => $query->paginate(12),
-            'categories' => Category::where('is_active', true)->orderBy('name')->get(),
+            'products'        => $query->paginate(12),
+            'categories'      => Category::where('is_active', true)->orderBy('name')->get(),
+            'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
         ])->layout('layouts.app');
     }
 }

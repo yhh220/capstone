@@ -57,6 +57,77 @@
                     {{ $product->name }}
                 </h1>
 
+                {{-- Price Section (when shopping is enabled) --}}
+                @if($shoppingEnabled)
+                <div class="mb-6">
+                    <div class="flex items-end gap-3 mb-2">
+                        @if($product->sale_price && $product->sale_price < $product->price)
+                            <span class="text-3xl font-black text-brand-red">RM {{ number_format($product->sale_price, 2) }}</span>
+                            <span class="text-xl text-gray-400 line-through">RM {{ number_format($product->price, 2) }}</span>
+                            <span class="bg-brand-red text-white text-xs font-bold px-2 py-1 rounded-full">
+                                {{ __('SAVE') }} {{ round((1 - $product->sale_price / $product->price) * 100) }}%
+                            </span>
+                        @else
+                            <span class="text-3xl font-black text-brand-red">RM {{ number_format($product->price, 2) }}</span>
+                        @endif
+                    </div>
+                    <div class="text-sm {{ $product->stock > 0 ? 'text-green-600' : 'text-red-500' }} font-semibold">
+                        @if($product->stock > 0)
+                            ✅ {{ __('In Stock') }} ({{ $product->stock }} {{ __('available') }})
+                        @else
+                            ❌ {{ __('Out of Stock') }}
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Quantity Selector + Add to Cart --}}
+                @if($product->stock > 0)
+                <div class="flex flex-col sm:flex-row gap-3 mb-6">
+                    <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-2">
+                        <button wire:click="decrementQuantity"
+                                class="w-10 h-10 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-bold text-lg"
+                                aria-label="{{ __('Decrease quantity') }}">
+                            −
+                        </button>
+                        <span class="w-12 text-center font-bold text-gray-800 dark:text-gray-200 tabular-nums"
+                              wire:key="qty-{{ $quantity }}">
+                            {{ $quantity }}
+                        </span>
+                        <button wire:click="incrementQuantity"
+                                class="w-10 h-10 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-bold text-lg"
+                                aria-label="{{ __('Increase quantity') }}">
+                            +
+                        </button>
+                    </div>
+                    <button wire:click="addToCart"
+                            class="flex-1 bg-brand-red text-white py-3 px-8 rounded-full font-bold text-lg hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 active:scale-95">
+                        🛒 {{ __('Add to Cart') }}
+                    </button>
+                </div>
+                @else
+                <div class="mb-6">
+                    <div class="bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 py-3 px-8 rounded-full font-bold text-lg text-center">
+                        {{ __('Out of Stock') }}
+                    </div>
+                </div>
+                @endif
+
+                <div class="flex flex-col sm:flex-row gap-3 mb-8">
+                    <a href="{{ $whatsAppUrl }}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="flex-1 border-2 border-brand-red text-brand-red py-3 px-8 rounded-full font-bold text-lg hover:bg-brand-red hover:text-white transition-colors text-center">
+                        {{ __('Ask on WhatsApp') }}
+                    </a>
+                    <a href="{{ $mapUrl }}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="flex-1 border-2 border-brand-black dark:border-white text-brand-black dark:text-white py-3 px-8 rounded-full font-bold text-lg hover:bg-brand-black hover:text-white dark:hover:bg-white dark:hover:text-brand-black transition-colors text-center">
+                        {{ __('Visit the showroom') }}
+                    </a>
+                </div>
+                @else
+                {{-- Shopping disabled: show enquiry notice --}}
                 <div class="flex items-start gap-2 bg-red-50 dark:bg-red-900/20 text-brand-red px-4 py-2.5 rounded-xl text-sm font-semibold mb-6">
                     <span class="flex-shrink-0 mt-0.5" aria-hidden="true">💬</span>
                     <span>{{ __('Enquire on WhatsApp or visit the showroom for pricing and compatibility.') }}</span>
@@ -65,21 +136,6 @@
                 @if($product->short_description)
                 <p class="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">{{ $product->short_description }}</p>
                 @endif
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-4">
-                        <div class="text-xs uppercase tracking-wider text-gray-400 mb-1">{{ __('Category') }}</div>
-                        <div class="font-semibold text-gray-800 dark:text-gray-100">{{ $product->category?->name ?? 'Accessories' }}</div>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-4">
-                        <div class="text-xs uppercase tracking-wider text-gray-400 mb-1">{{ __('Best for') }}</div>
-                        <div class="font-semibold text-gray-800 dark:text-gray-100">{{ __('Showroom comparison') }}</div>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-4">
-                        <div class="text-xs uppercase tracking-wider text-gray-400 mb-1">{{ __('Support') }}</div>
-                        <div class="font-semibold text-gray-800 dark:text-gray-100">{{ __('WhatsApp consultation') }}</div>
-                    </div>
-                </div>
 
                 <div class="flex flex-col sm:flex-row gap-3 mb-8">
                     <a href="{{ $whatsAppUrl }}"
@@ -95,6 +151,7 @@
                         {{ __('Visit the showroom') }}
                     </a>
                 </div>
+                @endif
 
                 <div class="border-t border-gray-100 dark:border-gray-700 pt-6 space-y-2 text-sm text-gray-500 dark:text-gray-400">
                     @if($product->sku)
