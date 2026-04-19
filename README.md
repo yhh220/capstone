@@ -1,469 +1,179 @@
-# Win Win Car Studio
+<div align="center">
+  <a href="https://laravel.com" target="_blank">
+    <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo">
+  </a>
 
-<p>
-  <img src="https://img.shields.io/badge/Laravel-13-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 13">
-  <img src="https://img.shields.io/badge/Livewire-4-FB70A9?style=for-the-badge&logo=livewire&logoColor=white" alt="Livewire 4">
-  <img src="https://img.shields.io/badge/Filament-5-F59E0B?style=for-the-badge" alt="Filament 5">
-  <img src="https://img.shields.io/badge/PHP-8.3+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.3+">
-  <img src="https://img.shields.io/badge/Tailwind_CSS-CDN-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
-  <img src="https://img.shields.io/badge/SQLite-dev-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
-</p>
+  <h1 align="center">Win Win Car Studio</h1>
 
-A full-stack web platform for a Malaysian car accessories showroom, built with **Laravel 13**, **Livewire 4**, and **Filament 5**. Customers browse products, book installation services, check vehicle compatibility, and contact the store — in English, Malay, or Chinese. The store owner manages everything through a dedicated admin panel.
+  <p align="center">
+    A premium full-stack web platform for a modern car accessories showroom and workshop.
+  </p>
 
----
-
-## Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Environment Setup](#environment-setup)
-- [Admin Panel Setup](#admin-panel-setup)
-- [Running the App](#running-the-app)
-- [Image Uploads](#image-uploads)
-- [SEO](#seo)
-- [Sitemap](#sitemap)
-- [Debugbar](#debugbar)
-- [Deploying to Production](#deploying-to-production)
-- [Windows / Herd Notes](#windows--herd-notes)
-- [Project Structure](#project-structure)
+  <p align="center">
+    <img src="https://img.shields.io/badge/Laravel-13-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 13">
+    <img src="https://img.shields.io/badge/Livewire-4-FB70A9?style=for-the-badge&logo=livewire&logoColor=white" alt="Livewire 4">
+    <img src="https://img.shields.io/badge/Filament-5-F59E0B?style=for-the-badge" alt="Filament 5">
+    <img src="https://img.shields.io/badge/PHP-8.3+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.3+">
+    <img src="https://img.shields.io/badge/Tailwind_CSS-CDN-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
+    <img src="https://img.shields.io/badge/SQLite-dev-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
+  </p>
+</div>
 
 ---
 
-## Features
+## 📖 Overview
 
-### Customer Storefront
+Built with the modern TALL stack (**Laravel 13**, **Livewire 4**, **Filament 5**), **Win Win Car Studio** is a robust e-commerce and booking management platform explicitly tailored for automotive accessory studios. 
 
-| Page | Description |
-|---|---|
-| **Home** | Hero, featured products, category grid, stats, testimonials, CTA |
-| **Products** | Full catalog with live search, category filter, price range, pagination |
-| **Product Detail** | Image, description, WhatsApp enquiry, related products |
-| **Services** | Bookable services with pricing and duration |
-| **Booking** | Book by date and time slot with real-time availability |
-| **Booking Tracker** | Look up appointment status by phone number |
-| **Gallery** | Masonry photo gallery filterable by category |
-| **Compatibility Checker** | Select brand → model → year to find matching products |
-| **AI Chatbot** | Floating assistant powered by Claude (Anthropic API) |
-| **Contact** | Enquiry form with rate limiting and honeypot spam protection |
-| **About** | Store story, team, mission, values |
-
-**Cross-cutting:**
-- Multi-language: English / Bahasa Melayu / 中文 (session-based)
-- Dark / Light / System theme toggle
-- User registration and login with password strength indicator
-- Fully responsive — mobile, tablet, desktop
-- Per-page SEO: meta title, description, Open Graph, JSON-LD
-- Auto-generated sitemap at `/sitemap.xml`
-- Accessibility: skip links, ARIA labels, reduced-motion support
-
-### Admin Panel (`/admin`)
-
-| Resource | Capabilities |
-|---|---|
-| **Products** | Create / edit with media library upload, featured flag, pricing |
-| **Categories** | Manage product categories |
-| **Services** | Manage bookable services with price, duration, toggle |
-| **Bookings** | View and manage appointments; pending badge count |
-| **Gallery** | Upload and organise gallery images by category |
-| **Feedback** | Approve / reject customer reviews |
-| **Contacts** | View enquiries, mark as read |
-| **Audit Log** | Read-only activity history (Spatie ActivityLog) |
-| **Dashboard** | Stats — revenue, pending bookings, enquiries, new contacts |
+It provides customers with a localized (English, Bahasa Melayu, Chinese), mobile-first storefront to browse products, check vehicle compatibility, book installations, track orders natively, and even interact with an AI-powered mechanic chatbot. The store owner manages the entire sales and scheduling lifecycle via a powerful administration panel.
 
 ---
 
-## Tech Stack
+## ✨ Features
 
-| Layer | Technology |
-|---|---|
-| Backend | Laravel 13 (PHP 8.3+) |
-| Reactive UI | Livewire 4 |
-| Admin Panel | Filament 5 |
-| Styling | Tailwind CSS (CDN — no build step required) |
-| Database | SQLite (dev) / MySQL (production) |
-| Image Management | Spatie Laravel MediaLibrary 11 + Intervention Image |
-| SEO | artesaos/seotools |
-| Sitemap | spatie/laravel-sitemap |
-| Activity Log | spatie/laravel-activitylog 5 |
-| AI Chatbot | Anthropic Claude API (`claude-haiku-4-5`) |
-| Debug toolbar | barryvdh/laravel-debugbar (dev only) |
+### 🏪 Customer Storefront
+
+| Section          | Description                                                                                          |
+| ---------------- | ---------------------------------------------------------------------------------------------------- |
+| **Home**             | Hero banner, featured products, category grid, statistics, testimonials, CTA.                       |
+| **Shop & Cart**      | Full product catalog, live search, categories, filtering, add to cart, and a secure checkout flow.  |
+| **Orders & Tracking**| Customers can view past orders ("My Orders") and look up e-commerce statuses via order number tracker. |
+| **Services & Booking**| View bookable services, pricing, and duration. Book active time slots with real-time availability.  |
+| **Booking Tracker**  | Look up workshop appointment statuses instantly via mobile number.                                   |
+| **Compatibility Check**| Select Brand → Model → Year to quickly find matching auto parts and accessories via a dynamic UI.                 |
+| **AI Mechanic Bot**  | Floating assistant powered by Claude (Anthropic API) that answers mechanic and product queries.     |
+| **User Profiles**    | User registration, login, view past orders, edit profile details securely.                          |
+| **Gallery**          | Masonry photo gallery filterable by category showcasing completed car transformations.              |
+| **Information**      | Contact form with spam protection, About Us, FAQ, Privacy Policy, Terms of Service.               |
+
+**Cross-cutting Capabilities:**
+- 🌍 **Multi-language:** Seamlessly switch between English, Bahasa Melayu, and Chinese (session-based).
+- 🌓 **Theming:** Fast Dark / Light / System theme toggling.
+- 📱 **Responsive Design:** Completely optimized for mobile, tablet, and desktop browsing.
+- 🚀 **SEO & Accessibility:** Per-page SEO, Auto-generated XML sitemaps, ARIA labels, and Open Graph previews.
+
+### 🛡️ Admin Dashboard (`/admin`)
+
+Powered by **Filament 5**, offering an intuitive management system:
+
+| Resource       | Capabilities |
+| -------------- | ------------ |
+| **Dashboard**  | KPI metrics — revenue, daily pending bookings, unread enquiries, order/sales overviews. |
+| **Orders**     | View and manage customer e-commerce orders, update fulfillment and shipping statuses. |
+| **Products**   | Manage catalogs, pricing, stock, vehicle compatibility, and rich media library image sets. |
+| **Categories** | Manage hierarchical product categories. |
+| **Services**   | Manage bookable workshop services (price, duration, availability toggle). |
+| **Bookings**   | Administer appointments, track pending and scheduled workshop slots. |
+| **Contacts / FAQ** | View customer enquiries, reply setups, and manage Frequently Asked Questions. |
+| **Feedback**   | Moderate and approve customer testimonials & reviews. |
+| **Gallery**    | Organize showcase albums using automated masonry grid image conversions. |
+| **Users / Logs** | Manage staff/system accounts and track activity logs natively (Spatie ActivityLogs). |
+| **Settings**   | Top-level global system settings configurations. |
 
 ---
 
-## Requirements
+## 🛠️ Tech Stack
 
-Before you start, make sure you have:
+- **Backend Framework:** Laravel 13 (PHP 8.3+)
+- **Reactive UI:** Livewire 4
+- **Admin Panel:** Filament 5
+- **Styling:** Tailwind CSS (CDN — zero build step required)
+- **Database:** SQLite (dev) / MySQL (production)
+- **Image Management:** Spatie MediaLibrary 11 + Intervention Image 4 (Auto-resizing thumbnails/cards)
+- **AI Integrations:** Anthropic Claude API (`claude-haiku-4-5`)
+- **Other Packages:**
+  - `spatie/laravel-activitylog` (Audit trails)
+  - `spatie/laravel-sitemap` (Dynamic sitemaps)
+  - `artesaos/seotools` (SEO configurations)
+  - `barryvdh/laravel-debugbar` (Development tools)
 
-- **PHP >= 8.3** with the following extensions enabled:
-  - `pdo_sqlite` (or `pdo_mysql` for MySQL)
-  - `mbstring`
-  - `openssl`
-  - `tokenizer`
-  - `xml`
-  - `gd` (required for image resizing)
+---
+
+## 🚀 Quick Start
+
+### 1. System Requirements
+- **PHP >= 8.3** (Required Extensions: `pdo_sqlite`, `mbstring`, `openssl`, `tokenizer`, `xml`, `gd`)
 - **Composer >= 2**
-- No Node.js or npm required — Tailwind CSS loads via CDN
+- *No Node/NPM required (Tailwind delivered via CDN)*
 
-To check your PHP version and extensions:
+### 2. Installation
 
-```bash
-php -v
-php -m | grep -E "gd|sqlite|mbstring"
-```
-
----
-
-## Installation
-
-Follow these steps in order after cloning the repository.
-
-### Step 1 — Clone the repository
-
+Clone the repository and install the dependencies. This might take a minute upon initial run:
 ```bash
 git clone <repo-url> winwin
 cd winwin
-```
-
-### Step 2 — Install PHP dependencies
-
-```bash
 composer install
 ```
 
-This installs Laravel, Livewire, Filament, and all other packages listed in `composer.json`. It may take 1–2 minutes on first run.
+### 3. Environment Setup
 
-### Step 3 — Create the environment file
-
+Duplicate the standard environment file and generate a unique application key:
 ```bash
 cp .env.example .env
-```
-
-Then generate the application key:
-
-```bash
 php artisan key:generate
 ```
 
-You should see:
-
-```
-INFO  Application key set successfully.
-```
-
-### Step 4 — Configure your environment
-
-Open `.env` and fill in your store details. At minimum, update these:
-
-```env
-APP_NAME="Win Win Car Studio"
-APP_URL=http://localhost:8000
-
-# Store information (shown in nav, footer, WhatsApp links)
-STORE_NAME="WIN WIN CAR AUDIO AUTO ACCESSORIES"
-STORE_SHORT_NAME="WIN WIN"
-STORE_TAGLINE="CAR AUDIO"
-STORE_PHONE_DISPLAY="016-9150917"
-STORE_PHONE_RAW="60169150917"
-STORE_EMAIL="winwincaraudio@gmail.com"
-STORE_ADDRESS="NO. 22, GROUND FLOOR, JALAN DINAR C U3/C, TAMAN SUBANG PERDANA, 40150 SHAH ALAM"
-STORE_HOURS="Mon–Thu, Sat–Sun: 10am–7pm (Closed Friday)"
-STORE_FACEBOOK_URL="https://facebook.com/yourpage"
-```
-
-### Step 5 — Set up the database
-
-The app uses SQLite by default — no database server required.
-
-```bash
-php artisan migrate --seed
-```
-
-This will:
-- Create all database tables
-- Seed 8 product categories and 12 sample products
-- Seed 31 Malaysian car models (Proton, Perodua, Honda, Toyota, Mazda, etc.)
-- Seed 3 sample customer testimonials
-- **Create a default admin account** — `admin@example.com` / `password`
-
-You should see output ending with:
-
-```
-INFO  Seeding: Database\Seeders\DatabaseSeeder
-INFO  Seeding: Database\Seeders\CarModelSeeder
-INFO  Database seeding completed successfully.
-```
-
-### Step 6 — Link storage for uploads
-
-```bash
-php artisan storage:link
-```
-
-This creates a `public/storage` symlink so uploaded images are publicly accessible. You should see:
-
-```
-INFO  The [public/storage] link has been connected to [storage/app/public].
-```
-
-### Step 7 — Generate the sitemap
-
-```bash
-php artisan sitemap:generate
-```
-
-This creates `public/sitemap.xml`. You can re-run this any time after adding new products.
-
-### Step 8 — Start the development server
-
-```bash
-php artisan serve
-```
-
-The app is now running at:
-
-| URL | What you see |
-|---|---|
-| `http://localhost:8000` | Customer storefront |
-| `http://localhost:8000/admin` | Admin panel login |
-
----
-
-## Environment Setup
-
-### AI Chatbot (optional)
-
-To enable the AI chatbot, add your Anthropic API key to `.env`:
-
+_Optional:_ If you want to enable the AI mechanic chatbot, insert your API key into `.env`:
 ```env
 ANTHROPIC_API_KEY=sk-ant-...
 ```
+*(Without a key, the chatbot hides intelligently and gets replaced with a standard contact prompt).*
 
-Without a key, the chatbot is automatically hidden and replaced with a contact prompt. You can get a key at [console.anthropic.com](https://console.anthropic.com).
+Update necessary operational credentials inside `.env` (like `STORE_NAME`, `STORE_PHONE_DISPLAY`, etc.).
 
-### Google Search Console (optional)
+### 4. Database Initialization
 
-To verify your site with Google:
-
-```env
-GOOGLE_SITE_VERIFICATION=your-verification-code
-```
-
----
-
-## Admin Panel Setup
-
-The admin panel lives at `/admin`. It is powered by **Filament 5** and is separate from the customer-facing site.
-
-### Logging in
-
-The seeder creates a default admin account automatically:
-
-- **URL:** `http://localhost:8000/admin`
-- **Email:** `admin@example.com`
-- **Password:** `password`
-
-> Change your password after first login.
-
-### Changing your admin password
-
-After logging in, click your name in the bottom-left corner of the admin panel → **Profile** → update your password there.
-
-Alternatively, from the terminal:
-
+Execute migrations to establish the SQLite datastore and populate initial dummy seed data:
 ```bash
-php artisan tinker
+php artisan migrate --seed
 ```
+*This routine seamlessly seeds dummy products, 31 Malaysian car models, testimonials, and a default super-admin profile (`admin@example.com` / `password`).*
 
-Then inside Tinker:
+### 5. Assets Linking
 
-```php
-$user = \App\Models\User::where('email', 'admin@example.com')->first();
-$user->password = bcrypt('your-new-password');
-$user->save();
-exit
-```
-
-### Creating additional admin accounts
-
+Link local storage directories for public media access and generate an initial SEO sitemap:
 ```bash
-php artisan tinker
+php artisan storage:link
+php artisan sitemap:generate
 ```
 
-```php
-\App\Models\User::create([
-    'name'     => 'Staff Name',
-    'email'    => 'staff@example.com',
-    'password' => bcrypt('their-password'),
-    'role'     => 'owner',   // 'owner' = full admin access
-]);
-exit
-```
+### 6. Boot Application
 
-### Admin roles
-
-| Role | Access |
-|---|---|
-| `owner` | Full admin panel access |
-| (anything else) | Customer account only, no `/admin` access |
-
----
-
-## Running the App
-
-### Development (standard)
-
+Initiate the Laravel local development server along with the background queue:
 ```bash
 php artisan serve
 ```
+*(Optionally run `composer run dev` to boot queue workers and servers parallelly).*
 
-### Development (all services at once)
+- Customer storefront natively bound to: `http://localhost:8000`
+- Administrator portal securely localized at: `http://localhost:8000/admin`
 
-If you want the server, queue worker, and log watcher running together:
+---
 
+## 📸 Media & Queue Workers
+
+Products, Services, and Gallery items are reliably handled traversing **Spatie Laravel MediaLibrary**. Images are auto-processed (cropped/compressed) asynchronously safely in background. 
+
+For local development image uploads to generate correctly, assure the queue worker process is active:
 ```bash
-composer run dev
+php artisan queue:listen
 ```
-
-This starts:
-- `php artisan serve` — web server
-- `php artisan queue:listen` — background job queue (for media conversions)
-- `php artisan pail` — real-time log viewer
-- `npm run dev` — Vite (if you add custom JS/CSS later)
-
-> **Note:** Media conversions (thumbnails) are dispatched to the queue. If you upload an image and the thumbnail does not appear, make sure the queue worker is running (`php artisan queue:listen`) or switch to synchronous processing by setting `QUEUE_CONNECTION=sync` in `.env`.
-
-### Useful commands
-
-```bash
-# Regenerate sitemap after adding products
-php artisan sitemap:generate
-
-# Regenerate all image thumbnails
-php artisan media-library:regenerate
-
-# Clear all caches
-php artisan optimize:clear
-
-# View all registered routes
-php artisan route:list
-
-# Open interactive console
-php artisan tinker
-```
+Alternatively, switch the connection variable exclusively: `QUEUE_CONNECTION=sync` under `.env`.
 
 ---
 
-## Image Uploads
+## 🌐 Deploying to Production
 
-Products, Services, and Gallery items use **Spatie Laravel MediaLibrary** for image management. Images uploaded through the Filament admin panel are automatically resized into multiple versions:
-
-| Model | Conversions generated |
-|---|---|
-| **Product** | `thumb` (400×300 px), `card` (800×600 px) |
-| **Service** | `thumb` (600×400 px) |
-| **Gallery Item** | `thumb` (600×600 px), `full` (1200 px wide) |
-
-All conversions are optimised and stored alongside the original. The admin upload form includes a built-in image editor (crop, rotate, flip).
-
-**In Blade views**, use the model helper to get the right size:
-
-```php
-$product->getImageUrl('thumb')   {{-- small thumbnail --}}
-$product->getImageUrl('card')    {{-- medium card image --}}
-$product->getImageUrl()          {{-- original upload --}}
-```
-
-Existing images uploaded before MediaLibrary was added continue to work automatically via fallback.
-
----
-
-## SEO
-
-Every page sets its own title, meta description, Open Graph tags, and JSON-LD through the `SetsSeo` trait.
-
-**To add SEO to a new Livewire page:**
-
-```php
-use App\Livewire\Concerns\SetsSeo;
-
-class MyPage extends Component
-{
-    use SetsSeo;
-
-    public function mount(): void
-    {
-        $this->setSeo(
-            title: 'Page Title',
-            description: 'Short description shown in Google results (under 160 chars).',
-            imageUrl: 'https://yoursite.com/og-image.jpg', // optional, for social sharing
-        );
-    }
-}
-```
-
-The page title will automatically be formatted as: `Page Title | Win Win Car Studio`.
-
----
-
-## Sitemap
-
-The sitemap at `/sitemap.xml` is generated from all public pages and active products.
-
-```bash
-# Generate or refresh manually
-php artisan sitemap:generate
-```
-
-To have it regenerate automatically every day, add this cron entry to your server:
-
-```cron
-* * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
-```
-
-Submit the sitemap URL to [Google Search Console](https://search.google.com/search-console) after deploying.
-
----
-
-## Debugbar
-
-`barryvdh/laravel-debugbar` is installed as a dev dependency. It shows a debug toolbar in the browser with query counts, request info, memory usage, and more.
-
-- **Visible when:** `APP_DEBUG=true` in `.env`
-- **Hidden when:** `APP_DEBUG=false` in `.env`
-
-No configuration needed. Set `APP_DEBUG=false` before deploying to production and the toolbar disappears completely.
-
----
-
-## Deploying to Production
-
-When deploying to a live server, update `.env`:
-
+When publishing to a live monolithic server, verify the `.env` variables are tightly closed for production:
 ```env
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://yourdomain.com
-
-# Switch to MySQL
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=winwin_db
-DB_USERNAME=db_user
-DB_PASSWORD=db_password
-
-# Use real queue driver (database or redis)
+DB_CONNECTION=mysql # Or your persistent relational choice
 QUEUE_CONNECTION=database
-
-# Use file or redis for session (not cookie in production)
 SESSION_DRIVER=file
 ```
 
-Then run:
-
+Execute production optimization commands natively shipped with Laravel:
 ```bash
 composer install --no-dev --optimize-autoloader
 php artisan migrate --force
@@ -472,36 +182,24 @@ php artisan sitemap:generate
 php artisan optimize
 ```
 
-Set up the cron for scheduled tasks (sitemap regeneration):
-
+Implement standard Cron scheduling inside your host for continuous jobs (e.g. daily Sitemaps):
 ```cron
 * * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
 ```
-
-Set up a queue worker to process image conversions:
-
-```bash
-php artisan queue:work --daemon
-```
-
-Or use Supervisor to keep it running persistently on the server.
+And set up a dedicated Supervisor daemon for your exact `php artisan queue:work --daemon`.
 
 ---
 
-## Windows / Herd Notes
+## 💻 Windows / Herd Operations
 
-### Session issues — "This page has expired" on login
-
-On Laravel Herd for Windows, use cookie-based sessions:
-
+For native *Laravel Herd on Windows* configurations, patch `.env` if encountering "expired session" states during authentication attempts:
 ```env
 SESSION_DRIVER=cookie
 SESSION_SECURE_COOKIE=false
 SESSION_SAME_SITE=lax
 ```
 
-### Storage permission errors — `rename(): Access is denied`
-
+If resolving permission clashes for SQLite writes (`rename(): Access is denied`):
 ```cmd
 icacls storage /grant Everyone:(OI)(CI)F /T
 php artisan view:clear
@@ -509,92 +207,5 @@ php artisan view:clear
 
 ---
 
-## Project Structure
-
-```
-app/
-├── Console/Commands/
-│   └── GenerateSitemap.php         # php artisan sitemap:generate
-│
-├── Filament/
-│   ├── Resources/                  # Admin panel CRUD
-│   │   ├── Products/               # Product management
-│   │   ├── Services/               # Service management
-│   │   ├── Bookings/               # Appointment management
-│   │   ├── Gallery/                # Gallery management
-│   │   ├── Feedback/               # Review management
-│   │   ├── Contacts/               # Enquiry management
-│   │   ├── Users/                  # User management
-│   │   ├── Categories/             # Category management
-│   │   └── Activities/             # Audit log (read-only)
-│   └── Widgets/                    # Dashboard stats + activity feed
-│
-├── Http/Middleware/
-│   ├── AdminMiddleware.php         # Protects /admin routes
-│   ├── SetLocale.php               # Applies session language
-│   └── SecurityHeaders.php         # CSP and security response headers
-│
-├── Livewire/
-│   ├── Concerns/
-│   │   └── SetsSeo.php             # Shared SEO trait for all pages
-│   ├── Auth/
-│   │   └── UserLogin.php           # Login + register (tab UI)
-│   ├── HomePage.php
-│   ├── ProductsPage.php
-│   ├── ProductDetail.php
-│   ├── ServicesPage.php
-│   ├── BookingForm.php
-│   ├── BookingTracker.php
-│   ├── GalleryPage.php
-│   ├── ContactPage.php
-│   ├── AboutPage.php
-│   ├── AiChatbot.php
-│   └── CompatibilityChecker.php
-│
-└── Models/
-    ├── Product.php                 # HasMedia (thumb, card), ActivityLog
-    ├── Service.php                 # HasMedia (thumb), ActivityLog
-    ├── GalleryItem.php             # HasMedia (thumb, full), ActivityLog
-    ├── Booking.php
-    ├── Category.php
-    ├── Contact.php
-    ├── Feedback.php
-    ├── CarModel.php
-    └── User.php
-
-config/
-├── seotools.php                    # SEO defaults (title, description, OG, JSON-LD)
-├── media-library.php               # Spatie MediaLibrary settings
-├── sitemap.php                     # Sitemap crawl config
-└── services.php                    # Store info (name, phone, address, etc.)
-
-database/
-├── migrations/                     # All schema migrations
-└── seeders/
-    ├── DatabaseSeeder.php          # Admin user, categories, products, testimonials
-    └── CarModelSeeder.php          # 31 Malaysian car models
-
-lang/
-├── ms.json                         # Bahasa Melayu translations
-└── zh.json                         # Chinese translations
-
-resources/views/
-├── layouts/
-│   └── app.blade.php               # Main layout — nav, dark mode, SEO tags, footer
-├── components/
-│   ├── chatbot.blade.php
-│   ├── compatibility-checker.blade.php
-│   ├── empty-state.blade.php
-│   └── page-loader.blade.php
-└── livewire/                       # One Blade view per Livewire component
-
-routes/
-├── web.php                         # All public routes + /sitemap.xml
-└── console.php                     # Scheduled commands (sitemap:generate daily)
-```
-
----
-
-## License
-
-This project is built for educational / capstone purposes.
+## 📄 License & Credits
+Built exclusively for internal capstone architecture design & demonstration scopes. All utilized assets are for demonstration purposes strictly.
