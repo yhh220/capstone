@@ -2,26 +2,40 @@
     <div class="bg-brand-black text-white py-12">
         <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Track Your Booking') }}</h1>
-            <p class="text-gray-400">{{ __('Enter your phone number to see the status of your appointments.') }}</p>
+            <p class="text-gray-400">{{ __('Enter your phone number or booking token to see appointment details.') }}</p>
         </div>
     </div>
 
     <div class="max-w-2xl mx-auto px-4 py-12">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 sm:p-8">
-            <div class="flex gap-3 mb-8">
+            <div class="space-y-4 mb-8">
                 <input wire:model="phone"
                        wire:keydown.enter="search"
                        type="tel"
                        placeholder="{{ __('Your phone number, e.g. 012-3456789') }}"
-                       class="flex-1 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('phone') border-red-400 @enderror">
+                       class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('phone') border-red-400 @enderror">
+
+                <div class="text-center text-xs uppercase tracking-widest text-gray-400">{{ __('or') }}</div>
+
+                <input wire:model="token"
+                       wire:keydown.enter="search"
+                       type="text"
+                       placeholder="{{ __('Booking token') }}"
+                       class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('token') border-red-400 @enderror">
+
                 <button wire:click="search"
                         wire:loading.attr="disabled"
-                        class="bg-brand-red text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-red-700 transition-colors whitespace-nowrap disabled:opacity-60">
+                        class="w-full bg-brand-red text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-red-700 transition-colors whitespace-nowrap disabled:opacity-60">
                     <span wire:loading.remove>{{ __('Search') }}</span>
                     <span wire:loading>...</span>
                 </button>
             </div>
+
             @error('phone')
+            <p class="text-red-500 text-sm -mt-5 mb-4">{{ $message }}</p>
+            @enderror
+
+            @error('token')
             <p class="text-red-500 text-sm -mt-5 mb-4">{{ $message }}</p>
             @enderror
 
@@ -34,7 +48,7 @@
                             <div>
                                 <div class="font-bold text-gray-800 dark:text-white">{{ $booking->service?->name ?? __('Service') }}</div>
                                 <div class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                                    {{ $booking->preferred_date->format('D, d M Y') }} &bull; {{ $booking->preferred_time }}
+                                    {{ $booking->preferred_date->format('D, d M Y') }} • {{ $booking->preferred_time }}
                                 </div>
                             </div>
                             <span class="flex-shrink-0 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold
@@ -46,16 +60,25 @@
                                 {{ ucfirst($booking->status) }}
                             </span>
                         </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-500 dark:text-gray-400">
+                            <div>{{ __('Vehicle') }}: {{ $booking->vehicle_model ?: __('Not provided') }}</div>
+                            <div>{{ __('Plate') }}: {{ $booking->vehicle_plate ?: __('Not provided') }}</div>
+                        </div>
                         @if($booking->notes)
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $booking->notes }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">{{ $booking->notes }}</p>
+                        @endif
+                        @if($booking->manage_url)
+                        <a href="{{ $booking->manage_url }}" class="inline-block mt-4 text-brand-red font-semibold hover:underline">
+                            {{ __('Manage this booking') }}
+                        </a>
                         @endif
                     </div>
                     @endforeach
                 </div>
                 @else
                 <div class="text-center py-8">
-                    <div class="text-5xl mb-3" aria-hidden="true">📭</div>
-                    <p class="text-gray-600 dark:text-gray-400">{{ __('No bookings found for this phone number.') }}</p>
+                    <div class="text-5xl mb-3" aria-hidden="true">?</div>
+                    <p class="text-gray-600 dark:text-gray-400">{{ __('No bookings found for the details provided.') }}</p>
                     <a href="{{ route('booking') }}" class="inline-block mt-4 text-brand-red font-semibold hover:underline">
                         {{ __('Make a Booking') }}
                     </a>

@@ -65,6 +65,7 @@ class ProductDetail extends Component
                 ->where('is_active', true)
                 ->take(4)
                 ->get(),
+            'translatedDescription' => $this->product->translated_description,
             'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
         ])->layout('layouts.app');
     }

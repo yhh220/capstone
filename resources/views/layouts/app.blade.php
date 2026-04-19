@@ -488,8 +488,11 @@
                         <li><a href="{{ route('services') }}" class="hover:text-brand-yellow transition-colors">{{ __('Services') }}</a></li>
                         <li><a href="{{ route('gallery') }}"  class="hover:text-brand-yellow transition-colors">{{ __('Gallery') }}</a></li>
                         <li><a href="{{ route('booking') }}"  class="hover:text-brand-yellow transition-colors">{{ __('Book Appointment') }}</a></li>
+                        <li><a href="{{ route('faq') }}"      class="hover:text-brand-yellow transition-colors">{{ __('FAQ') }}</a></li>
                         <li><a href="{{ route('about') }}"    class="hover:text-brand-yellow transition-colors">{{ __('About Us') }}</a></li>
                         <li><a href="{{ route('contact') }}"  class="hover:text-brand-yellow transition-colors">{{ __('Contact') }}</a></li>
+                        <li><a href="{{ route('privacy-policy') }}" class="hover:text-brand-yellow transition-colors">{{ __('Privacy Policy') }}</a></li>
+                        <li><a href="{{ route('terms-of-service') }}" class="hover:text-brand-yellow transition-colors">{{ __('Terms of Service') }}</a></li>
                     </ul>
                 </div>
 

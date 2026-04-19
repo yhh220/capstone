@@ -169,6 +169,50 @@
         </div>
     </section>
 
+    <section class="py-16 bg-white dark:bg-gray-800" aria-labelledby="showcase-heading">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid lg:grid-cols-2 gap-8 items-center">
+                <div data-aos="fade-right">
+                    <div class="inline-flex bg-red-50 text-brand-red text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">
+                        {{ __('3D Showcase Ready') }}
+                    </div>
+                    <h2 id="showcase-heading" class="text-3xl sm:text-4xl font-black text-brand-black dark:text-white mb-4">
+                        {{ __('Experience Our Signature Product in 3D') }}
+                    </h2>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
+                        {{ __('This section is prepared as the homepage mount point for the team 3D integration. Until the interactive model is attached, customers can still preview the featured product and continue to the detail page.') }}
+                    </p>
+                    @if($showcaseProduct)
+                    <a href="{{ route('product.show', $showcaseProduct->slug) }}"
+                       class="inline-flex items-center justify-center px-6 py-3 bg-brand-red text-white rounded-full font-bold hover:bg-red-700 transition-colors">
+                        {{ __('View Product Details') }}
+                    </a>
+                    @endif
+                </div>
+
+                <div data-aos="fade-left">
+                    <section id="3d-showcase" class="rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-700 bg-gray-100 dark:bg-gray-900">
+                        <div id="3d-mount-homepage"
+                             data-product-slug="{{ $showcaseProduct?->slug ?? 'skynavi-android-player' }}"
+                             class="min-h-[360px] flex items-center justify-center">
+                            @if($showcaseProduct?->getImageUrl('card'))
+                            <img src="{{ $showcaseProduct->getImageUrl('card') }}"
+                                 alt="{{ $showcaseProduct->name }}"
+                                 class="w-full h-[360px] object-cover">
+                            @else
+                            <div class="text-center px-6">
+                                <div class="text-6xl mb-4">3D</div>
+                                <div class="font-bold text-gray-800 dark:text-gray-100">{{ $showcaseProduct?->name ?? __('3D product showcase placeholder') }}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ __('Soon Gor can mount the interactive viewer into this container.') }}</div>
+                            </div>
+                            @endif
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </section>
+
     {{-- ── Why Choose ───────────────────────────────────────── --}}
     <section class="py-16 bg-brand-black text-white" aria-labelledby="why-heading">
         <div class="max-w-7xl mx-auto px-4">

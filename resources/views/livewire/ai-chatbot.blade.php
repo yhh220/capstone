@@ -36,7 +36,7 @@
                 </div>
                 <div>
                     <h3 class="font-bold text-gray-800 dark:text-white text-sm">{{ __('Win Win AI Assistant') }}</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Powered by Claude') }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Powered by :driver', ['driver' => strtoupper(config('ai.driver'))]) }}</p>
                 </div>
             </div>
             <button wire:click="clearChat"

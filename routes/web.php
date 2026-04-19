@@ -6,15 +6,19 @@ use App\Livewire\HomePage;
 use App\Livewire\ProductsPage;
 use App\Livewire\ProductDetail;
 use App\Livewire\AboutPage;
+use App\Livewire\BookingManage;
 use App\Livewire\ContactPage;
 use App\Livewire\ServicesPage;
 use App\Livewire\BookingForm;
 use App\Livewire\BookingTracker;
+use App\Livewire\FaqPage;
 use App\Livewire\GalleryPage;
 use App\Livewire\CartPage;
 use App\Livewire\CheckoutPage;
 use App\Livewire\OrderTracker;
+use App\Livewire\PrivacyPolicyPage;
 use App\Livewire\ProfilePage;
+use App\Livewire\TermsOfServicePage;
 use App\Livewire\MyOrdersPage;
 use App\Livewire\Auth\UserLogin;
 use App\Http\Middleware\ShoppingEnabled;
@@ -28,8 +32,12 @@ Route::get('/contact', ContactPage::class)->name('contact');
 Route::get('/services', ServicesPage::class)->name('services');
 Route::get('/booking', BookingForm::class)->name('booking');
 Route::get('/booking/track', BookingTracker::class)->name('booking.track');
+Route::get('/booking/{token}', BookingManage::class)->name('booking.manage');
 Route::get('/gallery', GalleryPage::class)->name('gallery');
 Route::get('/track-order', OrderTracker::class)->name('track-order');
+Route::get('/faq', FaqPage::class)->name('faq');
+Route::get('/privacy-policy', PrivacyPolicyPage::class)->name('privacy-policy');
+Route::get('/terms-of-service', TermsOfServicePage::class)->name('terms-of-service');
 
 // ─── Authenticated User Routes ────────────────────────────────
 Route::get('/profile', ProfilePage::class)->name('profile');
@@ -73,4 +81,3 @@ Route::get('/sitemap.xml', function () {
 // ─── Admin Panel ───────────────────────────────────────────────
 // Admin dashboard is now powered by Filament and auto-registered
 // at /admin via AdminPanelProvider. No manual routes needed.
-
