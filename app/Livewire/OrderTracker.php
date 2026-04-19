@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\Order;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 class OrderTracker extends Component
@@ -34,6 +35,16 @@ class OrderTracker extends Component
         $this->searched = true;
         $this->errorMsg = '';
 
+        $throttleKey = 'track-order:' . request()->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            $this->errorMsg = __("Too many tracking attempts. Please try again in {$seconds} seconds.");
+            return;
+        }
+
+        RateLimiter::hit($throttleKey, 60);
+
         $this->order = Order::where('order_number', $this->orderNumber)
             ->where('customer_email', $this->email)
             ->with('items')
@@ -41,6 +52,8 @@ class OrderTracker extends Component
 
         if (!$this->order) {
             $this->errorMsg = __('No order found. Please check your order number and email address.');
+        } else {
+            RateLimiter::clear($throttleKey);
         }
     }
 

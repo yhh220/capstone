@@ -60,7 +60,7 @@ class ProductsPage extends Component
             ->latest();
 
         if ($this->search !== '') {
-            $term = '%' . $this->search . '%';
+            $term = '%' . addcslashes($this->search, '%_\\') . '%';
             $query->where(function ($q) use ($term) {
                 $q->where('name', 'like', $term)
                   ->orWhere('short_description', 'like', $term)

@@ -33,7 +33,7 @@ class ProductDetail extends Component
 
     public function incrementQuantity(): void
     {
-        if ($this->quantity < ($this->product->stock ?: 99)) {
+        if ($this->quantity < ($this->product->stock ?? 99)) {
             $this->quantity++;
         }
     }
@@ -47,6 +47,11 @@ class ProductDetail extends Component
 
     public function addToCart(): void
     {
+        if ($this->product->stock === 0) {
+            session()->flash('error', __('Out of stock!'));
+            return;
+        }
+
         CartPage::addToCart($this->product->id, $this->quantity);
         session()->flash('success', __('Added to cart!'));
         $this->quantity = 1;

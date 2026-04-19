@@ -7,7 +7,9 @@ use App\Mail\OrderConfirmationMail;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
@@ -58,8 +60,7 @@ class CheckoutPage extends Component
         $this->customerEmail = $user->email ?? '';
 
         // Redirect to cart if cart is empty
-        $cartItems = CartItem::where('session_id', session()->getId())->count();
-        if ($cartItems === 0) {
+        if (CartItem::forCurrentOwner()->count() === 0) {
             $this->redirect(route('cart'));
             return;
         }
@@ -69,15 +70,13 @@ class CheckoutPage extends Component
 
     public function getCartItemsProperty()
     {
-        return CartItem::where('session_id', session()->getId())
-            ->with('product')
-            ->get();
+        return CartItem::forCurrentOwner()->with('product')->get();
     }
 
     public function getSubtotalProperty(): float
     {
         return $this->cartItems->sum(fn($item) =>
-            ($item->product->current_price ?? 0) * $item->quantity
+            ($item->product?->current_price ?? 0) * $item->quantity
         );
     }
 
@@ -100,7 +99,6 @@ class CheckoutPage extends Component
         }
 
         $cartItems = $this->cartItems;
-
         if ($cartItems->isEmpty()) {
             $this->redirect(route('cart'));
             return;
@@ -108,52 +106,79 @@ class CheckoutPage extends Component
 
         $subtotal = $this->subtotal;
 
-        // Create the order
-        $this->order = Order::create([
-            'user_id'          => Auth::id(),
-            'order_number'     => Order::generateOrderNumber(),
-            'tracking_number'  => Order::generateTrackingNumber(),
-            'customer_name'    => $this->customerName,
-            'customer_email'   => $this->customerEmail,
-            'customer_phone'   => $this->customerPhone,
-            'shipping_address' => [
-                'street'   => $this->street,
-                'city'     => $this->city,
-                'postcode' => $this->postcode,
-                'state'    => $this->state,
-            ],
-            'subtotal'       => $subtotal,
-            'total_amount'   => $subtotal,
-            'status'         => 'pending',
-            'payment_status' => 'paid', // Mock = always paid
-        ]);
+        try {
+            $order = DB::transaction(function () use ($cartItems, $subtotal) {
+                // Lock the product rows for the duration of the transaction so concurrent
+                // checkouts cannot double-sell the last unit of stock.
+                $products = Product::whereIn('id', $cartItems->pluck('product_id'))
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
 
-        // Create order items (snapshot of product at purchase time)
-        foreach ($cartItems as $cartItem) {
-            OrderItem::create([
-                'order_id'     => $this->order->id,
-                'product_id'   => $cartItem->product_id,
-                'product_name' => $cartItem->product->name,
-                'quantity'     => $cartItem->quantity,
-                'unit_price'   => $cartItem->product->current_price ?? 0,
-                'subtotal'     => ($cartItem->product->current_price ?? 0) * $cartItem->quantity,
-            ]);
+                // Pre-flight stock check — fail the whole order if anything is short.
+                foreach ($cartItems as $cartItem) {
+                    $product = $products->get($cartItem->product_id);
+                    if (!$product) {
+                        throw new \RuntimeException(__('A product in your cart is no longer available.'));
+                    }
+                    if (($product->stock ?? 0) < $cartItem->quantity) {
+                        throw new \RuntimeException(
+                            __('Insufficient stock for ":name" — only :stock left.', ['name' => $product->name, 'stock' => $product->stock])
+                        );
+                    }
+                }
 
-            // Decrease stock
-            if ($cartItem->product->stock > 0) {
-                $cartItem->product->decrement('stock', $cartItem->quantity);
-            }
+                $order = Order::create([
+                    'user_id'          => Auth::id(),
+                    'order_number'     => Order::generateOrderNumber(),
+                    'tracking_number'  => Order::generateTrackingNumber(),
+                    'customer_name'    => $this->customerName,
+                    'customer_email'   => $this->customerEmail,
+                    'customer_phone'   => $this->customerPhone,
+                    'shipping_address' => [
+                        'street'   => $this->street,
+                        'city'     => $this->city,
+                        'postcode' => $this->postcode,
+                        'state'    => $this->state,
+                    ],
+                    'subtotal'       => $subtotal,
+                    'total_amount'   => $subtotal,
+                    'status'         => 'pending',
+                    'payment_status' => 'paid', // Mock payment — always marked paid.
+                ]);
+
+                foreach ($cartItems as $cartItem) {
+                    $product = $products->get($cartItem->product_id);
+
+                    OrderItem::create([
+                        'order_id'     => $order->id,
+                        'product_id'   => $cartItem->product_id,
+                        'product_name' => $product->name,
+                        'quantity'     => $cartItem->quantity,
+                        'unit_price'   => $product->current_price ?? 0,
+                        'subtotal'     => ($product->current_price ?? 0) * $cartItem->quantity,
+                    ]);
+
+                    $product->decrement('stock', $cartItem->quantity);
+                }
+
+                CartItem::forCurrentOwner()->delete();
+
+                return $order;
+            });
+        } catch (\RuntimeException $e) {
+            $this->addError('stock', $e->getMessage());
+            $this->step = 1;
+            return;
         }
 
-        // Clear cart
-        CartItem::where('session_id', session()->getId())->delete();
+        $this->order = $order;
 
-        // Send confirmation email
         try {
             $this->order->load('items');
-            Mail::to($this->customerEmail)->send(new OrderConfirmationMail($this->order));
+            Mail::to($this->customerEmail)->queue(new OrderConfirmationMail($this->order));
         } catch (\Exception $e) {
-            // Don't block order on email failure — log it
+            // Don't block confirmation on email failure.
             logger()->error('Order email failed: ' . $e->getMessage());
         }
 
