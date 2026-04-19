@@ -6,7 +6,7 @@
      x-transition:leave-start="opacity-100"
      x-transition:leave-end="opacity-0 backdrop-blur-none"
      style="display: none;"
-     class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#050505]/95 backdrop-blur-md">
+     class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#0C0C0E]/95 backdrop-blur-md">
     
     <div class="w-[min(72vmin,240px)] aspect-[1.5] relative grid place-items-center mb-6">
         <svg viewBox="0 0 300 150" fill="none" aria-hidden="true" class="w-full h-full overflow-visible">
@@ -38,7 +38,7 @@
         </svg>
     </div>
     <div class="text-center font-sans tracking-wide">
-        <h2 class="text-xl font-bold text-brand-red animate-pulse">Car Parts Loading...</h2>
+        <h2 class="text-xl font-bold text-brand-red animate-pulse">Carbon Heat Loading...</h2>
     </div>
 </div>
 
@@ -104,7 +104,7 @@
                     const SVG_NS = 'http://www.w3.org/2000/svg';
                     for(let i=0; i<this.particleCount; i++) {
                         const circle = document.createElementNS(SVG_NS, 'circle');
-                        circle.setAttribute('fill', '#ff2a2a');
+                        circle.setAttribute('fill', '#E11D48');
                         this.$refs.group.appendChild(circle);
                         this.particleNodes.push(circle);
                     }
