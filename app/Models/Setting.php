@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class Setting extends Model
 {
@@ -17,6 +18,10 @@ class Setting extends Model
      */
     public static function getValue(string $key, mixed $default = null): mixed
     {
+        if (!Schema::hasTable('settings')) {
+            return $default;
+        }
+
         return cache()->remember("setting_{$key}", 3600, fn() =>
             static::find($key)?->value ?? $default
         );
@@ -27,6 +32,10 @@ class Setting extends Model
      */
     public static function setValue(string $key, mixed $value): void
     {
+        if (!Schema::hasTable('settings')) {
+            return;
+        }
+
         static::updateOrCreate(['key' => $key], ['value' => $value]);
         cache()->forget("setting_{$key}");
     }

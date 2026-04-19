@@ -21,12 +21,14 @@ class Booking extends Model
 
     protected $fillable = [
         'customer_name', 'customer_phone', 'customer_email',
-        'service_id', 'preferred_date', 'preferred_time',
-        'notes', 'status',
+        'vehicle_model', 'vehicle_plate', 'service_id', 'preferred_date', 'preferred_time',
+        'start_at', 'end_at', 'notes', 'status', 'confirm_token',
     ];
 
     protected $casts = [
         'preferred_date' => 'date',
+        'start_at' => 'datetime',
+        'end_at' => 'datetime',
     ];
 
     public const STATUSES = ['pending', 'confirmed', 'cancelled', 'completed'];
@@ -44,5 +46,10 @@ class Booking extends Model
             'completed'  => 'info',
             default      => 'warning',
         };
+    }
+
+    public function getManageUrlAttribute(): ?string
+    {
+        return $this->confirm_token ? route('booking.manage', $this->confirm_token) : null;
     }
 }

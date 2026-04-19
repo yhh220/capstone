@@ -56,15 +56,18 @@ class Product extends Model implements HasMedia
     }
 
     protected $fillable = [
-        'category_id', 'name', 'slug', 'description', 'short_description',
-        'price', 'sale_price', 'sku', 'stock', 'image', 'images',
-        'is_active', 'is_featured',
+        'category_id', 'name', 'brand', 'slug', 'description', 'description_ms', 'description_zh', 'short_description',
+        'price', 'sale_price', 'sku', 'stock', 'image', 'images', 'specs', 'compatible_vehicles',
+        'model_url', 'has_3d', 'is_active', 'is_featured',
     ];
 
     protected $casts = [
         'images' => 'array',
+        'specs' => 'array',
+        'compatible_vehicles' => 'array',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
+        'has_3d' => 'boolean',
         'price' => 'decimal:2',
         'sale_price' => 'decimal:2',
     ];
@@ -97,5 +100,14 @@ class Product extends Model implements HasMedia
     public function getIsOnSaleAttribute()
     {
         return !is_null($this->sale_price) && $this->sale_price < $this->price;
+    }
+
+    public function getTranslatedDescriptionAttribute(): ?string
+    {
+        return match (app()->getLocale()) {
+            'ms' => $this->description_ms ?: $this->description,
+            'zh' => $this->description_zh ?: $this->description,
+            default => $this->description,
+        };
     }
 }

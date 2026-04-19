@@ -21,6 +21,9 @@ class ProductsTable
                     ->sortable(),
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('brand')
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('slug')
                     ->searchable(),
                 TextColumn::make('price')
@@ -39,6 +42,8 @@ class ProductsTable
                 IconColumn::make('is_active')
                     ->boolean(),
                 IconColumn::make('is_featured')
+                    ->boolean(),
+                IconColumn::make('has_3d')
                     ->boolean(),
                 TextColumn::make('created_at')
                     ->dateTime()

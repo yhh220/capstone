@@ -46,12 +46,12 @@
                             <span class="text-gray-500 dark:text-gray-400 text-sm italic">{{ __('Contact for pricing') }}</span>
                             @endif
                         </div>
-                        @if($service->duration)
+                        @if($service->duration_label)
                         <div class="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            {{ $service->duration }}
+                            {{ $service->duration_label }}
                         </div>
                         @endif
                     </div>

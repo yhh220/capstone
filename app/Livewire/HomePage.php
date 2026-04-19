@@ -40,6 +40,7 @@ class HomePage extends Component
                 'categories' => new Collection(),
                 'newArrivals' => new Collection(),
                 'testimonials' => $this->fallbackTestimonials(),
+                'showcaseProduct' => null,
                 'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
             ])->layout('layouts.app');
         }
@@ -64,6 +65,12 @@ class HomePage extends Component
             ->take(6)
             ->get();
 
+        $showcaseProduct = Product::where('is_active', true)
+            ->where('has_3d', true)
+            ->whereNotNull('model_url')
+            ->latest()
+            ->first();
+
         $newArrivals = Product::where('is_active', true)
             ->whereNotIn('id', $featuredProducts->pluck('id'))
             ->latest()
@@ -78,6 +85,7 @@ class HomePage extends Component
                 ->get(),
             'newArrivals' => $newArrivals,
             'testimonials' => $testimonials,
+            'showcaseProduct' => $showcaseProduct,
             'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
         ])->layout('layouts.app');
     }

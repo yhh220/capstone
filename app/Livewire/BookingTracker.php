@@ -8,25 +8,38 @@ use Livewire\Component;
 class BookingTracker extends Component
 {
     public string $phone    = '';
+    public string $token    = '';
     public bool   $searched = false;
 
     protected array $rules = [
-        'phone' => 'required|min:6|max:20',
+        'phone' => 'nullable|min:6|max:20',
+        'token' => 'nullable|min:8|max:100',
     ];
 
     public function search(): void
     {
         $this->validate();
+
+        if (trim($this->phone) === '' && trim($this->token) === '') {
+            $this->addError('phone', __('Enter a phone number or booking token.'));
+            return;
+        }
+
         $this->searched = true;
     }
 
     public function getBookingsProperty()
     {
-        if (!$this->searched || $this->phone === '') {
+        if (!$this->searched) {
             return collect();
         }
 
-        // Normalize to digits only so "012-3456789" matches "0123456789"
+        if (trim($this->token) !== '') {
+            return Booking::with('service')
+                ->where('confirm_token', trim($this->token))
+                ->get();
+        }
+
         $digits = preg_replace('/\D+/', '', $this->phone);
         if ($digits === '') {
             return collect();

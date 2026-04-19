@@ -22,6 +22,9 @@ class BookingsTable
                     ->sortable(),
                 TextColumn::make('customer_phone')
                     ->searchable(),
+                TextColumn::make('vehicle_model')
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('service.name')
                     ->label('Service')
                     ->sortable(),
@@ -30,6 +33,9 @@ class BookingsTable
                     ->sortable(),
                 TextColumn::make('preferred_time')
                     ->sortable(),
+                TextColumn::make('confirm_token')
+                    ->label('Token')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {

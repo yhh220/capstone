@@ -28,7 +28,15 @@ class ServicesTable
                     ->sortable()
                     ->placeholder('Contact for pricing'),
                 TextColumn::make('duration')
-                    ->placeholder('—'),
+                    ->placeholder('-'),
+                TextColumn::make('duration_minutes')
+                    ->label('Minutes')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('buffer_after')
+                    ->label('Buffer')
+                    ->suffix(' min')
+                    ->sortable(),
                 IconColumn::make('is_active')
                     ->boolean()
                     ->sortable(),

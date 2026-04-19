@@ -2,7 +2,7 @@
     <div class="bg-brand-black text-white py-12">
         <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Book an Appointment') }}</h1>
-            <p class="text-gray-400">{{ __('Fill in your details and we will confirm your appointment as soon as possible.') }}</p>
+            <p class="text-gray-400">{{ __('Fill in your details and choose an available slot for your service.') }}</p>
         </div>
     </div>
 
@@ -10,11 +10,15 @@
         @if(session('booking_success'))
         <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-2xl p-8 text-center mb-8"
              role="alert" aria-live="polite">
-            <div class="text-5xl mb-4" aria-hidden="true">✅</div>
+            <div class="text-5xl mb-4" aria-hidden="true">OK</div>
             <h2 class="text-2xl font-black text-green-700 dark:text-green-300 mb-2">{{ __('Booking received!') }}</h2>
             <p class="text-green-600 dark:text-green-400">
-                {{ __('Thank you! We will contact you on WhatsApp to confirm your appointment.') }}
+                {{ __('Thank you! Save your manage link below so you can review or cancel the booking later.') }}
             </p>
+            <a href="{{ session('booking_success') }}"
+               class="block mt-4 text-brand-red font-semibold break-all hover:underline">
+                {{ session('booking_success') }}
+            </a>
             <a href="{{ route('booking') }}"
                class="inline-block mt-6 bg-brand-red text-white px-8 py-3 rounded-full font-semibold hover:bg-red-700 transition-colors">
                 {{ __('Make Another Booking') }}
@@ -22,10 +26,12 @@
         </div>
         @else
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 sm:p-8">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6">{{ __('Appointment Details') }}</h2>
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-2">{{ __('Appointment Details') }}</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                {{ __('Business hours: :start - :end', ['start' => $businessStart, 'end' => $businessEnd]) }}
+            </p>
 
             <div class="space-y-5">
-                {{-- Name --}}
                 <div>
                     <label for="booking-name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                         {{ __('Your Name') }} <span class="text-brand-red">*</span>
@@ -40,47 +46,76 @@
                     @enderror
                 </div>
 
-                {{-- Phone --}}
-                <div>
-                    <label for="booking-phone" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                        {{ __('Phone Number') }} <span class="text-brand-red">*</span>
-                    </label>
-                    <input wire:model="customer_phone"
-                           id="booking-phone"
-                           type="tel"
-                           placeholder="e.g. 012-3456789"
-                           class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('customer_phone') border-red-400 @enderror">
-                    @error('customer_phone')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="booking-phone" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            {{ __('Phone Number') }} <span class="text-brand-red">*</span>
+                        </label>
+                        <input wire:model="customer_phone"
+                               id="booking-phone"
+                               type="tel"
+                               placeholder="e.g. 012-3456789"
+                               class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('customer_phone') border-red-400 @enderror">
+                        @error('customer_phone')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="booking-email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            {{ __('Email') }} <span class="text-gray-400 font-normal text-xs">({{ __('optional') }})</span>
+                        </label>
+                        <input wire:model="customer_email"
+                               id="booking-email"
+                               type="email"
+                               placeholder="{{ __('your@email.com') }}"
+                               class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('customer_email') border-red-400 @enderror">
+                        @error('customer_email')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
-                {{-- Email --}}
-                <div>
-                    <label for="booking-email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                        {{ __('Email') }} <span class="text-gray-400 font-normal text-xs">({{ __('optional') }})</span>
-                    </label>
-                    <input wire:model="customer_email"
-                           id="booking-email"
-                           type="email"
-                           placeholder="{{ __('your@email.com') }}"
-                           class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('customer_email') border-red-400 @enderror">
-                    @error('customer_email')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="booking-vehicle-model" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            {{ __('Vehicle Model') }} <span class="text-brand-red">*</span>
+                        </label>
+                        <input wire:model="vehicle_model"
+                               id="booking-vehicle-model"
+                               type="text"
+                               placeholder="{{ __('e.g. Myvi 1.5 AV 2022') }}"
+                               class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('vehicle_model') border-red-400 @enderror">
+                        @error('vehicle_model')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="booking-vehicle-plate" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            {{ __('Vehicle Plate') }} <span class="text-gray-400 font-normal text-xs">({{ __('optional') }})</span>
+                        </label>
+                        <input wire:model="vehicle_plate"
+                               id="booking-vehicle-plate"
+                               type="text"
+                               placeholder="{{ __('e.g. ABC1234') }}"
+                               class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('vehicle_plate') border-red-400 @enderror">
+                        @error('vehicle_plate')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
-                {{-- Service --}}
                 <div>
                     <label for="booking-service" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                         {{ __('Service') }} <span class="text-brand-red">*</span>
                     </label>
-                    <select wire:model="service_id"
+                    <select wire:model.live="service_id"
                             id="booking-service"
                             class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('service_id') border-red-400 @enderror">
                         <option value="">{{ __('Select a service...') }}</option>
                         @foreach($services as $svc)
-                        <option value="{{ $svc->id }}">{{ $svc->name }}{{ $svc->price ? ' — RM ' . number_format($svc->price, 2) : '' }}</option>
+                        <option value="{{ $svc->id }}">{{ $svc->name }}{{ $svc->price ? ' - RM ' . number_format($svc->price, 2) : '' }}</option>
                         @endforeach
                     </select>
                     @error('service_id')
@@ -88,13 +123,12 @@
                     @enderror
                 </div>
 
-                {{-- Date + Time --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                         <label for="booking-date" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                             {{ __('Preferred Date') }} <span class="text-brand-red">*</span>
                         </label>
-                        <input wire:model="preferred_date"
+                        <input wire:model.live="preferred_date"
                                id="booking-date"
                                type="date"
                                min="{{ date('Y-m-d') }}"
@@ -123,7 +157,6 @@
                     </div>
                 </div>
 
-                {{-- Notes --}}
                 <div>
                     <label for="booking-notes" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                         {{ __('Notes') }} <span class="text-gray-400 font-normal text-xs">({{ __('optional') }})</span>
@@ -131,7 +164,7 @@
                     <textarea wire:model="notes"
                               id="booking-notes"
                               rows="3"
-                              placeholder="{{ __('Car model, specific requirements, etc.') }}"
+                              placeholder="{{ __('Car symptoms, preferred checks, or extra requests.') }}"
                               class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('notes') border-red-400 @enderror"></textarea>
                     @error('notes')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>

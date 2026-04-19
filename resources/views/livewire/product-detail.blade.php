@@ -56,6 +56,11 @@
                 <h1 class="text-2xl sm:text-3xl font-black text-brand-black dark:text-white mb-4">
                     {{ $product->name }}
                 </h1>
+                @if($product->brand)
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    {{ __('Brand') }}: <span class="font-semibold text-gray-700 dark:text-gray-200">{{ $product->brand }}</span>
+                </div>
+                @endif
 
                 {{-- Price Section (when shopping is enabled) --}}
                 @if($shoppingEnabled)
@@ -166,15 +171,54 @@
                         {{ $product->category->name }}
                     </div>
                     @endif
+                    @if(!empty($product->compatible_vehicles))
+                    <div>
+                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('Compatible Vehicles') }}:</span>
+                        {{ implode(', ', $product->compatible_vehicles) }}
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
 
-        @if($product->description)
+        @if($product->has_3d && $product->model_url)
+        <div class="mt-12 bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700" data-aos="fade-up">
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <h2 class="text-2xl font-black text-brand-black dark:text-white">{{ __('3D Viewer') }}</h2>
+                <span class="text-xs uppercase tracking-widest text-gray-400">{{ __('Mount Point Ready') }}</span>
+            </div>
+            <div id="3d-mount-product"
+                 data-model-url="{{ $product->model_url }}"
+                 data-product-name="{{ $product->name }}"
+                 class="min-h-[320px] rounded-2xl bg-gray-100 dark:bg-gray-900 border border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center text-center px-6">
+                <div>
+                    <div class="text-5xl mb-3">3D</div>
+                    <div class="font-semibold text-gray-800 dark:text-gray-200">{{ __('Interactive product viewer will mount here.') }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ __('Fallback content remains visible until the viewer script is integrated.') }}</div>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        @if($translatedDescription)
         <div class="mt-12 bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700" data-aos="fade-up">
             <h2 class="text-2xl font-black text-brand-black dark:text-white mb-4">{{ __('Product Overview') }}</h2>
             <div class="text-gray-600 dark:text-gray-400 leading-relaxed prose dark:prose-invert max-w-none">
-                {!! nl2br(e($product->description)) !!}
+                {!! nl2br(e($translatedDescription)) !!}
+            </div>
+        </div>
+        @endif
+
+        @if(!empty($product->specs))
+        <div class="mt-12 bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700" data-aos="fade-up">
+            <h2 class="text-2xl font-black text-brand-black dark:text-white mb-4">{{ __('Specifications') }}</h2>
+            <div class="grid sm:grid-cols-2 gap-4">
+                @foreach($product->specs as $label => $value)
+                <div class="rounded-xl bg-gray-50 dark:bg-gray-900 px-4 py-3">
+                    <div class="text-xs uppercase tracking-widest text-gray-400 mb-1">{{ $label }}</div>
+                    <div class="font-semibold text-gray-800 dark:text-gray-100">{{ is_array($value) ? implode(', ', $value) : $value }}</div>
+                </div>
+                @endforeach
             </div>
         </div>
         @endif

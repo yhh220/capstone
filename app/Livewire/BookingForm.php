@@ -5,21 +5,29 @@ namespace App\Livewire;
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\Booking;
 use App\Models\Service;
+use App\Services\Booking\BookingService;
 use Carbon\Carbon;
 use Livewire\Component;
 
 class BookingForm extends Component
 {
     use SetsSeo;
-    public string $customer_name    = '';
-    public string $customer_phone   = '';
-    public string $customer_email   = '';
-    public string $service_id       = '';
-    public string $preferred_date   = '';
-    public string $preferred_time   = '';
-    public string $notes            = '';
 
-    /** Pre-selected service from URL query param */
+    public string $customer_name = '';
+    public string $customer_phone = '';
+    public string $customer_email = '';
+    public string $vehicle_model = '';
+    public string $vehicle_plate = '';
+    public string $service_id = '';
+    public string $preferred_date = '';
+    public string $preferred_time = '';
+    public string $notes = '';
+
+    protected function bookingService(): BookingService
+    {
+        return app(BookingService::class);
+    }
+
     public function mount(?int $service = null): void
     {
         if ($service) {
@@ -35,32 +43,42 @@ class BookingForm extends Component
     protected function rules(): array
     {
         return [
-            'customer_name'  => 'required|min:2|max:100',
+            'customer_name' => 'required|min:2|max:100',
             'customer_phone' => 'required|max:20',
             'customer_email' => 'nullable|email|max:100',
-            'service_id'     => 'required|exists:services,id',
+            'vehicle_model' => 'required|min:2|max:120',
+            'vehicle_plate' => 'nullable|max:30',
+            'service_id' => 'required|exists:services,id',
             'preferred_date' => 'required|date|after_or_equal:today',
             'preferred_time' => 'required',
-            'notes'          => 'nullable|max:1000',
+            'notes' => 'nullable|max:1000',
         ];
     }
 
     public function getAvailableTimesProperty(): array
     {
-        $times = [];
-        for ($h = 10; $h <= 19; $h++) {
-            foreach (['00', '30'] as $m) {
-                if ($h === 10 && $m === '00') continue;
-                $key = sprintf('%02d:%s', $h, $m);
-                $times[$key] = $key;
-            }
+        if ($this->service_id === '' || $this->preferred_date === '') {
+            return [];
         }
-        return $times;
+
+        $service = Service::find($this->service_id);
+
+        if (!$service) {
+            return [];
+        }
+
+        $slots = $this->bookingService()
+            ->getAvailableSlots($service, Carbon::parse($this->preferred_date))
+            ->all();
+
+        return array_combine($slots, $slots) ?: [];
     }
 
     public function submit(): void
     {
         $this->validate();
+
+        $service = Service::findOrFail($this->service_id);
 
         try {
             $date = Carbon::parse($this->preferred_date);
@@ -69,52 +87,60 @@ class BookingForm extends Component
             return;
         }
 
-        // Block Fridays — shop is closed
         if ($date->dayOfWeek === Carbon::FRIDAY) {
             $this->addError('preferred_date', __('We are closed on Fridays. Please choose another day.'));
             return;
         }
 
-        // Block times already past today
-        if ($date->isToday()) {
-            $slot = Carbon::createFromFormat('Y-m-d H:i', $date->format('Y-m-d') . ' ' . $this->preferred_time);
-            if ($slot && $slot->isPast()) {
-                $this->addError('preferred_time', __('That time has already passed. Please choose a later slot.'));
-                return;
-            }
+        $startAt = $this->bookingService()->buildStartAt($this->preferred_date, $this->preferred_time);
+
+        if ($startAt->isPast()) {
+            $this->addError('preferred_time', __('That time has already passed. Please choose a later slot.'));
+            return;
         }
 
-        // Slot conflict: same service + date + time already booked (pending or confirmed)
-        $conflict = Booking::where('service_id', $this->service_id)
-            ->where('preferred_date', $date->format('Y-m-d'))
-            ->where('preferred_time', $this->preferred_time)
-            ->whereIn('status', ['pending', 'confirmed'])
-            ->exists();
-
-        if ($conflict) {
+        if (!$this->bookingService()->isSlotAvailable($service, $startAt)) {
             $this->addError('preferred_time', __('This slot is already booked. Please pick another time.'));
             return;
         }
 
-        Booking::create([
-            'customer_name'  => strip_tags($this->customer_name),
+        $booking = Booking::create([
+            'customer_name' => strip_tags($this->customer_name),
             'customer_phone' => strip_tags($this->customer_phone),
             'customer_email' => $this->customer_email ?: null,
-            'service_id'     => $this->service_id,
+            'vehicle_model' => strip_tags($this->vehicle_model),
+            'vehicle_plate' => $this->vehicle_plate !== '' ? strtoupper(strip_tags($this->vehicle_plate)) : null,
+            'service_id' => $this->service_id,
             'preferred_date' => $this->preferred_date,
             'preferred_time' => $this->preferred_time,
-            'notes'          => strip_tags($this->notes),
-            'status'         => 'pending',
+            'start_at' => $startAt,
+            'end_at' => $this->bookingService()->buildEndAt($service, $startAt),
+            'notes' => strip_tags($this->notes),
+            'status' => 'pending',
+            'confirm_token' => (string) str()->uuid(),
         ]);
 
-        $this->reset(['customer_name', 'customer_phone', 'customer_email', 'service_id', 'preferred_date', 'preferred_time', 'notes']);
-        session()->flash('booking_success', true);
+        $this->reset([
+            'customer_name',
+            'customer_phone',
+            'customer_email',
+            'vehicle_model',
+            'vehicle_plate',
+            'service_id',
+            'preferred_date',
+            'preferred_time',
+            'notes',
+        ]);
+
+        session()->flash('booking_success', $booking->manage_url);
     }
 
     public function render()
     {
         return view('livewire.booking-form', [
             'services' => Service::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get(),
+            'businessStart' => setting('BUSINESS_HOURS_START', '09:00'),
+            'businessEnd' => setting('BUSINESS_HOURS_END', '18:00'),
         ])->layout('layouts.app');
     }
 }

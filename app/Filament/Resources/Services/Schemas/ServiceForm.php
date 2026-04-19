@@ -20,6 +20,14 @@ class ServiceForm
                 TextInput::make('duration')
                     ->placeholder('e.g. 1-2 hours')
                     ->maxLength(100),
+                TextInput::make('duration_minutes')
+                    ->numeric()
+                    ->default(60)
+                    ->required(),
+                TextInput::make('buffer_after')
+                    ->numeric()
+                    ->default(15)
+                    ->required(),
                 TextInput::make('price')
                     ->numeric()
                     ->prefix('RM')

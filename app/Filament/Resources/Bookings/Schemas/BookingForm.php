@@ -36,6 +36,11 @@ class BookingForm
                     ->label('Email (optional)')
                     ->email()
                     ->maxLength(100),
+                TextInput::make('vehicle_model')
+                    ->required()
+                    ->maxLength(120),
+                TextInput::make('vehicle_plate')
+                    ->maxLength(30),
                 Select::make('service_id')
                     ->label('Service')
                     ->options(Service::where('is_active', true)->orderBy('name')->pluck('name', 'id'))
@@ -49,6 +54,10 @@ class BookingForm
                     ->label('Preferred Time')
                     ->options($times)
                     ->required(),
+                TextInput::make('confirm_token')
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->columnSpanFull(),
                 Select::make('status')
                     ->options([
                         'pending'   => 'Pending',
