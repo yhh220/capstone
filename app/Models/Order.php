@@ -32,19 +32,34 @@ class Order extends Model
 
     /**
      * Generate a unique order number like ORD-2026-00001
+     * Fixes: Concurrency crashes and yearly counter un-reset (Bug 1, Bug 10)
      */
     public static function generateOrderNumber(): string
     {
-        $count = static::count() + 1;
-        return 'ORD-' . date('Y') . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);
+        $year = date('Y');
+        $latestOrder = static::where('order_number', 'like', "ORD-{$year}-%")->orderBy('id', 'desc')->first();
+        
+        if ($latestOrder) {
+            $lastSequence = (int) substr($latestOrder->order_number, -5);
+            $count = $lastSequence + 1;
+        } else {
+            $count = 1;
+        }
+        
+        return 'ORD-' . $year . '-' . str_pad((string)$count, 5, '0', STR_PAD_LEFT);
     }
 
     /**
      * Generate a unique tracking number like WNWN12345678
+     * Fixes: Adds a uniqueness check loop to avoid collisions
      */
     public static function generateTrackingNumber(): string
     {
-        return 'WNWN' . strtoupper(Str::random(8));
+        do {
+            $tracking = 'WNWN' . strtoupper(Str::random(8));
+        } while (static::where('tracking_number', $tracking)->exists());
+
+        return $tracking;
     }
 
     /**

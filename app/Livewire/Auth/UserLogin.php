@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Auth;
 
+use App\Models\CartItem;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -69,10 +70,13 @@ class UserLogin extends Component
         // Clear rate limiter on successful login
         RateLimiter::clear($throttleKey);
 
+        // Transfer any guest cart under the pre-regenerate session id to the user.
+        CartItem::claimGuestCart(session()->getId(), Auth::id());
+
         // Regenerate session to prevent session fixation attacks
         session()->regenerate();
 
-        $this->redirect('/', navigate: false);
+        $this->redirect(session()->pull('url.intended', '/'), navigate: false);
     }
 
     /**
@@ -111,10 +115,13 @@ class UserLogin extends Component
         // Auto-login after registration
         Auth::login($user);
 
+        // Transfer any guest cart under the pre-regenerate session id to the new user.
+        CartItem::claimGuestCart(session()->getId(), Auth::id());
+
         // Regenerate session to prevent session fixation attacks
         session()->regenerate();
 
-        $this->redirect('/', navigate: false);
+        $this->redirect(session()->pull('url.intended', '/'), navigate: false);
     }
 
     public function render()

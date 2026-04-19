@@ -21,34 +21,28 @@ class CartPage extends Component
 
     public function getCartItemsProperty()
     {
-        return CartItem::where('session_id', session()->getId())
-            ->with('product')
-            ->get();
+        return CartItem::forCurrentOwner()->with('product')->get();
     }
 
     public function getSubtotalProperty(): float
     {
         return $this->cartItems->sum(fn($item) =>
-            ($item->product->current_price ?? 0) * $item->quantity
+            ($item->product?->current_price ?? 0) * $item->quantity
         );
     }
 
     public function incrementQuantity(int $cartItemId): void
     {
-        $item = CartItem::where('id', $cartItemId)
-            ->where('session_id', session()->getId())
-            ->first();
+        $item = CartItem::forCurrentOwner()->where('id', $cartItemId)->first();
 
-        if ($item && $item->quantity < ($item->product->stock ?? 99)) {
+        if ($item && $item->quantity < ($item->product?->stock ?? 99)) {
             $item->increment('quantity');
         }
     }
 
     public function decrementQuantity(int $cartItemId): void
     {
-        $item = CartItem::where('id', $cartItemId)
-            ->where('session_id', session()->getId())
-            ->first();
+        $item = CartItem::forCurrentOwner()->where('id', $cartItemId)->first();
 
         if ($item) {
             if ($item->quantity <= 1) {
@@ -61,41 +55,53 @@ class CartPage extends Component
 
     public function removeItem(int $cartItemId): void
     {
-        CartItem::where('id', $cartItemId)
-            ->where('session_id', session()->getId())
-            ->delete();
+        CartItem::forCurrentOwner()->where('id', $cartItemId)->delete();
     }
 
     public function clearCart(): void
     {
-        CartItem::where('session_id', session()->getId())->delete();
+        CartItem::forCurrentOwner()->delete();
     }
 
     /**
-     * Static helper: add a product to the session cart.
+     * Static helper: add a product to the current owner's cart, clamped to stock.
      */
     public static function addToCart(int $productId, int $quantity = 1): void
     {
-        $sessionId = session()->getId();
+        $product = Product::find($productId);
+        if (!$product) {
+            return;
+        }
 
-        $existing = CartItem::where('session_id', $sessionId)
+        $maxStock = $product->stock ?? 99;
+        if ($maxStock <= 0) {
+            return;
+        }
+
+        $existing = CartItem::forCurrentOwner()
             ->where('product_id', $productId)
             ->first();
 
+        $currentQty = $existing?->quantity ?? 0;
+        $targetQty  = min($currentQty + $quantity, $maxStock);
+
+        if ($targetQty <= $currentQty) {
+            return; // already at or above stock ceiling
+        }
+
         if ($existing) {
-            $existing->increment('quantity', $quantity);
+            $existing->update(['quantity' => $targetQty]);
         } else {
-            CartItem::create([
-                'session_id' => $sessionId,
-                'product_id' => $productId,
-                'quantity'   => $quantity,
-            ]);
+            CartItem::create(array_merge(
+                CartItem::currentOwnerAttributes(),
+                ['product_id' => $productId, 'quantity' => $targetQty],
+            ));
         }
     }
 
     public static function getCartCount(): int
     {
-        return CartItem::where('session_id', session()->getId())->sum('quantity');
+        return (int) CartItem::forCurrentOwner()->sum('quantity');
     }
 
     public function render()

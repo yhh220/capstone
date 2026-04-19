@@ -187,6 +187,7 @@
                     @foreach([
                         [route('home'),     __('Home'),     request()->routeIs('home')],
                         [route('products'), __('Products'), request()->routeIs('products*')],
+                        [route('cart'),     __('Cart'),     request()->routeIs('cart')],
                         [route('services'), __('Services'), request()->routeIs('services')],
                         [route('gallery'),  __('Gallery'),  request()->routeIs('gallery')],
                         [route('booking'),  __('Booking'),  request()->routeIs('booking*')],
@@ -377,6 +378,7 @@
                 @foreach([
                     [route('home'),     __('Home'),     request()->routeIs('home')],
                     [route('products'), __('Products'), request()->routeIs('products*')],
+                    [route('cart'),     __('Cart'),     request()->routeIs('cart')],
                     [route('services'), __('Services'), request()->routeIs('services')],
                     [route('gallery'),  __('Gallery'),  request()->routeIs('gallery')],
                     [route('booking'),  __('Booking'),  request()->routeIs('booking*')],
