@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-        .header { background: linear-gradient(135deg, #111827, #DC2626); padding: 32px; text-align: center; color: #fff; }
+        body { font-family: Arial, sans-serif; background: #f4f4f5; margin: 0; padding: 20px; color: #27272a; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(24, 24, 27, 0.12); border: 1px solid #e4e4e7; }
+        .header { background: linear-gradient(135deg, #18181B, #E11D48); padding: 32px; text-align: center; color: #fff; }
         .header h1 { margin: 0; font-size: 24px; }
         .header p { margin: 8px 0 0; opacity: 0.9; font-size: 14px; }
         .body-content { padding: 32px; }
         .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-        .info-label { color: #888; }
+        .info-label { color: #71717a; }
         .info-value { font-weight: bold; }
         .items-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
-        .items-table th { text-align: left; padding: 10px 8px; border-bottom: 2px solid #DC2626; color: #555; font-size: 12px; text-transform: uppercase; }
+        .items-table th { text-align: left; padding: 10px 8px; border-bottom: 2px solid #E11D48; color: #52525b; font-size: 12px; text-transform: uppercase; }
         .items-table td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; }
-        .total-row td { font-weight: bold; font-size: 16px; border-top: 2px solid #111827; padding-top: 12px; }
-        .track-btn { display: inline-block; background: #DC2626; color: #fff; padding: 14px 32px; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 14px; margin-top: 16px; }
-        .footer { background: #111827; color: #999; padding: 24px 32px; text-align: center; font-size: 12px; line-height: 1.6; }
+        .total-row td { font-weight: bold; font-size: 16px; border-top: 2px solid #18181B; padding-top: 12px; }
+        .track-btn { display: inline-block; background: #E11D48; color: #fff; padding: 14px 32px; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 14px; margin-top: 16px; }
+        .footer { background: #18181B; color: #a1a1aa; padding: 24px 32px; text-align: center; font-size: 12px; line-height: 1.6; }
         .emoji { font-size: 18px; }
     </style>
 </head>
@@ -46,7 +46,7 @@
                 <span class="info-value">{{ ucfirst($order->payment_status) }}</span>
             </div>
 
-            <h3 style="margin-top: 24px; color: #111827;">Items Ordered</h3>
+            <h3 style="margin-top: 24px; color: #18181B;">Items Ordered</h3>
             <table class="items-table">
                 <thead>
                     <tr>
@@ -65,7 +65,7 @@
                     @endforeach
                     <tr class="total-row">
                         <td colspan="2">Total</td>
-                        <td style="text-align: right; color: #DC2626;">RM {{ number_format($order->total_amount, 2) }}</td>
+                        <td style="text-align: right; color: #E11D48;">RM {{ number_format($order->total_amount, 2) }}</td>
                     </tr>
                 </tbody>
             </table>
