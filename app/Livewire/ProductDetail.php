@@ -12,6 +12,7 @@ class ProductDetail extends Component
     use SetsSeo;
 
     public Product $product;
+    public int $quantity = 1;
 
     public function mount(string $slug): void
     {
@@ -30,6 +31,27 @@ class ProductDetail extends Component
         );
     }
 
+    public function incrementQuantity(): void
+    {
+        if ($this->quantity < ($this->product->stock ?: 99)) {
+            $this->quantity++;
+        }
+    }
+
+    public function decrementQuantity(): void
+    {
+        if ($this->quantity > 1) {
+            $this->quantity--;
+        }
+    }
+
+    public function addToCart(): void
+    {
+        CartPage::addToCart($this->product->id, $this->quantity);
+        session()->flash('success', __('Added to cart!'));
+        $this->quantity = 1;
+    }
+
     public function render()
     {
         return view('livewire.product-detail', [
@@ -38,6 +60,7 @@ class ProductDetail extends Component
                 ->where('is_active', true)
                 ->take(4)
                 ->get(),
+            'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
         ])->layout('layouts.app');
     }
 }

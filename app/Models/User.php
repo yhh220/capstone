@@ -14,7 +14,7 @@ use Filament\Panel;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-#[Fillable(['name', 'email', 'password', 'role'])]
+#[Fillable(['name', 'email', 'password', 'role', 'phone', 'gender', 'address_line', 'city', 'postcode', 'state', 'preferred_courier'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -49,13 +49,12 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * Check if the user has owner role.
-     *
-     * @return bool
+     * Check if the user can access the admin panel.
+     * Owner, admin, and staff can access.
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->isAdmin();
+        return $this->isAdmin() || $this->isStaff();
     }
 
     public function isOwner(): bool
@@ -65,8 +64,6 @@ class User extends Authenticatable implements FilamentUser
 
     /**
      * Check if the user has admin role (includes owner).
-     *
-     * @return bool
      */
     public function isAdmin(): bool
     {
@@ -75,11 +72,25 @@ class User extends Authenticatable implements FilamentUser
 
     /**
      * Check if the user has staff role.
-     *
-     * @return bool
      */
     public function isStaff(): bool
     {
         return $this->role === 'staff';
+    }
+
+    /**
+     * Check if the user is a client.
+     */
+    public function isClient(): bool
+    {
+        return $this->role === 'client';
+    }
+
+    /**
+     * Get the user's orders.
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }

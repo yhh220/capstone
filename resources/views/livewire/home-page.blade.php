@@ -46,6 +46,8 @@
         </div>
     </section>
 
+
+
     {{-- ── Stats bar ────────────────────────────────────────── --}}
     <section class="bg-brand-red text-white py-8" aria-label="Statistics">
         <div class="max-w-7xl mx-auto px-4">
@@ -143,6 +145,22 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
                             {{ $product->short_description ?: __('View details and enquire for suitability, pricing, and installation.') }}
                         </p>
+                        {{-- Price (shown when admin enables online shopping) --}}
+                        @if($shoppingEnabled)
+                        <div class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                            @if($product->sale_price && $product->sale_price < $product->price)
+                                <span class="text-brand-red font-black text-lg">RM {{ number_format($product->sale_price, 2) }}</span>
+                                <span class="text-gray-400 line-through text-sm ml-1">RM {{ number_format($product->price, 2) }}</span>
+                            @else
+                                <span class="text-brand-red font-black text-lg">RM {{ number_format($product->price, 2) }}</span>
+                            @endif
+                            @if($product->stock > 0)
+                                <span class="text-green-500 text-xs ml-2">{{ __('In Stock') }}</span>
+                            @else
+                                <span class="text-red-400 text-xs ml-2">{{ __('Out of Stock') }}</span>
+                            @endif
+                        </div>
+                        @endif
                     </div>
                 </a>
                 @endforeach
@@ -213,7 +231,17 @@
                         <div class="font-semibold text-sm text-gray-800 dark:text-gray-200 group-hover:text-brand-red transition-colors line-clamp-2">
                             {{ $product->name }}
                         </div>
+                        @if($shoppingEnabled)
+                        <div class="mt-1">
+                            @if($product->sale_price && $product->sale_price < $product->price)
+                                <span class="text-brand-red font-bold text-sm">RM {{ number_format($product->sale_price, 2) }}</span>
+                            @else
+                                <span class="text-brand-red font-bold text-sm">RM {{ number_format($product->price, 2) }}</span>
+                            @endif
+                        </div>
+                        @else
                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('Tap to view details and enquire') }}</div>
+                        @endif
                     </div>
                 </a>
                 @endforeach

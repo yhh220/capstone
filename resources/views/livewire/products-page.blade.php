@@ -118,6 +118,11 @@
                                 @else
                                 <div class="w-full h-full flex items-center justify-center text-6xl" aria-hidden="true">🚗</div>
                                 @endif
+                                @if($shoppingEnabled && $product->sale_price && $product->sale_price < $product->price)
+                                <div class="absolute top-3 left-3 bg-brand-red text-white text-xs font-bold px-2 py-1 rounded-full">
+                                    {{ __('SALE') }}
+                                </div>
+                                @endif
                             </div>
                             <div class="p-4 pb-3">
                                 <div class="text-xs text-gray-400 dark:text-gray-500 mb-1">
@@ -129,20 +134,45 @@
                                 @if($product->short_description)
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">{{ $product->short_description }}</p>
                                 @endif
+                                {{-- Price display --}}
+                                @if($shoppingEnabled)
+                                <div class="flex items-center gap-2 mt-1">
+                                    @if($product->sale_price && $product->sale_price < $product->price)
+                                        <span class="text-brand-red font-black text-lg">RM {{ number_format($product->sale_price, 2) }}</span>
+                                        <span class="text-gray-400 line-through text-sm">RM {{ number_format($product->price, 2) }}</span>
+                                    @else
+                                        <span class="text-brand-red font-black text-lg">RM {{ number_format($product->price, 2) }}</span>
+                                    @endif
+                                </div>
+                                <div class="text-xs mt-1 {{ $product->stock > 0 ? 'text-green-500' : 'text-red-400' }}">
+                                    {{ $product->stock > 0 ? __('In Stock') . ' (' . $product->stock . ')' : __('Out of Stock') }}
+                                </div>
+                                @endif
                             </div>
                         </a>
                         <div class="px-4 pb-4 flex gap-2">
-                            <a href="{{ route('product.show', $product->slug) }}"
-                               class="flex-1 text-center text-sm font-semibold text-brand-red border border-brand-red rounded-lg py-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                                {{ __('Details') }}
-                            </a>
-                            <a href="{{ $productWaUrl }}"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               class="flex-1 text-center text-sm font-semibold bg-brand-red text-white rounded-lg py-2 hover:bg-red-700 transition-colors"
-                               aria-label="{{ __('Enquire about') }} {{ $product->name }} {{ __('on WhatsApp') }}">
-                                WhatsApp
-                            </a>
+                            @if($shoppingEnabled && $product->stock > 0)
+                                <button wire:click="addToCart({{ $product->id }})"
+                                        class="flex-1 text-center text-sm font-semibold bg-brand-red text-white rounded-lg py-2 hover:bg-red-700 transition-colors">
+                                    🛒 {{ __('Add to Cart') }}
+                                </button>
+                                <a href="{{ route('product.show', $product->slug) }}"
+                                   class="text-center text-sm font-semibold text-brand-red border border-brand-red rounded-lg py-2 px-3 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                    {{ __('Details') }}
+                                </a>
+                            @else
+                                <a href="{{ route('product.show', $product->slug) }}"
+                                   class="flex-1 text-center text-sm font-semibold text-brand-red border border-brand-red rounded-lg py-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                    {{ __('Details') }}
+                                </a>
+                                <a href="{{ $productWaUrl }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="flex-1 text-center text-sm font-semibold bg-brand-red text-white rounded-lg py-2 hover:bg-red-700 transition-colors"
+                                   aria-label="{{ __('Enquire about') }} {{ $product->name }} {{ __('on WhatsApp') }}">
+                                    WhatsApp
+                                </a>
+                            @endif
                         </div>
                     </div>
                     @endforeach

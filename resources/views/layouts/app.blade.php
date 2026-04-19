@@ -211,13 +211,74 @@
                         {{ __('WhatsApp us') }}
                     </a>
                     @auth
-                        <span class="hidden lg:inline text-sm text-gray-600 dark:text-gray-300">Hi, <strong class="text-brand-black dark:text-white">{{ Auth::user()->name }}</strong></span>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full text-xs lg:text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition whitespace-nowrap">
-                                {{ __('Logout') }}
+                        {{-- User Dropdown --}}
+                        <div class="relative" id="user-dropdown-wrapper" x-data="{ open: false }">
+                            <button @click="open = !open"
+                                    @click.outside="open = false"
+                                    class="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-600"
+                                    aria-label="{{ __('User menu') }}">
+                                <div class="w-7 h-7 rounded-full bg-brand-red flex items-center justify-center text-white text-xs font-black">
+                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                </div>
+                                <span class="hidden lg:inline text-sm font-semibold text-gray-700 dark:text-gray-300 max-w-[100px] truncate">{{ Auth::user()->name }}</span>
+                                <svg class="w-3 h-3 text-gray-400 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                        </form>
+
+                            <div x-show="open" x-cloak
+                                 x-transition:enter="transition ease-out duration-150"
+                                 x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-100"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50">
+                                {{-- User Info --}}
+                                <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                                    <div class="font-bold text-gray-800 dark:text-white text-sm truncate">{{ Auth::user()->name }}</div>
+                                    <div class="text-xs text-gray-400 truncate">{{ Auth::user()->email }}</div>
+                                    <div class="text-xs text-brand-red font-semibold mt-0.5">{{ ucfirst(Auth::user()->role) }}</div>
+                                </div>
+
+                                <div class="py-1">
+                                    {{-- Profile --}}
+                                    <a href="{{ route('profile') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                        {{ __('My Profile') }}
+                                    </a>
+
+                                    {{-- My Orders --}}
+                                    <a href="{{ route('my-orders') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                        {{ __('My Orders') }}
+                                    </a>
+
+                                    {{-- Track Order --}}
+                                    <a href="{{ route('track-order') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                        {{ __('Track Order') }}
+                                    </a>
+
+                                    {{-- Admin Dashboard (admin/owner only) --}}
+                                    @if(Auth::user()->isAdmin())
+                                    <a href="/admin" class="flex items-center gap-3 px-4 py-2.5 text-sm text-brand-red font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                        {{ __('Admin Dashboard') }}
+                                    </a>
+                                    @endif
+                                </div>
+
+                                {{-- Logout --}}
+                                <div class="border-t border-gray-100 dark:border-gray-700 py-1">
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                            {{ __('Logout') }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     @else
                         <a href="{{ route('login') }}" class="text-xs lg:text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-brand-red transition whitespace-nowrap">
                             {{ __('Sign In') }}
@@ -339,10 +400,41 @@
                 </div>
                 <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
                     @auth
-                        <span class="block py-2 px-3 text-sm text-gray-500 dark:text-gray-400">{{ __('Signed in as') }} <strong class="dark:text-white">{{ Auth::user()->name }}</strong></span>
+                        <div class="px-3 py-2 mb-1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-brand-red flex items-center justify-center text-white text-sm font-black">
+                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-sm text-gray-800 dark:text-white">{{ Auth::user()->name }}</div>
+                                    <div class="text-xs text-gray-400">{{ ucfirst(Auth::user()->role) }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="{{ route('profile') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            {{ __('My Profile') }}
+                        </a>
+                        <a href="{{ route('my-orders') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                            {{ __('My Orders') }}
+                        </a>
+                        <a href="{{ route('track-order') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                            {{ __('Track Order') }}
+                        </a>
+                        @if(Auth::user()->isAdmin())
+                        <a href="/admin" class="flex items-center gap-3 py-2.5 px-3 rounded-lg font-semibold text-brand-red hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            {{ __('Admin Dashboard') }}
+                        </a>
+                        @endif
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="block w-full text-left py-2.5 px-3 rounded-lg font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">{{ __('Logout') }}</button>
+                            <button type="submit" class="flex items-center gap-3 w-full py-2.5 px-3 rounded-lg font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                {{ __('Logout') }}
+                            </button>
                         </form>
                     @else
                         <a href="{{ route('login') }}" class="block py-2.5 px-3 rounded-lg font-medium text-brand-red hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">{{ __('Sign In / Register') }}</a>
