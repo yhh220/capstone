@@ -1,5 +1,5 @@
 <div>
-    <div class="bg-brand-black text-white py-12">
+    <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
         <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2" data-aos="fade-up">{{ __('Our Services') }}</h1>
             <p class="text-gray-400" data-aos="fade-up" data-aos-delay="80">{{ __('Professional installation and modification services by our experienced team.') }}</p>
@@ -72,7 +72,7 @@
         </div>
         @endif
 
-        <div class="mt-12 bg-brand-black text-white rounded-2xl p-6 sm:p-8 text-center" data-aos="zoom-in">
+        <div class="mt-12 bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white rounded-2xl p-6 sm:p-8 text-center" data-aos="zoom-in">
             <h2 class="text-2xl font-black mb-2">{{ __('Need a custom service?') }}</h2>
             <p class="text-gray-400 mb-6">{{ __('Contact us on WhatsApp and our team will advise you on the best options for your car.') }}</p>
             @php $wa = 'https://wa.me/' . config('services.store.phone_raw') . '?text=' . rawurlencode('Hi Win Win Car Studio! I would like to enquire about your services.'); @endphp

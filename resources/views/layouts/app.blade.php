@@ -58,40 +58,47 @@
     </script>
 
     <style>
-        /* ── Carbon Heat color theme ───────────────────────── */
+        /* ── Ember Carbon color theme ──────────────────────────
+           Brand    : Ember Red #C8413D · Carbon Black #121212 · Asphalt #1C1917
+           Neutrals : Bone White #E8E0D8 · Chalk #F7F5F3 · Warm Ash #8C8480
+           Borders  : Gunmetal #3A3330 · Deep Slate #2E2A28
+           Accents  : Ember Dark #A83432 (hover) · Ember Light #E86460 (glow)
+        ──────────────────────────────────────────────────────── */
         :root {
-            --brand-red-rgb: 225 29 72;       /* #E11D48 — modern crimson */
-            --brand-yellow-rgb: 245 158 11;   /* #F59E0B — amber accent  */
-            --brand-black-rgb: 24 24 27;      /* #18181B — neutral zinc  */
+            --brand-red-rgb: 200 65 61;       /* #C8413D — Ember Red (CTA, focus) */
+            --brand-yellow-rgb: 232 100 96;   /* #E86460 — Ember Light (accent/glow) */
+            --brand-black-rgb: 18 18 18;      /* #121212 — Carbon Black */
+            --brand-red-hover-rgb: 168 52 50; /* #A83432 — Ember Dark (hover) */
         }
         .dark {
-            --brand-red-rgb: 251 113 133;     /* #FB7185 — softened rose for dark */
-            --brand-yellow-rgb: 251 191 36;   /* #FBBF24 — brighter amber       */
-            --brand-black-rgb: 26 26 30;      /* #1A1A1E — elevated carbon panel */
+            --brand-red-rgb: 232 100 96;      /* #E86460 — Ember Light on dark */
+            --brand-yellow-rgb: 232 224 216;  /* #E8E0D8 — Bone White accent */
+            --brand-black-rgb: 28 25 23;      /* #1C1917 — Asphalt surface */
+            --brand-red-hover-rgb: 200 65 61; /* #C8413D — Ember Red hover on dark */
         }
 
-        /* True carbon-black body in dark mode */
+        /* Carbon-black body in dark mode */
         .dark body {
-            background-color: #0C0C0E;
-            color: #FAFAFA;
+            background-color: #121212;
+            color: #E8E0D8;
         }
 
         :root {
-            --app-bg-rgb: 255 255 255;
+            --app-bg-rgb: 247 245 243;        /* #F7F5F3 — Chalk */
             --app-surface-rgb: 255 255 255;
-            --app-surface-soft-rgb: 244 244 245;
-            --app-border-rgb: 228 228 231;
-            --app-text-rgb: 39 39 42;
-            --app-muted-rgb: 82 82 91;
+            --app-surface-soft-rgb: 232 224 216; /* #E8E0D8 — Bone White */
+            --app-border-rgb: 224 218 210;    /* Bone White tint */
+            --app-text-rgb: 18 18 18;         /* #121212 — Carbon Black */
+            --app-muted-rgb: 140 132 128;     /* #8C8480 — Warm Ash */
         }
 
         .dark {
-            --app-bg-rgb: 12 12 14;
-            --app-surface-rgb: 26 26 30;
-            --app-surface-soft-rgb: 20 20 24;
-            --app-border-rgb: 42 42 48;
-            --app-text-rgb: 250 250 250;
-            --app-muted-rgb: 212 212 216;
+            --app-bg-rgb: 18 18 18;           /* #121212 — Carbon Black */
+            --app-surface-rgb: 28 25 23;      /* #1C1917 — Asphalt */
+            --app-surface-soft-rgb: 46 42 40; /* #2E2A28 — Deep Slate */
+            --app-border-rgb: 58 51 48;       /* #3A3330 — Gunmetal */
+            --app-text-rgb: 232 224 216;      /* #E8E0D8 — Bone White */
+            --app-muted-rgb: 140 132 128;     /* #8C8480 — Warm Ash */
         }
 
         body {
@@ -125,19 +132,19 @@
         }
 
         .dark .dark\:text-gray-400 {
-            color: rgb(161 161 170) !important;
+            color: rgb(140 132 128) !important; /* Warm Ash */
         }
 
         .dark .dark\:hover\:bg-gray-700:hover,
         .dark .dark\:hover\:bg-gray-700\/50:hover {
-            background-color: rgb(35 35 41) !important;
+            background-color: rgb(46 42 40) !important; /* Deep Slate */
         }
 
         .dark .dark\:bg-red-900\/10,
         .dark .dark\:bg-red-900\/20,
         .dark .dark\:bg-red-900\/30,
         .dark .dark\:hover\:bg-red-900\/20:hover {
-            background-color: rgb(75 17 31 / 0.45) !important;
+            background-color: rgb(168 52 50 / 0.22) !important; /* Ember Dark tint */
         }
 
         .skip-link {
@@ -175,10 +182,10 @@
         }
 
         .hero-gradient {
-            background: linear-gradient(135deg, #18181B 0%, #2A2A30 50%, rgb(var(--brand-red-rgb)) 100%);
+            background: linear-gradient(135deg, #121212 0%, #2E2A28 50%, rgb(var(--brand-red-rgb)) 100%);
         }
         .dark .hero-gradient {
-            background: linear-gradient(135deg, #0C0C0E 0%, #1A1A1E 50%, rgb(var(--brand-red-rgb)) 100%);
+            background: linear-gradient(135deg, #121212 0%, #1C1917 50%, rgb(var(--brand-red-rgb)) 100%);
         }
 
         /* ── Hero orb floating animation ─────────────────── */

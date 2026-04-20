@@ -6,7 +6,7 @@
         $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($storeAddress);
     @endphp
 
-    <div class="bg-brand-black text-white py-12">
+    <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
         <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Our Products') }}</h1>
             <p class="text-gray-400">{{ __('Browse our product showcase, then visit the showroom or contact us on WhatsApp for advice.') }}</p>

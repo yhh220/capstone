@@ -43,7 +43,7 @@
         </div>
     </section>
 
-    <section class="py-16 bg-brand-black text-white" aria-label="Company statistics">
+    <section class="py-16 bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white" aria-label="Company statistics">
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                 @foreach([

@@ -1,5 +1,5 @@
 <div>
-    <div class="bg-brand-black text-white py-12">
+    <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
         <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Checkout') }}</h1>
             <p class="text-gray-400">

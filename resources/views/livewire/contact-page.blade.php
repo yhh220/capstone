@@ -11,7 +11,7 @@
         $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($storeAddress);
     @endphp
 
-    <div class="bg-brand-black text-white py-16">
+    <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-16">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <h1 class="text-4xl sm:text-5xl font-black mb-4" data-aos="fade-up">
                 {{ __('Contact') }} <span class="text-brand-yellow">{{ __('Us') }}</span>

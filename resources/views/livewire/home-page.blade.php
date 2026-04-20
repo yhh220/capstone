@@ -214,13 +214,13 @@
     </section>
 
     {{-- ── Why Choose ───────────────────────────────────────── --}}
-    <section class="py-16 bg-brand-black text-white" aria-labelledby="why-heading">
+    <section class="py-16 bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white" aria-labelledby="why-heading">
         <div class="max-w-7xl mx-auto px-4">
             <div class="text-center mb-12" data-aos="fade-up">
                 <h2 id="why-heading" class="text-3xl sm:text-4xl font-black mb-3">
-                    {{ __('Why Choose') }} <span class="text-brand-yellow">Win Win</span>?
+                    {{ __('Why Choose') }} <span class="text-brand-red">Win Win</span>?
                 </h2>
-                <p class="text-gray-400">{{ __('Built to create trust before the customer even steps into the store') }}</p>
+                <p class="text-gray-600 dark:text-gray-400">{{ __('Built to create trust before the customer even steps into the store') }}</p>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach([
@@ -230,10 +230,10 @@
                     ['🛠', __('Installation advice'), __('Our team helps match products to your vehicle and needs.')],
                 ] as $i => [$icon, $title, $description])
                 <div data-aos="fade-up" data-aos-delay="{{ $i * 100 }}"
-                     class="text-center p-6 bg-gray-800 rounded-2xl hover:bg-gray-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                     class="text-center p-6 bg-white dark:bg-gray-800 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
                     <div class="text-5xl mb-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true">{{ $icon }}</div>
-                    <h3 class="text-xl font-bold text-brand-yellow mb-2">{{ $title }}</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">{{ $description }}</p>
+                    <h3 class="text-xl font-bold text-brand-red mb-2">{{ $title }}</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{{ $description }}</p>
                 </div>
                 @endforeach
             </div>
