@@ -39,8 +39,13 @@
                     @if($isLoginTab)
                     <form wire:submit="login">
                         <div class="text-center mb-6">
-                            <div class="w-16 h-16 bg-brand-red rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-red-200">
-                                <span class="text-brand-yellow font-black text-2xl">W</span>
+                            <div class="h-14 w-48 flex items-center justify-center mx-auto mb-2">
+                                <img src="{{ asset('images/logo/logo-dark.svg') }}" alt="" class="h-full w-full object-contain block dark:hidden">
+                                <img src="{{ asset('images/logo/logo-light.svg') }}" alt="" class="h-full w-full object-contain hidden dark:block">
+                            </div>
+                            <div class="flex items-center justify-center gap-2 mb-4">
+                                <span class="font-black text-brand-black dark:text-white text-xs uppercase tracking-[0.2em]">Win Win</span>
+                                <span class="text-[11px] text-brand-red font-semibold uppercase tracking-widest">Car Audio</span>
                             </div>
                             <h2 class="text-2xl font-black text-brand-black dark:text-white">Welcome Back</h2>
                             <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Sign in to your Win Win account</p>

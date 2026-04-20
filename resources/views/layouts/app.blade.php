@@ -241,17 +241,18 @@
          role="navigation"
          aria-label="{{ __('Main navigation') }}">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex items-center justify-between h-16 gap-2">
+            <div class="flex items-center justify-between h-20 gap-2">
                 <!-- Brand Identity -->
                 <a href="{{ route('home') }}"
-                   class="flex items-center gap-2 flex-shrink-0 group"
+                   class="flex flex-col items-center justify-center flex-shrink-0 group leading-none py-1"
                    aria-label="{{ $storeName }} - {{ __('Home') }}">
-                    <div class="w-10 h-10 bg-brand-red rounded-full flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 group-active:scale-95 shadow-md shadow-brand-red/20" aria-hidden="true">
-                        <span class="text-brand-yellow font-black text-lg">W</span>
+                    <div class="h-10 w-32 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-105 group-active:scale-95" aria-hidden="true">
+                        <img src="{{ asset('images/logo/logo-dark.svg') }}" alt="" class="h-full w-full object-contain block dark:hidden">
+                        <img src="{{ asset('images/logo/logo-light.svg') }}" alt="" class="h-full w-full object-contain hidden dark:block">
                     </div>
-                    <div class="leading-tight transition-opacity duration-300 group-hover:opacity-80">
-                        <div class="font-black text-brand-black dark:text-white text-sm uppercase tracking-wide">{{ $storeShortName }}</div>
-                        <div class="text-xs text-brand-red font-semibold uppercase tracking-widest">{{ $storeTagline }}</div>
+                    <div class="mt-1 flex items-center gap-1.5 leading-none transition-opacity duration-300 group-hover:opacity-80">
+                        <span class="font-black text-brand-black dark:text-white text-[11px] uppercase tracking-[0.15em]">{{ $storeShortName }}</span>
+                        <span class="text-[10px] text-brand-red font-semibold uppercase tracking-widest">{{ $storeTagline }}</span>
                     </div>
                 </a>
 
@@ -610,14 +611,12 @@
         <div class="max-w-7xl mx-auto px-4 py-12">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
                 <div class="sm:col-span-2">
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-10 h-10 bg-brand-red rounded-full flex items-center justify-center flex-shrink-0" aria-hidden="true">
-                            <span class="text-brand-yellow font-black text-lg">W</span>
+                    <div class="mb-4">
+                        <div class="h-14 w-44 flex items-center justify-start flex-shrink-0 mb-2" aria-hidden="true">
+                            <img src="{{ asset('images/logo/logo-light.svg') }}" alt="" class="h-full w-full object-contain">
                         </div>
-                        <div>
-                            <div class="font-black text-white text-lg">{{ $storeName }}</div>
-                            <div class="text-xs text-brand-yellow uppercase tracking-widest">{{ $storeTagline }}</div>
-                        </div>
+                        <div class="font-black text-white text-lg leading-tight">{{ $storeName }}</div>
+                        <div class="text-xs text-brand-yellow uppercase tracking-widest mt-0.5">{{ $storeTagline }}</div>
                     </div>
                     <p class="text-sm text-gray-400 leading-relaxed">
                         {{ __('Browse our products online, then visit the showroom or message us on WhatsApp for recommendations and installation guidance.') }}
