@@ -59,8 +59,10 @@
             @endforeach
         </div>
         @else
-        <div class="text-center py-20" data-aos="fade-up">
-            <div class="text-6xl mb-4" aria-hidden="true">📸</div>
+        <div class="text-center py-20 group" data-aos="fade-up">
+            <div class="flex justify-center text-gray-300 dark:text-gray-600 mb-6" aria-hidden="true">
+                <svg class="w-16 h-16 group-hover:scale-125 group-hover:text-brand-yellow transition-all duration-500 drop-shadow-sm" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
+            </div>
             <h2 class="text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">
                 {{ $activeCategory ? __('No photos in this category yet') : __('Gallery coming soon') }}
             </h2>
@@ -68,8 +70,9 @@
             @php $fb = config('services.store.facebook_url'); @endphp
             @if($fb)
             <a href="{{ $fb }}" target="_blank" rel="noopener noreferrer"
-               class="inline-block mt-4 bg-brand-red text-white px-6 py-2.5 rounded-full font-semibold hover:bg-red-700 transition-colors">
-                {{ __('Visit Our Facebook') }}
+               class="group relative inline-flex items-center gap-2 mt-4 bg-[#1877F2] text-white px-6 py-2.5 rounded-full font-semibold hover:shadow-[0_4px_15px_rgba(24,119,242,0.4)] hover:-translate-y-1 transition-all duration-300 active:scale-95 overflow-hidden">
+                <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                <span class="relative z-10">{{ __('Visit Our Facebook') }}</span>
             </a>
             @endif
         </div>

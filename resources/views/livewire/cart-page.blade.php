@@ -18,7 +18,9 @@
                         @if($item->product->image)
                             <img src="{{ Storage::url($item->product->image) }}" alt="{{ $item->product->name }}" class="w-full h-full object-cover">
                         @else
-                            <div class="w-full h-full flex items-center justify-center text-3xl" aria-hidden="true">🚗</div>
+                            <div class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600" aria-hidden="true">
+                                <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path></svg>
+                            </div>
                         @endif
                     </div>
 
@@ -93,8 +95,9 @@
                     </div>
 
                     <a href="{{ route('checkout') }}"
-                       class="block w-full bg-brand-red text-white text-center py-3.5 rounded-full font-bold text-lg mt-6 hover:bg-red-700 transition-colors shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 transition-all duration-300">
-                        {{ __('Proceed to Checkout') }}
+                       class="group relative overflow-hidden block w-full bg-brand-red text-white text-center py-3.5 rounded-full font-bold text-lg mt-6 transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95">
+                        <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                        <span class="relative z-10">{{ __('Proceed to Checkout') }}</span>
                     </a>
 
                     <a href="{{ route('products') }}"
@@ -102,21 +105,25 @@
                         {{ __('Continue Shopping') }}
                     </a>
 
-                    <div class="mt-4 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-xs p-3 rounded-xl text-center">
-                        ⚠️ {{ __('DEMO MODE — No actual payment will be processed.') }}
+                    <div class="mt-4 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-xs p-3 rounded-xl text-center flex items-center justify-center gap-1.5">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+                        {{ __('DEMO MODE — No actual payment will be processed.') }}
                     </div>
                 </div>
             </div>
         </div>
         @else
         {{-- Empty Cart --}}
-        <div class="text-center py-20 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
-            <div class="text-6xl mb-4" aria-hidden="true">🛒</div>
+        <div class="text-center py-20 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 group">
+            <div class="flex justify-center text-gray-300 dark:text-gray-600 mb-6" aria-hidden="true">
+                <svg class="w-20 h-20 group-hover:scale-125 group-hover:text-brand-yellow transition-all duration-500 drop-shadow-sm" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
+            </div>
             <h2 class="text-2xl font-black text-gray-700 dark:text-gray-200 mb-2">{{ __('Your cart is empty') }}</h2>
             <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('Explore our products and add something you love!') }}</p>
             <a href="{{ route('products') }}"
-               class="inline-block bg-brand-red text-white px-8 py-3 rounded-full font-bold hover:bg-red-700 transition-colors">
-                {{ __('Browse Products') }}
+               class="group relative inline-flex items-center gap-2 bg-brand-red text-white px-8 py-3 rounded-full font-bold transition-all duration-300 overflow-hidden hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 active:scale-95">
+                <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                <span class="relative z-10">{{ __('Browse Products') }}</span>
             </a>
         </div>
         @endif

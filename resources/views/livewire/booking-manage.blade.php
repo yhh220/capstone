@@ -58,13 +58,14 @@
 
                         @if(!in_array($booking->status, ['cancelled', 'completed'], true))
                         <button wire:click="cancelBooking"
-                                class="w-full mt-5 bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition-colors">
-                            {{ __('Cancel Booking') }}
+                                class="group relative overflow-hidden w-full mt-5 bg-red-600 text-white py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-[0_4px_15px_rgba(220,38,38,0.4)] hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2">
+                            <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                            <span class="relative z-10">{{ __('Cancel Booking') }}</span>
                         </button>
                         @endif
 
                         <a href="{{ route('booking.track') }}"
-                           class="block mt-3 text-center border border-brand-red text-brand-red py-3 rounded-xl font-semibold hover:bg-red-50 transition-colors">
+                           class="group block mt-3 text-center border-2 border-brand-red text-brand-red py-3 rounded-xl font-semibold hover:bg-brand-red hover:text-white hover:-translate-y-0.5 transition-all duration-300 active:scale-95">
                             {{ __('Track Other Booking') }}
                         </a>
                     </div>

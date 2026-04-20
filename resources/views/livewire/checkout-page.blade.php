@@ -99,11 +99,12 @@
             </div>
 
             <div class="flex gap-3 mt-6">
-                <a href="{{ route('cart') }}" class="px-6 py-3 border border-gray-200 dark:border-gray-600 rounded-full font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <a href="{{ route('cart') }}" class="group flex items-center px-6 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-full font-semibold text-gray-600 dark:text-gray-300 hover:border-brand-red hover:text-brand-red hover:bg-red-50 dark:hover:bg-red-900/10 transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
                     {{ __('← Back to Cart') }}
                 </a>
-                <button wire:click="goToStep2" class="flex-1 bg-brand-red text-white py-3 rounded-full font-bold text-lg hover:bg-red-700 transition-colors">
-                    {{ __('Continue to Payment →') }}
+                <button wire:click="goToStep2" class="group relative overflow-hidden flex-1 bg-brand-red text-white py-3 flex justify-center items-center rounded-full font-bold text-lg transition-all duration-300 shadow hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95">
+                    <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                    <span class="relative z-10">{{ __('Continue to Payment →') }}</span>
                 </button>
             </div>
         </div>
@@ -145,14 +146,15 @@
             </div>
 
             <div class="flex gap-3 mt-6">
-                <button wire:click="goBack" class="px-6 py-3 border border-gray-200 dark:border-gray-600 rounded-full font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <button wire:click="goBack" class="group flex items-center px-6 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-full font-semibold text-gray-600 dark:text-gray-300 hover:border-brand-red hover:text-brand-red hover:bg-red-50 dark:hover:bg-red-900/10 transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
                     {{ __('← Back') }}
                 </button>
                 <button wire:click="placeOrder"
                         wire:loading.attr="disabled"
-                        class="flex-1 bg-brand-red text-white py-3 rounded-full font-bold text-lg hover:bg-red-700 transition-colors disabled:opacity-50 relative">
-                    <span wire:loading.remove wire:target="placeOrder">{{ __('Place Order (Demo)') }} →</span>
-                    <span wire:loading wire:target="placeOrder" class="flex items-center justify-center gap-2">
+                        class="group relative overflow-hidden flex-1 bg-brand-red text-white py-3 flex justify-center items-center gap-2 rounded-full font-bold text-lg transition-all duration-300 shadow hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
+                    <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                    <span class="relative z-10" wire:loading.remove wire:target="placeOrder">{{ __('Place Order (Demo)') }} →</span>
+                    <span class="relative z-10 hidden flex items-center justify-center gap-2" wire:loading.class.remove="hidden" wire:target="placeOrder">
                         <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                         {{ __('Processing...') }}
                     </span>
@@ -163,7 +165,9 @@
         {{-- Step 3: Confirmation --}}
         @else
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700 text-center" data-aos="zoom-in">
-            <div class="text-6xl mb-4">🎉</div>
+            <div class="flex justify-center mb-6" aria-hidden="true">
+                <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="m9 11 3 3L22 4"></path></svg>
+            </div>
             <h2 class="text-2xl font-black text-gray-800 dark:text-white mb-2">{{ __('Order Confirmed!') }}</h2>
             <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('Thank you for your purchase. A confirmation email has been sent.') }}</p>
 
@@ -189,10 +193,11 @@
             @endif
 
             <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-                <a href="{{ route('track-order') }}" class="bg-brand-red text-white px-8 py-3 rounded-full font-bold hover:bg-red-700 transition-colors">
-                    {{ __('Track Your Order') }}
+                <a href="{{ route('track-order') }}" class="group relative overflow-hidden bg-brand-red text-white px-8 py-3 flex items-center justify-center gap-2 rounded-full font-bold hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 transition-all duration-300 active:scale-95">
+                    <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                    <span class="relative z-10">{{ __('Track Your Order') }}</span>
                 </a>
-                <a href="{{ route('products') }}" class="border-2 border-gray-200 dark:border-gray-600 px-8 py-3 rounded-full font-bold text-gray-700 dark:text-gray-300 hover:border-brand-red hover:text-brand-red transition-colors">
+                <a href="{{ route('products') }}" class="group border-2 border-gray-200 dark:border-gray-600 px-8 py-3 flex items-center justify-center gap-2 rounded-full font-bold text-gray-700 dark:text-gray-300 hover:border-brand-red hover:text-brand-red hover:-translate-y-1 transition-all duration-300 active:scale-95">
                     {{ __('Continue Shopping') }}
                 </a>
             </div>

@@ -25,9 +25,11 @@
 
                 <button wire:click="search"
                         wire:loading.attr="disabled"
-                        class="w-full bg-brand-red text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-red-700 transition-colors whitespace-nowrap disabled:opacity-60">
-                    <span wire:loading.remove>{{ __('Search') }}</span>
-                    <span wire:loading>...</span>
+                        class="group relative overflow-hidden w-full bg-brand-red text-white px-6 py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-300 hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 whitespace-nowrap disabled:opacity-60">
+                    <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                    <svg class="w-4 h-4 relative z-10" wire:loading.remove fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                    <span class="relative z-10" wire:loading.remove>{{ __('Search') }}</span>
+                    <span class="relative z-10 hidden" wire:loading.class.remove="hidden">...</span>
                 </button>
             </div>
 
@@ -77,7 +79,9 @@
                 </div>
                 @else
                 <div class="text-center py-8">
-                    <div class="text-5xl mb-3" aria-hidden="true">?</div>
+                    <div class="flex justify-center text-gray-300 dark:text-gray-600 mb-4" aria-hidden="true">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 11H9m8 4H9m4 4H9M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path></svg>
+                    </div>
                     <p class="text-gray-600 dark:text-gray-400">{{ __('No bookings found for the details provided.') }}</p>
                     <a href="{{ route('booking') }}" class="inline-block mt-4 text-brand-red font-semibold hover:underline">
                         {{ __('Make a Booking') }}

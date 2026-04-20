@@ -25,16 +25,20 @@
             </div>
             <button wire:click="trackOrder"
                     wire:loading.attr="disabled"
-                    class="w-full mt-4 bg-brand-red text-white py-3 rounded-full font-bold hover:bg-red-700 transition-colors disabled:opacity-50">
-                <span wire:loading.remove wire:target="trackOrder">🔍 {{ __('Track Order') }}</span>
-                <span wire:loading wire:target="trackOrder">{{ __('Searching...') }}</span>
+                    class="group relative overflow-hidden w-full mt-4 bg-brand-red text-white py-3 flex items-center justify-center gap-2 rounded-full font-bold transition-all duration-300 shadow hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
+                <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                <svg class="w-4 h-4 relative z-10 group-hover:scale-110 transition-transform duration-300" wire:loading.remove wire:target="trackOrder" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                <span class="relative z-10" wire:loading.remove wire:target="trackOrder">{{ __('Track Order') }}</span>
+                <span class="relative z-10 hidden" wire:loading.class.remove="hidden" wire:target="trackOrder">{{ __('Searching...') }}</span>
             </button>
         </div>
 
         {{-- Error Message --}}
         @if($searched && $errorMsg)
         <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-6 text-center mb-8">
-            <div class="text-4xl mb-3">😔</div>
+            <div class="flex justify-center text-red-400 mb-3" aria-hidden="true">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>
+            </div>
             <p class="text-red-600 dark:text-red-400 font-semibold">{{ $errorMsg }}</p>
         </div>
         @endif

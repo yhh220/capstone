@@ -20,8 +20,9 @@
                 {{ session('booking_success') }}
             </a>
             <a href="{{ route('booking') }}"
-               class="inline-block mt-6 bg-brand-red text-white px-8 py-3 rounded-full font-semibold hover:bg-red-700 transition-colors">
-                {{ __('Make Another Booking') }}
+               class="group relative inline-flex items-center gap-2 mt-6 bg-brand-red text-white px-8 py-3 rounded-full font-semibold hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 transition-all duration-300 active:scale-95 overflow-hidden">
+                <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                <span class="relative z-10">{{ __('Make Another Booking') }}</span>
             </a>
         </div>
         @else
@@ -173,9 +174,11 @@
 
                 <button wire:click="submit"
                         wire:loading.attr="disabled"
-                        class="w-full bg-brand-red text-white py-3 px-8 rounded-xl font-bold text-lg hover:bg-red-700 transition-colors disabled:opacity-60">
-                    <span wire:loading.remove>{{ __('Confirm Booking') }}</span>
-                    <span wire:loading>{{ __('Submitting...') }}</span>
+                        class="group relative overflow-hidden w-full bg-brand-red text-white py-3 px-8 flex items-center justify-center gap-2 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-60">
+                    <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                    <svg class="w-5 h-5 relative z-10 group-hover:translate-x-0.5 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg>
+                    <span class="relative z-10" wire:loading.remove>{{ __('Confirm Booking') }}</span>
+                    <span class="relative z-10 hidden" wire:loading.class.remove="hidden">{{ __('Submitting...') }}</span>
                 </button>
             </div>
         </div>
