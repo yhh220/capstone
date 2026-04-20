@@ -115,15 +115,15 @@
     {{-- ── Featured Products ────────────────────────────────── --}}
     <section class="py-16 bg-gray-50 dark:bg-gray-900" aria-labelledby="featured-heading">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center mb-12 gap-4" data-aos="fade-up">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-12 gap-2" data-aos="fade-up">
                 <div>
                     <h2 id="featured-heading" class="text-3xl sm:text-4xl font-black text-brand-black dark:text-white mb-2">
                         {{ __('Featured Products') }}
                     </h2>
                     <p class="text-gray-500 dark:text-gray-400">{{ __('Popular products customers often ask about in store') }}</p>
                 </div>
-                <a href="{{ route('products') }}" class="text-brand-red font-semibold hover:underline text-sm shrink-0">
-                    {{ __('See Full Showcase') }}
+                <a href="{{ route('products') }}" class="text-brand-red font-semibold hover:underline text-sm shrink-0 self-start sm:self-center">
+                    {{ __('See Full Showcase') }} →
                 </a>
             </div>
 
