@@ -45,7 +45,7 @@ class UserForm
                             })
                             ->required()
                             ->default('client'),
-                    ])->columns(2),
+                    ])->columns(['default' => 1, 'sm' => 2]),
 
                 Section::make('Profile Details')
                     ->schema([
@@ -61,7 +61,8 @@ class UserForm
                             ]),
                         TextInput::make('address_line')
                             ->label('Street Address')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->columnSpanFull(),
                         TextInput::make('city')
                             ->maxLength(255),
                         TextInput::make('postcode')
@@ -85,7 +86,7 @@ class UserForm
                                 'Putrajaya'       => 'Putrajaya',
                                 'Labuan'          => 'Labuan',
                             ]),
-                    ])->columns(2),
+                    ])->columns(['default' => 1, 'sm' => 2]),
             ]);
     }
 }

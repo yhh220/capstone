@@ -43,7 +43,7 @@ class OrderResource extends Resource
                         'paid'    => 'Paid',
                     ])
                     ->required(),
-            ]),
+            ])->columns(['default' => 1, 'sm' => 2]),
 
             Forms\Components\Section::make('Customer Details')->schema([
                 Forms\Components\TextInput::make('customer_name')->disabled(),
@@ -52,7 +52,7 @@ class OrderResource extends Resource
                 Forms\Components\TextInput::make('total_amount')
                     ->prefix('RM')
                     ->disabled(),
-            ]),
+            ])->columns(['default' => 1, 'sm' => 2]),
         ]);
     }
 

@@ -16,18 +16,21 @@ class ProductForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(['default' => 1, 'sm' => 2])
             ->components([
                 Select::make('category_id')
                     ->relationship('category', 'name')
                     ->searchable()
                     ->preload()
                     ->label('Category'),
-                TextInput::make('name')
-                    ->required(),
                 TextInput::make('brand')
                     ->maxLength(255),
+                TextInput::make('name')
+                    ->required()
+                    ->columnSpanFull(),
                 TextInput::make('slug')
-                    ->required(),
+                    ->required()
+                    ->columnSpanFull(),
                 Textarea::make('description')
                     ->columnSpanFull(),
                 Textarea::make('description_ms')
@@ -41,10 +44,10 @@ class ProductForm
                 TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->prefix('$'),
+                    ->prefix('RM'),
                 TextInput::make('sale_price')
                     ->numeric()
-                    ->prefix('$'),
+                    ->prefix('RM'),
                 TextInput::make('sku')
                     ->label('SKU'),
                 TextInput::make('stock')
@@ -59,20 +62,21 @@ class ProductForm
                     ->columnSpanFull()
                     ->placeholder('Add vehicle model'),
                 TextInput::make('model_url')
-                    ->label('3D Model URL'),
+                    ->label('3D Model URL')
+                    ->columnSpanFull(),
                 Toggle::make('has_3d')
                     ->label('Has 3D Viewer')
                     ->default(false),
+                Toggle::make('is_active')
+                    ->required(),
+                Toggle::make('is_featured')
+                    ->required(),
                 SpatieMediaLibraryFileUpload::make('images')
                     ->collection('images')
                     ->image()
                     ->imageEditor()
                     ->optimize('webp')
                     ->columnSpanFull(),
-                Toggle::make('is_active')
-                    ->required(),
-                Toggle::make('is_featured')
-                    ->required(),
             ]);
     }
 }

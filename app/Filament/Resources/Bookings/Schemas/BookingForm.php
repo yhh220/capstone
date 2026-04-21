@@ -22,7 +22,7 @@ class BookingForm
         }
 
         return $schema
-            ->columns(2)
+            ->columns(['default' => 1, 'sm' => 2])
             ->components([
                 TextInput::make('customer_name')
                     ->label('Customer Name')

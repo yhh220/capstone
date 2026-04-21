@@ -13,10 +13,16 @@ class ServiceForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(['default' => 1, 'sm' => 2])
             ->components([
                 TextInput::make('name')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->columnSpanFull(),
+                TextInput::make('price')
+                    ->numeric()
+                    ->prefix('RM')
+                    ->placeholder('Leave blank for "Contact for pricing"'),
                 TextInput::make('duration')
                     ->placeholder('e.g. 1-2 hours')
                     ->maxLength(100),
@@ -28,10 +34,9 @@ class ServiceForm
                     ->numeric()
                     ->default(15)
                     ->required(),
-                TextInput::make('price')
+                TextInput::make('sort_order')
                     ->numeric()
-                    ->prefix('RM')
-                    ->placeholder('Leave blank for "Contact for pricing"'),
+                    ->default(0),
                 Textarea::make('description')
                     ->required()
                     ->columnSpanFull(),
@@ -41,9 +46,6 @@ class ServiceForm
                     ->imageEditor()
                     ->optimize('webp')
                     ->columnSpanFull(),
-                TextInput::make('sort_order')
-                    ->numeric()
-                    ->default(0),
                 Toggle::make('is_active')
                     ->default(true),
             ]);

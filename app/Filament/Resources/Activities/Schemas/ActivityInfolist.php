@@ -31,7 +31,7 @@ class ActivityInfolist
                         KeyValueEntry::make('attribute_changes.old')
                             ->label('Old Values (Before)')
                             ->columnSpan(1),
-                    ])->columns(2),
+                    ])->columns(['default' => 1, 'sm' => 2]),
                 TextEntry::make('created_at')
                     ->dateTime()
                     ->placeholder('-'),

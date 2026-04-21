@@ -20,7 +20,7 @@ class GalleryItemsTable
             ->columns([
                 ImageColumn::make('image')
                     ->square()
-                    ->size(80),
+                    ->size(60),
                 TextColumn::make('title')
                     ->searchable()
                     ->sortable(),
@@ -29,10 +29,12 @@ class GalleryItemsTable
                     ->sortable(),
                 IconColumn::make('is_featured')
                     ->boolean()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('sort_order')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

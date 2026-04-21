@@ -13,6 +13,7 @@ class FeedbackForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(['default' => 1, 'sm' => 2])
             ->components([
                 FileUpload::make('image')
                     ->image()
@@ -28,12 +29,13 @@ class FeedbackForm
                     ->required()
                     ->numeric()
                     ->default(5),
-                Toggle::make('is_active')
-                    ->required(),
                 TextInput::make('sort_order')
                     ->required()
                     ->numeric()
                     ->default(0),
+                Toggle::make('is_active')
+                    ->required()
+                    ->columnSpanFull(),
             ]);
     }
 }

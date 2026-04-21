@@ -19,7 +19,7 @@ class ServicesTable
             ->columns([
                 ImageColumn::make('image')
                     ->square()
-                    ->size(60),
+                    ->size(48),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
@@ -27,22 +27,26 @@ class ServicesTable
                     ->money('MYR')
                     ->sortable()
                     ->placeholder('Contact for pricing'),
-                TextColumn::make('duration')
-                    ->placeholder('-'),
-                TextColumn::make('duration_minutes')
-                    ->label('Minutes')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('buffer_after')
-                    ->label('Buffer')
-                    ->suffix(' min')
-                    ->sortable(),
                 IconColumn::make('is_active')
                     ->boolean()
                     ->sortable(),
+                TextColumn::make('duration')
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('duration_minutes')
+                    ->label('Minutes')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('buffer_after')
+                    ->label('Buffer')
+                    ->suffix(' min')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('sort_order')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
