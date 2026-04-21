@@ -277,6 +277,25 @@
         .stagger-4 { transition-delay: 0.36s; }
         .stagger-5 { transition-delay: 0.48s; }
         .stagger-6 { transition-delay: 0.60s; }
+
+        /* ── Language menu entrance ──────────────────── */
+        @keyframes langMenuIn {
+            from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0)   scale(1);    }
+        }
+        .lang-menu-enter { animation: langMenuIn 0.2s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+        /* ── Theme segmented pill active state ───────── */
+        .theme-seg-active {
+            background: white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05);
+            color: #E11D48 !important;
+        }
+        .dark .theme-seg-active {
+            background: rgb(55, 65, 81);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+            color: #E11D48 !important;
+        }
     </style>
 
     @livewireStyles
@@ -343,15 +362,17 @@
                                 aria-label="{{ __('Select language') }}"
                                 aria-expanded="false"
                                 aria-haspopup="true"
-                                class="group flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-300 hover:shadow-sm">
-                            @if(app()->getLocale() === 'ms')
-                                BM
-                            @elseif(app()->getLocale() === 'zh')
-                                中文
-                            @else
-                                EN
-                            @endif
-                            <svg class="w-3 h-3 ml-0.5 transition-transform duration-300 group-hover:translate-y-0.5 group-data-[state=open]:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                class="group flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-brand-red bg-gray-50/80 dark:bg-gray-800/80 hover:bg-red-50/80 dark:hover:bg-red-900/20 border border-gray-200/60 dark:border-gray-700/60 hover:border-brand-red/40 transition-all duration-300 hover:shadow-sm backdrop-blur-sm">
+                            <svg class="w-3.5 h-3.5 opacity-50 group-hover:opacity-90 transition-opacity duration-300" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            </svg>
+                            <span class="tracking-wide">
+                                @if(app()->getLocale() === 'ms') BM
+                                @elseif(app()->getLocale() === 'zh') 中文
+                                @else EN
+                                @endif
+                            </span>
+                            <svg class="w-3 h-3 opacity-50 group-hover:opacity-90 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                         </button>
@@ -359,52 +380,46 @@
                         <div id="lang-menu"
                              role="menu"
                              aria-orientation="vertical"
-                             class="hidden absolute right-0 top-full mt-1.5 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden w-44 z-50">
-                            @foreach([
-                                ['en', 'English'],
-                                ['ms', 'Bahasa Melayu'],
-                                ['zh', '中文'],
-                            ] as [$code, $name])
-                            <button type="button"
-                               data-lang="{{ $code }}"
-                               data-lang-url="{{ route('lang', $code) }}"
-                               role="menuitem"
-                               class="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm transition-colors {{ app()->getLocale() === $code ? 'text-brand-red font-semibold bg-red-50 dark:bg-red-900/20' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
-                                {{ $name }}
-                            </button>
-                            @endforeach
+                             class="hidden absolute right-0 top-full mt-2 w-52 rounded-2xl shadow-2xl border border-gray-100/80 dark:border-gray-700/50 overflow-hidden z-50 backdrop-blur-xl bg-white/95 dark:bg-gray-900/95 lang-menu-enter">
+                            <div class="px-4 pt-3 pb-2">
+                                <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ __('Language') }}</span>
+                            </div>
+                            <div class="px-2 pb-2 space-y-0.5">
+                                @foreach([
+                                    ['en', 'English',       'EN'],
+                                    ['ms', 'Bahasa Melayu', 'BM'],
+                                    ['zh', '中文',           'ZH'],
+                                ] as [$code, $name, $short])
+                                <button type="button"
+                                   data-lang="{{ $code }}"
+                                   data-lang-url="{{ route('lang', $code) }}"
+                                   role="menuitem"
+                                   class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 {{ app()->getLocale() === $code ? 'bg-red-50 dark:bg-red-900/20 text-brand-red' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80' }}">
+                                    <span class="flex-1 text-sm font-semibold">{{ $name }}</span>
+                                    <svg class="lang-check w-4 h-4 text-brand-red shrink-0 {{ app()->getLocale() !== $code ? 'hidden' : '' }}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                </button>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 2. Dark mode toggle -->
-                    <div class="relative" id="theme-wrapper">
-                        <button id="theme-btn"
-                                aria-label="{{ __('Select theme') }}"
-                                aria-expanded="false"
-                                aria-haspopup="true"
-                                class="group flex items-center gap-1.5 p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-300 hover:shadow-sm">
-                            <div class="relative w-4 h-4 flex items-center justify-center overflow-hidden">
-                                <svg id="icon-theme-display" class="w-4 h-4 absolute transition-transform duration-500 origin-center group-hover:rotate-[30deg] group-hover:scale-110" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
-                                </svg>
-                            </div>
+                    <!-- 2. Dark mode toggle (segmented pill) -->
+                    <div id="theme-wrapper" class="flex items-center p-1 rounded-xl bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm gap-0.5">
+                        <button class="theme-option p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="light" title="Light" aria-label="{{ __('Light mode') }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                            </svg>
                         </button>
-                        <div id="theme-menu"
-                             role="menu"
-                             aria-orientation="vertical"
-                             class="hidden absolute right-0 top-full mt-1.5 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden w-36 z-50">
-                            <button class="theme-option flex items-center w-full gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700" data-theme="light">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-                                Light
-                            </button>
-                            <button class="theme-option flex items-center w-full gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700" data-theme="dark">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                                Dark
-                            </button>
-                            <button class="theme-option flex items-center w-full gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700" data-theme="system">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                                System
-                            </button>
-                        </div>
+                        <button class="theme-option p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="dark" title="Dark" aria-label="{{ __('Dark mode') }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                            </svg>
+                        </button>
+                        <button class="theme-option p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="system" title="System" aria-label="{{ __('System theme') }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/>
+                            </svg>
+                        </button>
                     </div>
 
                     <!-- 3. Cart icon (only when shopping enabled) -->
@@ -425,6 +440,7 @@
                     @endif
 
                     <!-- 4. User dropdown (desktop) -->
+                    @if($shoppingEnabled || (auth()->check() && !auth()->user()->isAdmin()))
                     <div class="hidden md:block relative" x-data="{ open: false }">
                         <button @click="open = !open"
                                 @click.outside="open = false"
@@ -492,27 +508,28 @@
                                     </form>
                                 </div>
                             @else
+                                @if($shoppingEnabled)
                                 <div class="py-1">
                                     <a href="{{ route('login') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                                         {{ __('Sign In') }}
                                     </a>
-                                    @if($shoppingEnabled)
                                     <a href="{{ route('login') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                                         {{ __('Register') }}
                                     </a>
-                                    @endif
                                 </div>
+                                @endif
                             @endauth
                         </div>
                     </div>
+                    @endif
 
-                    <!-- 5. WhatsApp button (always visible) (SVGL/Yesicon Style) -->
+                    <!-- 5. WhatsApp button (desktop only) -->
                     <a href="{{ $whatsAppUrl }}"
                        target="_blank"
                        rel="noopener noreferrer"
-                       class="group flex items-center justify-center p-2 rounded-lg bg-[#25D366] text-white hover:bg-[#1EBE57] hover:scale-110 active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg"
+                       class="hidden md:flex items-center justify-center p-2 rounded-lg bg-[#25D366] text-white hover:bg-[#1EBE57] hover:scale-110 active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg group"
                        aria-label="{{ __('WhatsApp us') }}">
                         <!-- Premium WhatsApp SVGL Icon -->
                         <svg class="w-5 h-5 drop-shadow-sm group-hover:rotate-[15deg] transition-transform duration-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -555,6 +572,7 @@
                 </a>
                 @endforeach
 
+                @if($shoppingEnabled || (auth()->check() && !auth()->user()->isAdmin()))
                 <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
                     @auth
                         <div class="px-3 py-2 mb-1">
@@ -600,12 +618,13 @@
                             </button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="block py-2.5 px-3 rounded-lg font-medium text-brand-red hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">{{ __('Sign In') }}</a>
                         @if($shoppingEnabled)
+                        <a href="{{ route('login') }}" class="block py-2.5 px-3 rounded-lg font-medium text-brand-red hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">{{ __('Sign In') }}</a>
                         <a href="{{ route('login') }}" class="block py-2.5 px-3 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{{ __('Register') }}</a>
                         @endif
                     @endauth
                 </div>
+                @endif
             </div>
         </div>
 
@@ -752,47 +771,24 @@
     </footer>
 
     <script>
-        const themeBtn = document.getElementById('theme-btn');
-        const themeMenu = document.getElementById('theme-menu');
-        const themeWrapper = document.getElementById('theme-wrapper');
-        const iconDisplay = document.getElementById('icon-theme-display');
-
-        const icons = {
-            light: '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
-            dark: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
-            system: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>'
-        };
+        function updateThemeSegment(theme) {
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.classList.toggle('theme-seg-active', btn.dataset.theme === theme);
+            });
+        }
 
         function applyTheme(theme) {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (theme === 'system') {
-                document.documentElement.classList.toggle('dark', prefersDark);
-            } else {
-                document.documentElement.classList.toggle('dark', theme === 'dark');
-            }
-            iconDisplay.innerHTML = icons[theme];
+            document.documentElement.classList.toggle('dark', theme === 'system' ? prefersDark : theme === 'dark');
             localStorage.setItem('theme', theme);
+            updateThemeSegment(theme);
         }
 
         const savedTheme = localStorage.getItem('theme') || 'system';
         applyTheme(savedTheme);
 
-        themeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            themeMenu.classList.toggle('hidden');
-        });
-
         document.querySelectorAll('.theme-option').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                applyTheme(e.currentTarget.dataset.theme);
-                themeMenu.classList.add('hidden');
-            });
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!themeWrapper.contains(e.target)) {
-                themeMenu.classList.add('hidden');
-            }
+            btn.addEventListener('click', e => applyTheme(e.currentTarget.dataset.theme));
         });
 
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
@@ -805,6 +801,9 @@
 
         function openLang() {
             langMenu.classList.remove('hidden');
+            langMenu.classList.remove('lang-menu-enter');
+            void langMenu.offsetWidth; // reflow to restart animation
+            langMenu.classList.add('lang-menu-enter');
             langBtn.setAttribute('aria-expanded', 'true');
         }
 
@@ -891,18 +890,18 @@
 
                 // Update lang button label
                 var labels = { en: 'EN', ms: 'BM', zh: '中文' };
-                var langBtnText = langBtn.childNodes[0];
-                langBtnText.nodeValue = '\n                            ' + labels[toLocale] + '\n                            ';
+                var langBtnSpan = langBtn.querySelector('span');
+                if (langBtnSpan) langBtnSpan.textContent = labels[toLocale];
 
                 // Update active state of menu items
                 document.querySelectorAll('[data-lang]').forEach(function (btn) {
                     var isActive = btn.dataset.lang === toLocale;
-                    btn.className = btn.className
-                        .replace(/text-brand-red font-semibold bg-red-50 dark:bg-red-900\/20|text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/, '')
-                        .trim();
-                    btn.className += ' ' + (isActive
-                        ? 'text-brand-red font-semibold bg-red-50 dark:bg-red-900/20'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700');
+                    btn.classList.toggle('bg-red-50', isActive);
+                    btn.classList.toggle('text-brand-red', isActive);
+                    btn.classList.toggle('text-gray-700', !isActive);
+                    btn.classList.toggle('dark:text-gray-300', !isActive);
+                    var check = btn.querySelector('.lang-check');
+                    if (check) check.classList.toggle('hidden', !isActive);
                 });
 
                 // Update html lang attribute
