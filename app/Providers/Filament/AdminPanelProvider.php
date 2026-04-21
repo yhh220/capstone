@@ -11,6 +11,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -38,6 +39,7 @@ class AdminPanelProvider extends PanelProvider
 
             // ── Theme ─────────────────────────────────────────────────
             ->defaultThemeMode(\Filament\Enums\ThemeMode::Dark)
+            ->darkMode(true)
             ->font('DM Sans')
             ->colors([
                 'primary' => Color::Rose,
@@ -48,8 +50,14 @@ class AdminPanelProvider extends PanelProvider
                 'gray'    => Color::Zinc,
             ])
 
+            // ── Render Hooks ──────────────────────────────────────────
+            ->renderHook(
+                PanelsRenderHook::SIMPLE_LAYOUT_START,
+                fn () => view('filament.theme-toggle'),
+            )
+
             // ── Navigation ────────────────────────────────────────────
-            ->sidebarCollapsibleOnDesktop()
+            ->sidebarFullyCollapsibleOnDesktop()
             ->navigationGroups([
                 NavigationGroup::make('Shop')
                     ->icon('heroicon-o-shopping-bag'),
