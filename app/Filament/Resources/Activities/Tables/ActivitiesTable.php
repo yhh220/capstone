@@ -17,7 +17,6 @@ class ActivitiesTable
             ->columns([
                 TextColumn::make('causer.name')
                     ->label('User')
-                    ->sortable()
                     ->searchable()
                     ->placeholder('System'),
                 TextColumn::make('ip_address')

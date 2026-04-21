@@ -6,6 +6,11 @@ use Filament\Widgets\ChartWidget;
 
 class RevenueChart extends ChartWidget
 {
+    protected int|string|array $columnSpan = [
+        'md' => 1,
+        'xl' => 6,
+    ];
+
     protected ?string $heading = 'Revenue Chart';
 
     protected function getData(): array

@@ -6,6 +6,11 @@ use Filament\Widgets\ChartWidget;
 
 class TopProductsChart extends ChartWidget
 {
+    protected int|string|array $columnSpan = [
+        'md' => 1,
+        'xl' => 6,
+    ];
+
     protected ?string $heading = 'Top Products Chart';
 
     protected function getData(): array

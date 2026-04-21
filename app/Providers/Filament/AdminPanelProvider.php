@@ -7,7 +7,6 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -32,8 +31,8 @@ class AdminPanelProvider extends PanelProvider
 
             // ── Branding ──────────────────────────────────────────────
             ->brandName('Win Win Car Audio')
-            ->brandLogo(asset('images/logo/logo-light.svg'))
-            ->darkModeBrandLogo(asset('images/logo/logo-dark.svg'))
+            ->brandLogo(asset('images/logo/logo-dark.svg'))
+            ->darkModeBrandLogo(asset('images/logo/logo-light.svg'))
             ->brandLogoHeight('2rem')
             ->favicon(asset('images/logo/logo-light.svg'))
 
@@ -52,26 +51,20 @@ class AdminPanelProvider extends PanelProvider
 
             // ── Render Hooks ──────────────────────────────────────────
             ->renderHook(
-                PanelsRenderHook::SIMPLE_LAYOUT_START,
+                PanelsRenderHook::TOPBAR_END,
                 fn () => view('filament.theme-toggle'),
             )
 
             // ── Navigation ────────────────────────────────────────────
             ->sidebarFullyCollapsibleOnDesktop()
             ->navigationGroups([
-                NavigationGroup::make('Shop')
-                    ->icon('heroicon-o-shopping-bag'),
-                NavigationGroup::make('Store Products')
-                    ->icon('heroicon-o-rectangle-stack'),
-                NavigationGroup::make('Services & Bookings')
-                    ->icon('heroicon-o-wrench-screwdriver'),
-                NavigationGroup::make('Customer Interactions')
-                    ->icon('heroicon-o-chat-bubble-left-right'),
+                NavigationGroup::make('Shop'),
+                NavigationGroup::make('Store Products'),
+                NavigationGroup::make('Services & Bookings'),
+                NavigationGroup::make('Customer Interactions'),
                 NavigationGroup::make('System Settings')
-                    ->icon('heroicon-o-users')
                     ->collapsed(),
                 NavigationGroup::make('System')
-                    ->icon('heroicon-o-cog-6-tooth')
                     ->collapsed(),
             ])
 
@@ -79,7 +72,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
-                Dashboard::class,
+                \App\Filament\Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([

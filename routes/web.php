@@ -78,6 +78,9 @@ Route::get('/sitemap.xml', function () {
     return response()->file($path, ['Content-Type' => 'application/xml']);
 })->name('sitemap');
 
+// ─── Unauthorized Access Page ──────────────────────────────────
+Route::get('/unauthorized', fn () => view('errors.unauthorized'))->name('unauthorized');
+
 // ─── Admin Panel ───────────────────────────────────────────────
 // Admin dashboard is now powered by Filament and auto-registered
 // at /admin via AdminPanelProvider. No manual routes needed.

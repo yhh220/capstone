@@ -21,5 +21,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (
+            \Illuminate\Auth\Access\AuthorizationException $e,
+            \Illuminate\Http\Request $request
+        ) {
+            if ($request->is('admin*') && auth()->check()) {
+                return redirect()->route('unauthorized');
+            }
+        });
     })->create();
