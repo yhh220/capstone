@@ -34,9 +34,6 @@ class ServiceForm
                     ->numeric()
                     ->default(15)
                     ->required(),
-                TextInput::make('sort_order')
-                    ->numeric()
-                    ->default(0),
                 Textarea::make('description')
                     ->required()
                     ->columnSpanFull(),

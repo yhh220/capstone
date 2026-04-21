@@ -15,6 +15,7 @@ class ServicesTable
     public static function configure(Table $table): Table
     {
         return $table->paginated([10, 25, 50])
+            ->reorderable('sort_order')
             ->defaultSort('sort_order')
             ->columns([
                 ImageColumn::make('image')
@@ -46,9 +47,9 @@ class ServicesTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('sort_order')
-                    ->numeric()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Rank')
+                    ->alignCenter()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

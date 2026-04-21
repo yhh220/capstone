@@ -16,6 +16,7 @@ class GalleryItemsTable
     public static function configure(Table $table): Table
     {
         return $table->paginated([12, 24, 48])
+            ->reorderable('sort_order')
             ->defaultSort('sort_order')
             ->columns([
                 ImageColumn::make('image')
@@ -34,9 +35,9 @@ class GalleryItemsTable
                     ->toggleable()
                     ->alignCenter(),
                 TextColumn::make('sort_order')
-                    ->numeric()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Rank')
+                    ->alignCenter()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

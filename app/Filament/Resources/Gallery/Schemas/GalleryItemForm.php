@@ -32,9 +32,6 @@ class GalleryItemForm
                     ->imageEditor()
                     ->required()
                     ->columnSpanFull(),
-                TextInput::make('sort_order')
-                    ->numeric()
-                    ->default(0),
                 Toggle::make('is_featured')
                     ->default(false),
             ]);

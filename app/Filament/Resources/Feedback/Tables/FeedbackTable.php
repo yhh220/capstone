@@ -15,6 +15,8 @@ class FeedbackTable
     public static function configure(Table $table): Table
     {
         return $table->paginated([10, 25, 50, 100, 'all'])
+            ->reorderable('sort_order')
+            ->defaultSort('sort_order')
             ->columns([
                 ImageColumn::make('image')
                     ->circular()
@@ -33,7 +35,8 @@ class FeedbackTable
                     ->label('Status')
                     ->alignCenter(),
                 TextColumn::make('sort_order')
-                    ->numeric()
+                    ->label('Rank')
+                    ->alignCenter()
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()

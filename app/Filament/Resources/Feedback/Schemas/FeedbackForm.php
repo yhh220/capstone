@@ -38,11 +38,6 @@ class FeedbackForm
                             ->maxValue(5)
                             ->default(5)
                             ->helperText('Star rating from 1 to 5.'),
-                        TextInput::make('sort_order')
-                            ->required()
-                            ->numeric()
-                            ->default(0)
-                            ->helperText('Lower numbers appear first.'),
                         Toggle::make('is_active')
                             ->label('Show on Homepage')
                             ->default(true)
