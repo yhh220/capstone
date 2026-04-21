@@ -20,7 +20,7 @@ class ContactResource extends Resource
 
     protected static \UnitEnum|string|null $navigationGroup = 'Customer Interactions';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelope;
 
     public static function form(Schema $schema): Schema
     {

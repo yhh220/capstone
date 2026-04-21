@@ -20,7 +20,7 @@ class CategoryResource extends Resource
 
     protected static \UnitEnum|string|null $navigationGroup = 'Store Products';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
     public static function form(Schema $schema): Schema
     {
