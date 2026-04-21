@@ -5,9 +5,9 @@ namespace App\Filament\Resources\Categories\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class CategoriesTable
@@ -20,9 +20,11 @@ class CategoriesTable
                     ->searchable(),
                 TextColumn::make('slug')
                     ->searchable(),
-                ImageColumn::make('image'),
-                IconColumn::make('is_active')
-                    ->boolean(),
+                ImageColumn::make('image')
+                    ->alignCenter(),
+                ToggleColumn::make('is_active')
+                    ->label('Active')
+                    ->alignCenter(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

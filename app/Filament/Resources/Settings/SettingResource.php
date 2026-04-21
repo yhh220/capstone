@@ -27,11 +27,27 @@ class SettingResource extends Resource
             Forms\Components\TextInput::make('key')
                 ->required()
                 ->disabled()
-                ->label('Setting Key'),
+                ->label('Setting Key')
+                ->formatStateUsing(fn (string $state): string => match ($state) {
+                    'ONLINE_SHOPPING_ENABLED' => '🛒 Online Shopping Mode',
+                    'BUSINESS_HOURS_START'    => '🕒 Business Start Time',
+                    'BUSINESS_HOURS_END'      => '🕓 Business End Time',
+                    default                   => $state,
+                }),
             Forms\Components\TextInput::make('value')
                 ->required()
-                ->label('Value')
-                ->helperText('For boolean settings, use "true" or "false".'),
+                ->label('Setting Value')
+                ->placeholder(fn (Setting $record): string => match ($record->key) {
+                    'BUSINESS_HOURS_START', 'BUSINESS_HOURS_END' => 'e.g. 09:00',
+                    'ONLINE_SHOPPING_ENABLED' => 'true or false',
+                    default => '',
+                })
+                ->helperText(fn (Setting $record): ?string => match ($record->key) {
+                    'ONLINE_SHOPPING_ENABLED' => 'Set to "true" to enable the cart and checkout features, or "false" to hide them.',
+                    'BUSINESS_HOURS_START'    => 'The earliest time a customer can book a service (24h format, e.g., 09:00).',
+                    'BUSINESS_HOURS_END'      => 'The latest time your shop accepts appointments (24h format, e.g., 18:00).',
+                    default                   => 'Enter the value for this setting.',
+                }),
         ]);
     }
 
@@ -40,10 +56,22 @@ class SettingResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('key')
-                    ->label('Setting')
+                    ->label('Setting Name')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'ONLINE_SHOPPING_ENABLED' => '🛒 Online Shopping Mode',
+                        'BUSINESS_HOURS_START'    => '🕒 Business Start Time',
+                        'BUSINESS_HOURS_END'      => '🕓 Business End Time',
+                        default                   => $state,
+                    })
+                    ->description(fn (Setting $record): string => match ($record->key) {
+                        'ONLINE_SHOPPING_ENABLED' => 'Toggle shopping cart & checkout availability.',
+                        'BUSINESS_HOURS_START'    => 'Opening time for booking services.',
+                        'BUSINESS_HOURS_END'      => 'Closing time for booking services.',
+                        default                   => 'System configuration setting.',
+                    }),
                 TextColumn::make('value')
                     ->searchable()
                     ->badge()

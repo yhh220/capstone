@@ -42,9 +42,9 @@ class ServiceForm
                     ->columnSpanFull(),
                 SpatieMediaLibraryFileUpload::make('images')
                     ->collection('images')
+                    ->multiple()
                     ->image()
                     ->imageEditor()
-                    ->optimize('webp')
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->default(true),

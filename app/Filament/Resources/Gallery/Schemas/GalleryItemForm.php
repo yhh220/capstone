@@ -27,9 +27,9 @@ class GalleryItemForm
                     ->columnSpanFull(),
                 SpatieMediaLibraryFileUpload::make('images')
                     ->collection('images')
+                    ->multiple()
                     ->image()
                     ->imageEditor()
-                    ->optimize('webp')
                     ->required()
                     ->columnSpanFull(),
                 TextInput::make('sort_order')

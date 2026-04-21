@@ -109,7 +109,7 @@ class UserLogin extends Component
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => $validated['password'],
-            'role' => 'user',
+            'role' => 'client',
         ]);
 
         // Auto-login after registration

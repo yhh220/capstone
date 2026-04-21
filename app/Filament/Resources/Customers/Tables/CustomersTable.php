@@ -1,20 +1,19 @@
 <?php
 
-namespace App\Filament\Resources\Users\Tables;
+namespace App\Filament\Resources\Customers\Tables;
 
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
-class UsersTable
+class CustomersTable
 {
     public static function configure(Table $table): Table
     {
-        return $table->paginated([10, 25, 50])
+        return $table->paginated([10, 25, 50, 100])
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
@@ -26,27 +25,29 @@ class UsersTable
                     ->sortable(),
                 TextColumn::make('phone')
                     ->label('Phone')
-                    ->searchable(),
-                BadgeColumn::make('role')
-                    ->colors([
-                        'danger'  => 'owner',
-                        'warning' => 'admin',
-                        'info'    => 'staff',
-                    ])
-                    ->formatStateUsing(fn (string $state) => ucfirst($state))
-                    ->sortable(),
+                    ->searchable()
+                    ->placeholder('—'),
+                TextColumn::make('address_line')
+                    ->label('Address')
+                    ->limit(30)
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('city')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('state')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('orders_count')
+                    ->label('Orders')
+                    ->counts('orders')
+                    ->sortable()
+                    ->badge()
+                    ->color('primary'),
                 TextColumn::make('created_at')
-                    ->label('Joined')
+                    ->label('Registered')
                     ->dateTime('d M Y')
                     ->sortable(),
-            ])
-            ->filters([
-                SelectFilter::make('role')
-                    ->options([
-                        'owner' => 'Owner',
-                        'admin' => 'Admin',
-                        'staff' => 'Staff',
-                    ]),
             ])
             ->recordActions([
                 EditAction::make()

@@ -5,9 +5,9 @@ namespace App\Filament\Resources\Services\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class ServicesTable
@@ -19,7 +19,8 @@ class ServicesTable
             ->columns([
                 ImageColumn::make('image')
                     ->square()
-                    ->size(48),
+                    ->size(48)
+                    ->alignCenter(),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
@@ -27,9 +28,10 @@ class ServicesTable
                     ->money('MYR')
                     ->sortable()
                     ->placeholder('Contact for pricing'),
-                IconColumn::make('is_active')
-                    ->boolean()
-                    ->sortable(),
+                ToggleColumn::make('is_active')
+                    ->label('Active')
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('duration')
                     ->placeholder('-')
                     ->toggleable(isToggledHiddenByDefault: true),

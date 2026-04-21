@@ -15,27 +15,39 @@ class FeedbackForm
         return $schema
             ->columns(['default' => 1, 'sm' => 2])
             ->components([
-                FileUpload::make('image')
-                    ->image()
-                    ->directory('feedback-images')
-                    ->columnSpanFull(),
-                TextInput::make('name')
-                    ->required(),
-                TextInput::make('location'),
-                Textarea::make('message')
-                    ->required()
-                    ->columnSpanFull(),
-                TextInput::make('rating')
-                    ->required()
-                    ->numeric()
-                    ->default(5),
-                TextInput::make('sort_order')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                Toggle::make('is_active')
-                    ->required()
-                    ->columnSpanFull(),
+                \Filament\Schemas\Components\Section::make('Homepage Testimonial')
+                    ->description('This feedback will be displayed in the "What Our Clients Say" section on the home page. Make sure to set "Active" to show it.')
+                    ->schema([
+                        FileUpload::make('image')
+                            ->image()
+                            ->directory('feedback-images')
+                            ->helperText('Optional customer photo.'),
+                        TextInput::make('name')
+                            ->required()
+                            ->placeholder('e.g. Ahmad Rizal'),
+                        TextInput::make('location')
+                            ->placeholder('e.g. Kuala Lumpur'),
+                        Textarea::make('message')
+                            ->required()
+                            ->label('Testimonial Content')
+                            ->columnSpanFull(),
+                        TextInput::make('rating')
+                            ->required()
+                            ->numeric()
+                            ->minValue(1)
+                            ->maxValue(5)
+                            ->default(5)
+                            ->helperText('Star rating from 1 to 5.'),
+                        TextInput::make('sort_order')
+                            ->required()
+                            ->numeric()
+                            ->default(0)
+                            ->helperText('Lower numbers appear first.'),
+                        Toggle::make('is_active')
+                            ->label('Show on Homepage')
+                            ->default(true)
+                            ->required(),
+                    ])->columns(['default' => 1, 'sm' => 2]),
             ]);
     }
 }

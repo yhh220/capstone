@@ -22,6 +22,14 @@ class FeedbackResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
 
+    protected static ?string $navigationLabel = 'Testimonials';
+
+    protected static ?string $modelLabel = 'Testimonial';
+
+    protected static ?string $pluralModelLabel = 'Testimonials';
+
+    protected static ?int $navigationSort = 2;
+
     public static function form(Schema $schema): Schema
     {
         return FeedbackForm::configure($schema);

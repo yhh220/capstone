@@ -70,12 +70,13 @@ class ProductForm
                 Toggle::make('is_active')
                     ->required(),
                 Toggle::make('is_featured')
+                    ->label('Show on Homepage')
                     ->required(),
                 SpatieMediaLibraryFileUpload::make('images')
                     ->collection('images')
+                    ->multiple()
                     ->image()
                     ->imageEditor()
-                    ->optimize('webp')
                     ->columnSpanFull(),
             ]);
     }

@@ -14,15 +14,6 @@ class HomePage extends Component
 {
     use SetsSeo;
 
-    private function fallbackTestimonials(): Collection
-    {
-        return collect([
-            ['name' => 'Ahmad Rizal', 'location' => 'KL', 'message' => "The staff explained the options clearly on WhatsApp before I came over. The showroom visit was smooth and helpful.", 'rating' => 5],
-            ['name' => 'Siti Nurul', 'location' => 'Selangor', 'message' => 'Very helpful team and excellent product guidance. I could compare models in person before deciding.', 'rating' => 5],
-            ['name' => 'Tan Wei Ming', 'location' => 'Penang', 'message' => 'I liked that the website showed the products first, then the store team helped me choose the right fit.', 'rating' => 5],
-        ]);
-    }
-
     public function mount(): void
     {
         $storeName = config('services.store.name', 'Win Win Car Studio');
@@ -39,25 +30,17 @@ class HomePage extends Component
                 'featuredProducts' => new Collection(),
                 'categories' => new Collection(),
                 'newArrivals' => new Collection(),
-                'testimonials' => $this->fallbackTestimonials(),
+                'testimonials' => new Collection(),
                 'showcaseProduct' => null,
                 'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
             ])->layout('layouts.app');
         }
 
-        $testimonials = $this->fallbackTestimonials();
-
-        if (Schema::hasTable('feedback')) {
-            $feedback = Feedback::where('is_active', true)
-                ->orderBy('sort_order')
-                ->latest('id')
-                ->take(6)
-                ->get();
-
-            if ($feedback->isNotEmpty()) {
-                $testimonials = $feedback;
-            }
-        }
+        $testimonials = Feedback::where('is_active', true)
+            ->orderBy('sort_order')
+            ->latest('id')
+            ->take(6)
+            ->get();
 
         $featuredProducts = Product::where('is_active', true)
             ->where('is_featured', true)

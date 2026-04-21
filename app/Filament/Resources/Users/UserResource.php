@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserResource extends Resource
 {
@@ -20,7 +21,38 @@ class UserResource extends Resource
 
     protected static \UnitEnum|string|null $navigationGroup = 'System Settings';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
+
+    protected static ?string $navigationLabel = 'Users';
+
+    protected static ?string $modelLabel = 'User';
+
+    protected static ?string $pluralModelLabel = 'Users';
+
+    /**
+     * Only show owner / admin / staff — never clients.
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereIn('role', ['owner', 'admin', 'staff']);
+    }
+
+    /**
+     * Only owner and admin can edit staff.
+     */
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return auth()->user()->isAdmin();
+    }
+
+    /**
+     * Only owner and admin can delete staff.
+     */
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return auth()->user()->isAdmin();
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -34,17 +66,15 @@ class UserResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => ListUsers::route('/'),
+            'index'  => ListUsers::route('/'),
             'create' => CreateUser::route('/create'),
-            'edit' => EditUser::route('/{record}/edit'),
+            'edit'   => EditUser::route('/{record}/edit'),
         ];
     }
 }
