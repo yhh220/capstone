@@ -21,7 +21,7 @@
                             {{ $isLoginTab ? 'text-brand-red border-b-2 border-brand-red bg-red-50/50 dark:bg-red-900/20' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}"
                         id="tab-sign-in"
                     >
-                        🔐 {{ __('Sign In') }}
+                        <span aria-hidden="true">🔐</span> {{ __('Sign In') }}
                     </button>
                     <button
                         wire:click="switchTab(false)"
@@ -29,7 +29,7 @@
                             {{ !$isLoginTab ? 'text-brand-red border-b-2 border-brand-red bg-red-50/50 dark:bg-red-900/20' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' }}"
                         id="tab-register"
                     >
-                        ✨ {{ __('Register') }}
+                        <span aria-hidden="true">✨</span> {{ __('Register') }}
                     </button>
                 </div>
 
@@ -90,7 +90,7 @@
                                     wire:click="$toggle('showPassword')"
                                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
                                 >
-                                    {{ $showPassword ? '🙈' : '👁️' }}
+                                    <span aria-hidden="true">{{ $showPassword ? '🙈' : '👁️' }}</span>
                                 </button>
                             </div>
                             @error('loginPassword')
@@ -119,7 +119,7 @@
                             class="w-full bg-brand-red text-white py-3 rounded-xl font-bold text-sm uppercase tracking-wider hover:bg-red-700 transition-all duration-300 shadow-lg shadow-red-200 hover:shadow-red-300 flex items-center justify-center gap-2 disabled:opacity-50"
                             wire:loading.attr="disabled"
                         >
-                            <span wire:loading.remove wire:target="login">{{ __('Sign In') }} →</span>
+                            <span wire:loading.remove wire:target="login">{{ __('Sign In') }} <span aria-hidden="true">→</span></span>
                             <span wire:loading wire:target="login" class="flex items-center gap-2">
                                 <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
@@ -135,7 +135,7 @@
                     <form wire:submit="register">
                         <div class="text-center mb-6">
                             <div class="w-16 h-16 bg-brand-black rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-gray-300">
-                                <span class="text-brand-yellow font-black text-2xl">✨</span>
+                                <span class="text-brand-yellow font-black text-2xl" aria-hidden="true">✨</span>
                             </div>
                             <h2 class="text-2xl font-black text-brand-black dark:text-white">{{ __('Create Account') }}</h2>
                             <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">{{ __('Join the Win Win family today') }}</p>
@@ -197,7 +197,7 @@
                                     wire:click="$toggle('showPassword')"
                                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
                                 >
-                                    {{ $showPassword ? '🙈' : '👁️' }}
+                                    <span aria-hidden="true">{{ $showPassword ? '🙈' : '👁️' }}</span>
                                 </button>
                             </div>
                             @error('password')
@@ -243,14 +243,14 @@
                                     <div class="{{ $strengthColor }} {{ $strengthWidth }} h-1.5 rounded-full transition-all duration-500"></div>
                                 </div>
                                 <div class="flex justify-between items-center mt-1">
-                                    <p class="text-xs text-gray-500">{{ __('Strength') }}: <span class="font-semibold {{ str_replace('bg-', 'text-', $strengthColor) }}">{{ $strengthLabel }}</span></p>
+                                    <p class="text-xs text-gray-500">{{ __('Strength') }}<span aria-hidden="true">: </span><span class="font-semibold {{ str_replace('bg-', 'text-', $strengthColor) }}">{{ $strengthLabel }}</span></p>
                                 </div>
                                 <div class="flex gap-1 flex-wrap mt-1">
-                                    <span class="text-xs {{ strlen($password) >= 8 ? 'text-green-600' : 'text-gray-400' }}">✓ {{ __('8+ chars') }}</span>
-                                    <span class="text-xs {{ preg_match('/[A-Z]/', $password) ? 'text-green-600' : 'text-gray-400' }}">✓ {{ __('Uppercase') }}</span>
-                                    <span class="text-xs {{ preg_match('/[a-z]/', $password) ? 'text-green-600' : 'text-gray-400' }}">✓ {{ __('Lowercase') }}</span>
-                                    <span class="text-xs {{ preg_match('/[0-9]/', $password) ? 'text-green-600' : 'text-gray-400' }}">✓ {{ __('Number') }}</span>
-                                    <span class="text-xs {{ preg_match('/[^A-Za-z0-9]/', $password) ? 'text-green-600' : 'text-gray-400' }}">✓ {{ __('Symbol') }}</span>
+                                    <span class="text-xs {{ strlen($password) >= 8 ? 'text-green-600' : 'text-gray-400' }}"><span aria-hidden="true">✓</span> {{ __('8+ chars') }}</span>
+                                    <span class="text-xs {{ preg_match('/[A-Z]/', $password) ? 'text-green-600' : 'text-gray-400' }}"><span aria-hidden="true">✓</span> {{ __('Uppercase') }}</span>
+                                    <span class="text-xs {{ preg_match('/[a-z]/', $password) ? 'text-green-600' : 'text-gray-400' }}"><span aria-hidden="true">✓</span> {{ __('Lowercase') }}</span>
+                                    <span class="text-xs {{ preg_match('/[0-9]/', $password) ? 'text-green-600' : 'text-gray-400' }}"><span aria-hidden="true">✓</span> {{ __('Number') }}</span>
+                                    <span class="text-xs {{ preg_match('/[^A-Za-z0-9]/', $password) ? 'text-green-600' : 'text-gray-400' }}"><span aria-hidden="true">✓</span> {{ __('Symbol') }}</span>
                                 </div>
                             </div>
                             @endif
@@ -282,7 +282,7 @@
                             class="w-full bg-brand-black text-brand-yellow py-3 rounded-xl font-bold text-sm uppercase tracking-wider hover:bg-gray-800 transition-all duration-300 shadow-lg shadow-gray-300 hover:shadow-gray-400 flex items-center justify-center gap-2 disabled:opacity-50"
                             wire:loading.attr="disabled"
                         >
-                            <span wire:loading.remove wire:target="register">{{ __('Create Account') }} ✨</span>
+                            <span wire:loading.remove wire:target="register">{{ __('Create Account') }} <span aria-hidden="true">✨</span></span>
                             <span wire:loading wire:target="register" class="flex items-center gap-2">
                                 <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
@@ -299,7 +299,7 @@
                 {{-- Security Badge --}}
                 <div class="bg-gray-50 dark:bg-gray-900/50 px-8 py-4 border-t border-gray-100 dark:border-gray-700">
                     <div class="flex items-center justify-center gap-2 text-xs text-gray-400 dark:text-gray-500 text-center">
-                        <span>🔐</span>
+                        <span aria-hidden="true">🔐</span>
                         <span>{{ __('Protected with bcrypt hashing • SSL encrypted') }}</span>
                     </div>
                 </div>

@@ -48,7 +48,7 @@
                         {{ __('Tracking') }}: <span class="font-mono font-bold text-gray-700 dark:text-gray-300">{{ $order->tracking_number }}</span>
                     </div>
                     <a href="{{ route('track-order') }}" class="text-brand-red font-bold hover:underline">
-                        {{ __('Track Order') }} →
+                        {{ __('Track Order') }} <span aria-hidden="true">→</span>
                     </a>
                 </div>
             </div>

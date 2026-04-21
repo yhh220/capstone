@@ -430,5 +430,10 @@
     "Creating account...": "Sedang mencipta akaun...",
     "Protected with bcrypt hashing • SSL encrypted": "Dilindungi dengan pencincangan bcrypt • penyulitan SSL",
     "Password": "Kata Laluan",
-    "Confirm Password": "Sahkan Kata Laluan"
+    "Confirm Password": "Sahkan Kata Laluan",
+
+    "Find Us": "Cari Kami",
+    "Visit Our Showroom": "Lawati Kedai Kami",
+    "Get Directions": "Dapatkan Arah",
+    "Visit the showroom or chat with us on WhatsApp for product advice.": "Lawati kedai atau berbual dengan kami di WhatsApp untuk nasihat produk."
 }

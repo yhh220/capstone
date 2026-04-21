@@ -692,13 +692,9 @@
                         <li><a href="{{ route('home') }}"     class="hover:text-brand-yellow transition-colors">{{ __('Home') }}</a></li>
                         <li><a href="{{ route('products') }}" class="hover:text-brand-yellow transition-colors">{{ __('Products') }}</a></li>
                         <li><a href="{{ route('services') }}" class="hover:text-brand-yellow transition-colors">{{ __('Services') }}</a></li>
-                        <li><a href="{{ route('gallery') }}"  class="hover:text-brand-yellow transition-colors">{{ __('Gallery') }}</a></li>
                         <li><a href="{{ route('booking') }}"  class="hover:text-brand-yellow transition-colors">{{ __('Book Appointment') }}</a></li>
-                        <li><a href="{{ route('faq') }}"      class="hover:text-brand-yellow transition-colors">{{ __('FAQ') }}</a></li>
                         <li><a href="{{ route('about') }}"    class="hover:text-brand-yellow transition-colors">{{ __('About Us') }}</a></li>
                         <li><a href="{{ route('contact') }}"  class="hover:text-brand-yellow transition-colors">{{ __('Contact') }}</a></li>
-                        <li><a href="{{ route('privacy-policy') }}" class="hover:text-brand-yellow transition-colors">{{ __('Privacy Policy') }}</a></li>
-                        <li><a href="{{ route('terms-of-service') }}" class="hover:text-brand-yellow transition-colors">{{ __('Terms of Service') }}</a></li>
                     </ul>
                 </div>
 
@@ -742,9 +738,15 @@
                 </div>
             </div>
 
-            <div class="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-2">
+            <div class="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-3">
                 <p>&copy; {{ date('Y') }} {{ $storeName }}. <span>{{ __('All rights reserved.') }}</span></p>
-                <p>{{ __('Visit the showroom or chat with us on WhatsApp for product advice.') }}</p>
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('privacy-policy') }}" class="hover:text-brand-yellow transition-colors">{{ __('Privacy Policy') }}</a>
+                    <span aria-hidden="true">·</span>
+                    <a href="{{ route('terms-of-service') }}" class="hover:text-brand-yellow transition-colors">{{ __('Terms of Service') }}</a>
+                    <span aria-hidden="true">·</span>
+                    <a href="{{ route('faq') }}" class="hover:text-brand-yellow transition-colors">{{ __('FAQ') }}</a>
+                </div>
             </div>
         </div>
     </footer>
@@ -847,12 +849,29 @@
                 return map;
             }
 
+            // Translatable HTML attributes (placeholders, aria-labels, titles)
+            var TRANSLATABLE_ATTRS = ['placeholder', 'aria-label', 'title'];
+
+            // Swap translatable attributes on all elements
+            function swapAttrs(reverseMap, target) {
+                TRANSLATABLE_ATTRS.forEach(function (attr) {
+                    document.querySelectorAll('[' + attr + ']').forEach(function (el) {
+                        var val = (el.getAttribute(attr) || '').trim();
+                        if (!val) return;
+                        var key = reverseMap[val];
+                        if (!key) return;
+                        el.setAttribute(attr, target ? (target[key] || key) : key);
+                    });
+                });
+            }
+
             // Swap all text nodes in the DOM
             function swapLocale(toLocale) {
                 if (toLocale === currentLocale) return;
                 var reverseMap = buildReverseMap(currentLocale);
                 var target = toLocale === 'en' ? null : translations[toLocale];
 
+                // 1. Text nodes
                 var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
                 var nodes = [];
                 var node;
@@ -866,6 +885,9 @@
                     var newText = target ? (target[key] || key) : key;
                     n.nodeValue = n.nodeValue.replace(trimmed, newText);
                 });
+
+                // 2. Translatable attributes (placeholder, aria-label, title)
+                swapAttrs(reverseMap, target);
 
                 // Update lang button label
                 var labels = { en: 'EN', ms: 'BM', zh: '中文' };
@@ -898,6 +920,48 @@
                     swapLocale(this.dataset.lang);
                 });
             });
+
+            // ── Fix Livewire race condition ─────────────────────────────
+            // When Livewire re-renders a component, the server may respond in
+            // a different locale than the client's current locale (because the
+            // session-locale fetch is async). This re-applies the correct locale
+            // to any newly injected text nodes/attributes after every Livewire update.
+            function reapplyCurrentLocale() {
+                if (currentLocale === 'en') {
+                    // EN mode: reverse any foreign-language text/attrs that slipped in
+                    ['zh', 'ms'].forEach(function (loc) {
+                        if (!translations[loc]) return;
+                        var revMap = {};
+                        Object.entries(translations[loc]).forEach(function (entry) {
+                            revMap[entry[1]] = entry[0];
+                        });
+                        // Text nodes
+                        var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+                        var nodes = [];
+                        var node;
+                        while ((node = walker.nextNode())) nodes.push(node);
+                        nodes.forEach(function (n) {
+                            var trimmed = n.nodeValue.trim();
+                            if (!trimmed) return;
+                            var key = revMap[trimmed];
+                            if (!key) return;
+                            n.nodeValue = n.nodeValue.replace(trimmed, key);
+                        });
+                        // Attributes
+                        swapAttrs(revMap, null);
+                    });
+                } else {
+                    // Non-EN mode: translate any English nodes/attrs Livewire just injected.
+                    // Temporarily pretend we're in EN — already-translated nodes are not
+                    // in the EN→EN reverse map so they get skipped automatically.
+                    var savedLocale = currentLocale;
+                    currentLocale = 'en';
+                    swapLocale(savedLocale);
+                }
+            }
+
+            document.addEventListener('livewire:updated', reapplyCurrentLocale);
+            document.addEventListener('livewire:navigated', reapplyCurrentLocale);
         }());
 
         const mobileBtn = document.getElementById('mobile-menu-btn');

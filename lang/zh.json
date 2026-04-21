@@ -430,5 +430,10 @@
     "Creating account...": "正在创建账户...",
     "Protected with bcrypt hashing • SSL encrypted": "受 bcrypt 哈希保护 • SSL 加密",
     "Password": "密码",
-    "Confirm Password": "确认密码"
+    "Confirm Password": "确认密码",
+
+    "Find Us": "找到我们",
+    "Visit Our Showroom": "参观我们的展厅",
+    "Get Directions": "获取路线",
+    "Visit the showroom or chat with us on WhatsApp for product advice.": "欢迎到店了解，或通过 WhatsApp 咨询产品建议。"
 }

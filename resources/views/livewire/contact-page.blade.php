@@ -192,19 +192,29 @@
         </div>
     </div>
 
-    <a href="{{ $mapUrl }}"
-       target="_blank"
-       rel="noopener noreferrer"
-       class="block bg-gray-200 dark:bg-gray-700 h-64"
-       data-aos="fade-up">
-        <div class="h-full flex items-center justify-center text-center text-gray-500 dark:text-gray-400">
-            <div>
-                <div class="text-gray-400 dark:text-gray-600 mb-4 flex justify-center" aria-hidden="true">
-                    <svg class="w-12 h-12 group-hover:text-brand-red group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300 drop-shadow-sm" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+    <section class="py-16 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700" aria-labelledby="contact-location-heading">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-10" data-aos="fade-up">
+                <div class="inline-block bg-brand-red/10 dark:bg-brand-red/20 text-brand-red text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
+                    {{ __('Find Us') }}
                 </div>
-                <p class="font-semibold">{{ $storeName }}</p>
-                <p class="text-sm">{{ $storeAddress }}</p>
+                <h2 id="contact-location-heading" class="text-3xl sm:text-4xl font-black text-brand-black dark:text-white">
+                    {{ __('Visit Our Showroom') }}
+                </h2>
+            </div>
+
+            <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg" data-aos="fade-up">
+                <iframe
+                    src="https://maps.google.com/maps?q={{ rawurlencode('Win Win Car Audio, ' . $storeAddress) }}&output=embed&z=16"
+                    width="100%"
+                    height="420"
+                    style="border: 0; display: block;"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    title="{{ __('Win Win Car Audio showroom location') }}">
+                </iframe>
             </div>
         </div>
-    </a>
+    </section>
 </div>
