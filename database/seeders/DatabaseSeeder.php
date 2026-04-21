@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Feedback;
 use App\Models\Product;
@@ -101,5 +102,22 @@ class DatabaseSeeder extends Seeder
             ['key' => 'BUSINESS_HOURS_START',    'value' => '09:00', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'BUSINESS_HOURS_END',      'value' => '18:00', 'created_at' => now(), 'updated_at' => now()],
         ]);
+
+        $brands = [
+            ['name' => 'Mohawk',   'sort_order' => 1],
+            ['name' => '70mai',    'sort_order' => 2],
+            ['name' => 'Alpine',   'sort_order' => 3],
+            ['name' => 'Skynavi',  'sort_order' => 4],
+            ['name' => 'Sparko',   'sort_order' => 5],
+            ['name' => 'SONY',     'sort_order' => 6],
+            ['name' => 'Dynavin',  'sort_order' => 7],
+            ['name' => 'MBquart',  'sort_order' => 8],
+        ];
+        foreach ($brands as $brand) {
+            Brand::firstOrCreate(
+                ['name' => $brand['name']],
+                ['display_type' => 'text', 'sort_order' => $brand['sort_order'], 'is_active' => true]
+            );
+        }
     }
 }

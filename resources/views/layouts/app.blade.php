@@ -130,7 +130,7 @@
 
         .dark .dark\:border-gray-700,
         .dark .dark\:border-gray-600 {
-            border-color: rgb(var(--app-border-rgb)) !important;
+            border-color: rgb(var(--app-border-rgb));
         }
 
         .dark .dark\:text-white,
@@ -239,9 +239,48 @@
 
         /* ── AOS customisation ───────────────────────────── */
         [data-aos] { will-change: transform, opacity; }
+
+        /* ── Scroll-reveal system ────────────────────────── */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .scroll-reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .scroll-reveal-left {
+            opacity: 0;
+            transform: translateX(-40px);
+            transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .scroll-reveal-left.is-visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .scroll-reveal-right {
+            opacity: 0;
+            transform: translateX(40px);
+            transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .scroll-reveal-right.is-visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .stagger-1 { transition-delay: 0.00s; }
+        .stagger-2 { transition-delay: 0.12s; }
+        .stagger-3 { transition-delay: 0.24s; }
+        .stagger-4 { transition-delay: 0.36s; }
+        .stagger-5 { transition-delay: 0.48s; }
+        .stagger-6 { transition-delay: 0.60s; }
     </style>
 
     @livewireStyles
+    @stack('styles')
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans antialiased">
     <x-page-loader />
@@ -704,7 +743,7 @@
             </div>
 
             <div class="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-2">
-                <p>&copy; {{ date('Y') }} {{ $storeName }}. {{ __('All rights reserved.') }}</p>
+                <p>&copy; {{ date('Y') }} {{ $storeName }}. <span>{{ __('All rights reserved.') }}</span></p>
                 <p>{{ __('Visit the showroom or chat with us on WhatsApp for product advice.') }}</p>
             </div>
         </div>
@@ -878,6 +917,7 @@
     @livewire('ai-chatbot')
 
     @livewireScripts
+    @stack('scripts')
 
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
     <script>
@@ -930,6 +970,38 @@
 
         // Re-run after Livewire re-renders
         document.addEventListener('livewire:navigated', () => animateCounters());
+    </script>
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top"
+            aria-label="{{ __('Scroll to top') }}"
+            class="fixed bottom-6 right-6 sm:bottom-8 sm:left-1/2 sm:-translate-x-1/2 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-brand-red text-white shadow-2xl transition-all duration-500 translate-y-20 opacity-0 pointer-events-none hover:bg-brand-red/90 hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-4 focus:ring-brand-red/30 group">
+        <svg class="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
+        </svg>
+    </button>
+
+    <script>
+        // ── Scroll to Top Logic ──────────────────────────────
+        (function() {
+            const btn = document.getElementById('scroll-to-top');
+            if (!btn) return;
+
+            function toggleBtn() {
+                if (window.scrollY > 400) {
+                    btn.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+                } else {
+                    btn.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+                }
+            }
+
+            window.addEventListener('scroll', toggleBtn);
+            btn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            // Re-check on navigation
+            document.addEventListener('livewire:navigated', toggleBtn);
+        })();
     </script>
 </body>
 </html>

@@ -54,6 +54,10 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::TOPBAR_END,
                 fn () => view('filament.theme-toggle'),
             )
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn () => view('filament.scroll-to-top'),
+            )
 
             // ── Navigation ────────────────────────────────────────────
             ->sidebarFullyCollapsibleOnDesktop()

@@ -71,7 +71,7 @@ class ProductForm
                     ->required(),
                 Toggle::make('is_featured')
                     ->label('Show on Homepage')
-                    ->required(),
+                    ->hidden(),
                 SpatieMediaLibraryFileUpload::make('images')
                     ->collection('images')
                     ->multiple()
