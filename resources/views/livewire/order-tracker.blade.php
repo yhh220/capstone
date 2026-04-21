@@ -18,7 +18,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Email Address') }}</label>
-                    <input wire:model="email" type="email" placeholder="your@email.com"
+                    <input wire:model="email" type="email" placeholder="{{ __('your@email.com') }}"
                            class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                     @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>

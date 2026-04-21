@@ -90,32 +90,6 @@
         </div>
     </section>
 
-    <section class="py-16 bg-white dark:bg-gray-800" aria-labelledby="team-heading">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-12" data-aos="fade-up">
-                <h2 id="team-heading" class="text-3xl sm:text-4xl font-black text-brand-black dark:text-white mb-3">
-                    {{ __('Meet Our Team') }}
-                </h2>
-                <p class="text-gray-500 dark:text-gray-400">The passionate people behind {{ $storeName }}</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                @foreach([
-                    ['Ahmad Fauzi', 'Founder', 'Car enthusiast with 15+ years in the automotive industry.'],
-                    ['Nurul Ain', 'Customer Experience Lead', 'Helps customers coordinate showroom visits and product consultations.'],
-                    ['Kevin Lim', 'Product Specialist', 'Guides customers through compatibility, features, and installation options.'],
-                ] as $i => [$name, $role, $bio])
-                <div class="text-center" data-aos="zoom-in" data-aos-delay="{{ $i * 120 }}">
-                    <div class="w-24 h-24 bg-brand-red text-white rounded-full flex items-center justify-center text-3xl font-black mx-auto mb-4 transition-transform duration-300 hover:scale-110" aria-hidden="true">
-                        {{ substr($name, 0, 1) }}
-                    </div>
-                    <h3 class="text-xl font-bold text-brand-black dark:text-white">{{ $name }}</h3>
-                    <div class="text-brand-red text-sm font-semibold mb-2">{{ $role }}</div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">{{ $bio }}</p>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
 
     <section class="py-16 bg-brand-red text-white" aria-labelledby="core-values-heading">
         <div class="max-w-7xl mx-auto px-4">

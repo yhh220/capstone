@@ -153,7 +153,7 @@
                     <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-brand-red group-hover:text-white group-hover:rotate-[10deg] transition-all duration-500 shadow-sm" aria-hidden="true">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
                     </div>
-                    <div class="font-bold text-base text-gray-800 dark:text-gray-100 group-hover:text-brand-red transition-colors">{{ $category->name }}</div>
+                    <div class="font-bold text-base text-gray-800 dark:text-gray-100 group-hover:text-brand-red transition-colors">{{ __($category->name) }}</div>
                     <div class="text-xs text-gray-400 dark:text-gray-500 mt-2 font-medium tracking-wide">{{ $category->products_count }} {{ __('ITEMS') }}</div>
                 </a>
                 @endforeach
