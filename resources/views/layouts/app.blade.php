@@ -326,11 +326,13 @@
                                 ['ms', 'Bahasa Melayu'],
                                 ['zh', '中文'],
                             ] as [$code, $name])
-                            <a href="{{ route('lang', $code) }}"
+                            <button type="button"
+                               data-lang="{{ $code }}"
+                               data-lang-url="{{ route('lang', $code) }}"
                                role="menuitem"
-                               class="flex items-center gap-2 px-4 py-2.5 text-sm transition-colors {{ app()->getLocale() === $code ? 'text-brand-red font-semibold bg-red-50 dark:bg-red-900/20' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+                               class="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm transition-colors {{ app()->getLocale() === $code ? 'text-brand-red font-semibold bg-red-50 dark:bg-red-900/20' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
                                 {{ $name }}
-                            </a>
+                            </button>
                             @endforeach
                         </div>
                     </div>
@@ -786,6 +788,78 @@
                 closeLang();
             }
         });
+
+        // Instant client-side language switching — zero reload
+        (function () {
+            var translations = {
+                ms: @json(json_decode(file_get_contents(base_path('lang/ms.json')), true)),
+                zh: @json(json_decode(file_get_contents(base_path('lang/zh.json')), true))
+            };
+            var currentLocale = '{{ app()->getLocale() }}';
+
+            // Build reverse map: displayed text → translation key
+            function buildReverseMap(locale) {
+                var map = {};
+                if (locale === 'en') {
+                    Object.keys(translations.ms).forEach(function (k) { map[k] = k; });
+                } else if (translations[locale]) {
+                    Object.entries(translations[locale]).forEach(function ([k, v]) { map[v] = k; });
+                }
+                return map;
+            }
+
+            // Swap all text nodes in the DOM
+            function swapLocale(toLocale) {
+                if (toLocale === currentLocale) return;
+                var reverseMap = buildReverseMap(currentLocale);
+                var target = toLocale === 'en' ? null : translations[toLocale];
+
+                var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+                var nodes = [];
+                var node;
+                while ((node = walker.nextNode())) nodes.push(node);
+
+                nodes.forEach(function (n) {
+                    var trimmed = n.nodeValue.trim();
+                    if (!trimmed) return;
+                    var key = reverseMap[trimmed];
+                    if (!key) return;
+                    var newText = target ? (target[key] || key) : key;
+                    n.nodeValue = n.nodeValue.replace(trimmed, newText);
+                });
+
+                // Update lang button label
+                var labels = { en: 'EN', ms: 'BM', zh: '中文' };
+                var langBtnText = langBtn.childNodes[0];
+                langBtnText.nodeValue = '\n                            ' + labels[toLocale] + '\n                            ';
+
+                // Update active state of menu items
+                document.querySelectorAll('[data-lang]').forEach(function (btn) {
+                    var isActive = btn.dataset.lang === toLocale;
+                    btn.className = btn.className
+                        .replace(/text-brand-red font-semibold bg-red-50 dark:bg-red-900\/20|text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/, '')
+                        .trim();
+                    btn.className += ' ' + (isActive
+                        ? 'text-brand-red font-semibold bg-red-50 dark:bg-red-900/20'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700');
+                });
+
+                // Update html lang attribute
+                document.documentElement.lang = toLocale;
+                currentLocale = toLocale;
+
+                // Persist locale to session silently
+                fetch('/lang/' + toLocale, { redirect: 'follow' });
+                closeLang();
+            }
+
+            document.querySelectorAll('[data-lang]').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    swapLocale(this.dataset.lang);
+                });
+            });
+        }());
 
         const mobileBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');

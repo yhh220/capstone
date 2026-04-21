@@ -29,7 +29,7 @@
                         {{ __('We help customers choose with confidence') }}
                     </h2>
                     <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                        {{ $storeName }} was built around a simple idea: customers should be able to discover products online, then speak to real people before deciding what fits their car.
+                        {{ __('Win Win Car Audio Auto Accessories was built around a simple idea: customers should be able to discover products online, then speak to real people before deciding what fits their car.') }}
                     </p>
                     <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
                         {{ __('Starting from a small workshop in Kuala Lumpur, the team focused on practical advice, in-person product viewing, and honest recommendations instead of pushing quick online purchases.') }}
