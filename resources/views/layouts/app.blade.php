@@ -758,7 +758,7 @@
             </div>
 
             <div class="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-3">
-                <p>&copy; {{ date('Y') }} {{ $storeName }}. <span>{{ __('All rights reserved.') }}</span></p>
+                <p>&copy; {{ $storeName }} 2025. <span>{{ __('All rights reserved.') }}</span></p>
                 <div class="flex items-center gap-4">
                     <a href="{{ route('privacy-policy') }}" class="hover:text-brand-yellow transition-colors">{{ __('Privacy Policy') }}</a>
                     <span aria-hidden="true">·</span>
