@@ -207,8 +207,8 @@
                 <iframe
                     src="https://maps.google.com/maps?q={{ rawurlencode('Win Win Car Audio, ' . $storeAddress) }}&output=embed&z=16"
                     width="100%"
-                    height="420"
-                    style="border: 0; display: block;"
+                    class="w-full block"
+                    style="height: clamp(240px, 50vw, 420px); border: 0;"
                     allowfullscreen=""
                     loading="lazy"
                     referrerpolicy="no-referrer-when-downgrade"

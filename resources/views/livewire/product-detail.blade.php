@@ -27,7 +27,7 @@
     <div class="max-w-7xl mx-auto px-4 py-10">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div data-aos="fade-right">
-                <div class="bg-gray-100 dark:bg-gray-700 rounded-2xl h-80 sm:h-96 flex items-center justify-center overflow-hidden">
+                <div class="bg-gray-100 dark:bg-gray-700 rounded-2xl h-64 sm:h-80 md:h-96 flex items-center justify-center overflow-hidden">
                     @if($product->getImageUrl('card'))
                     <img src="{{ $product->getImageUrl('card') }}"
                          alt="{{ $product->name }}"
@@ -125,13 +125,13 @@
                     <a href="{{ $whatsAppUrl }}"
                        target="_blank"
                        rel="noopener noreferrer"
-                       class="flex-1 border-2 border-brand-red text-brand-red py-3 px-8 rounded-full font-bold text-lg hover:bg-brand-red hover:text-white transition-colors text-center">
+                       class="flex-1 border-2 border-brand-red text-brand-red py-3 px-4 sm:px-8 rounded-full font-bold text-base sm:text-lg hover:bg-brand-red hover:text-white transition-colors text-center">
                         {{ __('Ask on WhatsApp') }}
                     </a>
                     <a href="{{ $mapUrl }}"
                        target="_blank"
                        rel="noopener noreferrer"
-                       class="flex-1 border-2 border-brand-black dark:border-white text-brand-black dark:text-white py-3 px-8 rounded-full font-bold text-lg hover:bg-brand-black hover:text-white dark:hover:bg-white dark:hover:text-brand-black transition-colors text-center">
+                       class="flex-1 border-2 border-brand-black dark:border-white text-brand-black dark:text-white py-3 px-4 sm:px-8 rounded-full font-bold text-base sm:text-lg hover:bg-brand-black hover:text-white dark:hover:bg-white dark:hover:text-brand-black transition-colors text-center">
                         {{ __('Visit the showroom') }}
                     </a>
                 </div>

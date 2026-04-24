@@ -31,7 +31,7 @@
 
         <div class="flex flex-col lg:flex-row gap-8">
             <aside id="filter-sidebar" class="hidden lg:block w-full lg:w-64 flex-shrink-0" aria-label="Product filters">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 lg:sticky lg:top-24">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 lg:sticky lg:top-20">
                     <h3 class="font-bold text-gray-800 dark:text-gray-200 text-lg mb-4">{{ __('Find products') }}</h3>
 
                     <div class="mb-5">

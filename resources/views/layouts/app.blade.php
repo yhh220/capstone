@@ -318,16 +318,16 @@
          role="navigation"
          aria-label="{{ __('Main navigation') }}">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex items-center justify-between h-20 gap-2">
+            <div class="flex items-center justify-between h-14 sm:h-20 gap-1.5 sm:gap-2">
                 <!-- Brand Identity -->
                 <a href="{{ route('home') }}"
                    class="flex flex-col items-center justify-center flex-shrink-0 group leading-none py-1"
                    aria-label="{{ $storeName }} - {{ __('Home') }}">
-                    <div class="h-10 w-32 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-105 group-active:scale-95" aria-hidden="true">
+                    <div class="h-8 w-24 sm:h-10 sm:w-32 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-105 group-active:scale-95" aria-hidden="true">
                         <img src="{{ asset('images/logo/logo-dark.svg') }}" alt="" class="h-full w-full object-contain block dark:hidden">
                         <img src="{{ asset('images/logo/logo-light.svg') }}" alt="" class="h-full w-full object-contain hidden dark:block">
                     </div>
-                    <div class="mt-1 flex items-center gap-1.5 leading-none transition-opacity duration-300 group-hover:opacity-80">
+                    <div class="mt-0.5 sm:mt-1 hidden sm:flex items-center gap-1.5 leading-none transition-opacity duration-300 group-hover:opacity-80">
                         <span class="font-black text-brand-black dark:text-white text-[11px] uppercase tracking-[0.15em]">{{ $storeShortName }}</span>
                         <span class="text-[10px] text-brand-red font-semibold uppercase tracking-widest">{{ $storeTagline }}</span>
                     </div>
@@ -354,7 +354,7 @@
                 </div>
 
                 <!-- Right-side icons: Lang, Theme, Cart (cond), User, WhatsApp, Mobile menu -->
-                <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1 sm:gap-1.5">
 
                     <!-- 1. Language switcher -->
                     <div class="relative" id="lang-wrapper">
@@ -362,7 +362,7 @@
                                 aria-label="{{ __('Select language') }}"
                                 aria-expanded="false"
                                 aria-haspopup="true"
-                                class="group flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-brand-red bg-gray-50/80 dark:bg-gray-800/80 hover:bg-red-50/80 dark:hover:bg-red-900/20 border border-gray-200/60 dark:border-gray-700/60 hover:border-brand-red/40 transition-all duration-300 hover:shadow-sm backdrop-blur-sm">
+                                class="group flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 sm:px-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-brand-red bg-gray-50/80 dark:bg-gray-800/80 hover:bg-red-50/80 dark:hover:bg-red-900/20 border border-gray-200/60 dark:border-gray-700/60 hover:border-brand-red/40 transition-all duration-300 hover:shadow-sm backdrop-blur-sm">
                             <svg class="w-3.5 h-3.5 opacity-50 group-hover:opacity-90 transition-opacity duration-300" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                                 <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
                             </svg>
@@ -403,20 +403,20 @@
                         </div>
                     </div>
 
-                    <!-- 2. Dark mode toggle (segmented pill) -->
-                    <div id="theme-wrapper" class="flex items-center p-1 rounded-xl bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm gap-0.5">
-                        <button class="theme-option p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="light" title="Light" aria-label="{{ __('Light mode') }}">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <!-- 2. Dark mode toggle (segmented pill) — hidden on xs, visible sm+ -->
+                    <div id="theme-wrapper" class="hidden sm:flex items-center p-1 rounded-xl bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm gap-0.5">
+                        <button class="theme-option p-1.5 sm:p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="light" title="Light" aria-label="{{ __('Light mode') }}">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
                             </svg>
                         </button>
-                        <button class="theme-option p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="dark" title="Dark" aria-label="{{ __('Dark mode') }}">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <button class="theme-option p-1.5 sm:p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="dark" title="Dark" aria-label="{{ __('Dark mode') }}">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                             </svg>
                         </button>
-                        <button class="theme-option p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="system" title="System" aria-label="{{ __('System theme') }}">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <button class="theme-option p-1.5 sm:p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="system" title="System" aria-label="{{ __('System theme') }}">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/>
                             </svg>
                         </button>
@@ -555,6 +555,22 @@
             <div id="mobile-menu"
                  class="hidden md:hidden pb-4 space-y-1 border-t border-gray-100 dark:border-gray-700 pt-3"
                  role="menu">
+
+                <!-- Theme toggle inside mobile menu (xs screens) -->
+                <div class="sm:hidden flex items-center gap-2 px-3 py-2 mb-1">
+                    <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 mr-1">{{ __('Theme') }}:</span>
+                    <div class="flex items-center p-1 rounded-xl bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 gap-0.5">
+                        <button class="theme-option p-1.5 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600" data-theme="light" title="Light" aria-label="{{ __('Light mode') }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                        </button>
+                        <button class="theme-option p-1.5 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600" data-theme="dark" title="Dark" aria-label="{{ __('Dark mode') }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        </button>
+                        <button class="theme-option p-1.5 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600" data-theme="system" title="System" aria-label="{{ __('System theme') }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+                        </button>
+                    </div>
+                </div>
                 @foreach([
                     [route('home'),     __('Home'),     request()->routeIs('home')],
                     [route('products'), __('Products'), request()->routeIs('products*')],
