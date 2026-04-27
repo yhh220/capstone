@@ -104,14 +104,7 @@
                     @endif
 
                     <form wire:submit="submit" class="space-y-5" novalidate>
-                        <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true" tabindex="-1">
-                            <input wire:model="honeypot"
-                                   type="text"
-                                   name="website"
-                                   autocomplete="off"
-                                   tabindex="-1"
-                                   placeholder="Leave this empty">
-                        </div>
+                        <x-honeypot livewire-model="honeypotData" />
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div>

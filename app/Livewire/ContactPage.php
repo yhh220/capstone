@@ -6,10 +6,14 @@ use App\Livewire\Concerns\SetsSeo;
 use Livewire\Component;
 use App\Models\Contact;
 use Illuminate\Support\Facades\RateLimiter;
+use Spatie\Honeypot\Http\Livewire\Concerns\HoneypotData;
+use Spatie\Honeypot\Http\Livewire\Concerns\UsesSpamProtection;
 
 class ContactPage extends Component
 {
-    use SetsSeo;
+    use SetsSeo, UsesSpamProtection;
+
+    public HoneypotData $honeypotData;
 
     public string $name     = '';
     public string $email    = '';
@@ -17,11 +21,10 @@ class ContactPage extends Component
     public string $subject  = '';
     public string $message  = '';
 
-    /** Honeypot — must stay empty; bots fill this field */
-    public string $honeypot = '';
-
     public function mount(): void
     {
+        $this->honeypotData = new HoneypotData();
+
         $this->setSeo(
             title: 'Contact Us',
             description: 'Get in touch with Win Win Car Studio. Send us a message, chat on WhatsApp, or visit our showroom in Kuala Lumpur.',
@@ -34,17 +37,12 @@ class ContactPage extends Component
         'phone'    => 'nullable|max:20',
         'subject'  => 'required|min:3|max:150',
         'message'  => 'required|min:10|max:2000',
-        'honeypot' => 'max:0',   // must be empty
     ];
 
     public function submit(): void
     {
-        // Honeypot check — silently discard bot submissions without revealing detection
-        if ($this->honeypot !== '') {
-            $this->reset(['name', 'email', 'phone', 'subject', 'message', 'honeypot']);
-            session()->flash('success', __('Thank you! Your message has been sent. We will get back to you shortly.'));
-            return;
-        }
+        // Honeypot check — powered by spatie/laravel-honeypot (field check + time gate)
+        $this->protectAgainstSpam();
 
         // Rate limiting: max 3 submissions per IP per 5 minutes
         $key = 'contact.' . request()->ip();
@@ -66,7 +64,7 @@ class ContactPage extends Component
             'message' => strip_tags($this->message),
         ]);
 
-        $this->reset(['name', 'email', 'phone', 'subject', 'message', 'honeypot']);
+        $this->reset(['name', 'email', 'phone', 'subject', 'message']);
         session()->flash('success', __('Thank you! Your message has been sent. We will get back to you shortly.'));
         $this->dispatch('message-sent');
     }

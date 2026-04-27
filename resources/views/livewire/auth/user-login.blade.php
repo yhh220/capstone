@@ -133,6 +133,7 @@
                     {{-- ============ REGISTER FORM ============ --}}
                     @else
                     <form wire:submit="register">
+                        <x-honeypot livewire-model="honeypotData" />
                         <div class="text-center mb-6">
                             <div class="w-16 h-16 bg-brand-black rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-gray-300">
                                 <span class="text-brand-yellow font-black text-2xl" aria-hidden="true">✨</span>

@@ -8,9 +8,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
+use Spatie\Honeypot\Http\Livewire\Concerns\HoneypotData;
+use Spatie\Honeypot\Http\Livewire\Concerns\UsesSpamProtection;
 
 class UserLogin extends Component
 {
+    use UsesSpamProtection;
+
     // Tab toggle: true = Sign In, false = Register
     public bool $isLoginTab = true;
 
@@ -25,8 +29,19 @@ class UserLogin extends Component
     public string $password = '';
     public string $password_confirmation = '';
 
+    // Honeypot for Register form — powered by spatie/laravel-honeypot
+    public HoneypotData $honeypotData;
+
     // Password visibility toggle
     public bool $showPassword = false;
+
+    /**
+     * Initialize honeypot data for the register form.
+     */
+    public function mount(): void
+    {
+        $this->honeypotData = new HoneypotData();
+    }
 
     /**
      * Switch between Sign In and Register tabs.
@@ -87,6 +102,9 @@ class UserLogin extends Component
      */
     public function register(): void
     {
+        // Honeypot check — powered by spatie/laravel-honeypot (field check + time gate)
+        $this->protectAgainstSpam();
+
         $validated = $this->validate([
             'name' => ['required', 'string', 'min:2', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
