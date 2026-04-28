@@ -1,0 +1,21 @@
+{
+  "name": "Win Win Car Audio",
+  "short_name": "Win Win",
+  "icons": [
+    {
+      "src": "/winwin-favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/winwin-apple-touch-icon.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#C8413D",
+  "background_color": "#0C0C0E",
+  "display": "standalone"
+}

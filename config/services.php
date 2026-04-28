@@ -40,9 +40,9 @@ return [
     ],
 
     'store' => [
-        'name' => env('STORE_NAME', 'WIN WIN CAR AUDIO AUTO ACCESSORIES'),
-        'short_name' => env('STORE_SHORT_NAME', 'WIN WIN'),
-        'tagline' => env('STORE_TAGLINE', 'CAR AUDIO'),
+        'name' => env('STORE_NAME', 'Win Win Car Audio Auto Accessories'),
+        'short_name' => env('STORE_SHORT_NAME', 'Win Win'),
+        'tagline' => env('STORE_TAGLINE', 'Car Audio'),
         'phone_display' => env('STORE_PHONE_DISPLAY', '016-9150917'),
         'phone_raw' => env('STORE_PHONE_RAW', '60169150917'),
         'email' => env('STORE_EMAIL', 'winwincaraudio@gmail.com'),

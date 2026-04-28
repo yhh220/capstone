@@ -24,6 +24,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#E11D48" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0C0C0E" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260428" type="image/svg+xml">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20260428">
+    <link rel="icon" href="{{ asset('winwin-favicon-32x32.png') }}?v=20260428" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="{{ asset('winwin-apple-touch-icon.png') }}?v=20260428">
+    <link rel="mask-icon" href="{{ asset('winwin-favicon.svg') }}?v=20260428" color="#C8413D">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=20260428">
     {!! SEOMeta::generate() !!}
     {!! OpenGraph::generate() !!}
     {!! TwitterCard::generate() !!}

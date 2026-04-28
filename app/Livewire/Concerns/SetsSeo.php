@@ -11,7 +11,7 @@ trait SetsSeo
     protected function setSeo(string $title, string $description, ?string $imageUrl = null): void
     {
         $storeName = config('services.store.name', 'Win Win Car Studio');
-        $fullTitle  = $title . ' | ' . $storeName;
+        $fullTitle = $title === $storeName ? $storeName : $title . ' | ' . $storeName;
 
         SEOMeta::setTitle($fullTitle);
         SEOMeta::setDescription($description);
