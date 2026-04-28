@@ -27,6 +27,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->authGuard('admin')
             ->login(\App\Filament\Pages\Auth\Login::class)
 
             // ── Branding ──────────────────────────────────────────────
@@ -101,6 +102,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                \App\Http\Middleware\LogoutAdminGuardOnly::class,
             ]);
     }
 }

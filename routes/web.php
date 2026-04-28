@@ -63,9 +63,9 @@ Route::get('/login', UserLogin::class)->name('login');
 
 // Logout (POST only — CSRF protected)
 Route::post('/logout', function () {
-    Auth::logout();
-    session()->invalidate();
+    Auth::guard('web')->logout();
     session()->regenerateToken();
+
     return redirect()->route('home');
 })->name('logout');
 
