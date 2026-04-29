@@ -82,6 +82,64 @@ class DatabaseSeeder extends Seeder
 
         $this->call(CarModelSeeder::class);
 
+        $services = [
+            [
+                'name' => 'Car Audio Installation',
+                'description' => 'Professional installation of head units, speakers, and amplifiers. Includes wiring and basic system tuning.',
+                'price' => 150.00,
+                'duration_minutes' => 120,
+                'buffer_after' => 15,
+                'sort_order' => 1,
+            ],
+            [
+                'name' => 'Subwoofer & Amplifier Setup',
+                'description' => 'Full subwoofer and amplifier installation with custom enclosure fitting and tuning for deep, powerful bass.',
+                'price' => 200.00,
+                'duration_minutes' => 150,
+                'buffer_after' => 15,
+                'sort_order' => 2,
+            ],
+            [
+                'name' => 'Window Tinting',
+                'description' => 'High-quality window film installation for UV protection, heat rejection, and privacy. Full car coverage.',
+                'price' => 350.00,
+                'duration_minutes' => 180,
+                'buffer_after' => 30,
+                'sort_order' => 3,
+            ],
+            [
+                'name' => 'Dashcam Installation',
+                'description' => 'Clean hidden-wire installation for front and/or rear dashcams. Includes parking mode wiring setup.',
+                'price' => 80.00,
+                'duration_minutes' => 60,
+                'buffer_after' => 15,
+                'sort_order' => 4,
+            ],
+            [
+                'name' => 'Car Alarm & Security System',
+                'description' => 'Installation of car alarm, immobilizer, or GPS tracker. Protects your vehicle against theft.',
+                'price' => 250.00,
+                'duration_minutes' => 120,
+                'buffer_after' => 15,
+                'sort_order' => 5,
+            ],
+            [
+                'name' => 'DSP Tuning & Sound Calibration',
+                'description' => 'Professional Digital Sound Processor setup and fine-tuning for audiophile-grade in-car sound quality.',
+                'price' => null,
+                'duration_minutes' => 90,
+                'buffer_after' => 15,
+                'sort_order' => 6,
+            ],
+        ];
+
+        foreach ($services as $service) {
+            \App\Models\Service::firstOrCreate(
+                ['name' => $service['name']],
+                array_merge($service, ['is_active' => true])
+            );
+        }
+
         foreach ([
             ['name' => 'Ahmad Rizal', 'location' => 'KL', 'message' => "The staff explained the options clearly on WhatsApp before I came over. The showroom visit was smooth and helpful.", 'rating' => 5, 'sort_order' => 1],
             ['name' => 'Siti Nurul', 'location' => 'Selangor', 'message' => 'Very helpful team and excellent product guidance. I could compare models in person before deciding.', 'rating' => 5, 'sort_order' => 2],
