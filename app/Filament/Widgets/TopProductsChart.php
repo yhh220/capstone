@@ -2,41 +2,74 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Product;
 use Filament\Widgets\ChartWidget;
 
 class TopProductsChart extends ChartWidget
 {
-    protected int|string|array $columnSpan = [
-        'md' => 1,
-        'xl' => 6,
-    ];
+    protected static ?int $sort = 3;
 
-    protected ?string $heading = 'Top Products Chart';
+    protected int|string|array $columnSpan = 'full';
+
+    protected ?string $heading = 'Product Stock Overview';
+
+    protected ?string $description = 'Current stock levels for all active products';
 
     protected function getData(): array
     {
-        // Currently empty data (0 items sold) until frontend syncs
+        $products = Product::where('is_active', true)
+            ->orderByDesc('stock')
+            ->limit(10)
+            ->get(['name', 'stock', 'category_id']);
+
         return [
             'datasets' => [
                 [
-                    'label' => 'Units Sold (Top Sales)',
-                    'data' => [0, 0, 0, 0, 0],
-                    'backgroundColor' => [
-                        'rgba(139, 92, 246, 0.8)', // Violet
-                        'rgba(236, 72, 153, 0.8)', // Pink/Neon
-                        'rgba(59, 130, 246, 0.8)', // Blue
-                        'rgba(16, 185, 129, 0.8)', // Emerald
-                        'rgba(245, 158, 11, 0.8)', // Amber
-                    ],
+                    'label'           => 'Stock Available',
+                    'data'            => $products->pluck('stock')->toArray(),
+                    'backgroundColor' => $products->map(function ($p, $i) {
+                        $colors = [
+                            'rgba(236, 72, 153, 0.85)',
+                            'rgba(139, 92, 246, 0.85)',
+                            'rgba(59, 130, 246, 0.85)',
+                            'rgba(16, 185, 129, 0.85)',
+                            'rgba(245, 158, 11, 0.85)',
+                            'rgba(239, 68, 68, 0.85)',
+                            'rgba(20, 184, 166, 0.85)',
+                            'rgba(249, 115, 22, 0.85)',
+                            'rgba(99, 102, 241, 0.85)',
+                            'rgba(34, 197, 94, 0.85)',
+                        ];
+                        return $colors[$i % count($colors)];
+                    })->toArray(),
+                    'borderRadius'      => 6,
+                    'borderSkipped'     => false,
                 ],
             ],
-            // Dummy best sellers, showing 0 sales.
-            'labels' => ['Pioneer Head Unit', 'Dash Camera 4K', 'Seat Covers Set', 'LED Headlight', 'Subwoofer 10"'],
+            'labels' => $products->map(fn ($p) => strlen($p->name) > 25 ? substr($p->name, 0, 22) . '…' : $p->name)->toArray(),
         ];
     }
 
     protected function getType(): string
     {
         return 'bar';
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'plugins' => [
+                'legend' => ['display' => false],
+            ],
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+                    'title' => [
+                        'display' => true,
+                        'text'    => 'Units in Stock',
+                    ],
+                ],
+            ],
+        ];
     }
 }
