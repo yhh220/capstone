@@ -1,23 +1,14 @@
 <div>
-    {{-- ── HERO ── --}}
-    <div class="relative bg-gray-900 overflow-hidden py-16 sm:py-20">
-        <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-            <div class="absolute -top-32 -left-32 w-[30rem] h-[30rem] bg-brand-red/10 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-24 -right-24 w-[28rem] h-[28rem] bg-brand-yellow/8 rounded-full blur-3xl"></div>
-            <div class="absolute inset-0 opacity-[0.03]" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,.5) 60px, rgba(255,255,255,.5) 61px), repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,.5) 60px, rgba(255,255,255,.5) 61px);"></div>
-        </div>
-        <div class="relative z-10 max-w-7xl mx-auto px-4 text-center">
-            <span class="inline-flex items-center gap-2 bg-brand-red/20 border border-brand-red/30 text-brand-red text-xs font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                {{ __('Online Booking') }}
-            </span>
-            <h1 class="text-4xl sm:text-5xl font-black text-white mb-3 leading-tight">{{ __('Book Your Appointment') }}</h1>
-            <p class="text-gray-400 text-lg max-w-xl mx-auto">{{ __('Select your service, pick a slot, and we will handle the rest.') }}</p>
+    {{-- ── PAGE HEADER ── --}}
+    <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Book Your Appointment') }}</h1>
+            <p class="text-gray-400">{{ __('Select your service, pick a slot, and we will handle the rest.') }}</p>
         </div>
     </div>
 
     {{-- ── SUCCESS STATE ── --}}
-    @if(session('booking_success'))
+    @if($submitted)
     <div class="max-w-2xl mx-auto px-4 py-16 text-center">
         <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-xl p-10">
             <div class="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -27,18 +18,18 @@
             <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('Thank you! Save the manage link below to review or cancel your booking later.') }}</p>
             <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6">
                 <p class="text-xs text-gray-400 uppercase tracking-wider mb-2 font-semibold">{{ __('Your Booking Link') }}</p>
-                <a href="{{ session('booking_success') }}" class="text-brand-red font-semibold text-sm break-all hover:underline">{{ session('booking_success') }}</a>
+                <a href="{{ $manageUrl }}" class="text-brand-red font-semibold text-sm break-all hover:underline">{{ $manageUrl }}</a>
             </div>
-            <a href="{{ route('booking') }}"
-               class="group relative inline-flex items-center gap-2 bg-brand-red text-white px-8 py-3 rounded-full font-bold hover:shadow-[0_4px_20px_rgba(220,38,38,0.35)] hover:-translate-y-0.5 transition-all duration-300 active:scale-95 overflow-hidden">
+            <button wire:click="$set('submitted', false)"
+                    class="group relative inline-flex items-center gap-2 bg-brand-red text-white px-8 py-3 rounded-full font-bold hover:shadow-[0_4px_20px_rgba(220,38,38,0.35)] hover:-translate-y-0.5 transition-all duration-300 active:scale-95 overflow-hidden">
                 <span class="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
                 <span class="relative z-10">{{ __('Make Another Booking') }}</span>
-            </a>
+            </button>
         </div>
     </div>
 
     {{-- ── MULTI-STEP BOOKING WIZARD ── --}}
-    @else
+    @else {{-- !$submitted --}}
     <div class="max-w-7xl mx-auto px-4 py-10 sm:py-14">
         <div class="flex flex-col lg:flex-row gap-6 items-start">
 

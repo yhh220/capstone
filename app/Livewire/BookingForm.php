@@ -27,6 +27,9 @@ class BookingForm extends Component
     public int $currentStep = 1;
     public int $totalSteps = 4;
 
+    public bool $submitted = false;
+    public string $manageUrl = '';
+
     protected function bookingService(): BookingService
     {
         return app(BookingService::class);
@@ -176,6 +179,9 @@ class BookingForm extends Component
             'confirm_token' => (string) str()->uuid(),
         ]);
 
+        $this->manageUrl = $booking->manage_url;
+        $this->submitted = true;
+
         $this->reset([
             'customer_name',
             'customer_phone',
@@ -188,8 +194,6 @@ class BookingForm extends Component
             'notes',
         ]);
         $this->currentStep = 1;
-
-        session()->flash('booking_success', $booking->manage_url);
     }
 
     public function render()
