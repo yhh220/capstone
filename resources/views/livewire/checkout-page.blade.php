@@ -102,9 +102,13 @@
                 <a href="{{ route('cart') }}" class="group flex items-center px-6 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-full font-semibold text-gray-600 dark:text-gray-300 hover:border-brand-red hover:text-brand-red hover:bg-red-50 dark:hover:bg-red-900/10 transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
                     {{ __('← Back to Cart') }}
                 </a>
-                <button wire:click="goToStep2" class="group relative overflow-hidden flex-1 bg-brand-red text-white py-3 flex justify-center items-center rounded-full font-bold text-lg transition-all duration-300 shadow hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95">
+                <button wire:click="goToStep2"
+                        wire:loading.attr="disabled"
+                        wire:target="goToStep2"
+                        class="group relative overflow-hidden flex-1 bg-brand-red text-white py-3 flex justify-center items-center rounded-full font-bold text-lg transition-all duration-300 shadow hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
                     <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
-                    <span class="relative z-10">{{ __('Continue to Payment →') }}</span>
+                    <span class="relative z-10" wire:loading.remove wire:target="goToStep2">{{ __('Continue to Payment →') }}</span>
+                    <span class="relative z-10 hidden" wire:loading.class.remove="hidden" wire:target="goToStep2">{{ __('Checking...') }}</span>
                 </button>
             </div>
         </div>
@@ -151,6 +155,7 @@
                 </button>
                 <button wire:click="placeOrder"
                         wire:loading.attr="disabled"
+                        wire:target="placeOrder"
                         class="group relative overflow-hidden flex-1 bg-brand-red text-white py-3 flex justify-center items-center gap-2 rounded-full font-bold text-lg transition-all duration-300 shadow hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
                     <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
                     <span class="relative z-10" wire:loading.remove wire:target="placeOrder">{{ __('Place Order (Demo)') }} <span aria-hidden="true">→</span></span>

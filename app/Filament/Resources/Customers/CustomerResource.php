@@ -8,6 +8,7 @@ use App\Filament\Resources\Customers\Pages\ListCustomers;
 use App\Filament\Resources\Customers\Tables\CustomersTable;
 use App\Models\User;
 use BackedEnum;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -48,7 +49,7 @@ class CustomerResource extends Resource
      */
     public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
     {
-        return auth()->user()->isAdmin();
+        return Filament::auth()->user()?->isAdmin() ?? false;
     }
 
     /**
@@ -56,7 +57,7 @@ class CustomerResource extends Resource
      */
     public static function canCreate(): bool
     {
-        return true;
+        return Filament::auth()->user()?->isAdmin() ?? false;
     }
 
     /**
@@ -64,7 +65,7 @@ class CustomerResource extends Resource
      */
     public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
     {
-        return auth()->user()->isAdmin();
+        return Filament::auth()->user()?->isAdmin() ?? false;
     }
 
     public static function form(Schema $schema): Schema

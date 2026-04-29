@@ -86,6 +86,8 @@
             <div class="flex items-center gap-2">
                 <input wire:model="userInput"
                        wire:keydown.enter="sendMessage"
+                       wire:loading.attr="disabled"
+                       wire:target="sendMessage"
                        type="text"
                        id="chatbot-input"
                        maxlength="500"
@@ -94,6 +96,7 @@
                        class="w-full bg-gray-100 dark:bg-gray-800 border-transparent focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-brand-red focus:border-transparent rounded-full px-4 py-2.5 text-sm text-gray-800 dark:text-gray-200 transition-all disabled:opacity-60">
                 <button wire:click="sendMessage"
                         wire:loading.attr="disabled"
+                        wire:target="sendMessage"
                         {{ strlen(trim($userInput)) === 0 || $isLoading ? 'disabled' : '' }}
                         class="bg-brand-red hover:bg-red-700 disabled:opacity-50 text-white p-2.5 rounded-full flex-shrink-0 transition-colors">
                     <svg class="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

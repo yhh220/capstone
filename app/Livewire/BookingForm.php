@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Service;
 use App\Services\Booking\BookingService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 class BookingForm extends Component
@@ -76,6 +77,14 @@ class BookingForm extends Component
 
     public function submit(): void
     {
+        $throttleKey = 'booking-submit:' . request()->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            $this->addError('customer_phone', __("Too many booking attempts. Please wait {$seconds} seconds before trying again."));
+            return;
+        }
+
         $this->validate();
 
         $service = Service::findOrFail($this->service_id);
@@ -87,8 +96,8 @@ class BookingForm extends Component
             return;
         }
 
-        if ($date->dayOfWeek === Carbon::FRIDAY) {
-            $this->addError('preferred_date', __('We are closed on Fridays. Please choose another day.'));
+        if ($this->bookingService()->isClosedDate($date)) {
+            $this->addError('preferred_date', __('We are closed on :days. Please choose another day.', ['days' => $this->closedDaysLabel()]));
             return;
         }
 
@@ -103,6 +112,8 @@ class BookingForm extends Component
             $this->addError('preferred_time', __('This slot is already booked. Please pick another time.'));
             return;
         }
+
+        RateLimiter::hit($throttleKey, 600);
 
         $booking = Booking::create([
             'customer_name' => strip_tags($this->customer_name),
@@ -141,6 +152,24 @@ class BookingForm extends Component
             'services' => Service::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get(),
             'businessStart' => setting('BUSINESS_HOURS_START', '09:00'),
             'businessEnd' => setting('BUSINESS_HOURS_END', '18:00'),
+            'closedDaysLabel' => $this->closedDaysLabel(),
         ])->layout('layouts.app');
+    }
+
+    private function closedDaysLabel(): string
+    {
+        $names = [
+            Carbon::SUNDAY => __('Sundays'),
+            Carbon::MONDAY => __('Mondays'),
+            Carbon::TUESDAY => __('Tuesdays'),
+            Carbon::WEDNESDAY => __('Wednesdays'),
+            Carbon::THURSDAY => __('Thursdays'),
+            Carbon::FRIDAY => __('Fridays'),
+            Carbon::SATURDAY => __('Saturdays'),
+        ];
+
+        return collect($this->bookingService()->closedWeekdays())
+            ->map(fn (int $day): string => $names[$day] ?? (string) $day)
+            ->implode(', ');
     }
 }

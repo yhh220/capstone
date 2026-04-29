@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use Filament\Facades\Filament;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -32,7 +33,7 @@ class UserForm
                             ->hiddenOn('view'),
                         Select::make('role')
                             ->options(function () {
-                                if (auth()->user()->isOwner()) {
+                                if (Filament::auth()->user()?->isOwner()) {
                                     return [
                                         'owner' => 'Owner (Superadmin)',
                                         'admin' => 'Admin',

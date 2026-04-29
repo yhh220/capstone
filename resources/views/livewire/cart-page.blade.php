@@ -15,7 +15,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 items-center" wire:key="cart-{{ $item->id }}">
                     {{-- Product Image --}}
                     <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden flex-shrink-0">
-                        @if($item->product->image)
+                        @if($item->product?->image)
                             <img src="{{ Storage::url($item->product->image) }}" alt="{{ $item->product->name }}" class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600" aria-hidden="true">
@@ -26,16 +26,37 @@
 
                     {{-- Product Info --}}
                     <div class="flex-1 min-w-0">
+                        @if($item->product)
                         <a href="{{ route('product.show', $item->product->slug) }}" class="font-bold text-gray-800 dark:text-gray-200 hover:text-brand-red transition-colors line-clamp-1">
                             {{ $item->product->name }}
                         </a>
-                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            RM {{ number_format($item->product->current_price, 2) }} {{ __('each') }}
+                        @else
+                        <div class="font-bold text-gray-800 dark:text-gray-200 line-clamp-1">
+                            {{ __('Unavailable product') }}
                         </div>
+                        @endif
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            RM {{ number_format($item->product?->current_price ?? 0, 2) }} {{ __('each') }}
+                        </div>
+                        @if(!$item->product || ($item->product->stock ?? 0) <= 0)
+                        <div class="mt-2 text-xs font-semibold text-red-600 dark:text-red-400">
+                            {{ __('This item is currently out of stock. Please remove it before checkout.') }}
+                        </div>
+                        @elseif($item->quantity > $item->product->stock)
+                        <div class="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                            {{ __('Only :stock left in stock. Please reduce the quantity before checkout.', ['stock' => $item->product->stock]) }}
+                        </div>
+                        @elseif($item->product->stock <= 3)
+                        <div class="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                            {{ __('Low stock: only :stock left.', ['stock' => $item->product->stock]) }}
+                        </div>
+                        @endif
 
                         {{-- Quantity Controls --}}
                         <div class="flex items-center gap-3 mt-3">
                             <button wire:click="decrementQuantity({{ $item->id }})"
+                                    wire:loading.attr="disabled"
+                                    wire:target="decrementQuantity({{ $item->id }})"
                                     class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-bold"
                                     aria-label="{{ __('Decrease quantity') }}">
                                 −
@@ -44,7 +65,10 @@
                                 {{ $item->quantity }}
                             </span>
                             <button wire:click="incrementQuantity({{ $item->id }})"
-                                    class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-bold"
+                                    wire:loading.attr="disabled"
+                                    wire:target="incrementQuantity({{ $item->id }})"
+                                    @if($item->product && $item->quantity >= $item->product->stock) disabled @endif
+                                    class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-bold disabled:opacity-40 disabled:cursor-not-allowed"
                                     aria-label="{{ __('Increase quantity') }}">
                                 +
                             </button>
@@ -58,8 +82,10 @@
                         </div>
                         <button wire:click="removeItem({{ $item->id }})"
                                 wire:confirm="{{ __('Remove this item?') }}"
+                                wire:loading.attr="disabled"
+                                wire:target="removeItem({{ $item->id }})"
                                 class="text-xs text-gray-400 hover:text-red-500 transition-colors mt-2 underline"
-                                aria-label="{{ __('Remove') }} {{ $item->product->name }}">
+                                aria-label="{{ __('Remove') }} {{ $item->product?->name ?? __('Unavailable product') }}">
                             {{ __('Remove') }}
                         </button>
                     </div>
@@ -68,7 +94,9 @@
 
                 <div class="text-right">
                     <button wire:click="clearCart" wire:confirm="{{ __('Clear all items from your cart?') }}"
-                            class="text-sm text-gray-500 hover:text-red-500 transition-colors underline">
+                            wire:loading.attr="disabled"
+                            wire:target="clearCart"
+                            class="text-sm text-gray-500 hover:text-red-500 transition-colors underline disabled:opacity-60">
                         {{ __('Clear Cart') }}
                     </button>
                 </div>
@@ -94,11 +122,20 @@
                         </div>
                     </div>
 
+                    @if($this->hasStockWarnings)
+                    <div class="mt-6 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-sm font-semibold text-red-700 dark:text-red-300 text-center">
+                        {{ __('Please resolve stock warnings before checkout.') }}
+                    </div>
+                    <span class="block w-full bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-center py-3.5 rounded-full font-bold text-lg mt-3 cursor-not-allowed">
+                        {{ __('Checkout unavailable') }}
+                    </span>
+                    @else
                     <a href="{{ route('checkout') }}"
                        class="group relative overflow-hidden block w-full bg-brand-red text-white text-center py-3.5 rounded-full font-bold text-lg mt-6 transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95">
                         <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
                         <span class="relative z-10">{{ __('Proceed to Checkout') }}</span>
                     </a>
+                    @endif
 
                     <a href="{{ route('products') }}"
                        class="block w-full text-center py-3 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-red transition-colors mt-3 font-semibold">

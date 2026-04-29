@@ -174,10 +174,11 @@
                         <button type="submit"
                                 class="group relative overflow-hidden w-full bg-brand-red text-white py-4 flex items-center justify-center gap-2 rounded-xl font-bold text-lg hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                                 wire:loading.attr="disabled"
-                                wire:loading.class="opacity-75">
+                                wire:loading.class="opacity-75"
+                                wire:target="submit">
                             <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
-                            <span class="relative z-10" wire:loading.remove>{{ __('Send Message') }}</span>
-                            <span class="relative z-10 hidden" wire:loading.class.remove="hidden" aria-live="polite">{{ __('Sending...') }}</span>
+                            <span class="relative z-10" wire:loading.remove wire:target="submit">{{ __('Send Message') }}</span>
+                            <span class="relative z-10 hidden" wire:loading.class.remove="hidden" wire:target="submit" aria-live="polite">{{ __('Sending...') }}</span>
                         </button>
                     </form>
                 </div>

@@ -32,6 +32,7 @@ class SettingResource extends Resource
                     'ONLINE_SHOPPING_ENABLED' => '🛒 Online Shopping Mode',
                     'BUSINESS_HOURS_START'    => '🕒 Business Start Time',
                     'BUSINESS_HOURS_END'      => '🕓 Business End Time',
+                    'BUSINESS_CLOSED_WEEKDAYS'=> '🚫 Closed Weekdays',
                     default                   => $state,
                 }),
             Forms\Components\TextInput::make('value')
@@ -39,6 +40,7 @@ class SettingResource extends Resource
                 ->label('Setting Value')
                 ->placeholder(fn (Setting $record): string => match ($record->key) {
                     'BUSINESS_HOURS_START', 'BUSINESS_HOURS_END' => 'e.g. 09:00',
+                    'BUSINESS_CLOSED_WEEKDAYS' => 'e.g. 5 for Friday, or 0,5 for Sunday and Friday',
                     'ONLINE_SHOPPING_ENABLED' => 'true or false',
                     default => '',
                 })
@@ -46,6 +48,7 @@ class SettingResource extends Resource
                     'ONLINE_SHOPPING_ENABLED' => 'Set to "true" to enable the cart and checkout features, or "false" to hide them.',
                     'BUSINESS_HOURS_START'    => 'The earliest time a customer can book a service (24h format, e.g., 09:00).',
                     'BUSINESS_HOURS_END'      => 'The latest time your shop accepts appointments (24h format, e.g., 18:00).',
+                    'BUSINESS_CLOSED_WEEKDAYS'=> 'Comma-separated weekday numbers: 0=Sunday, 1=Monday, ... 5=Friday, 6=Saturday.',
                     default                   => 'Enter the value for this setting.',
                 }),
         ]);
@@ -64,12 +67,14 @@ class SettingResource extends Resource
                         'ONLINE_SHOPPING_ENABLED' => '🛒 Online Shopping Mode',
                         'BUSINESS_HOURS_START'    => '🕒 Business Start Time',
                         'BUSINESS_HOURS_END'      => '🕓 Business End Time',
+                        'BUSINESS_CLOSED_WEEKDAYS'=> '🚫 Closed Weekdays',
                         default                   => $state,
                     })
                     ->description(fn (Setting $record): string => match ($record->key) {
                         'ONLINE_SHOPPING_ENABLED' => 'Toggle shopping cart & checkout availability.',
                         'BUSINESS_HOURS_START'    => 'Opening time for booking services.',
                         'BUSINESS_HOURS_END'      => 'Closing time for booking services.',
+                        'BUSINESS_CLOSED_WEEKDAYS'=> 'Weekdays where bookings are unavailable.',
                         default                   => 'System configuration setting.',
                     }),
                 TextColumn::make('value')

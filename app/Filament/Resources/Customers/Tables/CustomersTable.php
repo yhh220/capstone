@@ -6,6 +6,7 @@ use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -51,12 +52,12 @@ class CustomersTable
             ])
             ->recordActions([
                 EditAction::make()
-                    ->visible(fn () => auth()->user()->isAdmin()),
+                    ->visible(fn () => Filament::auth()->user()?->isAdmin() ?? false),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()->isAdmin()),
+                        ->visible(fn () => Filament::auth()->user()?->isAdmin() ?? false),
                 ]),
             ]);
     }

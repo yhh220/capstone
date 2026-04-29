@@ -30,6 +30,9 @@
             <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-2">{{ __('Appointment Details') }}</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
                 {{ __('Business hours: :start - :end', ['start' => $businessStart, 'end' => $businessEnd]) }}
+                @if($closedDaysLabel)
+                    <span class="block mt-1">{{ __('Closed on :days', ['days' => $closedDaysLabel]) }}</span>
+                @endif
             </p>
 
             <div class="space-y-5">
@@ -134,7 +137,9 @@
                                type="date"
                                min="{{ date('Y-m-d') }}"
                                class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('preferred_date') border-red-400 @enderror">
-                        <p class="text-xs text-gray-400 mt-1">{{ __('We are closed on Fridays.') }}</p>
+                        @if($closedDaysLabel)
+                        <p class="text-xs text-gray-400 mt-1">{{ __('Closed on :days.', ['days' => $closedDaysLabel]) }}</p>
+                        @endif
                         @error('preferred_date')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -174,11 +179,12 @@
 
                 <button wire:click="submit"
                         wire:loading.attr="disabled"
+                        wire:target="submit"
                         class="group relative overflow-hidden w-full bg-brand-red text-white py-3 px-8 flex items-center justify-center gap-2 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-60">
                     <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
                     <svg class="w-5 h-5 relative z-10 group-hover:translate-x-0.5 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg>
-                    <span class="relative z-10" wire:loading.remove>{{ __('Confirm Booking') }}</span>
-                    <span class="relative z-10 hidden" wire:loading.class.remove="hidden">{{ __('Submitting...') }}</span>
+                    <span class="relative z-10" wire:loading.remove wire:target="submit">{{ __('Confirm Booking') }}</span>
+                    <span class="relative z-10 hidden" wire:loading.class.remove="hidden" wire:target="submit">{{ __('Submitting...') }}</span>
                 </button>
             </div>
         </div>

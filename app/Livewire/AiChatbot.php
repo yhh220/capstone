@@ -83,10 +83,11 @@ PROMPT;
 
         if (RateLimiter::tooManyAttempts($throttleKey, self::RATE_LIMIT_MAX)) {
             $seconds = RateLimiter::availableIn($throttleKey);
+            $phone = config('services.store.phone_display');
             $this->messages[] = ['role' => 'user', 'text' => $text];
             $this->messages[] = [
                 'role' => 'assistant',
-                'text' => "Too many messages. Please wait {$seconds} seconds before sending again, or WhatsApp us at +60169150917.",
+                'text' => "Too many messages. Please wait {$seconds} seconds before sending again, or WhatsApp us at {$phone}.",
             ];
             $this->userInput = '';
             return;
@@ -110,7 +111,7 @@ PROMPT;
         try {
             $reply = $this->ai()->chat($aiMessages, $this->systemPrompt());
         } catch (\Throwable) {
-            $reply = 'Connection issue. Please WhatsApp us at +60169150917 for immediate assistance.';
+            $reply = 'Connection issue. Please WhatsApp us at ' . config('services.store.phone_display') . ' for immediate assistance.';
         }
 
         $this->messages[] = ['role' => 'assistant', 'text' => $reply];

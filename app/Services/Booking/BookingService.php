@@ -11,6 +11,10 @@ class BookingService
 {
     public function getAvailableSlots(Service $service, Carbon $date): Collection
     {
+        if ($this->isClosedDate($date)) {
+            return collect();
+        }
+
         $start = Carbon::parse($date->format('Y-m-d') . ' ' . setting('BUSINESS_HOURS_START', '09:00'));
         $end = Carbon::parse($date->format('Y-m-d') . ' ' . setting('BUSINESS_HOURS_END', '18:00'));
         $slots = collect();
@@ -56,5 +60,22 @@ class BookingService
     public function buildEndAt(Service $service, Carbon $startAt): Carbon
     {
         return $startAt->copy()->addMinutes($service->duration_minutes + $service->buffer_after);
+    }
+
+    public function isClosedDate(Carbon $date): bool
+    {
+        return in_array($date->dayOfWeek, $this->closedWeekdays(), true);
+    }
+
+    public function closedWeekdays(): array
+    {
+        return collect(explode(',', (string) setting('BUSINESS_CLOSED_WEEKDAYS', '5')))
+            ->map(fn (string $day): string => trim($day))
+            ->filter(fn (string $day): bool => $day !== '' && is_numeric($day))
+            ->map(fn (string $day): int => (int) $day)
+            ->filter(fn (int $day): bool => $day >= 0 && $day <= 6)
+            ->unique()
+            ->values()
+            ->all();
     }
 }

@@ -31,6 +31,13 @@ class CartPage extends Component
         );
     }
 
+    public function getHasStockWarningsProperty(): bool
+    {
+        return $this->cartItems->contains(fn ($item): bool =>
+            !$item->product || ($item->product->stock ?? 0) < $item->quantity
+        );
+    }
+
     public function incrementQuantity(int $cartItemId): void
     {
         $item = CartItem::forCurrentOwner()->where('id', $cartItemId)->first();
