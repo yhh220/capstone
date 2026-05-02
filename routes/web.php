@@ -40,9 +40,10 @@ Route::get('/privacy-policy', PrivacyPolicyPage::class)->name('privacy-policy');
 Route::get('/terms-of-service', TermsOfServicePage::class)->name('terms-of-service');
 
 // ─── Authenticated User Routes ────────────────────────────────
-Route::get('/profile', ProfilePage::class)->name('profile');
-Route::get('/my-orders', MyOrdersPage::class)->name('my-orders');
-
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', ProfilePage::class)->name('profile');
+    Route::get('/my-orders', MyOrdersPage::class)->name('my-orders');
+});
 // ─── Shopping Routes (protected by ShoppingEnabled middleware) ──
 Route::middleware(ShoppingEnabled::class)->group(function () {
     Route::get('/cart', CartPage::class)->name('cart');
@@ -55,7 +56,7 @@ Route::get('/lang/{locale}', function (string $locale) {
         session(['locale' => $locale]);
     }
 
-    return back();
+    return redirect(url()->previous() ?: '/');
 })->name('lang');
 
 // ─── Authentication Routes ─────────────────────────────────────
@@ -73,7 +74,7 @@ Route::post('/logout', function () {
 Route::get('/sitemap.xml', function () {
     $path = public_path('sitemap.xml');
     if (!file_exists($path)) {
-        \Artisan::call('sitemap:generate');
+        abort(404);
     }
     return response()->file($path, ['Content-Type' => 'application/xml']);
 })->name('sitemap');

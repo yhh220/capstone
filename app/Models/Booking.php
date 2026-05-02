@@ -22,7 +22,7 @@ class Booking extends Model
 
     protected $fillable = [
         'customer_name', 'customer_phone', 'customer_email',
-        'vehicle_model', 'vehicle_plate', 'service_id', 'preferred_date', 'preferred_time',
+        'vehicle_model', 'vehicle_plate', 'service_id', 'preferred_date',
         'start_at', 'end_at', 'notes', 'status', 'confirm_token',
     ];
 

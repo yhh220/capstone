@@ -474,5 +474,11 @@
     "Checking...": "Menyemak...",
     "Verified Technicians": "Juruteknik Bertauliah",
     "Free Cancellation": "Pembatalan Percuma",
-    "WhatsApp Confirmation": "Pengesahan WhatsApp"
+    "WhatsApp Confirmation": "Pengesahan WhatsApp",
+    "Pending": "Menunggu",
+    "Processing": "Memproses",
+    "Shipped": "Dihantar",
+    "Delivered": "Telah Dihantar",
+    "Cancelled": "Dibatalkan",
+    "Order Placed": "Pesanan Dibuat"
 }

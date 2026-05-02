@@ -144,7 +144,7 @@ class CheckoutPage extends Component
                     'subtotal'       => $subtotal,
                     'total_amount'   => $subtotal,
                     'status'         => 'pending',
-                    'payment_status' => 'paid', // Mock payment — always marked paid.
+                    'payment_status' => 'pending', // Pending real payment integration
                 ]);
 
                 foreach ($cartItems as $cartItem) {

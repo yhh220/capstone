@@ -171,7 +171,6 @@ class BookingForm extends Component
             'vehicle_plate' => $this->vehicle_plate !== '' ? strtoupper(strip_tags($this->vehicle_plate)) : null,
             'service_id' => $this->service_id,
             'preferred_date' => $this->preferred_date,
-            'preferred_time' => $this->preferred_time,
             'start_at' => $startAt,
             'end_at' => $this->bookingService()->buildEndAt($service, $startAt),
             'notes' => strip_tags($this->notes),

@@ -61,12 +61,7 @@ class ProductForm
                 TagsInput::make('compatible_vehicles')
                     ->columnSpanFull()
                     ->placeholder('Add vehicle model'),
-                TextInput::make('model_url')
-                    ->label('3D Model URL')
-                    ->columnSpanFull(),
-                Toggle::make('has_3d')
-                    ->label('Has 3D Viewer')
-                    ->default(false),
+
                 Toggle::make('is_active')
                     ->required(),
                 Toggle::make('is_featured')

@@ -46,9 +46,7 @@ class ProductsTable
                 ToggleColumn::make('is_featured')
                     ->label('Show on Homepage')
                     ->alignCenter(),
-                ToggleColumn::make('has_3d')
-                    ->label('3D')
-                    ->alignCenter(),
+
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
