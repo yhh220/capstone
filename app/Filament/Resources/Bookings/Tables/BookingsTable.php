@@ -31,8 +31,6 @@ class BookingsTable
                 TextColumn::make('preferred_date')
                     ->date('D, d M Y')
                     ->sortable(),
-                TextColumn::make('preferred_time')
-                    ->sortable(),
                 TextColumn::make('confirm_token')
                     ->label('Token')
                     ->toggleable(isToggledHiddenByDefault: true),

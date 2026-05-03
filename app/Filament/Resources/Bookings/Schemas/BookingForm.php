@@ -13,14 +13,6 @@ class BookingForm
 {
     public static function configure(Schema $schema): Schema
     {
-        $times = [];
-        for ($h = 10; $h <= 19; $h++) {
-            foreach (['00', '30'] as $m) {
-                if ($h === 10 && $m === '00') continue; // shop opens 10:30
-                $times[sprintf('%02d:%s', $h, $m)] = sprintf('%02d:%s', $h, $m);
-            }
-        }
-
         return $schema
             ->columns(['default' => 1, 'sm' => 2])
             ->components([
@@ -50,10 +42,6 @@ class BookingForm
                     ->label('Preferred Date')
                     ->required()
                     ->native(false),
-                Select::make('preferred_time')
-                    ->label('Preferred Time')
-                    ->options($times)
-                    ->required(),
                 TextInput::make('confirm_token')
                     ->disabled()
                     ->dehydrated(false)

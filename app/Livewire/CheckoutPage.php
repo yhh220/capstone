@@ -141,10 +141,11 @@ class CheckoutPage extends Component
                         'postcode' => $this->postcode,
                         'state'    => $this->state,
                     ],
-                    'subtotal'       => $subtotal,
-                    'total_amount'   => $subtotal,
-                    'status'         => 'pending',
-                    'payment_status' => 'pending', // Pending real payment integration
+                    'subtotal'        => $subtotal,
+                    'total_amount'    => $subtotal,
+                    'status'          => 'pending',
+                    'payment_status'  => 'pending',
+                    'payment_method'  => $this->paymentMethod,
                 ]);
 
                 foreach ($cartItems as $cartItem) {

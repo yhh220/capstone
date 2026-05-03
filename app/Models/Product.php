@@ -61,6 +61,8 @@ class Product extends Model implements HasMedia
         'model_url', 'has_3d', 'is_active', 'is_featured',
     ];
 
+    protected $appends = ['current_price', 'is_on_sale'];
+
     protected $casts = [
         'images' => 'array',
         'specs' => 'array',

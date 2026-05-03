@@ -44,8 +44,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', ProfilePage::class)->name('profile');
     Route::get('/my-orders', MyOrdersPage::class)->name('my-orders');
 });
-// ─── Shopping Routes (protected by ShoppingEnabled middleware) ──
-Route::middleware(ShoppingEnabled::class)->group(function () {
+// ─── Shopping Routes (protected by ShoppingEnabled + auth middleware) ──
+Route::middleware(['auth', ShoppingEnabled::class])->group(function () {
     Route::get('/cart', CartPage::class)->name('cart');
     Route::get('/checkout', CheckoutPage::class)->name('checkout');
 });

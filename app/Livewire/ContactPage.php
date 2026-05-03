@@ -48,7 +48,7 @@ class ContactPage extends Component
         $key = 'contact.' . request()->ip();
         if (RateLimiter::tooManyAttempts($key, 3)) {
             $seconds = RateLimiter::availableIn($key);
-            $this->addError('name', "Too many submissions. Please wait {$seconds} seconds before trying again.");
+            $this->addError('name', __('Too many submissions. Please wait :seconds seconds before trying again.', ['seconds' => $seconds]));
             return;
         }
 

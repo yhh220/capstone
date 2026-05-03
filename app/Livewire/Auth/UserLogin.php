@@ -68,7 +68,7 @@ class UserLogin extends Component
 
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
-            $this->addError('loginEmail', "Too many login attempts. Please try again in {$seconds} seconds.");
+            $this->addError('loginEmail', __('Too many login attempts. Please try again in :seconds seconds.', ['seconds' => $seconds]));
             return;
         }
 
@@ -78,7 +78,7 @@ class UserLogin extends Component
         ], $this->remember)) {
             RateLimiter::hit($throttleKey, 60);
 
-            $this->addError('loginEmail', 'Invalid email or password.');
+            $this->addError('loginEmail', __('Invalid email or password.'));
             return;
         }
 
@@ -118,8 +118,8 @@ class UserLogin extends Component
             ],
             'password_confirmation' => ['required'],
         ], [
-            'password.min' => 'Password must be at least 8 characters.',
-            'name.min' => 'Name must be at least 2 characters.',
+            'password.min' => __('Password must be at least 8 characters.'),
+            'name.min' => __('Name must be at least 2 characters.'),
         ]);
 
         // Create user — password is automatically hashed by the 'hashed' cast

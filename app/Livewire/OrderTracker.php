@@ -39,7 +39,7 @@ class OrderTracker extends Component
 
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
-            $this->errorMsg = __("Too many tracking attempts. Please try again in {$seconds} seconds.");
+            $this->errorMsg = __('Too many tracking attempts. Please try again in :seconds seconds.', ['seconds' => $seconds]);
             return;
         }
 

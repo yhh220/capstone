@@ -31,7 +31,7 @@ return new class extends Migration
                 $table->decimal('subtotal', 10, 2)->default(0)->after('shipping_address');
             }
             if (!Schema::hasColumn('orders', 'payment_status')) {
-                $table->string('payment_status')->default('paid')->after('total_amount');
+                $table->string('payment_status')->default('pending')->after('total_amount');
             }
         });
     }
