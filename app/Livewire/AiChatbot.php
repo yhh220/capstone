@@ -40,6 +40,7 @@ class AiChatbot extends Component
         ];
 
         $this->messages[] = ['role' => 'assistant', 'text' => $greetings[$lang]];
+        $this->dispatch('chatbot-scroll');
     }
 
     public function open(): void
@@ -113,6 +114,7 @@ class AiChatbot extends Component
 
         $this->messages[] = ['role' => 'assistant', 'text' => $reply];
         $this->isLoading = false;
+        $this->dispatch('chatbot-scroll');
     }
 
     public function render()
