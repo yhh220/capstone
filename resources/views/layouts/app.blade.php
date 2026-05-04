@@ -843,10 +843,14 @@
         });
 
         // Instant client-side language switching — zero reload
+        @php
+            $jsLangMs = cache()->remember('lang.ms', 86400, function () { return json_decode(file_get_contents(base_path('lang/ms.json')), true); });
+            $jsLangZh = cache()->remember('lang.zh', 86400, function () { return json_decode(file_get_contents(base_path('lang/zh.json')), true); });
+        @endphp
         (function () {
             var translations = {
-                ms: @json(cache()->remember('lang.ms', 86400, fn() => json_decode(file_get_contents(base_path('lang/ms.json')), true))),
-                zh: @json(cache()->remember('lang.zh', 86400, fn() => json_decode(file_get_contents(base_path('lang/zh.json')), true)))
+                ms: @json($jsLangMs),
+                zh: @json($jsLangZh)
             };
             var currentLocale = '{{ app()->getLocale() }}';
 
