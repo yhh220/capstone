@@ -267,17 +267,12 @@
     @push('styles')
     <style>
         .brand-track {
-            animation: brand-marquee 60s linear infinite;
             will-change: transform;
             backface-visibility: hidden;
             transform-style: preserve-3d;
         }
-        .brand-marquee-wrapper:hover .brand-track {
-            animation-play-state: paused;
-        }
-        @keyframes brand-marquee {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-50%, 0, 0); }
+        @media (prefers-reduced-motion: reduce) {
+            .brand-track { animation: none !important; transform: none !important; }
         }
         .category-card {
             transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
@@ -291,5 +286,50 @@
             transition: transform 0.05s linear !important;
         }
     </style>
+    @endpush
+
+    @push('scripts')
+    <script>
+    (function () {
+        function initMarquee() {
+            const wrapper = document.querySelector('.brand-marquee-wrapper');
+            const track   = document.querySelector('.brand-track');
+            if (!wrapper || !track) return;
+
+            const BASE_SPEED = 0.55; // px per frame (~33px/s at 60fps)
+            let pos     = 0;
+            let speed   = BASE_SPEED;
+            let target  = BASE_SPEED;
+            let halfW   = 0;
+            let raf     = null;
+
+            function measure() { halfW = track.scrollWidth / 2; }
+            measure();
+            window.addEventListener('resize', measure);
+
+            wrapper.addEventListener('mouseenter', () => { target = 0; });
+            wrapper.addEventListener('mouseleave', () => { target = BASE_SPEED; });
+
+            function tick() {
+                // Lerp: each frame speed moves 10% closer to target → smooth ease in/out
+                speed += (target - speed) * 0.1;
+                pos   -= speed;
+                if (pos <= -halfW) pos += halfW;
+                track.style.transform = 'translate3d(' + pos + 'px, 0, 0)';
+                raf = requestAnimationFrame(tick);
+            }
+
+            raf = requestAnimationFrame(tick);
+        }
+
+        // Run after Livewire hydrates (safe for both first load and navigations)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMarquee);
+        } else {
+            initMarquee();
+        }
+        document.addEventListener('livewire:navigated', initMarquee);
+    }());
+    </script>
     @endpush
 </div>

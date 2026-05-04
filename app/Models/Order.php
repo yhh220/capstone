@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -49,17 +50,19 @@ class Order extends Model
      */
     public static function generateOrderNumber(): string
     {
-        $year = date('Y');
-        $latestOrder = static::where('order_number', 'like', "ORD-{$year}-%")->orderBy('id', 'desc')->first();
-        
-        if ($latestOrder) {
-            $lastSequence = (int) substr($latestOrder->order_number, -5);
-            $count = $lastSequence + 1;
-        } else {
-            $count = 1;
-        }
-        
-        return 'ORD-' . $year . '-' . str_pad((string)$count, 5, '0', STR_PAD_LEFT);
+        return DB::transaction(function () {
+            $year = date('Y');
+            $latestOrder = static::where('order_number', 'like', "ORD-{$year}-%")
+                ->lockForUpdate()
+                ->orderBy('id', 'desc')
+                ->first();
+
+            $count = $latestOrder
+                ? ((int) substr($latestOrder->order_number, -5)) + 1
+                : 1;
+
+            return 'ORD-' . $year . '-' . str_pad((string) $count, 5, '0', STR_PAD_LEFT);
+        });
     }
 
     /**

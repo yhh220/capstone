@@ -29,7 +29,7 @@ class StatsOverview extends StatsOverviewWidget
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('total_amount');
-        $registeredUsers   = User::where('role', 'customer')->count();
+        $registeredUsers   = User::where('role', 'client')->count();
 
         return [
             Stat::make('Active Products', Product::where('is_active', true)->count())

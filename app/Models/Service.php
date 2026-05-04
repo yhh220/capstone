@@ -72,7 +72,7 @@ class Service extends Model implements HasMedia
         $minutes = max((int) $this->duration_minutes, 0);
 
         if ($minutes === 0) {
-            return 'Flexible';
+            return __('Flexible');
         }
 
         if ($minutes < 60) {

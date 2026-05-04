@@ -26,7 +26,7 @@
         @if($items->count() > 0)
         <div class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
             @foreach($items as $i => $item)
-            <div class="break-inside-avoid bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 group hover:-translate-y-1 transition-transform duration-300"
+            <div wire:key="gallery-{{ $item->id }}" class="break-inside-avoid bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 group hover:-translate-y-1 transition-transform duration-300"
                  data-aos="zoom-in" data-aos-delay="{{ min($i * 60, 400) }}">
                 <div class="overflow-hidden">
                     @if($item->getImageUrl('thumb'))

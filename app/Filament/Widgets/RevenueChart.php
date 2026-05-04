@@ -38,8 +38,8 @@ class RevenueChart extends ChartWidget
                 [
                     'label'           => 'Revenue (RM)',
                     'data'            => $revenue,
-                    'borderColor'     => '#ec4899',
-                    'backgroundColor' => 'rgba(236, 72, 153, 0.12)',
+                    'borderColor'     => '#C8413D',
+                    'backgroundColor' => 'rgba(200, 65, 61, 0.12)',
                     'fill'            => true,
                     'tension'         => 0.4,
                     'pointRadius'     => 4,

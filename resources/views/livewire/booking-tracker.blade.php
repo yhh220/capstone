@@ -45,12 +45,12 @@
                 @if($this->bookings->count() > 0)
                 <div class="space-y-4">
                     @foreach($this->bookings as $booking)
-                    <div class="border border-gray-100 dark:border-gray-700 rounded-xl p-5">
+                    <div wire:key="booking-{{ $booking->id }}" class="border border-gray-100 dark:border-gray-700 rounded-xl p-5">
                         <div class="flex items-start justify-between gap-3 mb-3">
                             <div>
                                 <div class="font-bold text-gray-800 dark:text-white">{{ $booking->service?->name ?? __('Service') }}</div>
                                 <div class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                                    {{ $booking->preferred_date->format('D, d M Y') }} • {{ $booking->preferred_time }}
+                                    {{ $booking->preferred_date->format('D, d M Y') }}{{ $booking->start_at ? ' • ' . $booking->start_at->format('h:i A') : '' }}
                                 </div>
                             </div>
                             <span class="flex-shrink-0 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold

@@ -21,7 +21,7 @@
                         </div>
                         <div>
                             <div class="text-gray-400">{{ __('Time') }}</div>
-                            <div class="font-semibold text-gray-800 dark:text-gray-100">{{ $booking->preferred_time }}</div>
+                            <div class="font-semibold text-gray-800 dark:text-gray-100">{{ $booking->start_at?->format('h:i A') ?? __('Not set') }}</div>
                         </div>
                         <div>
                             <div class="text-gray-400">{{ __('Vehicle') }}</div>

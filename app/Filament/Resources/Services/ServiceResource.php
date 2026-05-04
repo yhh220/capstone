@@ -18,6 +18,8 @@ class ServiceResource extends Resource
 {
     protected static ?string $model = Service::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static \UnitEnum|string|null $navigationGroup = 'Services & Bookings';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
