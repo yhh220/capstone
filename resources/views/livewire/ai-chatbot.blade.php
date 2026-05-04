@@ -35,29 +35,48 @@
                     <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></span>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 dark:text-white text-sm">{{ __('Win Win AI Assistant') }}</h3>
+                    <h3 class="font-bold text-gray-800 dark:text-white text-sm">{{ __('Win Win Assistant') }}</h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Ask me anything about our shop') }}</p>
                 </div>
             </div>
+            @if($chatLang !== '')
             <button wire:click="clearChat"
                     class="text-xs text-gray-400 hover:text-brand-red transition-colors mr-2"
                     title="{{ __('Clear chat') }}">
                 {{ __('Clear') }}
             </button>
+            @endif
         </div>
+
+        {{-- Language Selection Screen --}}
+        @if($chatLang === '')
+        <div class="flex-1 flex flex-col items-center justify-center p-6 text-center bg-gray-50/50 dark:bg-gray-800/50">
+            <div class="text-5xl mb-4">👋</div>
+            <h4 class="font-bold text-gray-800 dark:text-white text-base mb-1">Welcome to Win Win Car Studio!</h4>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Please select your preferred language<br>Sila pilih bahasa anda<br>请选择您的语言</p>
+            <div class="flex flex-col gap-3 w-full max-w-[220px]">
+                <button wire:click="selectLang('en')"
+                        class="flex items-center justify-center gap-3 w-full py-3 px-5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-brand-red hover:text-white hover:border-brand-red dark:hover:bg-brand-red dark:hover:border-brand-red text-gray-700 dark:text-gray-200 font-medium text-sm transition-all shadow-sm">
+                    <span class="text-xl">🇬🇧</span> English
+                </button>
+                <button wire:click="selectLang('ms')"
+                        class="flex items-center justify-center gap-3 w-full py-3 px-5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-brand-red hover:text-white hover:border-brand-red dark:hover:bg-brand-red dark:hover:border-brand-red text-gray-700 dark:text-gray-200 font-medium text-sm transition-all shadow-sm">
+                    <span class="text-xl">🇲🇾</span> Bahasa Melayu
+                </button>
+                <button wire:click="selectLang('zh')"
+                        class="flex items-center justify-center gap-3 w-full py-3 px-5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-brand-red hover:text-white hover:border-brand-red dark:hover:bg-brand-red dark:hover:border-brand-red text-gray-700 dark:text-gray-200 font-medium text-sm transition-all shadow-sm">
+                    <span class="text-xl">🇨🇳</span> 中文
+                </button>
+            </div>
+        </div>
+
+        {{-- Normal Chat Screen --}}
+        @else
 
         {{-- Messages --}}
         <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50 dark:bg-gray-800/50"
              id="chatbot-messages"
              wire:key="messages-{{ count($messages) }}">
-
-            @if(count($messages) === 0)
-            <div class="flex justify-start">
-                <div class="max-w-[85%] bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-gray-600 rounded-2xl rounded-bl-none px-4 py-2.5 text-sm shadow-sm">
-                    {{ __('Hi! I\'m the Win Win AI assistant. Ask me about our products, services, or opening hours!') }} 👋
-                </div>
-            </div>
-            @endif
 
             @foreach($messages as $msg)
             <div class="flex {{ $msg['role'] === 'user' ? 'justify-end' : 'justify-start' }}">
@@ -106,6 +125,8 @@
             </div>
             <p class="text-center text-[10px] text-gray-400 mt-2">{{ __('AI assistant — responses may not be 100% accurate') }}</p>
         </div>
+
+        @endif
     </div>
 
     <script>
