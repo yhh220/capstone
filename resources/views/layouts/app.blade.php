@@ -37,8 +37,12 @@
     <script>
         (function () {
             var t = localStorage.getItem('theme');
-            if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            var dark = t === 'dark' || ((!t || t === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (dark) {
                 document.documentElement.classList.add('dark');
+                document.documentElement.style.backgroundColor = '#121212';
+            } else {
+                document.documentElement.style.backgroundColor = '#F7F5F3';
             }
         })();
     </script>
@@ -73,7 +77,40 @@
             font-family: 'Anton', sans-serif !important;
             font-weight: 400 !important;
             text-transform: uppercase;
-            letter-spacing: 0.02em;
+            letter-spacing: 0;
+        }
+
+        html:not([lang^="en"]) h1,
+        html:not([lang^="en"]) h2,
+        html:not([lang^="en"]) h3,
+        html:not([lang^="en"]) h4,
+        html:not([lang^="en"]) h5,
+        html:not([lang^="en"]) h6,
+        html:not([lang^="en"]) .font-display,
+        html:not([lang^="en"]) .uppercase {
+            text-transform: none !important;
+        }
+
+        html:not([lang^="en"]) [class*="tracking-"] {
+            letter-spacing: 0 !important;
+        }
+
+        #main-content a,
+        #main-content button,
+        #main-content [role="button"] {
+            min-width: 0;
+        }
+
+        #main-content a[class*="inline-flex"],
+        #main-content button[class*="inline-flex"],
+        #main-content a[class*="flex"],
+        #main-content button[class*="flex"] {
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        #main-content svg {
+            flex-shrink: 0;
         }
         /* ── Ember Carbon color theme ──────────────────────────
            Brand    : Ember Red #C8413D · Carbon Black #121212 · Asphalt #1C1917
@@ -301,6 +338,145 @@
             box-shadow: 0 1px 4px rgba(0,0,0,0.35);
             color: #E11D48 !important;
         }
+
+        /* ═══════════════════════════════════════════════
+           UNIFIED BUTTON SYSTEM
+           Primary   .btn-primary   — red fill, white text
+           Secondary .btn-secondary — bordered, red on hover
+           Ghost     .btn-ghost     — transparent, red on hover
+           Sizes     .btn-sm / .btn-md / .btn-lg
+        ═══════════════════════════════════════════════ */
+
+        /* Base */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            border-radius: 0.75rem;   /* rounded-xl */
+            border: 2px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            transition: transform 0.2s ease, box-shadow 0.2s ease,
+                        background-color 0.2s ease, border-color 0.2s ease,
+                        color 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn:active { transform: scale(0.96) !important; }
+        .btn:disabled, .btn[disabled] { opacity: 0.5; pointer-events: none; }
+
+        /* Sizes */
+        .btn-sm  { padding: 0.5rem 1rem;      font-size: 0.8125rem; } /* py-2 px-4   */
+        .btn-md  { padding: 0.625rem 1.5rem;  font-size: 0.875rem;  } /* py-2.5 px-6 */
+        .btn-lg  { padding: 0.75rem 2rem;     font-size: 1rem;      } /* py-3 px-8   */
+        .btn-xl  { padding: 0.875rem 2.25rem; font-size: 1.0625rem; } /* py-3.5 px-9 */
+
+        /* Pill variant (hero / checkout flow) */
+        .btn-pill { border-radius: 9999px; }
+
+        /* Primary — red fill */
+        .btn-primary {
+            background-color: rgb(var(--brand-red-rgb));
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background-color: rgb(var(--brand-red-hover-rgb));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(var(--brand-red-rgb) / 0.35);
+        }
+
+        /* Secondary — bordered */
+        .btn-secondary {
+            background-color: transparent;
+            border-color: rgb(220 220 220);
+            color: rgb(55 65 81);
+        }
+        .dark .btn-secondary {
+            border-color: rgb(75 85 99);
+            color: rgb(209 213 219);
+        }
+        .btn-secondary:hover {
+            border-color: rgb(var(--brand-red-rgb));
+            color: rgb(var(--brand-red-rgb));
+            transform: translateY(-2px);
+        }
+
+        /* Ghost — text only, subtle bg on hover */
+        .btn-ghost {
+            background-color: transparent;
+            color: rgb(var(--brand-red-rgb));
+        }
+        .btn-ghost:hover {
+            background-color: rgb(var(--brand-red-rgb) / 0.08);
+            transform: translateY(-2px);
+        }
+
+        /* Icon button (square, no text) */
+        .btn-icon {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            gap: 0;
+        }
+
+        /* Shine overlay — add .btn-shine to any .btn */
+        .btn-shine::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.22) 50%, transparent 60%);
+            transform: translateX(-100%);
+            transition: transform 0.45s ease;
+        }
+        .btn-shine:hover::after { transform: translateX(100%); }
+
+        /* ═══════════════════════════════════════════════
+           UNIFIED ICON SYSTEM  (Lucide)
+           .icon-xs  12px   .icon-sm  16px
+           .icon-md  20px   .icon-lg  24px
+           Icons inherit currentColor — set color on parent.
+           Use .icon-spin for loading, .icon-bounce on hover.
+        ═══════════════════════════════════════════════ */
+
+        .icon-xs { width: 0.75rem;  height: 0.75rem;  flex-shrink: 0; }
+        .icon-sm { width: 1rem;     height: 1rem;     flex-shrink: 0; }
+        .icon-md { width: 1.25rem;  height: 1.25rem;  flex-shrink: 0; }
+        .icon-lg { width: 1.5rem;   height: 1.5rem;   flex-shrink: 0; }
+        .icon-xl { width: 2rem;     height: 2rem;     flex-shrink: 0; }
+
+        .icon-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Arrow nudge — put on icon inside a .btn */
+        .btn:hover .icon-arrow { transform: translateX(3px); }
+        .icon-arrow { transition: transform 0.2s ease; }
+
+        /* ═══════════════════════════════════════════════
+           CARD HOVER (itshover.com pattern)
+           .card-lift  — translate up + shadow
+           .card-glow  — brand-red glow ring
+        ═══════════════════════════════════════════════ */
+
+        .card-lift {
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .card-lift:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.10);
+        }
+        .dark .card-lift:hover {
+            box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+        }
+        .card-glow {
+            transition: box-shadow 0.25s ease;
+        }
+        .card-glow:hover {
+            box-shadow: 0 0 0 3px rgb(var(--brand-red-rgb) / 0.25),
+                        0 8px 24px rgba(0,0,0,0.10);
+        }
     </style>
 
     @livewireStyles
@@ -395,14 +571,12 @@
                                     ['ms', 'Bahasa Melayu', 'BM'],
                                     ['zh', '中文',           'ZH'],
                                 ] as [$code, $name, $short])
-                                <button type="button"
-                                   data-lang="{{ $code }}"
-                                   data-lang-url="{{ route('lang', $code) }}"
+                                <a href="{{ route('lang', $code) }}"
                                    role="menuitem"
                                    class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 {{ app()->getLocale() === $code ? 'bg-red-50 dark:bg-red-900/20 text-brand-red' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80' }}">
                                     <span class="flex-1 text-sm font-semibold">{{ $name }}</span>
                                     <svg class="lang-check w-4 h-4 text-brand-red shrink-0 {{ app()->getLocale() !== $code ? 'hidden' : '' }}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                </button>
+                                </a>
                                 @endforeach
                             </div>
                         </div>
@@ -410,17 +584,17 @@
 
                     <!-- Dark mode toggle (segmented pill) — hidden on xs, visible sm+ -->
                     <div id="theme-wrapper" class="hidden sm:flex items-center p-1 rounded-xl bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm gap-0.5">
-                        <button class="theme-option p-1.5 sm:p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="light" title="Light" aria-label="{{ __('Light mode') }}">
+                        <button class="theme-option p-1.5 sm:p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="light" title="{{ __('Light mode') }}" aria-label="{{ __('Light mode') }}">
                             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
                             </svg>
                         </button>
-                        <button class="theme-option p-1.5 sm:p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="dark" title="Dark" aria-label="{{ __('Dark mode') }}">
+                        <button class="theme-option p-1.5 sm:p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="dark" title="{{ __('Dark mode') }}" aria-label="{{ __('Dark mode') }}">
                             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                             </svg>
                         </button>
-                        <button class="theme-option p-1.5 sm:p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="system" title="System" aria-label="{{ __('System theme') }}">
+                        <button class="theme-option p-1.5 sm:p-2 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" data-theme="system" title="{{ __('System theme') }}" aria-label="{{ __('System theme') }}">
                             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/>
                             </svg>
@@ -558,13 +732,13 @@
                 <div class="sm:hidden flex items-center gap-2 px-3 py-2 mb-1">
                     <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 mr-1">{{ __('Theme') }}:</span>
                     <div class="flex items-center p-1 rounded-xl bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 gap-0.5">
-                        <button class="theme-option p-1.5 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600" data-theme="light" title="Light" aria-label="{{ __('Light mode') }}">
+                        <button class="theme-option p-1.5 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600" data-theme="light" title="{{ __('Light mode') }}" aria-label="{{ __('Light mode') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
                         </button>
-                        <button class="theme-option p-1.5 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600" data-theme="dark" title="Dark" aria-label="{{ __('Dark mode') }}">
+                        <button class="theme-option p-1.5 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600" data-theme="dark" title="{{ __('Dark mode') }}" aria-label="{{ __('Dark mode') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                         </button>
-                        <button class="theme-option p-1.5 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600" data-theme="system" title="System" aria-label="{{ __('System theme') }}">
+                        <button class="theme-option p-1.5 rounded-lg transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-600" data-theme="system" title="{{ __('System theme') }}" aria-label="{{ __('System theme') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
                         </button>
                     </div>
@@ -841,144 +1015,6 @@
                 closeLang();
             }
         });
-
-        // Instant client-side language switching — zero reload
-        @php
-            $jsLangMs = cache()->remember('lang.ms', 86400, function () { return json_decode(file_get_contents(base_path('lang/ms.json')), true); });
-            $jsLangZh = cache()->remember('lang.zh', 86400, function () { return json_decode(file_get_contents(base_path('lang/zh.json')), true); });
-        @endphp
-        (function () {
-            var translations = {
-                ms: @json($jsLangMs),
-                zh: @json($jsLangZh)
-            };
-            var currentLocale = '{{ app()->getLocale() }}';
-
-            // Build reverse map: displayed text → translation key
-            function buildReverseMap(locale) {
-                var map = {};
-                if (locale === 'en') {
-                    Object.keys(translations.ms).forEach(function (k) { map[k] = k; });
-                } else if (translations[locale]) {
-                    Object.entries(translations[locale]).forEach(function ([k, v]) { map[v] = k; });
-                }
-                return map;
-            }
-
-            // Translatable HTML attributes (placeholders, aria-labels, titles)
-            var TRANSLATABLE_ATTRS = ['placeholder', 'aria-label', 'title'];
-
-            // Swap translatable attributes on all elements
-            function swapAttrs(reverseMap, target) {
-                TRANSLATABLE_ATTRS.forEach(function (attr) {
-                    document.querySelectorAll('[' + attr + ']').forEach(function (el) {
-                        var val = (el.getAttribute(attr) || '').trim();
-                        if (!val) return;
-                        var key = reverseMap[val];
-                        if (!key) return;
-                        el.setAttribute(attr, target ? (target[key] || key) : key);
-                    });
-                });
-            }
-
-            // Swap all text nodes in the DOM
-            function swapLocale(toLocale) {
-                if (toLocale === currentLocale) return;
-                var reverseMap = buildReverseMap(currentLocale);
-                var target = toLocale === 'en' ? null : translations[toLocale];
-
-                // 1. Text nodes
-                var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-                var nodes = [];
-                var node;
-                while ((node = walker.nextNode())) nodes.push(node);
-
-                nodes.forEach(function (n) {
-                    var trimmed = n.nodeValue.trim();
-                    if (!trimmed) return;
-                    var key = reverseMap[trimmed];
-                    if (!key) return;
-                    var newText = target ? (target[key] || key) : key;
-                    n.nodeValue = n.nodeValue.replace(trimmed, newText);
-                });
-
-                // 2. Translatable attributes (placeholder, aria-label, title)
-                swapAttrs(reverseMap, target);
-
-                // Update lang button label
-                var labels = { en: 'EN', ms: 'BM', zh: '中文' };
-                var langBtnSpan = langBtn.querySelector('span');
-                if (langBtnSpan) langBtnSpan.textContent = labels[toLocale];
-
-                // Update active state of menu items
-                document.querySelectorAll('[data-lang]').forEach(function (btn) {
-                    var isActive = btn.dataset.lang === toLocale;
-                    btn.classList.toggle('bg-red-50', isActive);
-                    btn.classList.toggle('text-brand-red', isActive);
-                    btn.classList.toggle('text-gray-700', !isActive);
-                    btn.classList.toggle('dark:text-gray-300', !isActive);
-                    var check = btn.querySelector('.lang-check');
-                    if (check) check.classList.toggle('hidden', !isActive);
-                });
-
-                // Update html lang attribute
-                document.documentElement.lang = toLocale;
-                currentLocale = toLocale;
-
-                // Persist locale to session silently
-                fetch('/lang/' + toLocale, { redirect: 'follow' });
-                closeLang();
-            }
-
-            document.querySelectorAll('[data-lang]').forEach(function (btn) {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    swapLocale(this.dataset.lang);
-                });
-            });
-
-            // ── Fix Livewire race condition ─────────────────────────────
-            // When Livewire re-renders a component, the server may respond in
-            // a different locale than the client's current locale (because the
-            // session-locale fetch is async). This re-applies the correct locale
-            // to any newly injected text nodes/attributes after every Livewire update.
-            function reapplyCurrentLocale() {
-                if (currentLocale === 'en') {
-                    // EN mode: reverse any foreign-language text/attrs that slipped in
-                    ['zh', 'ms'].forEach(function (loc) {
-                        if (!translations[loc]) return;
-                        var revMap = {};
-                        Object.entries(translations[loc]).forEach(function (entry) {
-                            revMap[entry[1]] = entry[0];
-                        });
-                        // Text nodes
-                        var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-                        var nodes = [];
-                        var node;
-                        while ((node = walker.nextNode())) nodes.push(node);
-                        nodes.forEach(function (n) {
-                            var trimmed = n.nodeValue.trim();
-                            if (!trimmed) return;
-                            var key = revMap[trimmed];
-                            if (!key) return;
-                            n.nodeValue = n.nodeValue.replace(trimmed, key);
-                        });
-                        // Attributes
-                        swapAttrs(revMap, null);
-                    });
-                } else {
-                    // Non-EN mode: translate any English nodes/attrs Livewire just injected.
-                    // Temporarily pretend we're in EN — already-translated nodes are not
-                    // in the EN→EN reverse map so they get skipped automatically.
-                    var savedLocale = currentLocale;
-                    currentLocale = 'en';
-                    swapLocale(savedLocale);
-                }
-            }
-
-            document.addEventListener('livewire:updated', reapplyCurrentLocale);
-            document.addEventListener('livewire:navigated', reapplyCurrentLocale);
-        }());
 
         const mobileBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');

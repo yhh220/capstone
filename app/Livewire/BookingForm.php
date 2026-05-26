@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Service;
 use App\Services\Booking\BookingService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
@@ -15,19 +16,29 @@ class BookingForm extends Component
     use SetsSeo;
 
     public string $customer_name = '';
+
     public string $customer_phone = '';
+
     public string $customer_email = '';
+
     public string $vehicle_model = '';
+
     public string $vehicle_plate = '';
+
     public string $service_id = '';
+
     public string $preferred_date = '';
+
     public string $preferred_time = '';
+
     public string $notes = '';
 
     public int $currentStep = 1;
+
     public int $totalSteps = 4;
 
     public bool $submitted = false;
+
     public string $manageUrl = '';
 
     protected function bookingService(): BookingService
@@ -74,6 +85,7 @@ class BookingForm extends Component
         if ($this->service_id === '') {
             return null;
         }
+
         return Service::find($this->service_id);
     }
 
@@ -112,7 +124,7 @@ class BookingForm extends Component
 
         $service = Service::find($this->service_id);
 
-        if (!$service) {
+        if (! $service) {
             return [];
         }
 
@@ -125,11 +137,12 @@ class BookingForm extends Component
 
     public function submit(): void
     {
-        $throttleKey = 'booking-submit:' . request()->ip();
+        $throttleKey = 'booking-submit:'.request()->ip();
 
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
-            $this->addError('customer_phone', __("Too many booking attempts. Please wait {$seconds} seconds before trying again."));
+            $this->addError('customer_phone', __('Too many booking attempts. Please wait :seconds seconds before trying again.', ['seconds' => $seconds]));
+
             return;
         }
 
@@ -141,11 +154,13 @@ class BookingForm extends Component
             $date = Carbon::parse($this->preferred_date);
         } catch (\Throwable) {
             $this->addError('preferred_date', __('Please pick a valid date.'));
+
             return;
         }
 
         if ($this->bookingService()->isClosedDate($date)) {
             $this->addError('preferred_date', __('We are closed on :days. Please choose another day.', ['days' => $this->closedDaysLabel()]));
+
             return;
         }
 
@@ -153,30 +168,44 @@ class BookingForm extends Component
 
         if ($startAt->isPast()) {
             $this->addError('preferred_time', __('That time has already passed. Please choose a later slot.'));
+
             return;
         }
 
-        if (!$this->bookingService()->isSlotAvailable($service, $startAt)) {
+        if (! $this->bookingService()->isSlotAvailable($service, $startAt)) {
             $this->addError('preferred_time', __('This slot is already booked. Please pick another time.'));
+
             return;
         }
 
         RateLimiter::hit($throttleKey, 600);
 
-        $booking = Booking::create([
-            'customer_name' => strip_tags($this->customer_name),
-            'customer_phone' => strip_tags($this->customer_phone),
-            'customer_email' => $this->customer_email ?: null,
-            'vehicle_model' => strip_tags($this->vehicle_model),
-            'vehicle_plate' => $this->vehicle_plate !== '' ? strtoupper(strip_tags($this->vehicle_plate)) : null,
-            'service_id' => $this->service_id,
-            'preferred_date' => $this->preferred_date,
-            'start_at' => $startAt,
-            'end_at' => $this->bookingService()->buildEndAt($service, $startAt),
-            'notes' => strip_tags($this->notes),
-            'status' => 'pending',
-            'confirm_token' => (string) str()->uuid(),
-        ]);
+        try {
+            $booking = DB::transaction(function () use ($service, $startAt) {
+                if (! $this->bookingService()->isSlotAvailable($service, $startAt)) {
+                    throw new \RuntimeException(__('This slot is already booked. Please pick another time.'));
+                }
+
+                return Booking::create([
+                    'customer_name' => strip_tags($this->customer_name),
+                    'customer_phone' => strip_tags($this->customer_phone),
+                    'customer_email' => $this->customer_email ?: null,
+                    'vehicle_model' => strip_tags($this->vehicle_model),
+                    'vehicle_plate' => $this->vehicle_plate !== '' ? strtoupper(strip_tags($this->vehicle_plate)) : null,
+                    'service_id' => $this->service_id,
+                    'preferred_date' => $this->preferred_date,
+                    'start_at' => $startAt,
+                    'end_at' => $this->bookingService()->buildEndAt($service, $startAt),
+                    'notes' => strip_tags($this->notes),
+                    'status' => 'pending',
+                    'confirm_token' => (string) str()->uuid(),
+                ]);
+            });
+        } catch (\RuntimeException $e) {
+            $this->addError('preferred_time', $e->getMessage());
+
+            return;
+        }
 
         $this->manageUrl = $booking->manage_url;
         $this->submitted = true;

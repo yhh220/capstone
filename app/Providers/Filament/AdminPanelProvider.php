@@ -32,13 +32,13 @@ class AdminPanelProvider extends PanelProvider
 
             // ── Branding ──────────────────────────────────────────────
             ->brandName('Win Win Car Audio')
-            ->brandLogo(asset('images/logo/logo-dark.svg'))
-            ->darkModeBrandLogo(asset('images/logo/logo-light.svg'))
+            ->brandLogo(asset('images/logo/logo-dark.svg'))    // light mode: dark logo (dark text on white)
+            ->darkModeBrandLogo(asset('images/logo/logo-light.svg')) // dark mode: light logo (white text on dark)
             ->brandLogoHeight('2rem')
             ->favicon(asset('winwin-favicon.svg') . '?v=20260428')
 
             // ── Theme ─────────────────────────────────────────────────
-            ->defaultThemeMode(\Filament\Enums\ThemeMode::Dark)
+            ->defaultThemeMode(\Filament\Enums\ThemeMode::System)
             ->darkMode(true)
             ->font('DM Sans')
             ->colors([

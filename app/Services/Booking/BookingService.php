@@ -15,8 +15,8 @@ class BookingService
             return collect();
         }
 
-        $start = Carbon::parse($date->format('Y-m-d') . ' ' . setting('BUSINESS_HOURS_START', '09:00'));
-        $end = Carbon::parse($date->format('Y-m-d') . ' ' . setting('BUSINESS_HOURS_END', '18:00'));
+        $start = Carbon::parse($date->format('Y-m-d').' '.setting('BUSINESS_HOURS_START', '09:00'));
+        $end = Carbon::parse($date->format('Y-m-d').' '.setting('BUSINESS_HOURS_END', '18:00'));
         $slots = collect();
 
         while ($start->copy()->addMinutes($service->duration_minutes) <= $end) {
@@ -34,21 +34,14 @@ class BookingService
     {
         $endAt = $startAt->copy()->addMinutes($service->duration_minutes + $service->buffer_after);
 
-        return !Booking::query()
+        return ! Booking::query()
             ->when($ignoreBookingId, fn ($query) => $query->whereKeyNot($ignoreBookingId))
             ->where('service_id', $service->id)
             ->where('status', '!=', 'cancelled')
             ->whereNotNull('start_at')
             ->whereNotNull('end_at')
-            ->where(function ($query) use ($startAt, $endAt) {
-                $query
-                    ->whereBetween('start_at', [$startAt, $endAt])
-                    ->orWhereBetween('end_at', [$startAt, $endAt])
-                    ->orWhere(function ($nested) use ($startAt, $endAt) {
-                        $nested->where('start_at', '<=', $startAt)
-                            ->where('end_at', '>=', $endAt);
-                    });
-            })
+            ->where('start_at', '<', $endAt)
+            ->where('end_at', '>', $startAt)
             ->exists();
     }
 

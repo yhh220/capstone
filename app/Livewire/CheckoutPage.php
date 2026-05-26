@@ -20,14 +20,21 @@ class CheckoutPage extends Component
     public int $step = 1;
 
     // Step 1: Customer Info
-    public string $customerName  = '';
+    public string $customerName = '';
+
     public string $customerEmail = '';
+
     public string $customerPhone = '';
-    public string $street        = '';
-    public string $city          = '';
-    public string $postcode      = '';
-    public string $state         = 'Selangor';
-    public string $orderNotes    = '';
+
+    public string $street = '';
+
+    public string $city = '';
+
+    public string $postcode = '';
+
+    public string $state = 'Selangor';
+
+    public string $orderNotes = '';
 
     // Step 2: Payment method
     public string $paymentMethod = 'online_banking';
@@ -36,32 +43,34 @@ class CheckoutPage extends Component
     public ?Order $order = null;
 
     protected $rules = [
-        'customerName'  => 'required|string|max:255',
+        'customerName' => 'required|string|max:255',
         'customerEmail' => 'required|email|max:255',
         'customerPhone' => 'required|string|max:20',
-        'street'        => 'required|string|max:500',
-        'city'          => 'required|string|max:255',
-        'postcode'      => 'required|string|max:10',
-        'state'         => 'required|string|max:100',
+        'street' => 'required|string|max:500',
+        'city' => 'required|string|max:255',
+        'postcode' => 'required|string|max:10',
+        'state' => 'required|string|max:100',
     ];
 
     public function mount(): void
     {
         // Force login — redirect if not authenticated
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             session()->put('url.intended', route('checkout'));
             $this->redirect(route('login'));
+
             return;
         }
 
         // Pre-fill from user profile
         $user = Auth::user();
-        $this->customerName  = $user->name ?? '';
+        $this->customerName = $user->name ?? '';
         $this->customerEmail = $user->email ?? '';
 
         // Redirect to cart if cart is empty
         if (CartItem::forCurrentOwner()->count() === 0) {
             $this->redirect(route('cart'));
+
             return;
         }
 
@@ -75,8 +84,7 @@ class CheckoutPage extends Component
 
     public function getSubtotalProperty(): float
     {
-        return $this->cartItems->sum(fn($item) =>
-            ($item->product?->current_price ?? 0) * $item->quantity
+        return $this->cartItems->sum(fn ($item) => ($item->product?->current_price ?? 0) * $item->quantity
         );
     }
 
@@ -93,21 +101,28 @@ class CheckoutPage extends Component
 
     public function placeOrder(): void
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             $this->redirect(route('login'));
+
             return;
         }
 
-        $cartItems = $this->cartItems;
-        if ($cartItems->isEmpty()) {
+        if (CartItem::forCurrentOwner()->count() === 0) {
             $this->redirect(route('cart'));
+
             return;
         }
-
-        $subtotal = $this->subtotal;
 
         try {
-            $order = DB::transaction(function () use ($cartItems, $subtotal) {
+            $order = DB::transaction(function () {
+                $cartItems = CartItem::forCurrentOwner()
+                    ->lockForUpdate()
+                    ->get();
+
+                if ($cartItems->isEmpty()) {
+                    throw new \RuntimeException(__('Your cart is empty. Please review your cart before checking out.'));
+                }
+
                 // Lock the product rows for the duration of the transaction so concurrent
                 // checkouts cannot double-sell the last unit of stock.
                 $products = Product::whereIn('id', $cartItems->pluck('product_id'))
@@ -118,7 +133,7 @@ class CheckoutPage extends Component
                 // Pre-flight stock check — fail the whole order if anything is short.
                 foreach ($cartItems as $cartItem) {
                     $product = $products->get($cartItem->product_id);
-                    if (!$product) {
+                    if (! $product) {
                         throw new \RuntimeException(__('A product in your cart is no longer available.'));
                     }
                     if (($product->stock ?? 0) < $cartItem->quantity) {
@@ -128,48 +143,66 @@ class CheckoutPage extends Component
                     }
                 }
 
+                $lineItems = $cartItems->map(function ($cartItem) use ($products): array {
+                    $product = $products->get($cartItem->product_id);
+                    $unitPrice = (float) ($product->current_price ?? 0);
+
+                    return [
+                        'cart_item' => $cartItem,
+                        'product' => $product,
+                        'unit_price' => $unitPrice,
+                        'subtotal' => $unitPrice * $cartItem->quantity,
+                    ];
+                });
+
+                $subtotal = $lineItems->sum('subtotal');
+
                 $order = Order::create([
-                    'user_id'          => Auth::id(),
-                    'order_number'     => Order::generateOrderNumber(),
-                    'tracking_number'  => Order::generateTrackingNumber(),
-                    'customer_name'    => $this->customerName,
-                    'customer_email'   => $this->customerEmail,
-                    'customer_phone'   => $this->customerPhone,
+                    'user_id' => Auth::id(),
+                    'order_number' => Order::generateOrderNumber(),
+                    'tracking_number' => Order::generateTrackingNumber(),
+                    'customer_name' => $this->customerName,
+                    'customer_email' => $this->customerEmail,
+                    'customer_phone' => $this->customerPhone,
                     'shipping_address' => [
-                        'street'   => $this->street,
-                        'city'     => $this->city,
+                        'street' => $this->street,
+                        'city' => $this->city,
                         'postcode' => $this->postcode,
-                        'state'    => $this->state,
+                        'state' => $this->state,
                     ],
-                    'subtotal'        => $subtotal,
-                    'total_amount'    => $subtotal,
-                    'status'          => 'pending',
-                    'payment_status'  => 'pending',
-                    'payment_method'  => $this->paymentMethod,
+                    'subtotal' => $subtotal,
+                    'total_amount' => $subtotal,
+                    'status' => 'pending',
+                    'payment_status' => 'pending',
+                    'payment_method' => $this->paymentMethod,
                 ]);
 
-                foreach ($cartItems as $cartItem) {
-                    $product = $products->get($cartItem->product_id);
+                foreach ($lineItems as $lineItem) {
+                    $cartItem = $lineItem['cart_item'];
+                    $product = $lineItem['product'];
 
                     OrderItem::create([
-                        'order_id'     => $order->id,
-                        'product_id'   => $cartItem->product_id,
+                        'order_id' => $order->id,
+                        'product_id' => $cartItem->product_id,
                         'product_name' => $product->name,
-                        'quantity'     => $cartItem->quantity,
-                        'unit_price'   => $product->current_price ?? 0,
-                        'subtotal'     => ($product->current_price ?? 0) * $cartItem->quantity,
+                        'quantity' => $cartItem->quantity,
+                        'unit_price' => $lineItem['unit_price'],
+                        'subtotal' => $lineItem['subtotal'],
                     ]);
 
                     $product->decrement('stock', $cartItem->quantity);
                 }
 
-                CartItem::forCurrentOwner()->delete();
+                CartItem::forCurrentOwner()
+                    ->whereKey($cartItems->pluck('id'))
+                    ->delete();
 
                 return $order;
             });
         } catch (\RuntimeException $e) {
             $this->addError('stock', $e->getMessage());
             $this->step = 1;
+
             return;
         }
 
@@ -180,7 +213,7 @@ class CheckoutPage extends Component
             Mail::to($this->customerEmail)->queue(new OrderConfirmationMail($this->order));
         } catch (\Exception $e) {
             // Don't block confirmation on email failure.
-            logger()->error('Order email failed: ' . $e->getMessage());
+            logger()->error('Order email failed: '.$e->getMessage());
         }
 
         $this->step = 3;

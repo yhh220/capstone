@@ -5,6 +5,7 @@ namespace App\Livewire\Auth;
 use App\Models\CartItem;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
@@ -35,17 +36,25 @@ class UserLogin extends Component
     // Password visibility toggle
     public bool $showPassword = false;
 
-    /**
-     * Initialize honeypot data for the register form.
-     */
+    // Progressive lockout thresholds: [attempts => lockout_seconds]
+    // Apple-style: 5 → 30s, 10 → 60s, 15 → 300s (5min), 20 → 900s (15min), 25+ → 3600s (1hr)
+    private const LOCKOUT_TIERS = [
+        5  => 30,
+        10 => 60,
+        15 => 300,
+        20 => 900,
+        25 => 3600,
+    ];
+
+    // IP-level block after 30 attempts (bot/spray attack detection)
+    private const IP_BLOCK_THRESHOLD = 30;
+    private const IP_BLOCK_SECONDS   = 3600;
+
     public function mount(): void
     {
         $this->honeypotData = new HoneypotData();
     }
 
-    /**
-     * Switch between Sign In and Register tabs.
-     */
     public function switchTab(bool $isLogin): void
     {
         $this->isLoginTab = $isLogin;
@@ -54,7 +63,13 @@ class UserLogin extends Component
     }
 
     /**
-     * Handle user sign in with rate limiting (cybersecurity: brute-force protection).
+     * Handle sign in with Apple-style progressive lockout.
+     * Tier 1: 5 fails  → 30 sec wait
+     * Tier 2: 10 fails → 1 min wait
+     * Tier 3: 15 fails → 5 min wait
+     * Tier 4: 20 fails → 15 min wait
+     * Tier 5: 25 fails → 1 hr wait
+     * IP block: 30 fails from same IP → 1 hr IP-level block
      */
     public function login(): void
     {
@@ -63,80 +78,131 @@ class UserLogin extends Component
             'loginPassword' => ['required', 'string'],
         ]);
 
-        // Rate limiting: max 5 attempts per minute per email
-        $throttleKey = 'login:' . strtolower($this->loginEmail) . '|' . request()->ip();
+        $ip         = request()->ip();
+        $emailKey   = 'login_fails:email:' . strtolower($this->loginEmail);
+        $ipKey      = 'login_fails:ip:' . $ip;
+        $ipBlockKey = 'login_block:ip:' . $ip;
 
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
-            $seconds = RateLimiter::availableIn($throttleKey);
-            $this->addError('loginEmail', __('Too many login attempts. Please try again in :seconds seconds.', ['seconds' => $seconds]));
+        // Check IP-level block first (bot/spray detection)
+        if (Cache::has($ipBlockKey)) {
+            $remaining = Cache::get($ipBlockKey . ':expires', now()->timestamp) - now()->timestamp;
+            $minutes = max(1, (int) ceil($remaining / 60));
+            $this->addError('loginEmail', __('Unusual activity detected from your network. Please try again in :minutes minutes.', ['minutes' => $minutes]));
             return;
         }
 
+        // Check per-email progressive lockout
+        $emailFails  = (int) Cache::get($emailKey, 0);
+        $lockoutKey  = 'login_lockout:' . strtolower($this->loginEmail) . ':' . $ip;
+
+        if (Cache::has($lockoutKey)) {
+            $seconds = max(1, Cache::get($lockoutKey . ':expires', now()->timestamp) - now()->timestamp);
+            $this->addError('loginEmail', $this->lockoutMessage((int) $seconds));
+            return;
+        }
+
+        // Attempt authentication
         if (!Auth::attempt([
-            'email' => $this->loginEmail,
+            'email'    => $this->loginEmail,
             'password' => $this->loginPassword,
         ], $this->remember)) {
-            RateLimiter::hit($throttleKey, 60);
+            // Increment failure counters
+            $emailFails++;
+            $ipFails = (int) Cache::get($ipKey, 0) + 1;
 
-            $this->addError('loginEmail', __('Invalid email or password.'));
+            Cache::put($emailKey, $emailFails, now()->addHours(2));
+            Cache::put($ipKey,    $ipFails,    now()->addHours(2));
+
+            // IP-level block for high-volume attacks
+            if ($ipFails >= self::IP_BLOCK_THRESHOLD) {
+                $expires = now()->addSeconds(self::IP_BLOCK_SECONDS)->timestamp;
+                Cache::put($ipBlockKey,              true,    now()->addSeconds(self::IP_BLOCK_SECONDS));
+                Cache::put($ipBlockKey . ':expires', $expires, now()->addSeconds(self::IP_BLOCK_SECONDS));
+                $this->addError('loginEmail', __('Unusual activity detected from your network. Please try again in 60 minutes.'));
+                return;
+            }
+
+            // Progressive lockout based on per-email failure count
+            $lockoutSeconds = $this->lockoutSecondsFor($emailFails);
+            if ($lockoutSeconds > 0) {
+                $expires = now()->addSeconds($lockoutSeconds)->timestamp;
+                Cache::put($lockoutKey,              true,   now()->addSeconds($lockoutSeconds));
+                Cache::put($lockoutKey . ':expires', $expires, now()->addSeconds($lockoutSeconds));
+                $this->addError('loginEmail', $this->lockoutMessage($lockoutSeconds));
+                return;
+            }
+
+            $remaining = 5 - ($emailFails % 5);
+            if ($remaining > 0 && $remaining < 5) {
+                $this->addError('loginEmail', __('Invalid email or password. :n attempt(s) remaining before lockout.', ['n' => $remaining]));
+            } else {
+                $this->addError('loginEmail', __('Invalid email or password.'));
+            }
             return;
         }
 
-        // Clear rate limiter on successful login
-        RateLimiter::clear($throttleKey);
+        // Successful login — clear all counters
+        Cache::forget($emailKey);
+        Cache::forget($ipKey);
+        Cache::forget($lockoutKey);
+        Cache::forget($lockoutKey . ':expires');
 
-        // Transfer any guest cart under the pre-regenerate session id to the user.
         CartItem::claimGuestCart(session()->getId(), Auth::id());
-
-        // Regenerate session to prevent session fixation attacks
         session()->regenerate();
 
         $this->redirect(session()->pull('url.intended', '/'), navigate: false);
     }
 
-    /**
-     * Handle user registration with strong password policy.
-     *
-     * CYBERSECURITY: Password is hashed automatically by the User model's
-     * 'hashed' cast. We never store plaintext passwords.
-     */
+    private function lockoutSecondsFor(int $fails): int
+    {
+        $seconds = 0;
+        foreach (self::LOCKOUT_TIERS as $threshold => $wait) {
+            if ($fails >= $threshold) {
+                $seconds = $wait;
+            }
+        }
+        return $seconds;
+    }
+
+    private function lockoutMessage(int $seconds): string
+    {
+        if ($seconds >= 3600) {
+            return __('Too many failed attempts. Please try again in 1 hour.');
+        }
+        if ($seconds >= 60) {
+            $minutes = (int) ceil($seconds / 60);
+            return __('Too many failed attempts. Please try again in :minutes minutes.', ['minutes' => $minutes]);
+        }
+        return __('Too many failed attempts. Please wait :seconds seconds.', ['seconds' => $seconds]);
+    }
+
     public function register(): void
     {
-        // Honeypot check — powered by spatie/laravel-honeypot (field check + time gate)
         $this->protectAgainstSpam();
 
         $validated = $this->validate([
-            'name' => ['required', 'string', 'min:2', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => [
+            'name'                  => ['required', 'string', 'min:2', 'max:255'],
+            'email'                 => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password'              => [
                 'required',
                 'confirmed',
-                Password::min(8)
-                    ->letters()
-                    ->numbers()
-                    ->symbols(),
+                Password::min(8)->letters()->numbers()->symbols(),
             ],
             'password_confirmation' => ['required'],
         ], [
             'password.min' => __('Password must be at least 8 characters.'),
-            'name.min' => __('Name must be at least 2 characters.'),
+            'name.min'     => __('Name must be at least 2 characters.'),
         ]);
 
-        // Create user — password is automatically hashed by the 'hashed' cast
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
             'password' => $validated['password'],
-            'role' => 'client',
+            'role'     => 'client',
         ]);
 
-        // Auto-login after registration
         Auth::login($user);
-
-        // Transfer any guest cart under the pre-regenerate session id to the new user.
         CartItem::claimGuestCart(session()->getId(), Auth::id());
-
-        // Regenerate session to prevent session fixation attacks
         session()->regenerate();
 
         $this->redirect(session()->pull('url.intended', '/'), navigate: false);

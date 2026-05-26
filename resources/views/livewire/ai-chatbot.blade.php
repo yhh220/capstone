@@ -29,10 +29,10 @@
                     <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-red-700 rounded-full animate-pulse"></span>
                 </div>
                 <div>
-                    <h3 class="font-bold text-white text-[15px] leading-tight tracking-wide">Win Win Assistant</h3>
+                    <h3 class="font-bold text-white text-[15px] leading-tight tracking-wide">{{ __('Win Win Assistant') }}</h3>
                     <div class="flex items-center gap-1.5 mt-0.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
-                        <p class="text-red-100 text-xs font-medium">Online now</p>
+                        <p class="text-red-100 text-xs font-medium">{{ __('Online now') }}</p>
                     </div>
                 </div>
             </div>
@@ -40,12 +40,12 @@
                 @if($chatLang !== '')
                 <button wire:click="clearChat"
                         class="text-red-100 hover:text-white text-xs font-semibold px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors">
-                    Clear
+                    {{ __('Clear') }}
                 </button>
                 @endif
                 <button wire:click="close"
                         class="text-red-100 hover:text-white transition-all duration-200 p-2 rounded-full hover:bg-white/20 active:scale-95"
-                        aria-label="Close">
+                        aria-label="{{ __('Close chat') }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -70,8 +70,8 @@
                             <path d="M19.5 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z"/>
                         </svg>
                     </div>
-                    <h4 class="text-white font-bold text-2xl mb-1 tracking-tight">Welcome!</h4>
-                    <p class="text-red-100 text-sm font-medium">How can we assist you today?</p>
+                    <h4 class="text-white font-bold text-2xl mb-1 tracking-tight">{{ __('Welcome!') }}</h4>
+                    <p class="text-red-100 text-sm font-medium">{{ __('How can we assist you today?') }}</p>
                 </div>
             </div>
 
@@ -79,7 +79,7 @@
                 <div class="flex items-center justify-center gap-3 mb-6">
                     <div class="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
                     <p class="text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                        Choose Language
+                        {{ __('Choose Language') }}
                     </p>
                     <div class="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
                 </div>
@@ -174,7 +174,7 @@
                 </button>
             </div>
             <div class="text-center mt-2">
-                <span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Powered by AI · Responses may vary</span>
+                <span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium">{{ __('Powered by AI · Responses may vary') }}</span>
             </div>
         </div>
         @endif
@@ -194,7 +194,7 @@
                            shadow-[0_8px_30px_rgb(220,38,38,0.4)]
                            hover:shadow-[0_8px_40px_rgb(220,38,38,0.6)] hover:scale-110 active:scale-95
                            transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-500/30"
-                    aria-label="{{ $isOpen ? 'Close chat' : 'Chat with us' }}">
+                    aria-label="{{ $isOpen ? __('Close chat') : __('Chat with us') }}">
                 @if($isOpen)
                 <svg class="w-6 h-6 md:w-7 md:h-7 text-white transform transition-transform duration-300 rotate-90 hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>

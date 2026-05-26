@@ -16,9 +16,10 @@ class ProductsTable
     {
         return $table->paginated([10, 25, 50, 100, 'all'])
             ->columns([
-                TextColumn::make('category_id')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('category.name')
+                    ->label('Category')
+                    ->sortable()
+                    ->placeholder('—'),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('brand')

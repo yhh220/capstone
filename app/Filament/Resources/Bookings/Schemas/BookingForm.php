@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Bookings\Schemas;
 
 use App\Models\Service;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -42,9 +43,19 @@ class BookingForm
                     ->label('Preferred Date')
                     ->required()
                     ->native(false),
+                DateTimePicker::make('start_at')
+                    ->label('Start Time')
+                    ->native(false)
+                    ->seconds(false),
+                DateTimePicker::make('end_at')
+                    ->label('End Time')
+                    ->native(false)
+                    ->seconds(false),
                 TextInput::make('confirm_token')
+                    ->label('Booking Token (auto-generated)')
                     ->disabled()
                     ->dehydrated(false)
+                    ->visibleOn('edit')
                     ->columnSpanFull(),
                 Select::make('status')
                     ->options([

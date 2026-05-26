@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page Expired — Win Win Car Audio</title>
+    <title>{{ __('Page Expired') }} - {{ config('services.store.name') }}</title>
     <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260428" type="image/svg+xml">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20260428">
     <link rel="icon" href="{{ asset('winwin-favicon-32x32.png') }}?v=20260428" sizes="32x32" type="image/png">
@@ -12,18 +12,35 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            var dark = t === 'dark' || (!t || t === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        })();
+    </script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg: #09090b;
-            --surface: #18181b;
-            --border: #27272a;
+            --bg: #f4f4f5;
+            --surface: #ffffff;
+            --border: #e4e4e7;
             --rose: #f43f5e;
             --rose-dark: #be123c;
             --rose-glow: rgba(244, 63, 94, 0.15);
+            --text: #18181b;
+            --muted: #52525b;
+            color-scheme: light;
+        }
+
+        html[data-theme="dark"] {
+            --bg: #09090b;
+            --surface: #18181b;
+            --border: #27272a;
             --text: #fafafa;
             --muted: #a1a1aa;
+            color-scheme: dark;
         }
 
         body {
@@ -34,11 +51,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            overflow-x: hidden;
             position: relative;
+            padding: 1rem;
         }
 
-        /* Background glow blobs */
         .bg-blob {
             position: fixed;
             border-radius: 50%;
@@ -68,16 +85,20 @@
             50% { transform: translate(-20px, -30px); }
         }
 
-        /* Grid pattern overlay */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
             background-image:
-                linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+                linear-gradient(rgba(24,24,27,.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(24,24,27,.04) 1px, transparent 1px);
             background-size: 40px 40px;
             z-index: 0;
+        }
+        html[data-theme="dark"] body::before {
+            background-image:
+                linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
         }
 
         .container {
@@ -95,16 +116,24 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* Logo */
         .logo {
             margin-bottom: 2.5rem;
         }
         .logo img {
             height: 36px;
             opacity: 0.9;
+            margin: 0 auto;
+        }
+        .logo-light {
+            display: none;
+        }
+        html[data-theme="dark"] .logo-dark {
+            display: none;
+        }
+        html[data-theme="dark"] .logo-light {
+            display: block;
         }
 
-        /* Shield icon */
         .icon-wrap {
             width: 80px; height: 80px;
             background: var(--rose-glow);
@@ -125,7 +154,6 @@
             color: var(--rose);
         }
 
-        /* Code badge */
         .code-badge {
             display: inline-block;
             background: var(--rose-glow);
@@ -138,6 +166,10 @@
             padding: 0.25rem 0.75rem;
             border-radius: 999px;
             margin-bottom: 1rem;
+        }
+        html:not([lang^="en"]) .code-badge {
+            letter-spacing: 0;
+            text-transform: none;
         }
 
         h1 {
@@ -162,7 +194,6 @@
             margin-bottom: 2rem;
         }
 
-        /* Buttons */
         .btn-group {
             display: flex;
             gap: 0.75rem;
@@ -183,6 +214,9 @@
             cursor: pointer;
             border: none;
             transition: all 0.2s ease;
+            justify-content: center;
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
         .btn-primary {
             background: var(--rose);
@@ -195,6 +229,7 @@
         }
         .btn svg {
             width: 16px; height: 16px;
+            flex-shrink: 0;
         }
     </style>
 </head>
@@ -204,7 +239,8 @@
 
     <div class="container">
         <div class="logo">
-            <img src="{{ asset('images/logo/logo-light.svg') }}" alt="Win Win Car Audio">
+            <img src="{{ asset('images/logo/logo-dark.svg') }}" alt="{{ config('services.store.name') }}" class="logo-dark">
+            <img src="{{ asset('images/logo/logo-light.svg') }}" alt="{{ config('services.store.name') }}" class="logo-light">
         </div>
 
         <div class="icon-wrap">
@@ -213,11 +249,11 @@
             </svg>
         </div>
 
-        <div class="code-badge">419 Page Expired</div>
+        <div class="code-badge">419 {{ __('Page Expired') }}</div>
 
-        <h1>Page Expired</h1>
+        <h1>{{ __('Page Expired') }}</h1>
         <p>
-            Your session has expired. Please refresh the page and try again.
+            {{ __('Your session has expired. Please refresh the page and try again.') }}
         </p>
 
         <hr class="divider">
@@ -227,7 +263,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                 </svg>
-                Refresh Page
+                {{ __('Refresh Page') }}
             </a>
         </div>
     </div>

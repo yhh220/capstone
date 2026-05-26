@@ -51,6 +51,7 @@
 
     {{-- ── 2. 3D SHOWCASE ── --}}
     <section class="py-24 bg-white dark:bg-gray-800" aria-labelledby="showcase-heading">
+        <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div data-aos="fade-right" class="order-2 lg:order-1">
@@ -58,42 +59,51 @@
                         {{ __('Interactive 3D') }}
                     </span>
                     <h2 id="showcase-heading" class="text-4xl sm:text-5xl font-black text-brand-black dark:text-white mb-6 leading-tight">
-                        {{ __('Experience Our Signature Product in 3D') }}
+                        {{ __('Explore Your Car in 3D') }}
                     </h2>
-                    <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed mb-10 max-w-md">
-                        {{ __('Rotate, zoom, and explore our featured product before you visit. The 3D viewer lets you inspect every detail from home.') }}
+                    <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed mb-6 max-w-md">
+                        {{ __('Rotate, zoom, and inspect every angle of our 3D car model. See how our accessories fit before you visit.') }}
                     </p>
-                    @if($showcaseProduct)
-                    <a href="{{ route('product.show', $showcaseProduct->slug) }}"
-                       class="group inline-flex items-center gap-3 bg-brand-red text-white px-8 py-4 rounded-full font-bold transition-all duration-300 hover:bg-red-700 hover:-translate-y-1 hover:shadow-xl active:scale-95">
-                        {{ __('View Product Details') }}
-                        <svg class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    <ul class="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-10">
+                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-red shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15"/></svg>{{ __('Drag to rotate') }}</li>
+                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-red shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6"/></svg>{{ __('Scroll to zoom') }}</li>
+                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-red shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>{{ __('Pinch to zoom on mobile') }}</li>
+                    </ul>
+                    <a href="{{ route('contact') }}"
+                       class="group relative inline-flex items-center gap-3 bg-brand-red text-white px-8 py-4 rounded-full font-black text-base transition-all duration-300 shadow-[0_6px_20px_rgba(var(--brand-red-rgb),0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgba(var(--brand-red-rgb),0.5)] hover:-translate-y-2 active:scale-95">
+                        <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
+                        <span class="relative z-10">{{ __('Visit Our Showroom') }}</span>
+                        <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </a>
-                    @endif
                 </div>
 
                 <div data-aos="fade-left" class="order-1 lg:order-2">
                     <div class="relative group">
                         <div class="absolute -inset-4 bg-gradient-to-tr from-brand-red/20 to-brand-yellow/20 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                        <section id="3d-showcase" class="relative rounded-[2rem] overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]">
-                            <div id="3d-mount-homepage"
-                                 data-product-slug="{{ $showcaseProduct?->slug ?? 'skynavi-android-player' }}"
-                                 class="min-h-[420px] flex items-center justify-center">
-                                @if($showcaseProduct?->getImageUrl('card'))
-                                    <img src="{{ $showcaseProduct->getImageUrl('card') }}"
-                                         alt="{{ $showcaseProduct->name }}"
-                                         class="w-full h-[420px] object-cover">
-                                @else
-                                    <div class="text-center px-8 py-12">
-                                        <div class="w-20 h-20 bg-brand-red/10 dark:bg-brand-red/20 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                                            <svg class="w-10 h-10 text-brand-red" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg>
-                                        </div>
-                                        <div class="font-bold text-lg text-gray-800 dark:text-gray-100 mb-2">{{ $showcaseProduct?->name ?? __('3D product showcase placeholder') }}</div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('Interactive 3D viewer coming soon.') }}</div>
-                                    </div>
-                                @endif
-                            </div>
-                        </section>
+                        <div class="relative rounded-[2rem] overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-900 shadow-2xl">
+                            <model-viewer
+                                src="{{ asset('models/3d/city.glb') }}"
+                                alt="{{ __('3D car model — Win Win Car Studio') }}"
+                                auto-rotate
+                                auto-rotate-delay="1000"
+                                rotation-per-second="20deg"
+                                camera-controls
+                                touch-action="pan-y"
+                                shadow-intensity="1"
+                                exposure="0.8"
+                                style="width:100%; height:480px; background:transparent;"
+                                loading="lazy">
+                                {{-- loading slot --}}
+                                <div slot="progress-bar" style="display:none;"></div>
+                                <div slot="poster"
+                                     style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#111827;">
+                                    <svg style="width:48px;height:48px;color:#C8413D;animation:spin 1s linear infinite;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/>
+                                    </svg>
+                                </div>
+                            </model-viewer>
+                            <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -10,6 +10,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Illuminate\Validation\Rule;
 
 class ProductForm
 {
@@ -30,7 +31,11 @@ class ProductForm
                     ->columnSpanFull(),
                 TextInput::make('slug')
                     ->required()
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->rules(fn ($record) => [
+                        'required',
+                        Rule::unique('products', 'slug')->ignore($record?->id),
+                    ]),
                 Textarea::make('description')
                     ->columnSpanFull(),
                 Textarea::make('description_ms')
@@ -65,8 +70,14 @@ class ProductForm
                 Toggle::make('is_active')
                     ->required(),
                 Toggle::make('is_featured')
-                    ->label('Show on Homepage')
-                    ->hidden(),
+                    ->label('Show on Homepage'),
+                Toggle::make('has_3d')
+                    ->label('Has 3D Model'),
+                TextInput::make('model_url')
+                    ->label('3D Model URL (.glb)')
+                    ->columnSpanFull()
+                    ->url()
+                    ->visible(fn ($get) => (bool) $get('has_3d')),
                 SpatieMediaLibraryFileUpload::make('images')
                     ->collection('images')
                     ->multiple()

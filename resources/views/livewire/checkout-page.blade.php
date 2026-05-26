@@ -105,9 +105,10 @@
                 <button wire:click="goToStep2"
                         wire:loading.attr="disabled"
                         wire:target="goToStep2"
-                        class="group relative overflow-hidden flex-1 bg-brand-red text-white py-3 flex justify-center items-center rounded-full font-bold text-lg transition-all duration-300 shadow hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
-                    <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
-                    <span class="relative z-10" wire:loading.remove wire:target="goToStep2">{{ __('Continue to Payment →') }}</span>
+                        class="group relative inline-flex justify-center items-center gap-2 flex-1 bg-brand-red text-white py-3 rounded-full font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgba(var(--brand-red-rgb),0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgba(var(--brand-red-rgb),0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
+                    <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
+                    <span class="relative z-10" wire:loading.remove wire:target="goToStep2">{{ __('Continue to Payment') }}</span>
+                    <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1" wire:loading.remove wire:target="goToStep2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     <span class="relative z-10 hidden" wire:loading.class.remove="hidden" wire:target="goToStep2">{{ __('Checking...') }}</span>
                 </button>
             </div>
@@ -156,11 +157,12 @@
                 <button wire:click="placeOrder"
                         wire:loading.attr="disabled"
                         wire:target="placeOrder"
-                        class="group relative overflow-hidden flex-1 bg-brand-red text-white py-3 flex justify-center items-center gap-2 rounded-full font-bold text-lg transition-all duration-300 shadow hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
-                    <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
-                    <span class="relative z-10" wire:loading.remove wire:target="placeOrder">{{ __('Place Order (Demo)') }} <span aria-hidden="true">→</span></span>
+                        class="group relative inline-flex justify-center items-center gap-2 flex-1 bg-brand-red text-white py-3 rounded-full font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgba(var(--brand-red-rgb),0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgba(var(--brand-red-rgb),0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-50">
+                    <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
+                    <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110" wire:loading.remove wire:target="placeOrder" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="relative z-10" wire:loading.remove wire:target="placeOrder">{{ __('Place Order (Demo)') }}</span>
                     <span class="relative z-10 hidden flex items-center justify-center gap-2" wire:loading.class.remove="hidden" wire:target="placeOrder">
-                        <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                        <svg class="icon-spin w-5 h-5" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                         {{ __('Processing...') }}
                     </span>
                 </button>
@@ -197,12 +199,16 @@
             </div>
             @endif
 
-            <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-                <a href="{{ route('track-order') }}" class="group relative overflow-hidden bg-brand-red text-white px-8 py-3 flex items-center justify-center gap-2 rounded-full font-bold hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 transition-all duration-300 active:scale-95">
-                    <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+            <div class="flex flex-col sm:flex-row gap-6 justify-center mt-8">
+                <a href="{{ route('track-order') }}"
+                   class="group relative inline-flex items-center justify-center gap-3 bg-brand-red text-white px-8 py-4 rounded-full font-black text-base transition-all duration-300 shadow-[0_6px_20px_rgba(var(--brand-red-rgb),0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgba(var(--brand-red-rgb),0.5)] hover:-translate-y-2 active:scale-95">
+                    <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
+                    <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                     <span class="relative z-10">{{ __('Track Your Order') }}</span>
                 </a>
-                <a href="{{ route('products') }}" class="group border-2 border-gray-200 dark:border-gray-600 px-8 py-3 flex items-center justify-center gap-2 rounded-full font-bold text-gray-700 dark:text-gray-300 hover:border-brand-red hover:text-brand-red hover:-translate-y-1 transition-all duration-300 active:scale-95">
+                <a href="{{ route('products') }}"
+                   class="group inline-flex items-center justify-center gap-3 border-2 border-gray-200 dark:border-gray-600 px-8 py-4 rounded-full font-black text-base text-gray-700 dark:text-gray-300 hover:border-brand-red hover:text-brand-red hover:-translate-y-2 hover:shadow-lg transition-all duration-300 active:scale-95">
+                    <svg class="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"/></svg>
                     {{ __('Continue Shopping') }}
                 </a>
             </div>

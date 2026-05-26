@@ -53,6 +53,39 @@ class OrderResource extends Resource
                     ->prefix('RM')
                     ->disabled(),
             ])->columns(['default' => 1, 'sm' => 2]),
+
+            Forms\Components\Section::make('Order Items')->schema([
+                Forms\Components\Placeholder::make('items_list')
+                    ->label('')
+                    ->content(function ($record): \Illuminate\Support\HtmlString {
+                        if (! $record) {
+                            return new \Illuminate\Support\HtmlString('<p class="text-sm text-gray-400">Save the order first to see items.</p>');
+                        }
+                        $items = $record->items()->with('product')->get();
+                        if ($items->isEmpty()) {
+                            return new \Illuminate\Support\HtmlString('<p class="text-sm text-gray-400">No items found.</p>');
+                        }
+                        $rows = $items->map(fn ($item) =>
+                            "<tr class='border-b dark:border-gray-700'>
+                                <td class='py-2 pr-4 text-sm'>{$item->product_name}</td>
+                                <td class='py-2 pr-4 text-sm text-center'>{$item->quantity}</td>
+                                <td class='py-2 pr-4 text-sm text-right'>RM " . number_format($item->unit_price, 2) . "</td>
+                                <td class='py-2 text-sm text-right font-semibold'>RM " . number_format($item->subtotal, 2) . "</td>
+                            </tr>"
+                        )->implode('');
+                        return new \Illuminate\Support\HtmlString("
+                            <table class='w-full'>
+                                <thead><tr class='text-xs text-gray-500 uppercase border-b dark:border-gray-700'>
+                                    <th class='pb-2 text-left'>Product</th>
+                                    <th class='pb-2 text-center'>Qty</th>
+                                    <th class='pb-2 text-right'>Unit Price</th>
+                                    <th class='pb-2 text-right'>Subtotal</th>
+                                </tr></thead>
+                                <tbody>{$rows}</tbody>
+                            </table>
+                        ");
+                    }),
+            ])->visibleOn('edit'),
         ]);
     }
 

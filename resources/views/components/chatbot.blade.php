@@ -3,7 +3,7 @@
 <div x-data="{
         isOpen: false,
         messages: [
-            { type: 'ai', text: 'Hi there! I\'m your AI Mechanic. Is your car making a weird noise, or are you looking for a specific part fitment?' }
+            { type: 'ai', text: @js(__("Hi there! I'm your AI Mechanic. Is your car making a weird noise, or are you looking for a specific part fitment?")) }
         ],
         newMessage: '',
         isTyping: false,
@@ -24,7 +24,7 @@
                 this.isTyping = false;
                 this.messages.push({ 
                     type: 'ai', 
-                    text: 'That sounds like it could be an issue with your brake pads or rotors. I recommend checking our high-performance brake kits! Would you like me to pull up parts that fit your vehicle?' 
+                    text: @js(__('That sounds like it could be an issue with your brake pads or rotors. I recommend checking our high-performance brake kits! Would you like me to pull up parts that fit your vehicle?'))
                 });
                 this.$nextTick(() => { this.scrollToBottom(); });
             }, 1500);
@@ -40,7 +40,7 @@
     <!-- Chat Button Toggle -->
     <button @click="isOpen = !isOpen; if(isOpen) $nextTick(() => $refs.chatInput.focus())" 
             class="w-14 h-14 bg-brand-red hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow-2xl transition-transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900"
-            aria-label="Toggle AI Mechanic Chat">
+            aria-label="{{ __('Toggle AI Mechanic Chat') }}">
         
         <svg x-show="!isOpen" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <!-- Sparkles / Robot icon representation -->
@@ -73,8 +73,8 @@
                     <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></span>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 dark:text-white text-md">AI Mechanic</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Powered by Local AI</p>
+                    <h3 class="font-bold text-gray-800 dark:text-white text-md">{{ __('AI Mechanic') }}</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('Powered by Local AI') }}</p>
                 </div>
             </div>
             <button @click="isOpen = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
@@ -111,7 +111,7 @@
                 <input x-ref="chatInput"
                        type="text" 
                        x-model="newMessage" 
-                       placeholder="Ask about a car issue..." 
+                       placeholder="{{ __('Ask about a car issue...') }}" 
                        class="w-full bg-gray-100 dark:bg-gray-800 border-transparent focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-brand-red focus:border-transparent rounded-full px-4 py-2.5 text-sm text-gray-800 dark:text-gray-200 transition-all shadow-inner" />
                 <button type="submit" 
                         :disabled="newMessage.trim() === '' || isTyping"
@@ -120,7 +120,7 @@
                 </button>
             </form>
             <div class="text-center mt-2">
-                 <span class="text-[10px] text-gray-400 font-medium">Free Mechanical AI - Capstone Project</span>
+                 <span class="text-[10px] text-gray-400 font-medium">{{ __('Free Mechanical AI - Capstone Project') }}</span>
             </div>
         </div>
     </div>

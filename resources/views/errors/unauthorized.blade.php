@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Denied — Win Win Car Audio</title>
+    <title>{{ __('Access Denied') }} - {{ config('services.store.name') }}</title>
     <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260428" type="image/svg+xml">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20260428">
     <link rel="icon" href="{{ asset('winwin-favicon-32x32.png') }}?v=20260428" sizes="32x32" type="image/png">
@@ -12,18 +12,35 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            var dark = t === 'dark' || (!t || t === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        })();
+    </script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg: #09090b;
-            --surface: #18181b;
-            --border: #27272a;
+            --bg: #f4f4f5;
+            --surface: #ffffff;
+            --border: #e4e4e7;
             --rose: #f43f5e;
             --rose-dark: #be123c;
             --rose-glow: rgba(244, 63, 94, 0.15);
+            --text: #18181b;
+            --muted: #52525b;
+            color-scheme: light;
+        }
+
+        html[data-theme="dark"] {
+            --bg: #09090b;
+            --surface: #18181b;
+            --border: #27272a;
             --text: #fafafa;
             --muted: #a1a1aa;
+            color-scheme: dark;
         }
 
         body {
@@ -34,11 +51,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            overflow-x: hidden;
             position: relative;
+            padding: 1rem;
         }
 
-        /* Background glow blobs */
         .bg-blob {
             position: fixed;
             border-radius: 50%;
@@ -68,16 +85,20 @@
             50% { transform: translate(-20px, -30px); }
         }
 
-        /* Grid pattern overlay */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
             background-image:
-                linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+                linear-gradient(rgba(24,24,27,.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(24,24,27,.04) 1px, transparent 1px);
             background-size: 40px 40px;
             z-index: 0;
+        }
+        html[data-theme="dark"] body::before {
+            background-image:
+                linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
         }
 
         .container {
@@ -95,16 +116,24 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* Logo */
         .logo {
             margin-bottom: 2.5rem;
         }
         .logo img {
             height: 36px;
             opacity: 0.9;
+            margin: 0 auto;
+        }
+        .logo-light {
+            display: none;
+        }
+        html[data-theme="dark"] .logo-dark {
+            display: none;
+        }
+        html[data-theme="dark"] .logo-light {
+            display: block;
         }
 
-        /* Shield icon */
         .icon-wrap {
             width: 80px; height: 80px;
             background: var(--rose-glow);
@@ -125,7 +154,6 @@
             color: var(--rose);
         }
 
-        /* Code badge */
         .code-badge {
             display: inline-block;
             background: var(--rose-glow);
@@ -138,6 +166,10 @@
             padding: 0.25rem 0.75rem;
             border-radius: 999px;
             margin-bottom: 1rem;
+        }
+        html:not([lang^="en"]) .code-badge {
+            letter-spacing: 0;
+            text-transform: none;
         }
 
         h1 {
@@ -177,6 +209,8 @@
             gap: 0.875rem;
             margin-bottom: 1.5rem;
             text-align: left;
+            min-width: 0;
+            flex-wrap: wrap;
         }
         .user-avatar {
             width: 40px; height: 40px;
@@ -198,6 +232,7 @@
         .user-info span {
             font-size: 0.875rem;
             font-weight: 500;
+            overflow-wrap: anywhere;
         }
         .user-role {
             margin-left: auto;
@@ -211,7 +246,6 @@
             border-radius: 999px;
         }
 
-        /* Buttons */
         .btn-group {
             display: flex;
             gap: 0.75rem;
@@ -232,6 +266,9 @@
             cursor: pointer;
             border: none;
             transition: all 0.2s ease;
+            justify-content: center;
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
         .btn-primary {
             background: var(--rose);
@@ -253,6 +290,7 @@
         }
         .btn svg {
             width: 16px; height: 16px;
+            flex-shrink: 0;
         }
     </style>
 </head>
@@ -262,7 +300,8 @@
 
     <div class="container">
         <div class="logo">
-            <img src="{{ asset('images/logo/logo-light.svg') }}" alt="Win Win Car Audio">
+            <img src="{{ asset('images/logo/logo-dark.svg') }}" alt="{{ config('services.store.name') }}" class="logo-dark">
+            <img src="{{ asset('images/logo/logo-light.svg') }}" alt="{{ config('services.store.name') }}" class="logo-light">
         </div>
 
         <div class="icon-wrap">
@@ -271,12 +310,12 @@
             </svg>
         </div>
 
-        <div class="code-badge">403 Unauthorized</div>
+        <div class="code-badge">403 {{ __('Unauthorized') }}</div>
 
-        <h1>Access Denied</h1>
+        <h1>{{ __('Access Denied') }}</h1>
         <p>
-            Your account does not have permission to access the admin panel.
-            Only <strong>staff, admin, and owner</strong> accounts are allowed.
+            {{ __('Your account does not have permission to access the admin panel.') }}
+            {{ __('Only') }} <strong>{{ __('staff, admin, and owner') }}</strong> {{ __('accounts are allowed.') }}
         </p>
 
         <hr class="divider">
@@ -285,7 +324,7 @@
         <div class="user-card">
             <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
             <div class="user-info">
-                <small>Signed in as</small>
+                <small>{{ __('Signed in as') }}</small>
                 <span>{{ auth()->user()->name }}</span>
             </div>
             <div class="user-role">{{ ucfirst(auth()->user()->role ?? 'client') }}</div>
@@ -297,7 +336,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                 </svg>
-                Go to Homepage
+                {{ __('Go to Homepage') }}
             </a>
             @auth
             <form method="POST" action="{{ route('logout') }}" style="display:inline;">
@@ -306,7 +345,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
                     </svg>
-                    Sign Out
+                    {{ __('Sign Out') }}
                 </button>
             </form>
             @endauth

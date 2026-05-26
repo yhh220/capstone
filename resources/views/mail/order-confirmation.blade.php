@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <style>
@@ -24,35 +24,35 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎉 Order Confirmed!</h1>
-            <p>Thank you for your purchase, {{ $order->customer_name }}!</p>
+            <h1>{{ __('Order Confirmed!') }}</h1>
+            <p>{{ __('Thank you for your purchase, :name!', ['name' => $order->customer_name]) }}</p>
         </div>
 
         <div class="body-content">
             <div class="info-row">
-                <span class="info-label">Order Number</span>
+                <span class="info-label">{{ __('Order Number') }}</span>
                 <span class="info-value">{{ $order->order_number }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Tracking Number</span>
+                <span class="info-label">{{ __('Tracking Number') }}</span>
                 <span class="info-value">{{ $order->tracking_number }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Status</span>
+                <span class="info-label">{{ __('Status') }}</span>
                 <span class="info-value">{{ ucfirst($order->status) }}</span>
             </div>
             <div class="info-row" style="border-bottom: none;">
-                <span class="info-label">Payment</span>
+                <span class="info-label">{{ __('Payment') }}</span>
                 <span class="info-value">{{ ucfirst($order->payment_status) }}</span>
             </div>
 
-            <h3 style="margin-top: 24px; color: #18181B;">Items Ordered</h3>
+            <h3 style="margin-top: 24px; color: #18181B;">{{ __('Items Ordered') }}</h3>
             <table class="items-table">
                 <thead>
                     <tr>
-                        <th>Product</th>
-                        <th style="text-align: center;">Qty</th>
-                        <th style="text-align: right;">Price</th>
+                        <th>{{ __('Product') }}</th>
+                        <th style="text-align: center;">{{ __('Qty') }}</th>
+                        <th style="text-align: right;">{{ __('Price') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -64,18 +64,18 @@
                     </tr>
                     @endforeach
                     <tr class="total-row">
-                        <td colspan="2">Total</td>
+                        <td colspan="2">{{ __('Total') }}</td>
                         <td style="text-align: right; color: #E11D48;">RM {{ number_format($order->total_amount, 2) }}</td>
                     </tr>
                 </tbody>
             </table>
 
             <div style="text-align: center; margin-top: 24px;">
-                <a href="{{ url('/track-order') }}" class="track-btn">Track Your Order</a>
+                <a href="{{ url('/track-order') }}" class="track-btn">{{ __('Track Your Order') }}</a>
             </div>
 
             <p style="margin-top: 24px; font-size: 13px; color: #888;">
-                Questions? WhatsApp us: <strong>016-915 0917</strong>
+                {{ __('Questions? WhatsApp us:') }} <strong>016-915 0917</strong>
             </p>
         </div>
 

@@ -38,7 +38,7 @@
         </svg>
     </div>
     <div class="text-center font-sans tracking-wide">
-        <h2 class="text-xl font-bold text-brand-red animate-pulse">Carbon Heat Loading...</h2>
+        <h2 class="text-xl font-bold text-brand-red animate-pulse">{{ __('Loading...') }}</h2>
     </div>
 </div>
 

@@ -7,6 +7,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class ContactsTable
@@ -36,7 +37,11 @@ class ContactsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                TernaryFilter::make('is_read')
+                    ->label('Read status')
+                    ->trueLabel('Read only')
+                    ->falseLabel('Unread only')
+                    ->native(false),
             ])
             ->recordActions([
                 EditAction::make(),
