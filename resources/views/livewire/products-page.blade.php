@@ -90,6 +90,15 @@
                            class="btn btn-secondary btn-md w-full">
                             {{ __('Visit the showroom') }}
                         </a>
+                        <button id="open-configurator-btn"
+                                class="btn btn-primary btn-md w-full btn-shine flex items-center justify-center gap-2">
+                            <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                                <line x1="12" y1="22.08" x2="12" y2="12"/>
+                            </svg>
+                            {{ __('3D Car Configurator') }}
+                        </button>
                     </div>
                 </div>
             </aside>
@@ -216,4 +225,277 @@
             });
         })();
     </script>
+
+    {{-- 3D CAR CONFIGURATOR POPUP MODAL --}}
+    <div id="configurator-modal" data-model-url="{{ asset('models/3d/car.glb') }}">
+        <!-- Canvas Viewport -->
+        <div class="configurator-viewport" id="configurator-viewport">
+            <canvas id="configurator-canvas"></canvas>
+
+            <!-- Loading overlay -->
+            <div class="configurator-loader" id="configurator-loader">
+                <div class="loader-logo">
+                    <svg class="w-16 h-16 text-brand-red animate-pulse" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                        <line x1="12" y1="22.08" x2="12" y2="12"/>
+                    </svg>
+                </div>
+                <div class="loader-title">{{ __('WIN WIN 3D STUDIO') }}</div>
+                <div class="loader-subtitle">{{ __('Loading 3D Showroom...') }}</div>
+                <div class="loader-progress-container">
+                    <div class="loader-progress-bar" id="loader-progress-bar"></div>
+                </div>
+                <div class="loader-percentage" id="loader-percentage">0%</div>
+            </div>
+
+            <!-- Overlay controls -->
+            <div class="configurator-controls-overlay">
+                <button id="close-configurator-btn" class="circle-btn" title="{{ __('Close Configurator') }}" aria-label="{{ __('Close Configurator') }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <button id="camera-reset-btn" class="circle-btn camera-btn" title="{{ __('Reset View') }}" aria-label="{{ __('Reset View') }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                </button>
+            </div>
+
+            <!-- Viewport Interaction Help -->
+            <div class="viewport-help">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+                <span>{{ __('Drag to rotate | Scroll to zoom') }}</span>
+            </div>
+        </div>
+
+        <!-- Customizer Sidebar Panel -->
+        <div class="configurator-sidebar">
+            <div class="sidebar-header">
+                <h2>{{ __('3D CONFIGURATOR') }}</h2>
+                <p>{{ __('Customize your premium sports build') }}</p>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="configurator-tabs">
+                <button class="tab-btn active" data-tab="paint">{{ __('Paint') }}</button>
+                <button class="tab-btn" data-tab="rims">{{ __('Rims') }}</button>
+                <button class="tab-btn" data-tab="spoilers">{{ __('Spoilers') }}</button>
+                <button class="tab-btn" data-tab="bumpers">{{ __('Bumpers') }}</button>
+            </div>
+
+            <!-- Sidebar Scrollable Sections -->
+            <div class="sidebar-content">
+                <!-- Section 1: Paint Color -->
+                <div class="sidebar-section active" id="section-paint">
+                    <div class="section-title">{{ __('Choose Body Color') }}</div>
+                    <div class="color-picker-grid">
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-color="red" style="background-color: #c8413d;"></button>
+                            <span class="color-swatch-label">{{ __('Red') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-color="yellow" style="background-color: #facc15;"></button>
+                            <span class="color-swatch-label">{{ __('Yellow') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-color="blue" style="background-color: #2563eb;"></button>
+                            <span class="color-swatch-label">{{ __('Blue') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-color="grey" style="background-color: #4b5563;"></button>
+                            <span class="color-swatch-label">{{ __('Grey') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-color="black" style="background-color: #0f172a;"></button>
+                            <span class="color-swatch-label">{{ __('Black') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-color="silver" style="background-color: #cbd5e1;"></button>
+                            <span class="color-swatch-label">{{ __('Silver') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch active" data-color="white" style="background-color: #f8fafc; border: 1.5px solid rgba(255,255,255,0.4);"></button>
+                            <span class="color-swatch-label">{{ __('White') }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Choose Rim Color -->
+                    <div class="section-title mt-6">{{ __('Choose Rim Color') }}</div>
+                    <div class="color-picker-grid">
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-rim-color="black" style="background-color: #111111;"></button>
+                            <span class="color-swatch-label">{{ __('Black') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-rim-color="white" style="background-color: #f8fafc; border: 1.5px solid rgba(255,255,255,0.4);"></button>
+                            <span class="color-swatch-label">{{ __('White') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch active" data-rim-color="silver" style="background-color: #cbd5e1;"></button>
+                            <span class="color-swatch-label">{{ __('Silver') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-rim-color="bronze" style="background-color: #a87c43;"></button>
+                            <span class="color-swatch-label">{{ __('Bronze') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-rim-color="darkgold" style="background-color: #8a7345;"></button>
+                            <span class="color-swatch-label">{{ __('Dark Gold') }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Choose Brake Color -->
+                    <div class="section-title mt-6">{{ __('Choose Brake Color') }}</div>
+                    <div class="color-picker-grid">
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch active" data-brake-color="red" style="background-color: #c8413d;"></button>
+                            <span class="color-swatch-label">{{ __('Red') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-brake-color="blue" style="background-color: #2563eb;"></button>
+                            <span class="color-swatch-label">{{ __('Blue') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-brake-color="yellow" style="background-color: #facc15;"></button>
+                            <span class="color-swatch-label">{{ __('Yellow') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-brake-color="white" style="background-color: #f8fafc; border: 1.5px solid rgba(255,255,255,0.4);"></button>
+                            <span class="color-swatch-label">{{ __('White') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
+                            <button class="color-swatch" data-brake-color="black" style="background-color: #0c0c0e;"></button>
+                            <span class="color-swatch-label">{{ __('Black') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Rims -->
+                <div class="sidebar-section" id="section-rims">
+                    <div class="section-title">{{ __('Choose Rims') }}</div>
+                    <div class="options-grid">
+                        <div class="option-card active" data-category="rims" data-item="rim7">
+                            <span class="option-name">{{ __('Sport Rims (Default)') }}</span>
+                            <span class="option-price">{{ __('Included') }}</span>
+                        </div>
+                        <div class="option-card" data-category="rims" data-item="rim1">
+                            <span class="option-name">{{ __('Vossen CV3 Style') }}</span>
+                            <span class="option-price">+ RM 1,200</span>
+                        </div>
+                        <div class="option-card" data-category="rims" data-item="rim2">
+                            <span class="option-name">{{ __('BBS Super RS Style') }}</span>
+                            <span class="option-price">+ RM 1,800</span>
+                        </div>
+                        <div class="option-card" data-category="rims" data-item="rim3">
+                            <span class="option-name">{{ __('Rotiform LAS-R Style') }}</span>
+                            <span class="option-price">+ RM 1,500</span>
+                        </div>
+                        <div class="option-card" data-category="rims" data-item="rim4">
+                            <span class="option-name">{{ __('HRE P101 Style') }}</span>
+                            <span class="option-price">+ RM 2,200</span>
+                        </div>
+                        <div class="option-card" data-category="rims" data-item="rim5">
+                            <span class="option-name">{{ __('Advan Racing GT Style') }}</span>
+                            <span class="option-price">+ RM 2,000</span>
+                        </div>
+                        <div class="option-card" data-category="rims" data-item="rim6">
+                            <span class="option-name">{{ __('TE37 Black Edition') }}</span>
+                            <span class="option-price">+ RM 2,500</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Spoilers / Wings -->
+                <div class="sidebar-section" id="section-spoilers">
+                    <div class="section-title">{{ __('Choose Spoiler') }}</div>
+                    <div class="options-grid">
+                        <div class="option-card active" data-category="spoilers" data-item="wing4">
+                            <span class="option-name">{{ __('Integrated Lip (Default)') }}</span>
+                            <span class="option-price">{{ __('Included') }}</span>
+                        </div>
+                        <div class="option-card" data-category="spoilers" data-item="wing1">
+                            <span class="option-name">{{ __('Carbon Fiber High Wing') }}</span>
+                            <span class="option-price">+ RM 1,200</span>
+                        </div>
+                        <div class="option-card" data-category="spoilers" data-item="wing2">
+                            <span class="option-name">{{ __('GT Performance Wing') }}</span>
+                            <span class="option-price">+ RM 1,500</span>
+                        </div>
+                        <div class="option-card" data-category="spoilers" data-item="wing3">
+                            <span class="option-name">{{ __('Sleek Ducktail Wing') }}</span>
+                            <span class="option-price">+ RM 600</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Front Bumpers -->
+                <div class="sidebar-section" id="section-bumpers">
+                    <div class="section-title">{{ __('Choose Front Bumper') }}</div>
+                    <div class="options-grid">
+                        <div class="option-card active" data-category="bumpers" data-item="bumperF3">
+                            <span class="option-name">{{ __('Standard Sport (Default)') }}</span>
+                            <span class="option-price">{{ __('Included') }}</span>
+                        </div>
+                        <div class="option-card" data-category="bumpers" data-item="bumperF1">
+                            <span class="option-name">{{ __('Aggressive Aero Bumper') }}</span>
+                            <span class="option-price">+ RM 1,800</span>
+                        </div>
+                        <div class="option-card" data-category="bumpers" data-item="bumperF2">
+                            <span class="option-name">{{ __('Widebody Spec Bumper') }}</span>
+                            <span class="option-price">+ RM 2,200</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Summary Panel -->
+            <div class="summary-panel">
+                <div class="summary-list">
+                    <div class="summary-row">
+                        <span>{{ __('Base Car') }}</span>
+                        <span>RM 150,000</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>{{ __('Body Color') }}</span>
+                        <span id="summary-color-name">{{ __('Chalk White') }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>{{ __('Rim Color') }}</span>
+                        <span id="summary-rim-color">{{ __('Liquid Silver') }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>{{ __('Brake Color') }}</span>
+                        <span id="summary-brake-color">{{ __('Ember Red') }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>{{ __('Selected Rims') }}</span>
+                        <span id="summary-rims-price">{{ __('Included') }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>{{ __('Selected Spoiler') }}</span>
+                        <span id="summary-spoiler-price">{{ __('Included') }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>{{ __('Front Bumper') }}</span>
+                        <span id="summary-bumper-price">{{ __('Included') }}</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>{{ __('Total Price') }}</span>
+                        <span id="summary-total-price">RM 150,000</span>
+                    </div>
+                </div>
+
+                <button id="enquire-config-btn" class="btn-shine-custom" data-phone="{{ $storePhoneRaw ?? '60123456789' }}">
+                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.5-5.739-1.446L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.967C16.58 2.023 14.12 1 11.997 1 6.558 1 2.13 5.371 2.127 10.8c-.001 1.764.482 3.483 1.398 5.017l-.982 3.582 3.504-.945zM17.47 14.28c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+                    {{ __('Enquire Configuration') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @push('styles')
+        @vite('resources/css/configurator.css')
+    @endpush
+
+    @push('scripts')
+        @vite('resources/js/configurator.js')
+    @endpush
 </div>

@@ -26,3 +26,6 @@ Thumbs.db
 
 # Stray tinker/psysh redirect artefacts (e.g. `toJson(JSON_PRETTY_PRINT)`)
 toJson*
+
+# Large 3D model asset
+/public/models/3d/car.glb
