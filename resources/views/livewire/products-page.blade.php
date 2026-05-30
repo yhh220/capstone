@@ -257,7 +257,22 @@
                 <button id="camera-reset-btn" class="circle-btn camera-btn" title="{{ __('Reset View') }}" aria-label="{{ __('Reset View') }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                 </button>
+                <button id="toggle-doors-btn" class="pill-btn" title="{{ __('Open Doors') }}" aria-label="{{ __('Open Doors') }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span>{{ __('Open Doors') }}</span>
+                </button>
+                <button id="toggle-interior-pos-btn" class="pill-btn" title="{{ __('Center View') }}" aria-label="{{ __('Center View') }}" style="display: none;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                    <span>{{ __('Center View') }}</span>
+                </button>
+                <button id="toggle-view-btn" class="pill-btn" title="{{ __('Interior View') }}" aria-label="{{ __('Interior View') }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    <span>{{ __('Interior View') }}</span>
+                </button>
             </div>
+
+            <!-- Fade Overlay for Cinematic Transition -->
+            <div id="configurator-fade-overlay" class="fade-overlay"></div>
 
             <!-- Viewport Interaction Help -->
             <div class="viewport-help">
@@ -275,11 +290,13 @@
 
             <!-- Tabs Navigation -->
             <div class="configurator-tabs">
-                <button class="tab-btn active" data-tab="paint">{{ __('Paint') }}</button>
-                <button class="tab-btn" data-tab="rims">{{ __('Rims') }}</button>
-                <button class="tab-btn" data-tab="spoilers">{{ __('Spoilers') }}</button>
-                <button class="tab-btn" data-tab="bumpers">{{ __('Bumpers') }}</button>
-            </div>
+                <div class="tabs grid grid-cols-4 gap-2 md:gap-3 mb-4" style="max-width: 600px; margin: 0 auto 1rem auto;">
+                    <button class="tab-btn active" data-tab="paint">{{ __('Paint') }}</button>
+                    <button class="tab-btn" data-tab="rims">{{ __('Rims') }}</button>
+                    <button class="tab-btn" data-tab="spoilers">{{ __('Spoilers') }}</button>
+                    <button class="tab-btn" data-tab="bumpers">{{ __('Bumpers') }}</button>
+                    <button class="tab-btn" data-tab="tint" style="grid-column: span 1;">{{ __('Tint') }}</button>
+                </div></div>
 
             <!-- Sidebar Scrollable Sections -->
             <div class="sidebar-content">
@@ -321,6 +338,10 @@
                     <div class="section-title mt-6">{{ __('Choose Rim Color') }}</div>
                     <div class="color-picker-grid">
                         <div class="color-swatch-wrapper">
+                            <button class="color-swatch active" data-rim-color="default" style="background: linear-gradient(135deg, #333338, #a1a1aa); border: 1.5px solid rgba(255,255,255,0.4);"></button>
+                            <span class="color-swatch-label">{{ __('Default') }}</span>
+                        </div>
+                        <div class="color-swatch-wrapper">
                             <button class="color-swatch" data-rim-color="black" style="background-color: #111111;"></button>
                             <span class="color-swatch-label">{{ __('Black') }}</span>
                         </div>
@@ -329,7 +350,7 @@
                             <span class="color-swatch-label">{{ __('White') }}</span>
                         </div>
                         <div class="color-swatch-wrapper">
-                            <button class="color-swatch active" data-rim-color="silver" style="background-color: #cbd5e1;"></button>
+                            <button class="color-swatch" data-rim-color="silver" style="background-color: #cbd5e1;"></button>
                             <span class="color-swatch-label">{{ __('Silver') }}</span>
                         </div>
                         <div class="color-swatch-wrapper">
@@ -444,6 +465,31 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Section 5: Window Tint -->
+                <div class="sidebar-section" id="section-tint">
+                    <div class="section-title">{{ __('Choose Window Tint Level') }}</div>
+                    <div class="options-grid">
+                        <div class="option-card active" data-tint="100">
+                            <span class="option-name">{{ __('100% (Fully Transparent)') }}</span>
+                        </div>
+                        <div class="option-card" data-tint="70">
+                            <span class="option-name">{{ __('70% Tint') }}</span>
+                        </div>
+                        <div class="option-card" data-tint="50">
+                            <span class="option-name">{{ __('50% Tint') }}</span>
+                        </div>
+                        <div class="option-card" data-tint="35">
+                            <span class="option-name">{{ __('35% Tint') }}</span>
+                        </div>
+                        <div class="option-card" data-tint="15">
+                            <span class="option-name">{{ __('15% Tint') }}</span>
+                        </div>
+                        <div class="option-card" data-tint="5">
+                            <span class="option-name">{{ __('5% Tint (Darkest)') }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Live Summary Panel -->
@@ -459,7 +505,7 @@
                     </div>
                     <div class="summary-row">
                         <span>{{ __('Rim Color') }}</span>
-                        <span id="summary-rim-color">{{ __('Liquid Silver') }}</span>
+                        <span id="summary-rim-color">{{ __('Default') }}</span>
                     </div>
                     <div class="summary-row">
                         <span>{{ __('Brake Color') }}</span>
@@ -476,6 +522,10 @@
                     <div class="summary-row">
                         <span>{{ __('Front Bumper') }}</span>
                         <span id="summary-bumper-price">{{ __('Included') }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>{{ __('Window Tint') }}</span>
+                        <span id="summary-window-tint">100%</span>
                     </div>
                     <div class="summary-row total">
                         <span>{{ __('Total Price') }}</span>

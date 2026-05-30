@@ -38,6 +38,7 @@ const COLOR_MAP = {
 };
 
 const RIM_COLOR_MAP = {
+    default: { hex: null, name: 'Default' },
     black: { hex: 0x111111, name: 'Matte Black' },
     white: { hex: 0xf8fafc, name: 'Chalk White' },
     silver: { hex: 0xcbd5e1, name: 'Liquid Silver' },
@@ -53,20 +54,52 @@ const BRAKE_COLOR_MAP = {
     black: { hex: 0x0c0c0e, name: 'Carbon Black' }
 };
 
+const TINT_MAP = {
+    '100': { transmission: 1.0, opacity: 1.0, color: 0xffffff },
+    '70': { transmission: 1.0, opacity: 1.0, color: 0xcccccc },
+    '50': { transmission: 1.0, opacity: 1.0, color: 0x999999 },
+    '35': { transmission: 1.0, opacity: 1.0, color: 0x666666 },
+    '15': { transmission: 1.0, opacity: 1.0, color: 0x333333 },
+    '5': { transmission: 1.0, opacity: 1.0, color: 0x111111 },
+};
+
 // Application State
 const state = {
     color: 'white',
     rims: 'rim7',
     spoilers: 'wing4',
     bumpers: 'bumperF3',
-    rimColor: 'silver',
+    rimColor: 'default',
     brakeColor: 'red',
+    windowTint: '100',
+    doorsOpen: false,
+    viewMode: 'exterior', // 'exterior' | 'interior'
+    interiorPosMode: 'driver', // 'driver' | 'center'
+    transitioning: false,
 };
 
 // Three.js Globals
-let scene, camera, renderer, controls;
+let scene, camera, renderer, controls, carModel;
 let isInitialized = false;
 let animationFrameId = null;
+let mixer;
+const doorActions = [];
+const clock = new THREE.Clock();
+
+const cameraAnimation = {
+    active: false,
+    startTime: 0,
+    duration: 1200,
+    startPos: new THREE.Vector3(),
+    endPos: new THREE.Vector3(),
+    startTarget: new THREE.Vector3(),
+    endTarget: new THREE.Vector3(),
+    onComplete: null
+};
+
+function easeInOutCubic(x) {
+    return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
 
 // References to Car Meshes
 const carParts = {
@@ -90,7 +123,7 @@ function getPartInfo(child) {
     let current = child;
     while (current && current.parent) {
         const name = current.name || '';
-        
+
         // Rims Regex match (1 to 7)
         const rimMatch = name.match(/rim[_\s-]*0?([1-7])/i);
         if (rimMatch) {
@@ -126,14 +159,15 @@ function getPartInfo(child) {
  */
 function isMeshBodyPaint(child, partInfo) {
     const bodyPaintNames = [
-        'AM-Body', 'AM-Bonet', 'AM-B-BUMPER', 'AM-Hood', 'AM-Lower-Cover', 
-        'AM-Side-Mirrors', 'AM-Side-Mirrors.001', 'AM-Handle', 'AM-Cover', 'AM-Plane.003'
+        'AM-Body', 'AM-Bonet', 'AM-B-BUMPER', 'AM-Hood', 'AM-Lower-Cover',
+        'AM-Side-Mirrors', 'AM-Side-Mirrors.001', 'AM-Handle', 'AM-Cover', 'AM-Plane.003',
+        'AM-Door1', 'AM-Side-Mirrors1', 'AM-Handle1', 'AM-Door2', 'AM-Side-Mirrors2', 'AM-Handle2'
     ];
 
     const bodyPaintExclusions = [
-        'AM-Window', 'AM-Glass-Supp', 'AM-Tire', 'AM-ForWheels', 'AM-Headlight', 
-        'AM-Back-Light', 'AM-Back-Small-Light', 'AM-Blinks', 'AM-Disk part 1', 
-        'AM-Gears', 'AM-Dashboard', 'AM-Dash', 'AM-Dash.001', 'AM-Dash.002', 
+        'AM-Window', 'AM-Glass-Supp', 'AM-Tire', 'AM-ForWheels', 'AM-Headlight',
+        'AM-Back-Light', 'AM-Back-Small-Light', 'AM-Blinks', 'AM-Disk part 1',
+        'AM-Gears', 'AM-Dashboard', 'AM-Dash', 'AM-Dash.001', 'AM-Dash.002',
         'AM-Dash.003', 'AM-Digi', 'AM-Circle', 'AM-Brake'
     ];
 
@@ -157,10 +191,10 @@ function isMeshBodyPaint(child, partInfo) {
         }
 
         // Direct prefix checks to exclude indices variations (e.g. AM-Dash.001)
-        if (name.startsWith('AM-Dash') || 
-            name.startsWith('AM-Window') || 
-            name.startsWith('AM-Glass') || 
-            name.startsWith('AM-Tire') || 
+        if (name.startsWith('AM-Dash') ||
+            name.startsWith('AM-Window') ||
+            name.startsWith('AM-Glass') ||
+            name.startsWith('AM-Tire') ||
             name.startsWith('AM-Headlight') ||
             name.startsWith('AM-Back-Light') ||
             name.startsWith('AM-Back-Small-Light')) {
@@ -203,6 +237,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Toggle Doors
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#toggle-doors-btn')) {
+            if (state.transitioning) return;
+            toggleDoors(!state.doorsOpen);
+        }
+    });
+
+    // Toggle View Mode (Interior/Exterior)
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#toggle-view-btn')) {
+            toggleView();
+        }
+    });
+
+    // Toggle Interior Position (Driver/Center)
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#toggle-interior-pos-btn')) {
+            toggleInteriorPos();
+        }
+    });
+
     // WhatsApp Enquiry Export
     document.addEventListener('click', (e) => {
         if (e.target.closest('#enquire-config-btn')) {
@@ -239,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const colorKey = swatch.dataset.color;
             state.color = colorKey;
-            
+
             // Update 3D body material color
             if (carBodyMaterial && COLOR_MAP[colorKey]) {
                 carBodyMaterial.color.setHex(COLOR_MAP[colorKey].hex);
@@ -260,10 +316,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const colorKey = swatch.dataset.rimColor;
             state.rimColor = colorKey;
-            
-            if (carRimMaterial && RIM_COLOR_MAP[colorKey]) {
-                carRimMaterial.color.setHex(RIM_COLOR_MAP[colorKey].hex);
-            }
+
+            updateRimMaterials();
 
             const label = document.getElementById('summary-rim-color');
             if (label) label.textContent = RIM_COLOR_MAP[colorKey].name;
@@ -279,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const colorKey = swatch.dataset.brakeColor;
             state.brakeColor = colorKey;
-            
+
             if (carBrakeMaterial && BRAKE_COLOR_MAP[colorKey]) {
                 carBrakeMaterial.color.setHex(BRAKE_COLOR_MAP[colorKey].hex);
             }
@@ -292,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Accessory Option Card Selection
     document.addEventListener('click', (e) => {
         const card = e.target.closest('.option-card');
-        if (card) {
+        if (card && card.dataset.category) {
             const category = card.dataset.category;
             const itemKey = card.dataset.item;
 
@@ -304,11 +358,30 @@ document.addEventListener('DOMContentLoaded', () => {
             // Hide old variant, show new variant in 3D
             const oldItemKey = state[category];
             state[category] = itemKey;
-            
+
             togglePartVisibility(category, oldItemKey, itemKey);
 
             // Update Price Summary
             updateSummaryUI();
+        }
+    });
+
+    // Window Tint Selection
+    document.addEventListener('click', (e) => {
+        const card = e.target.closest('.option-card[data-tint]');
+        if (card) {
+            document.querySelectorAll('.option-card[data-tint]').forEach(s => s.classList.remove('active'));
+            card.classList.add('active');
+
+            const tintKey = card.dataset.tint;
+            state.windowTint = tintKey;
+
+            if (glassMaterial && TINT_MAP[tintKey]) {
+                const config = TINT_MAP[tintKey];
+                glassMaterial.color.setHex(config.color);
+                glassMaterial.transmission = config.transmission;
+                glassMaterial.opacity = config.opacity;
+            }
         }
     });
 });
@@ -363,6 +436,11 @@ function togglePartVisibility(category, oldKey, newKey) {
         carParts[category][newKey].forEach(mesh => {
             mesh.visible = true;
         });
+    }
+
+    // If swapping rims, ensure the newly visible rim gets the correct material styling
+    if (category === 'rims') {
+        updateRimMaterials();
     }
 }
 
@@ -483,17 +561,56 @@ function initThree() {
         // On Loaded Success
         (gltf) => {
             const car = gltf.scene;
-
-            // Center car object on ground plane
-            const box = new THREE.Box3().setFromObject(car);
-            const center = box.getCenter(new THREE.Vector3());
-            
-            car.position.x = -center.x;
-            car.position.z = -center.z;
-            car.position.y = -box.min.y;
+            carModel = car;
 
             scene.add(car);
 
+            // Pre-traverse to hide non-default accessories so they do not corrupt the ground level bounding box calculation
+            car.traverse((child) => {
+                if (child.isMesh) {
+                    const partInfo = getPartInfo(child);
+                    if (partInfo) {
+                        const { category, key } = partInfo;
+                        if (category === 'rims' || category === 'spoilers' || category === 'bumpers') {
+                            child.visible = (key === state[category]);
+                        } else if (category === 'bumperB1') {
+                            child.visible = false;
+                        }
+                    }
+                }
+            });
+
+            // Step 1: Center X and Z first
+            const box1 = new THREE.Box3().setFromObject(car);
+            const center = box1.getCenter(new THREE.Vector3());
+            car.position.x = -center.x;
+            car.position.z = -center.z;
+
+            // Step 2: Recalculate bounding box after centering, then fix Y
+            car.updateMatrixWorld(true);
+            const box2 = new THREE.Box3().setFromObject(car);
+            car.position.y = -box2.min.y;
+
+            // Setup Animation Mixer
+            if (gltf.animations && gltf.animations.length > 0) {
+                mixer = new THREE.AnimationMixer(car);
+
+                const clip1 = gltf.animations.find(clip => clip.name === 'AM-Door动作');
+                const clip2 = gltf.animations.find(clip => clip.name === 'AM-Door2动作');
+
+                if (clip1) {
+                    const action1 = mixer.clipAction(clip1);
+                    action1.setLoop(THREE.LoopOnce, 1);
+                    action1.clampWhenFinished = true;
+                    doorActions.push(action1);
+                }
+                if (clip2) {
+                    const action2 = mixer.clipAction(clip2);
+                    action2.setLoop(THREE.LoopOnce, 1);
+                    action2.clampWhenFinished = true;
+                    doorActions.push(action2);
+                }
+            }
             // Initialize materials
             carBodyMaterial = new THREE.MeshPhysicalMaterial({
                 color: COLOR_MAP[state.color].hex,
@@ -518,7 +635,7 @@ function initThree() {
             glassMaterial = new THREE.MeshPhysicalMaterial({
                 color: 0xffffff,
                 transparent: true,
-                opacity: 0.45,
+                opacity: 1.0,
                 transmission: 1.0,
                 roughness: 0.05,
                 ior: 1.5,
@@ -530,7 +647,7 @@ function initThree() {
                 if (child.isMesh) {
                     child.castShadow = true;
                     child.receiveShadow = true;
-                    
+
                     const name = child.name;
                     const nameLower = name.toLowerCase();
 
@@ -538,22 +655,27 @@ function initThree() {
                     const partInfo = getPartInfo(child);
                     if (partInfo) {
                         const { category, key } = partInfo;
-                        
+
                         if (category === 'rims' || category === 'spoilers' || category === 'bumpers') {
                             if (!carParts[category][key]) {
                                 carParts[category][key] = [];
                             }
                             carParts[category][key].push(child);
-                            
+
                             // Hide non-default on load
                             child.visible = (key === state[category]);
 
-                            // Apply Rim material to rims category
+                            // Store original material reference
+                            child.userData.originalMaterial = child.material;
+
+                            // Apply Rim material to rims category if not default
                             if (category === 'rims') {
-                                child.material = carRimMaterial;
+                                if (state.rimColor !== 'default') {
+                                    child.material = carRimMaterial;
+                                }
                             }
                         } else if (category === 'bumperB1') {
-                            child.visible = true; // Always visible
+                            child.visible = false; // Hide loose misplaced bumper mesh
                         }
                     }
 
@@ -563,13 +685,36 @@ function initThree() {
                         child.material = carBrakeMaterial;
                     }
 
-                    // Apply Glass material if it matches glass/window name (checked first to prevent painting glass)
-                    const isGlass = nameLower.includes('glass') || nameLower.includes('window') || nameLower.includes('windshield') || nameLower.includes('windscreen');
-                    
+                    // Check if this is one of the explicitly excluded fake windows
+                    let isExcludedWindow = false;
+                    let tempObj = child;
+                    while (tempObj && tempObj.parent) {
+                        const tempName = (tempObj.name || '').toLowerCase();
+                        if (tempName.match(/window[._\s]*00[12]/)) {
+                            isExcludedWindow = true;
+                            break;
+                        }
+                        tempObj = tempObj.parent;
+                    }
+
+                    // Apply Glass material if it matches glass/window name and is NOT excluded
+                    let isGlass = false;
+                    if (!isExcludedWindow) {
+                        let currentObj = child;
+                        while (currentObj && currentObj.parent) {
+                            const curName = (currentObj.name || '').toLowerCase();
+                            if (curName.includes('glass') || curName.includes('window') || curName.includes('windshield') || curName.includes('windscreen')) {
+                                isGlass = true;
+                                break;
+                            }
+                            currentObj = currentObj.parent;
+                        }
+                    }
+
                     if (isGlass) {
                         carParts.glass.push(child);
                         child.material = glassMaterial;
-                    } else {
+                    } else if (!isExcludedWindow) {
                         // Apply Body paint color strictly to matching targets (and nested body meshes) AND active front bumpers
                         if (isMeshBodyPaint(child, partInfo)) {
                             carParts.body.push(child);
@@ -628,8 +773,32 @@ function initThree() {
 function animate() {
     animationFrameId = requestAnimationFrame(animate);
 
-    if (controls) {
-        controls.update();
+    const delta = clock.getDelta();
+    if (mixer) {
+        mixer.update(delta);
+    }
+
+    if (cameraAnimation.active) {
+        const elapsed = performance.now() - cameraAnimation.startTime;
+        const progress = Math.min(elapsed / cameraAnimation.duration, 1);
+        const t = easeInOutCubic(progress);
+
+        camera.position.lerpVectors(cameraAnimation.startPos, cameraAnimation.endPos, t);
+
+        const currentTarget = new THREE.Vector3();
+        currentTarget.lerpVectors(cameraAnimation.startTarget, cameraAnimation.endTarget, t);
+        camera.lookAt(currentTarget);
+
+        if (progress >= 1) {
+            cameraAnimation.active = false;
+            if (cameraAnimation.onComplete) {
+                cameraAnimation.onComplete();
+            }
+        }
+    } else {
+        if (controls && controls.enabled) {
+            controls.update();
+        }
     }
 
     if (renderer && scene && camera) {
@@ -655,10 +824,387 @@ function onWindowResize() {
  */
 function resetCamera() {
     if (camera && controls) {
-        controls.reset();
-        camera.position.set(5.5, 2, 5.5);
-        controls.target.set(0, 0.4, 0);
+        if (state.viewMode === 'interior') {
+            exitInteriorView();
+        } else {
+            controls.reset();
+            camera.position.set(5.5, 2, 5.5);
+            controls.target.set(0, 0.4, 0);
+            controls.update();
+        }
+    }
+}
+
+/**
+ * Toggle the car doors open/closed by running the mixer animations
+ */
+function toggleDoors(open, onComplete) {
+    if (doorActions.length === 0) {
+        if (onComplete) onComplete();
+        return;
+    }
+
+    state.doorsOpen = open;
+    const timeScale = open ? 1 : -1;
+    let maxDuration = 0;
+
+    doorActions.forEach(action => {
+        action.paused = false;
+        action.timeScale = timeScale;
+
+        const clipDuration = action.getClip().duration;
+        maxDuration = Math.max(maxDuration, clipDuration);
+
+        if (open) {
+            if (action.time === clipDuration) {
+                action.time = 0;
+            }
+        } else {
+            if (action.time === 0) {
+                action.time = clipDuration;
+            }
+        }
+        action.play();
+    });
+
+    // Update doors toggle button UI state
+    const doorBtn = document.getElementById('toggle-doors-btn');
+    if (doorBtn) {
+        const textSpan = doorBtn.querySelector('span');
+        if (textSpan) textSpan.textContent = open ? 'Close Doors' : 'Open Doors';
+        if (open) {
+            doorBtn.classList.add('active');
+        } else {
+            doorBtn.classList.remove('active');
+        }
+    }
+
+    if (onComplete) {
+        setTimeout(onComplete, maxDuration * 1000);
+    }
+}
+
+/**
+ * Handle screen fade transitions using CSS overlay
+ */
+function fadeScreen(fade, callback) {
+    const overlay = document.getElementById('configurator-fade-overlay');
+    if (!overlay) {
+        if (callback) callback();
+        return;
+    }
+
+    if (fade) {
+        overlay.classList.add('active');
+    } else {
+        overlay.classList.remove('active');
+    }
+
+    // CSS fade transition is 400ms, wait 450ms to ensure completion
+    setTimeout(() => {
+        if (callback) callback();
+    }, 450);
+}
+
+/**
+ * Get interior and door camera/target coordinates relative to the car's current position
+ */
+function getInteriorCoords() {
+    const carPos = (carModel && carModel.position) ? carModel.position.clone() : new THREE.Vector3();
+
+    // Driver's eye/camera position (seated inside LHD driver seat)
+    // Steering wheel is at local: x = -0.508, y = 0.745, z = 0.40
+    // Driver seat cushion is at local: x = 0.15, y = 0.45, z = 0.40
+    // Driver eye level: x = 0.15, y = 0.95, z = 0.40
+    const driverPos = new THREE.Vector3(
+        carPos.x + 0.15,
+        carPos.y + 0.95,
+        carPos.z + 0.40
+    );
+
+    // Target inside looking forward: x = -0.60, y = 0.85, z = 0.40
+    const driverTarget = new THREE.Vector3(
+        carPos.x - 0.60,
+        carPos.y + 0.85,
+        carPos.z + 0.40
+    );
+
+    // Center eye level (between seats)
+    const centerPos = new THREE.Vector3(
+        carPos.x + 0.15,
+        carPos.y + 0.95,
+        carPos.z - 0.45
+    );
+
+    // Target from center looking forward
+    const centerTarget = new THREE.Vector3(
+        carPos.x - 0.60,
+        carPos.y + 0.85,
+        carPos.z - 0.45
+    );
+
+    // Door exterior check/pan position (outside open driver-side door at z = 1.60)
+    const doorPos = new THREE.Vector3(
+        carPos.x - 0.40,
+        carPos.y + 1.10,
+        carPos.z + 1.60
+    );
+
+    // Looking at steering wheel/dashboard area
+    const doorTarget = new THREE.Vector3(
+        carPos.x - 0.50,
+        carPos.y + 0.85,
+        carPos.z + 0.40
+    );
+
+    return {
+        driverPos,
+        driverTarget,
+        centerPos,
+        centerTarget,
+        doorPos,
+        doorTarget
+    };
+}
+
+/**
+ * Helper to get active interior camera position vector based on current state
+ */
+function getActiveInteriorPos() {
+    const coords = getInteriorCoords();
+    if (state.interiorPosMode === 'center') {
+        return coords.centerPos;
+    }
+    return coords.driverPos;
+}
+
+/**
+ * Helper to get active interior camera target vector based on current state
+ */
+function getActiveInteriorTarget() {
+    const coords = getInteriorCoords();
+    if (state.interiorPosMode === 'center') {
+        return coords.centerTarget;
+    }
+    return coords.driverTarget;
+}
+
+/**
+ * Smoothly transition view between Driver position and Center position in the cabin
+ */
+function toggleInteriorPos() {
+    if (state.transitioning || state.viewMode !== 'interior') return;
+    state.transitioning = true;
+
+    // Fade screen to black
+    fadeScreen(true, () => {
+        // Toggle state
+        state.interiorPosMode = (state.interiorPosMode === 'driver') ? 'center' : 'driver';
+
+        const coords = getInteriorCoords();
+        const newPos = (state.interiorPosMode === 'center') ? coords.centerPos : coords.driverPos;
+        const newTarget = (state.interiorPosMode === 'center') ? coords.centerTarget : coords.driverTarget;
+
+        // Reset controls target (pivot point is the eye)
+        controls.target.copy(newPos);
+        
+        // Position the camera slightly behind the pivot so it looks forward
+        const direction = new THREE.Vector3().subVectors(newTarget, newPos).normalize();
+        camera.position.copy(newPos).sub(direction.multiplyScalar(0.01));
+        
         controls.update();
+
+        // Update button label and active state
+        const interiorPosBtn = document.getElementById('toggle-interior-pos-btn');
+        if (interiorPosBtn) {
+            const textSpan = interiorPosBtn.querySelector('span');
+            if (textSpan) {
+                textSpan.textContent = (state.interiorPosMode === 'center') ? 'Driver View' : 'Center View';
+            }
+            if (state.interiorPosMode === 'center') {
+                interiorPosBtn.classList.add('active');
+            } else {
+                interiorPosBtn.classList.remove('active');
+            }
+        }
+
+        // Fade screen back in
+        fadeScreen(false, () => {
+            state.transitioning = false;
+        });
+    });
+}
+
+/**
+ * Animate the camera smoothly towards the open door area
+ */
+function animateCameraToDoorSide(callback) {
+    if (!camera || !controls) {
+        if (callback) callback();
+        return;
+    }
+
+    controls.enabled = false; // Disable controls during active tween interpolation
+    cameraAnimation.active = true;
+    cameraAnimation.startTime = performance.now();
+    cameraAnimation.duration = 1200;
+    cameraAnimation.startPos.copy(camera.position);
+
+    const coords = getInteriorCoords();
+
+    cameraAnimation.endPos.copy(coords.doorPos);
+    cameraAnimation.startTarget.copy(controls.target);
+    cameraAnimation.endTarget.copy(coords.doorTarget);
+
+    cameraAnimation.onComplete = callback;
+}
+
+/**
+ * Handle transition to interior cabin view
+ */
+function enterInteriorView() {
+    if (state.transitioning) return;
+    state.transitioning = true;
+
+    // 1. Play door open animation first
+    toggleDoors(true, () => {
+        // 2. Camera moves slowly towards the car door area
+        animateCameraToDoorSide(() => {
+            // 3. Screen fades to black
+            fadeScreen(true, () => {
+                // Close doors silently while screen is black
+                toggleDoors(false, () => {
+                    // 4. Camera jumps inside the car
+                    state.viewMode = 'interior';
+                    const activePos = getActiveInteriorPos();
+                    const activeTarget = getActiveInteriorTarget();
+                
+                controls.enabled = true;
+                controls.enableZoom = false;
+                controls.enablePan = false;
+                controls.minDistance = 0.01;
+                controls.maxDistance = 0.01;
+                controls.maxPolarAngle = Math.PI - 0.1; // Allow looking down at floor/console
+                
+                // Pivot is the eye position
+                controls.target.copy(activePos);
+                
+                // Camera is slightly offset backwards so it looks forward towards the target
+                const direction = new THREE.Vector3().subVectors(activeTarget, activePos).normalize();
+                camera.position.copy(activePos).sub(direction.multiplyScalar(0.01));
+                
+                controls.update();
+
+                // Show the interior position toggle button
+                const interiorPosBtn = document.getElementById('toggle-interior-pos-btn');
+                if (interiorPosBtn) {
+                    interiorPosBtn.style.display = 'inline-flex';
+                    const textSpan = interiorPosBtn.querySelector('span');
+                    if (textSpan) {
+                        textSpan.textContent = (state.interiorPosMode === 'center') ? 'Driver View' : 'Center View';
+                    }
+                    if (state.interiorPosMode === 'center') {
+                        interiorPosBtn.classList.add('active');
+                    } else {
+                        interiorPosBtn.classList.remove('active');
+                    }
+                }
+
+                // Update View Toggle button UI
+                const viewBtn = document.getElementById('toggle-view-btn');
+                if (viewBtn) {
+                    const textSpan = viewBtn.querySelector('span');
+                    if (textSpan) textSpan.textContent = 'Exterior View';
+                    viewBtn.classList.add('active');
+                }
+
+                // 5. Screen fades back in
+                fadeScreen(false, () => {
+                    state.transitioning = false;
+                });
+                });
+            });
+        });
+    });
+}
+
+/**
+ * Handle transition back to exterior showroom view
+ */
+function exitInteriorView() {
+    if (state.transitioning) return;
+    state.transitioning = true;
+
+    // 1. Screen fades to black
+    fadeScreen(true, () => {
+        // Hide the interior position toggle button
+        const interiorPosBtn = document.getElementById('toggle-interior-pos-btn');
+        if (interiorPosBtn) {
+            interiorPosBtn.style.display = 'none';
+        }
+
+        // 2. Camera jumps back to exterior position (x=5, y=2, z=8)
+        camera.position.set(5, 2, 8);
+        controls.target.set(0, 0.4, 0);
+        
+        controls.enabled = true;
+        controls.enableZoom = true;
+        controls.enablePan = true;
+        controls.minDistance = 3.5;
+        controls.maxDistance = 8.5;
+        controls.maxPolarAngle = Math.PI / 2 - 0.03; // Limit looking underneath the floor
+        controls.update();
+
+        state.viewMode = 'exterior';
+
+        // Update View Toggle button UI
+        const viewBtn = document.getElementById('toggle-view-btn');
+        if (viewBtn) {
+            const textSpan = viewBtn.querySelector('span');
+            if (textSpan) textSpan.textContent = 'Interior View';
+            viewBtn.classList.remove('active');
+        }
+
+        // 3. Screen fades in
+        fadeScreen(false, () => {
+            // 4. Play door close animation
+            toggleDoors(false, () => {
+                state.transitioning = false;
+            });
+        });
+    });
+}
+
+/**
+ * Toggle between interior and exterior views
+ */
+function toggleView() {
+    if (state.viewMode === 'exterior') {
+        enterInteriorView();
+    } else {
+        exitInteriorView();
+    }
+}
+
+/**
+ * Update rim materials based on selected rim color state.
+ * If 'default', restores original GLB materials; otherwise applies colored carRimMaterial.
+ */
+function updateRimMaterials() {
+    const isDefault = state.rimColor === 'default';
+    for (const rimKey in carParts.rims) {
+        carParts.rims[rimKey].forEach(mesh => {
+            if (isDefault) {
+                if (mesh.userData.originalMaterial) {
+                    mesh.material = mesh.userData.originalMaterial;
+                }
+            } else {
+                if (carRimMaterial && RIM_COLOR_MAP[state.rimColor]) {
+                    carRimMaterial.color.setHex(RIM_COLOR_MAP[state.rimColor].hex || 0xffffff);
+                    mesh.material = carRimMaterial;
+                }
+            }
+        });
     }
 }
 
@@ -678,6 +1224,7 @@ function sendWhatsAppEnquiry() {
     const spoilerPrice = ACCESSORY_PRICES.spoilers[state.spoilers].price === 0 ? 'Included' : `+RM ${ACCESSORY_PRICES.spoilers[state.spoilers].price.toLocaleString()}`;
     const bumperSpec = ACCESSORY_PRICES.bumpers[state.bumpers].name;
     const bumperPrice = ACCESSORY_PRICES.bumpers[state.bumpers].price === 0 ? 'Included' : `+RM ${ACCESSORY_PRICES.bumpers[state.bumpers].price.toLocaleString()}`;
+    const windowTintSpec = state.windowTint + '%';
 
     const total = BASE_PRICE + ACCESSORY_PRICES.rims[state.rims].price + ACCESSORY_PRICES.spoilers[state.spoilers].price + ACCESSORY_PRICES.bumpers[state.bumpers].price;
 
@@ -688,7 +1235,8 @@ function sendWhatsAppEnquiry() {
         `• Rim Style: ${rimSpec} (Color: ${rimColorSpec}) (${rimPrice})\n` +
         `• Brake Caliper Color: ${brakeColorSpec}\n` +
         `• Spoiler Style: ${spoilerSpec} (${spoilerPrice})\n` +
-        `• Front Bumper: ${bumperSpec} (${bumperPrice})\n\n` +
+        `• Front Bumper: ${bumperSpec} (${bumperPrice})\n` +
+        `• Window Tint: ${windowTintSpec}\n\n` +
         `----------------------------\n` +
         `• Base Price: RM ${BASE_PRICE.toLocaleString()}\n` +
         `• Estimated Total: RM ${total.toLocaleString()}\n\n` +
