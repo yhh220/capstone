@@ -21,7 +21,7 @@
                 <a href="{{ $manageUrl }}" class="text-brand-red font-semibold text-sm break-all hover:underline">{{ $manageUrl }}</a>
             </div>
             <button wire:click="$set('submitted', false)"
-                    class="group relative inline-flex items-center gap-3 bg-brand-red text-white px-8 py-4 rounded-full font-black text-base transition-all duration-300 shadow-[0_6px_20px_rgba(var(--brand-red-rgb),0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgba(var(--brand-red-rgb),0.5)] hover:-translate-y-2 active:scale-95">
+                    class="group relative inline-flex items-center gap-3 bg-brand-red text-white px-8 py-4 rounded-full font-black text-base transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-2 active:scale-95">
                 <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
                 <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:rotate-[15deg]" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
                 <span class="relative z-10">{{ __('Make Another Booking') }}</span>
@@ -465,7 +465,7 @@
                                 wire:loading.attr="disabled"
                                 wire:target="nextStep"
                                 type="button"
-                                class="group relative inline-flex items-center gap-2 px-7 py-3 bg-brand-red text-white rounded-xl text-sm font-black transition-all duration-300 shadow-[0_4px_15px_rgba(var(--brand-red-rgb),0.3)] overflow-hidden hover:shadow-[0_8px_25px_rgba(var(--brand-red-rgb),0.45)] hover:-translate-y-1 active:scale-95 disabled:opacity-60">
+                                class="group relative inline-flex items-center gap-2 px-7 py-3 bg-brand-red text-white rounded-xl text-sm font-black transition-all duration-300 shadow-[0_4px_15px_rgb(var(--brand-red-rgb)_/_0.3)] overflow-hidden hover:shadow-[0_8px_25px_rgb(var(--brand-red-rgb)_/_0.45)] hover:-translate-y-1 active:scale-95 disabled:opacity-60">
                             <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
                             <span class="relative z-10" wire:loading.remove wire:target="nextStep">{{ __('Continue') }}</span>
                             <span class="relative z-10 hidden" wire:loading.class.remove="hidden" wire:target="nextStep">{{ __('Checking...') }}</span>
@@ -476,7 +476,7 @@
                                 wire:loading.attr="disabled"
                                 wire:target="submit"
                                 type="button"
-                                class="group relative inline-flex items-center gap-2 px-8 py-3 bg-brand-red text-white rounded-xl font-black text-sm transition-all duration-300 shadow-[0_4px_15px_rgba(var(--brand-red-rgb),0.3)] overflow-hidden hover:shadow-[0_8px_25px_rgba(var(--brand-red-rgb),0.45)] hover:-translate-y-1 active:scale-95 disabled:opacity-60">
+                                class="group relative inline-flex items-center gap-2 px-8 py-3 bg-brand-red text-white rounded-xl font-black text-sm transition-all duration-300 shadow-[0_4px_15px_rgb(var(--brand-red-rgb)_/_0.3)] overflow-hidden hover:shadow-[0_8px_25px_rgb(var(--brand-red-rgb)_/_0.45)] hover:-translate-y-1 active:scale-95 disabled:opacity-60">
                             <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
                             <svg class="w-4 h-4 relative z-10 transition-transform duration-300 group-hover:scale-110" wire:loading.remove wire:target="submit" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <span class="relative z-10" wire:loading.remove wire:target="submit">{{ __('Confirm Booking') }}</span>

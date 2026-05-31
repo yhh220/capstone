@@ -70,7 +70,7 @@
                         <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-red shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>{{ __('Pinch to zoom on mobile') }}</li>
                     </ul>
                     <a href="{{ route('contact') }}"
-                       class="group relative inline-flex items-center gap-3 bg-brand-red text-white px-8 py-4 rounded-full font-black text-base transition-all duration-300 shadow-[0_6px_20px_rgba(var(--brand-red-rgb),0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgba(var(--brand-red-rgb),0.5)] hover:-translate-y-2 active:scale-95">
+                       class="group relative inline-flex items-center gap-3 bg-brand-red text-white px-8 py-4 rounded-full font-black text-base transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-2 active:scale-95">
                         <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
                         <span class="relative z-10">{{ __('Visit Our Showroom') }}</span>
                         <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
@@ -289,7 +289,7 @@
         }
         .category-card:hover {
             border-color: rgb(var(--brand-red-rgb)) !important;
-            box-shadow: 0 0 20px rgba(var(--brand-red-rgb), 0.3) !important;
+            box-shadow: 0 0 20px rgb(var(--brand-red-rgb) / 0.3) !important;
         }
         .category-card:active {
             transform: scale(0.92) !important;

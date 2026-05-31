@@ -175,7 +175,7 @@
                         </div>
 
                         <button type="submit"
-                                class="group relative overflow-hidden w-full bg-brand-red text-white py-4 flex items-center justify-center gap-3 rounded-xl font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgba(var(--brand-red-rgb),0.35)] hover:shadow-[0_10px_30px_rgba(var(--brand-red-rgb),0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                                class="group relative overflow-hidden w-full bg-brand-red text-white py-4 flex items-center justify-center gap-3 rounded-xl font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                                 wire:loading.attr="disabled"
                                 wire:loading.class="opacity-75"
                                 wire:target="submit">
