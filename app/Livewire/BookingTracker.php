@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Booking;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 class BookingTracker extends Component
@@ -24,6 +25,16 @@ class BookingTracker extends Component
             $this->addError('phone', __('Enter a phone number or booking token.'));
             return;
         }
+
+        // Rate limit to stop brute-force phone-number enumeration / PII harvesting.
+        // (Token lookups are unguessable UUIDs; phone lookups are the risk.)
+        $key = 'booking-track:' . request()->ip();
+        if (RateLimiter::tooManyAttempts($key, 6)) {
+            $seconds = RateLimiter::availableIn($key);
+            $this->addError('phone', __('Too many lookups. Please try again in :seconds seconds.', ['seconds' => $seconds]));
+            return;
+        }
+        RateLimiter::hit($key, 120);
 
         $this->searched = true;
     }

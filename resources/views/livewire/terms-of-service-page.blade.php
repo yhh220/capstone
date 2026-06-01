@@ -7,7 +7,7 @@
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
         <div class="max-w-5xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Terms of Service') }}</h1>
-            <p class="text-gray-400">{{ __('Last Updated: April 2025') }}</p>
+            <p class="text-gray-400">{{ __('Last Updated: April 2026') }}</p>
         </div>
     </div>
 
@@ -42,7 +42,7 @@
             <section>
                 <h2 class="text-xl font-black text-gray-900 dark:text-white mb-3">{{ __('5. Intellectual Property') }}</h2>
                 <p>{{ __('All content on this website, including text, images, logos, and design, belongs to us. Please do not copy, reproduce, or steal our work.') }}</p>
-                <p class="mt-2 font-semibold">&copy; {{ __('Win Win Car Audio 2025') }}</p>
+                <p class="mt-2 font-semibold">&copy; {{ __('Win Win Car Audio 2026') }}</p>
             </section>
 
             <section>

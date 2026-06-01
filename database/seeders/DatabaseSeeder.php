@@ -18,14 +18,14 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        // 'role' is not mass-assignable; set it explicitly via forceFill.
         User::firstOrCreate(
             ['email' => env('DEFAULT_ADMIN_EMAIL', 'admin@example.com')],
             [
                 'name' => 'Admin',
                 'password' => bcrypt(env('DEFAULT_ADMIN_PASSWORD', 'password')),
-                'role' => 'owner',
             ]
-        );
+        )->forceFill(['role' => 'owner'])->save();
 
         $categories = [
             ['name' => 'Seat Covers', 'description' => 'Premium seat covers for all car models'],

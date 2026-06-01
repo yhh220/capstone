@@ -56,7 +56,7 @@
          aria-modal="true"
          aria-label="{{ $ui['title'] }}"
          x-data="{ langOpen: false }"
-         x-init="$nextTick(() => { if (window.matchMedia('(min-width: 768px)').matches) document.getElementById('chatbot-input')?.focus() })"
+         x-init="$nextTick(() => { let m = document.getElementById('chatbot-messages'); if (m) m.scrollTop = m.scrollHeight; if (window.matchMedia('(min-width: 768px)').matches) document.getElementById('chatbot-input')?.focus() })"
          @chatbot-scroll.window="$nextTick(() => { let el = document.getElementById('chatbot-messages'); if (el) el.scrollTop = el.scrollHeight; })"
          @chatbot-focus.window="$nextTick(() => document.getElementById('chatbot-input')?.focus())"
          @keydown.escape.window="$wire.close()">

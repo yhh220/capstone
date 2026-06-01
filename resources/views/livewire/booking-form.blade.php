@@ -31,6 +31,7 @@
 
     {{-- ── MULTI-STEP BOOKING WIZARD ── --}}
     @else {{-- !$submitted --}}
+    <x-honeypot livewire-model="honeypotData" />
     <div class="max-w-7xl mx-auto px-4 py-10 sm:py-14">
         <div class="flex flex-col lg:flex-row gap-6 items-start">
 

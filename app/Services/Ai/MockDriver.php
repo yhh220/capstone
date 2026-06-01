@@ -216,6 +216,116 @@ class MockDriver implements AiServiceInterface
                 ],
             ],
 
+            // Privacy / personal data (Privacy Policy)
+            [
+                'priority' => 60,
+                'keywords' => ['privacy', 'personal data', 'my data', 'data protection', 'pdpa', 'cookie', 'cookies', 'sell my data', 'privasi', 'data peribadi', '隐私', '个人资料', '个人信息', '数据', '保密'],
+                'reply' => [
+                    'en' => "🔒 Your privacy matters to us:\n\n• We only collect what we need (name, phone, email, vehicle details).\n• We NEVER sell your personal data.\n• Only basic session cookies — no ad tracking.\n• You can view, correct, or delete your data anytime.\n\nWe comply with Malaysia's PDPA 2010. Full details are on our Privacy Policy page. 😊",
+                    'ms' => "🔒 Privasi anda penting bagi kami:\n\n• Kami hanya kumpul apa yang perlu (nama, telefon, e-mel, butiran kenderaan).\n• Kami TIDAK PERNAH jual data peribadi anda.\n• Kuki sesi asas sahaja — tiada penjejakan iklan.\n• Anda boleh lihat, betulkan atau padam data anda bila-bila masa.\n\nKami patuhi PDPA 2010 Malaysia. Butiran penuh di halaman Dasar Privasi. 😊",
+                    'zh' => "🔒 我们非常重视您的隐私：\n\n• 只收集必要信息（姓名、电话、邮箱、车辆资料）。\n• 我们绝不出售您的个人数据。\n• 仅使用基本会话 cookie——无广告追踪。\n• 您可随时查看、更正或删除您的数据。\n\n我们遵守马来西亚 PDPA 2010 法规。详情见「隐私政策」页面。😊",
+                ],
+            ],
+
+            // Terms of service / copyright
+            [
+                'priority' => 58,
+                'keywords' => ['terms of service', 'terms', 'tos', 'agreement', 'intellectual property', 'copyright', 'terma', 'syarat perkhidmatan', '条款', '服务条款', '使用条款', '版权', '知识产权', '协议'],
+                'reply' => [
+                    'en' => "📋 Our Terms of Service in brief:\n\n• Product info & prices are kept accurate — please confirm final fitment & stock with us.\n• Online bookings/orders are confirmed by our team before fulfilment.\n• Please use the site responsibly.\n• All content & logos are our property. © Win Win Car Audio 2026.\n\nFull terms are on our Terms of Service page. 😊",
+                    'ms' => "📋 Ringkasan Terma Perkhidmatan kami:\n\n• Maklumat produk & harga dijaga tepat — sahkan kesesuaian & stok dengan kami.\n• Tempahan/pesanan dalam talian disahkan oleh pasukan kami dahulu.\n• Sila guna laman ini dengan bertanggungjawab.\n• Semua kandungan & logo ialah harta kami. © Win Win Car Audio 2026.\n\nTerma penuh di halaman Terma Perkhidmatan. 😊",
+                    'zh' => "📋 我们的服务条款简述：\n\n• 产品信息与价格力求准确——请向我们确认最终适配性与库存。\n• 线上预约/订单需经团队确认后才处理。\n• 请合理使用本网站。\n• 网站所有内容与标志均为我们所有。© Win Win Car Audio 2026。\n\n完整条款见「服务条款」页面。😊",
+                ],
+            ],
+
+            // Vehicle compatibility / fitment (FAQ)
+            [
+                'priority' => 72,
+                'keywords' => ['fit my car', 'compatible', 'compatibility', 'will it fit', 'suitable for', 'fitment', 'does it fit', 'sesuai dengan kereta', 'serasi', 'muat', '适合我的车', '兼容', '适配', '合适吗', '能装吗', '装得上'],
+                'reply' => [
+                    'en' => "🚗 Great question! To check if a product fits your car:\n\n1. Use the compatibility guidance on the product pages\n2. Tell us your car make, model & year\n3. We'll confirm fitment before you buy or visit\n\nFor a guaranteed match, WhatsApp us at {$p} with your car details. 😊",
+                    'ms' => "🚗 Soalan bagus! Untuk semak kesesuaian produk dengan kereta anda:\n\n1. Guna panduan keserasian di halaman produk\n2. Beritahu kami jenama, model & tahun kereta anda\n3. Kami sahkan kesesuaian sebelum anda beli atau datang\n\nUntuk kepastian, WhatsApp kami di {$p}. 😊",
+                    'zh' => "🚗 好问题！要确认产品是否适合您的车：\n\n1. 参考产品页面的兼容性说明\n2. 告诉我们您的车品牌、型号与年份\n3. 购买或到店前我们会帮您确认适配\n\n想要确保匹配，请把车辆信息 WhatsApp 给我们：{$p}。😊",
+                ],
+            ],
+
+            // Installation duration (FAQ)
+            [
+                'priority' => 68,
+                'keywords' => ['how long', 'duration', 'how much time', 'take long', 'how many hours', 'berapa lama', 'berapa jam', '多久', '多长时间', '要多久', '需要多久', '几个小时', '几小时'],
+                'reply' => [
+                    'en' => "⏱️ Installation time depends on the job:\n\n• Basic audio setup: ~1–2 hours\n• Dashcam / window tint: ~1–3 hours\n• Full custom installation: up to a full day\n\nWe'll give you an estimate when you book. WhatsApp {$p} for specifics! 😊",
+                    'ms' => "⏱️ Masa pemasangan bergantung pada kerja:\n\n• Set audio asas: ~1–2 jam\n• Dashcam / tinted: ~1–3 jam\n• Pemasangan custom penuh: sehingga sehari\n\nKami beri anggaran semasa anda tempah. WhatsApp {$p} untuk butiran! 😊",
+                    'zh' => "⏱️ 安装时间视项目而定：\n\n• 基础音响：约 1–2 小时\n• 行车记录仪 / 车窗膜：约 1–3 小时\n• 全套定制安装：最多一整天\n\n预约时我们会给您预估时间。详情请 WhatsApp {$p}！😊",
+                ],
+            ],
+
+            // Custom installation (FAQ)
+            [
+                'priority' => 66,
+                'keywords' => ['custom install', 'customize', 'customise', 'custom build', 'custom setup', 'bespoke', 'pemasangan khas', 'custom audio', '定制', '改装', '个性化', '量身'],
+                'reply' => [
+                    'en' => "🛠️ Yes — we love custom builds! We offer tailored car audio & accessory installations designed around your vehicle and goals.\n\nTell us what you have in mind and your car details. WhatsApp us at {$p} or visit the showroom to plan it with our team. 🔊",
+                    'ms' => "🛠️ Ya — kami suka projek custom! Kami tawarkan pemasangan audio & aksesori yang disesuaikan dengan kereta dan matlamat anda.\n\nBeritahu kami idea anda dan butiran kereta. WhatsApp {$p} atau datang ke kedai untuk rancang bersama pasukan kami. 🔊",
+                    'zh' => "🛠️ 当然——我们最喜欢定制项目！我们提供量身打造的汽车音响与配件安装，贴合您的车型与需求。\n\n告诉我们您的想法和车辆信息，WhatsApp {$p} 或到店与团队一起规划。🔊",
+                ],
+            ],
+
+            // Cancel / reschedule booking (FAQ)
+            [
+                'priority' => 64,
+                'keywords' => ['cancel booking', 'cancel my booking', 'cancel appointment', 'cancel my appointment', 'reschedule', 'change my booking', 'batal tempahan', 'tukar tempahan', '取消预约', '改预约', '改时间', '取消预订'],
+                'reply' => [
+                    'en' => "📆 To cancel or reschedule:\n\nUse your booking manage link (saved when you booked) to review or cancel before your appointment time. You can also look it up on the 'Track Booking' page using your details.\n\nNeed a hand? WhatsApp us at {$p}. 😊",
+                    'ms' => "📆 Untuk batal atau tukar tarikh:\n\nGuna pautan urus tempahan anda (disimpan semasa tempah) untuk semak atau batal sebelum masa temujanji. Anda juga boleh cari di halaman 'Jejak Tempahan'.\n\nPerlu bantuan? WhatsApp {$p}. 😊",
+                    'zh' => "📆 取消或改期：\n\n使用您预约时保存的「管理链接」可在预约时间前查看或取消。也可以在「预约查询」页面用您的资料查找。\n\n需要帮忙？WhatsApp 我们：{$p}。😊",
+                ],
+            ],
+
+            // Online shopping availability (FAQ)
+            [
+                'priority' => 48,
+                'keywords' => ['sell online', 'buy online', 'order online', 'online shopping', 'shop online', 'online store', 'beli online', 'jual online', '网购', '网上买', '在线购买', '能不能网购', '线上下单'],
+                'reply' => [
+                    'en' => "🛒 Online shopping may be turned on or off depending on current operations.\n\nIf prices or the 'Add to Cart' button are hidden, the easiest way is to WhatsApp us at {$p} — we'll confirm stock, pricing, and arrange pickup or installation for you. 😊",
+                    'ms' => "🛒 Pembelian dalam talian mungkin dibuka atau ditutup bergantung pada operasi semasa.\n\nJika harga atau butang 'Tambah ke Troli' disembunyikan, cara paling mudah ialah WhatsApp kami di {$p} — kami sahkan stok, harga dan aturkan ambil sendiri atau pemasangan. 😊",
+                    'zh' => "🛒 在线购买功能可能根据当前运营情况开启或关闭。\n\n如果价格或「加入购物车」按钮被隐藏，最简单的方式是 WhatsApp 我们：{$p}——我们会确认库存、价格，并为您安排自取或安装。😊",
+                ],
+            ],
+
+            // Languages supported (FAQ)
+            [
+                'priority' => 45,
+                'keywords' => ['language', 'languages', 'speak english', 'speak chinese', 'speak malay', 'bahasa', 'cakap', '语言', '说中文', '会中文', '英文', '马来文'],
+                'reply' => [
+                    'en' => "🌐 Yes! This site and our chat support English, Bahasa Malaysia, and Chinese (中文).\n\nUse the language switcher at the top to change anytime. Our showroom team can assist in these languages too! 😊",
+                    'ms' => "🌐 Ya! Laman dan sembang ini menyokong Bahasa Inggeris, Bahasa Malaysia dan Cina (中文).\n\nGuna penukar bahasa di atas untuk tukar bila-bila masa. Pasukan kedai kami juga boleh membantu dalam bahasa-bahasa ini! 😊",
+                    'zh' => "🌐 当然！本网站和聊天支持英文、马来文和中文。\n\n使用顶部的语言切换器可随时更改。我们的门店团队也能用这些语言为您服务！😊",
+                ],
+            ],
+
+            // Promotions / discounts
+            [
+                'priority' => 55,
+                'keywords' => ['discount', 'promo', 'promotion', 'offer', 'deal', 'voucher', 'coupon', 'cheaper', 'diskaun', 'tawaran', '折扣', '优惠', '促销', '便宜', '划算'],
+                'reply' => [
+                    'en' => "🎉 We often run promotions on selected items and installation packages!\n\nPrices vary by brand and market rate, so for the latest deals and the best price for your budget, WhatsApp us at {$p}. We'll sort you out! 💪",
+                    'ms' => "🎉 Kami kerap ada promosi untuk item terpilih dan pakej pemasangan!\n\nHarga berbeza ikut jenama dan pasaran. Untuk tawaran terkini dan harga terbaik, WhatsApp kami di {$p}. 💪",
+                    'zh' => "🎉 我们经常有精选商品和安装套餐的优惠活动！\n\n价格依品牌和市场行情而定，想了解最新优惠和最划算的价格，请 WhatsApp 我们：{$p}。💪",
+                ],
+            ],
+
+            // Returns / refunds / exchange
+            [
+                'priority' => 65,
+                'keywords' => ['refund', 'return', 'exchange', 'replace', 'faulty', 'defective', 'cancel order', 'pulangkan', 'tukar barang', 'rosak', '退款', '退货', '换货', '退换', '坏了', '取消订单'],
+                'reply' => [
+                    'en' => "🔄 For returns, exchanges, or a faulty item, our team will help you sort it out fairly.\n\nPlease have your order details ready and WhatsApp us at {$p}, or bring the item to our Shah Alam showroom. 😊",
+                    'ms' => "🔄 Untuk pemulangan, pertukaran atau barang rosak, pasukan kami akan bantu uruskan dengan adil.\n\nSediakan butiran pesanan anda dan WhatsApp kami di {$p}, atau bawa barang ke kedai kami di Shah Alam. 😊",
+                    'zh' => "🔄 关于退货、换货或商品故障，我们的团队会公平地为您处理。\n\n请准备好订单信息并 WhatsApp 我们：{$p}，或将商品带到莎阿南门店。😊",
+                ],
+            ],
+
             // Thank you
             [
                 'priority' => 15,
@@ -236,6 +346,8 @@ class MockDriver implements AiServiceInterface
      */
     private function dynamicReply(string $lang, string $msg): ?string
     {
+        $p = $this->phone;
+
         // Current time
         if (preg_match('/\b(time now|current time|what time is it|what\'?s the time|time right now)\b/iu', $msg)
             || preg_match('/(jam berapa sekarang|pukul berapa sekarang)/iu', $msg)
@@ -282,7 +394,104 @@ class MockDriver implements AiServiceInterface
             };
         }
 
+        // "Who am I?" — the bot doesn't track the visitor's identity.
+        if (preg_match('/\b(who am i|do you know me|what(\'?s| is) my name|who am i then)\b/iu', $msg)
+            || preg_match('/(我是谁|你知道我是谁|我叫什么)/u', $msg)
+            || preg_match('/(siapa saya|nama saya apa|awak kenal saya)/iu', $msg)) {
+            return match ($lang) {
+                'ms' => "Demi privasi, saya tak simpan maklumat peribadi anda 🔒 — jadi saya tak tahu nama anda. Tapi bagi saya, anda pelanggan istimewa kami! 😊\n\nApa yang boleh saya bantu hari ini?",
+                'zh' => "为了保护隐私，我不会记录您的个人信息 🔒，所以我不知道您的名字。不过在我这儿，您就是我们的贵宾！😊\n\n有什么可以帮您？",
+                default => "For privacy, I don't store your personal details 🔒 — so I don't know your name. But to me, you're our valued customer! 😊\n\nWhat can I help you with today?",
+            };
+        }
+
+        // Talk to a real human / agent
+        if (preg_match('/\b(human|real person|a person|agent|customer service|customer support|speak to (someone|staff)|talk to (someone|staff|a human)|live chat)\b/iu', $msg)
+            || preg_match('/(真人|人工|客服|找人|转人工)/u', $msg)
+            || preg_match('/(cakap dengan (orang|staf)|orang sebenar|khidmat pelanggan)/iu', $msg)) {
+            return match ($lang) {
+                'ms' => "Tiada masalah! 🙋 Pasukan manusia kami sedia membantu.\n\n📞 WhatsApp: {$p}\nAtau lawati kedai kami di Shah Alam. Mereka biasanya membalas dalam beberapa jam pada waktu perniagaan.",
+                'zh' => "没问题！🙋 我们的真人团队随时为您服务。\n\n📞 WhatsApp：{$p}\n或到访莎阿南门店。营业时间内通常几小时内回复您。",
+                default => "No problem! 🙋 Our human team is happy to help.\n\n📞 WhatsApp: {$p}\nOr visit our Shah Alam showroom. They usually reply within a few hours during business hours.",
+            };
+        }
+
+        // Are you open now? (live, based on Malaysia time)
+        if (preg_match('/\b(open now|are you open|you open|currently open|open right now|still open|open today)\b/iu', $msg)
+            || preg_match('/(现在.*营业|现在开.*吗|你们开.*吗|现在开门吗|营业中吗|现在有营业吗)/u', $msg)
+            || preg_match('/(buka sekarang|tengah buka|ada buka|buka tak)/iu', $msg)) {
+            return $this->openNowReply($lang);
+        }
+
+        // Short acknowledgements (whole message only)
+        if (preg_match('/^(ok|okay|k|kk|yes|yeah|yep|yup|no|nope|sure|alright|fine|got it|noted|cool)$/iu', trim($msg))
+            || preg_match('/^(好|好的|好滴|可以|嗯|嗯嗯|行|没事|没有|不用了|知道了|明白)$/u', trim($msg))
+            || preg_match('/^(ok|okay|baik|boleh|takpe|faham|noted)$/iu', trim($msg))) {
+            return match ($lang) {
+                'ms' => "Baik! 😊 Ada apa-apa lagi yang boleh saya bantu?",
+                'zh' => "好的！😊 还有什么可以帮您的吗？",
+                default => "Got it! 😊 Is there anything else I can help you with?",
+            };
+        }
+
+        // Compliments
+        if (preg_match('/\b(good (bot|job)|well done|you(\'?re| are) (great|helpful|awesome|amazing|smart|the best|good|nice)|nice work|love you|i like you|so helpful)\b/iu', $msg)
+            || preg_match('/(你真棒|你好棒|做得好|你很厉害|你太聪明|我喜欢你|爱你|你真好|你很好)/u', $msg)
+            || preg_match('/(awak (bagus|hebat|pandai|terbaik)|bagus la|terima kasih banyak)/iu', $msg)) {
+            return match ($lang) {
+                'ms' => "Terima kasih! 🥰 Anda sangat baik. Saya sentiasa di sini untuk membantu — tanya saja bila-bila masa! 🚗✨",
+                'zh' => "谢谢您！🥰 您太客气了。我随时都在，有需要随时问我哦！🚗✨",
+                default => "Aww, thank you! 🥰 You're too kind. I'm always here to help — ask me anything, anytime! 🚗✨",
+            };
+        }
+
+        // Complaints / frustration → apologise + hand off to humans
+        if (preg_match('/\b(useless|stupid|dumb|terrible|awful|hate (you|this)|you(\'?re| are) (bad|useless|stupid|dumb|annoying)|not helpful|doesn\'?t help|worst|rubbish)\b/iu', $msg)
+            || preg_match('/(没用|废物|笨|蠢|垃圾|讨厌你|不好用|没帮助|烂|答非所问)/u', $msg)
+            || preg_match('/(tak guna|bodoh|teruk|benci|tak membantu|menyusahkan)/iu', $msg)) {
+            return match ($lang) {
+                'ms' => "Maaf jika saya tak dapat membantu dengan baik. 🙏 Pasukan manusia kami pasti boleh bantu lebih lanjut.\n\n📞 WhatsApp: {$p}\nKami menghargai maklum balas anda!",
+                'zh' => "很抱歉没能帮到您。🙏 我们的真人团队一定能为您提供更好的帮助。\n\n📞 WhatsApp：{$p}\n感谢您的反馈！",
+                default => "I'm sorry I couldn't help better. 🙏 Our human team can definitely assist you further.\n\n📞 WhatsApp: {$p}\nWe appreciate your feedback!",
+            };
+        }
+
         return null;
+    }
+
+    private function openNowReply(string $lang): string
+    {
+        $now = now()->setTimezone('Asia/Kuala_Lumpur');
+        $dow = (int) $now->dayOfWeek; // 0 = Sun … 6 = Sat
+        $minutes = (int) $now->format('H') * 60 + (int) $now->format('i');
+        $t = $now->format('g:i A');
+
+        // Friday (5) is the rest day.
+        if ($dow === 5) {
+            return match ($lang) {
+                'ms' => "❌ Tidak, kami TUTUP hari ini (Jumaat hari rehat kami). Sekarang {$t}.\n\nKami buka semula esok. 😊",
+                'zh' => "❌ 抱歉，今天我们休息（周五是固定休息日）。现在 {$t}。\n\n我们明天恢复营业。😊",
+                default => "❌ No, we're CLOSED today (Friday is our rest day). It's {$t} now.\n\nWe reopen tomorrow. 😊",
+            };
+        }
+
+        $openAt = 10 * 60 + 30;                 // 10:30 AM
+        $closeAt = $dow === 0 ? 18 * 60 : 20 * 60; // Sun 6 PM, else 8 PM
+        $isOpen = $minutes >= $openAt && $minutes < $closeAt;
+
+        if ($isOpen) {
+            return match ($lang) {
+                'ms' => "✅ Ya, kami BUKA sekarang! 🎉 Masa sekarang {$t}.\n\nSinggahlah ke kedai kami di Shah Alam, atau WhatsApp {$this->phone}.",
+                'zh' => "✅ 是的，我们现在正在营业！🎉 现在 {$t}。\n\n欢迎到访莎阿南门店，或 WhatsApp {$this->phone}。",
+                default => "✅ Yes, we're OPEN now! 🎉 It's {$t}.\n\nDrop by our Shah Alam showroom, or WhatsApp {$this->phone}.",
+            };
+        }
+
+        return match ($lang) {
+            'ms' => "🔴 Maaf, kami TUTUP sekarang ({$t}).\n\nWaktu operasi: Isnin–Khamis & Sabtu 10:30 PG–8:00 MLM, Ahad 10:30 PG–6:00 PTG, Jumaat tutup.",
+            'zh' => "🔴 抱歉，我们现在不在营业时间内（{$t}）。\n\n营业时间：周一至周四及周六 10:30–20:00，周日 10:30–18:00，周五休息。",
+            default => "🔴 Sorry, we're CLOSED right now ({$t}).\n\nHours: Mon–Thu & Sat 10:30 AM–8:00 PM, Sun 10:30 AM–6:00 PM, closed Friday.",
+        };
     }
 
     private function timeReply(string $lang): string

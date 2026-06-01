@@ -10,10 +10,14 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
+use Spatie\Honeypot\Http\Livewire\Concerns\HoneypotData;
+use Spatie\Honeypot\Http\Livewire\Concerns\UsesSpamProtection;
 
 class BookingForm extends Component
 {
-    use SetsSeo;
+    use SetsSeo, UsesSpamProtection;
+
+    public HoneypotData $honeypotData;
 
     public string $customer_name = '';
 
@@ -91,6 +95,8 @@ class BookingForm extends Component
 
     public function mount(?int $service = null): void
     {
+        $this->honeypotData = new HoneypotData();
+
         if ($service) {
             $this->service_id = (string) $service;
         }
@@ -137,6 +143,9 @@ class BookingForm extends Component
 
     public function submit(): void
     {
+        // Honeypot check (field + time gate) — silently rejects bot submissions.
+        $this->protectAgainstSpam();
+
         $throttleKey = 'booking-submit:'.request()->ip();
 
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {

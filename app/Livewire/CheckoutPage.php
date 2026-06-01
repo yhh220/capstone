@@ -113,6 +113,11 @@ class CheckoutPage extends Component
             return;
         }
 
+        // Whitelist the payment method — never trust the client-supplied value.
+        if (! in_array($this->paymentMethod, ['online_banking', 'cod'], true)) {
+            $this->paymentMethod = 'online_banking';
+        }
+
         try {
             $order = DB::transaction(function () {
                 $cartItems = CartItem::forCurrentOwner()

@@ -6,27 +6,43 @@ use App\Contracts\AiServiceInterface;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class AiChatbot extends Component
 {
+    // #[Locked] = server-controlled only; the client cannot tamper with these
+    // via the Livewire update endpoint. Only $userInput is client-writable
+    // (wire:model), and it runs through the full sanitisation pipeline.
+    #[Locked]
     public bool $isOpen = false;
+
     public string $userInput = '';
+
+    #[Locked]
     public array $messages = [];
+
+    #[Locked]
     public bool $isLoading = false;
+
+    #[Locked]
     public string $chatLang = 'en';
 
     /** The user message awaiting an AI reply (drives the two-step typing indicator). */
+    #[Locked]
     public ?string $pendingText = null;
 
     /** Route name of the page the chatbot is embedded on (captured at mount). */
+    #[Locked]
     public string $currentRoute = '';
 
     private const MAX_INPUT_LENGTH = 500;
     private const MAX_HISTORY = 20;
-    private const RATE_LIMIT_MAX = 12;
+    private const MAX_MESSAGES = 40;        // hard cap on retained transcript
+    private const RATE_LIMIT_MAX = 12;      // messages per minute / IP
     private const RATE_LIMIT_DECAY = 60;
+    private const HOURLY_MAX = 120;         // messages per hour / IP (sustained-spam guard)
 
     // Abuse / security thresholds
     private const ABUSE_BLOCK_THRESHOLD = 4;   // malicious attempts before a cooldown
@@ -63,8 +79,14 @@ class AiChatbot extends Component
      */
     private function persist(): void
     {
+        // Hard-cap the transcript in memory and in the session so a long-lived
+        // chat can't bloat memory or session storage.
+        if (count($this->messages) > self::MAX_MESSAGES) {
+            $this->messages = array_slice($this->messages, -self::MAX_MESSAGES);
+        }
+
         session(['chatbot' => [
-            'messages' => array_slice($this->messages, -40),
+            'messages' => $this->messages,
             'open'     => $this->isOpen,
         ]]);
     }
@@ -252,11 +274,16 @@ class AiChatbot extends Component
             return;
         }
 
-        // ── Rate limiting ──────────────────────────────────────────────────
+        // ── Rate limiting (two tiers: burst per-minute + sustained per-hour) ─
         $throttleKey = 'chatbot:' . $ip;
+        $hourlyKey = 'chatbot_hourly:' . $ip;
 
-        if (RateLimiter::tooManyAttempts($throttleKey, self::RATE_LIMIT_MAX)) {
-            $seconds = RateLimiter::availableIn($throttleKey);
+        if (RateLimiter::tooManyAttempts($throttleKey, self::RATE_LIMIT_MAX)
+            || RateLimiter::tooManyAttempts($hourlyKey, self::HOURLY_MAX)) {
+            $seconds = max(
+                RateLimiter::availableIn($throttleKey),
+                RateLimiter::tooManyAttempts($hourlyKey, self::HOURLY_MAX) ? RateLimiter::availableIn($hourlyKey) : 0
+            );
             $phone = config('services.store.phone_display');
             $this->messages[] = ['role' => 'user', 'text' => $text];
             $this->messages[] = ['role' => 'assistant', 'text' => match ($this->chatLang) {
@@ -271,6 +298,7 @@ class AiChatbot extends Component
         }
 
         RateLimiter::hit($throttleKey, self::RATE_LIMIT_DECAY);
+        RateLimiter::hit($hourlyKey, 3600);
 
         // Step 1: show the user message + typing indicator immediately, then
         // process the AI reply in a follow-up request so the loading state is

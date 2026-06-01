@@ -194,7 +194,9 @@ class UserLogin extends Component
             'name.min'     => __('Name must be at least 2 characters.'),
         ]);
 
-        $user = User::create([
+        // forceCreate so 'role' is set explicitly (it is not mass-assignable).
+        // Public registration is always a 'client' — never staff/admin.
+        $user = User::forceCreate([
             'name'     => $validated['name'],
             'email'    => $validated['email'],
             'password' => $validated['password'],

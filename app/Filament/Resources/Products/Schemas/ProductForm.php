@@ -82,6 +82,8 @@ class ProductForm
                     ->collection('images')
                     ->multiple()
                     ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->maxSize(4096)
                     ->imageEditor()
                     ->columnSpanFull(),
             ]);

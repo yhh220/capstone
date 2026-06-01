@@ -30,6 +30,9 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // Safe default — factories bypass mass-assignment guards, and a plain
+            // generated user should be a client, not the DB's 'staff' default.
+            'role' => 'client',
         ];
     }
 

@@ -51,12 +51,16 @@ Route::middleware(['auth', ShoppingEnabled::class])->group(function () {
 });
 
 // ─── Language Switcher ─────────────────────────────────────────
-Route::get('/lang/{locale}', function (string $locale) {
+Route::get('/lang/{locale}', function (string $locale, \Illuminate\Http\Request $request) {
     if (in_array($locale, ['en', 'ms', 'zh'], true)) {
         session(['locale' => $locale]);
     }
 
-    return redirect(url()->previous() ?: '/');
+    // Open-redirect guard: only return to a same-origin previous URL.
+    $previous = url()->previous();
+    $sameHost = $previous && parse_url($previous, PHP_URL_HOST) === $request->getHost();
+
+    return redirect($sameHost ? $previous : '/');
 })->name('lang');
 
 // ─── Authentication Routes ─────────────────────────────────────

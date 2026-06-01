@@ -14,7 +14,10 @@ use Filament\Panel;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-#[Fillable(['name', 'email', 'password', 'role', 'phone', 'gender', 'address_line', 'city', 'postcode', 'state', 'preferred_courier'])]
+// 'role' is intentionally NOT mass-assignable — it is set explicitly only in
+// trusted paths (registration → 'client', seeder/admin panel via forceFill) so
+// an untrusted request can never escalate privileges through mass assignment.
+#[Fillable(['name', 'email', 'password', 'phone', 'gender', 'address_line', 'city', 'postcode', 'state', 'preferred_courier'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {

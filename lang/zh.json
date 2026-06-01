@@ -1,5 +1,6 @@
 {
     "Continue to Payment": "继续付款",
+    "Too many lookups. Please try again in :seconds seconds.": "查询过于频繁，请 :seconds 秒后再试。",
     "Too many failed attempts. Please try again in 1 hour.": "登录失败次数过多，请 1 小时后再试。",
     "Too many failed attempts. Please try again in :minutes minutes.": "登录失败次数过多，请 :minutes 分钟后再试。",
     "Too many failed attempts. Please wait :seconds seconds.": "登录失败次数过多，请等待 :seconds 秒。",
@@ -523,8 +524,10 @@
     "WhatsApp, when you choose to chat with us directly": "WhatsApp，当您选择直接与我们聊天时",
     "Your booking preferences and enquiry messages": "您的预约偏好和询问信息",
     "Win Win Car Audio 2025": "Win Win Car Audio 2025",
+    "Win Win Car Audio 2026": "Win Win Car Audio 2026",
     "Win Win Car Audio showroom location": "Win Win Car Audio 门店位置",
     "Last Updated: April 2025": "最后更新：2025年4月",
+    "Last Updated: April 2026": "最后更新：2026年4月",
     "Keep track of your orders and ensure smooth installations": "跟踪您的订单，确保安装顺利进行",
     "Make our website easier to use for everyone": "让我们的网站更易于所有人使用",
     "Manage and confirm your showroom appointments": "管理并确认您的展厅预约",
