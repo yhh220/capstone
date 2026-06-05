@@ -14,37 +14,55 @@
         </div>
 
         <div class="max-w-7xl mx-auto px-4 relative z-10">
-            <div class="max-w-3xl">
-                <div class="hero-reveal inline-flex items-center gap-2 bg-brand-yellow/90 backdrop-blur-sm text-brand-black text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full mb-6 shadow-md">
-                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                    {{ __('Shah Alam Car Audio & Accessories') }}
+            <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+
+                {{-- Left: text --}}
+                <div class="flex-1 min-w-0">
+                    <div class="hero-reveal inline-flex items-center gap-2 bg-brand-yellow/90 backdrop-blur-sm text-brand-black text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full mb-6 shadow-md">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        {{ __('Shah Alam Car Audio & Accessories') }}
+                    </div>
+
+                    <h1 class="hero-reveal-delay1 text-5xl sm:text-6xl md:text-7xl font-black leading-[1.05] mb-6 drop-shadow-sm">
+                        {{ __('Your car audio') }}<br>
+                        <span class="text-brand-yellow">{{ __('& accessories') }}</span><br>
+                        {{ __('specialist.') }}
+                    </h1>
+
+                    <p class="hero-reveal-delay2 text-lg sm:text-xl text-white/80 mb-10 leading-relaxed max-w-xl">
+                        {{ __('Discover car audio and accessories online — then visit our showroom in Shah Alam for expert advice and professional installation.') }}
+                    </p>
+
+                    <div class="hero-reveal-delay3 flex flex-col sm:flex-row gap-4">
+                        <a href="{{ route('products') }}"
+                           class="group relative inline-flex items-center justify-center px-8 py-4 bg-brand-yellow text-brand-black font-extrabold rounded-full overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(250,204,21,0.4)] active:scale-95">
+                            <span class="absolute inset-0 bg-white/30 -skew-x-12 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
+                            <span class="relative flex items-center gap-2">
+                                {{ __('Browse Products') }}
+                                <svg class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                            </span>
+                        </a>
+                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer"
+                           class="group inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur-md text-white font-bold rounded-full border border-white/25 transition-all duration-300 hover:bg-white/20 hover:border-white/50 hover:-translate-y-1 active:scale-95">
+                            <svg class="w-5 h-5 mr-2 transition-transform duration-300 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            {{ __('Visit Showroom') }}
+                        </a>
+                    </div>
                 </div>
 
-                <h1 class="hero-reveal-delay1 text-5xl sm:text-6xl md:text-7xl font-black leading-[1.05] mb-6 drop-shadow-sm">
-                    {{ __('Your car audio') }}<br>
-                    <span class="text-brand-yellow">{{ __('& accessories') }}</span><br>
-                    {{ __('specialist.') }}
-                </h1>
-
-                <p class="hero-reveal-delay2 text-lg sm:text-xl text-white/80 mb-10 leading-relaxed max-w-xl">
-                    {{ __('Discover car audio and accessories online — then visit our showroom in Shah Alam for expert advice and professional installation.') }}
-                </p>
-
-                <div class="hero-reveal-delay3 flex flex-col sm:flex-row gap-4">
-                    <a href="{{ route('products') }}"
-                       class="group relative inline-flex items-center justify-center px-8 py-4 bg-brand-yellow text-brand-black font-extrabold rounded-full overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(250,204,21,0.4)] active:scale-95">
-                        <span class="absolute inset-0 bg-white/30 -skew-x-12 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
-                        <span class="relative flex items-center gap-2">
-                            {{ __('Browse Products') }}
-                            <svg class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        </span>
-                    </a>
-                    <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer"
-                       class="group inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur-md text-white font-bold rounded-full border border-white/25 transition-all duration-300 hover:bg-white/20 hover:border-white/50 hover:-translate-y-1 active:scale-95">
-                        <svg class="w-5 h-5 mr-2 transition-transform duration-300 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        {{ __('Visit Showroom') }}
-                    </a>
+                {{-- Right: storefront photo --}}
+                <div class="hero-reveal-delay2 flex-shrink-0 w-full lg:w-[420px] xl:w-[480px]">
+                    <div class="relative rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] ring-1 ring-white/10">
+                        <img src="{{ asset('images/storefront.png') }}"
+                             alt="{{ __('Win Win Car Audio & Auto Accessories showroom in Shah Alam') }}"
+                             class="w-full h-auto object-cover"
+                             loading="eager"
+                             width="480" height="534">
+                        {{-- Subtle gradient overlay to blend with hero bg --}}
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" aria-hidden="true"></div>
+                    </div>
                 </div>
+
             </div>
         </div>
     </section>
