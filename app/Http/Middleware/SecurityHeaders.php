@@ -39,13 +39,25 @@ class SecurityHeaders
         // CDN), but the high-value directives — object-src 'none' (blocks SVG/
         // plugin XSS), frame-ancestors, base-uri, form-action — are enforced.
         if (! $request->is('admin', 'admin/*')) {
+            // In local dev, Vite serves assets from its own dev server.
+            // Read the hot file to get the exact origin, then allow it in CSP.
+            $viteOrigins = '';
+            if (app()->environment('local')) {
+                $hotFile = public_path('hot');
+                if (file_exists($hotFile)) {
+                    $viteUrl = rtrim(file_get_contents($hotFile));
+                    $wsUrl   = str_replace('http://', 'ws://', $viteUrl);
+                    $viteOrigins = " {$viteUrl} {$wsUrl}";
+                }
+            }
+
             $csp = implode('; ', [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com",
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com{$viteOrigins}",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com{$viteOrigins}",
                 "font-src 'self' https://fonts.gstatic.com data:",
                 "img-src 'self' data: blob: https:",
-                "connect-src 'self' https://unpkg.com",
+                "connect-src 'self' https://unpkg.com blob:{$viteOrigins}",
                 "worker-src 'self' blob:",
                 "child-src 'self' blob:",
                 "frame-ancestors 'self'",
