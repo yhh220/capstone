@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
-// Configuration Data
+// Configuration Data (配置数据：包含配件价格和颜色映射表)
 const BASE_PRICE = 150000;
 const ACCESSORY_PRICES = {
     rims: {
@@ -64,7 +64,7 @@ const TINT_MAP = {
     '5': { transmission: 1.0, opacity: 1.0, color: 0x111111 },
 };
 
-// Application State
+// Application State (应用状态：记录当前选择的配置项、颜色、视角等)
 const state = {
     color: 'white',
     rims: 'rim7',
@@ -79,7 +79,7 @@ const state = {
     transitioning: false,
 };
 
-// Three.js Globals
+// Three.js Globals (Three.js全局变量：场景、相机、渲染器、控制器等)
 let scene, camera, renderer, controls, carModel;
 let isInitialized = false;
 let animationFrameId = null;
@@ -102,7 +102,7 @@ function easeInOutCubic(x) {
     return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 }
 
-// References to Car Meshes
+// References to Car Meshes (汽车网格模型引用：存储需要动态替换或变色的3D部件)
 const carParts = {
     rims: {},     // rim1 -> Array of meshes
     spoilers: {}, // wing1 -> Array of meshes
@@ -111,7 +111,7 @@ const carParts = {
     glass: []     // Array of meshes for windows
 };
 
-// Materials
+// Materials (材质库：存储车漆、轮毂、刹车卡钳、玻璃等材质对象)
 let carBodyMaterial;
 let carRimMaterial;
 let carBrakeMaterial;
@@ -119,6 +119,7 @@ let glassMaterial;
 
 /**
  * Helper to check if a mesh is part of a swappable accessory based on name/ancestors using Regex
+ * 辅助函数：通过正则表达式判断当前3D部件是否属于可替换的配件（如轮毂、尾翼、保险杠）
  */
 function getPartInfo(child) {
     let current = child;
@@ -157,6 +158,7 @@ function getPartInfo(child) {
 /**
  * Helper to determine recursively if a mesh belongs to the body paint target list,
  * while respecting negative exclusions.
+ * 辅助函数：递归判断部件是否属于需要更改车漆颜色的目标列表（排除玻璃、轮胎、内饰等）
  */
 function isMeshBodyPaint(child, partInfo) {
     const bodyPaintNames = [
@@ -221,6 +223,7 @@ function isMeshBodyPaint(child, partInfo) {
 
 /**
  * Initialize Event Delegation on document to ensure persistence against Livewire re-renders
+ * 初始化事件代理：确保Livewire重新渲染后，点击事件依然生效（处理配置面板的点击）
  */
 document.addEventListener('DOMContentLoaded', () => {
     // Open Configurator
@@ -413,6 +416,7 @@ function openConfigurator() {
 
 /**
  * Close the configurator popup modal
+ * 关闭3D看车模态框：隐藏视图并停止渲染循环（节省性能）
  */
 function closeConfigurator() {
     const modal = document.getElementById('configurator-modal');
@@ -429,6 +433,7 @@ function closeConfigurator() {
 
 /**
  * Show/Hide meshes of a category in the 3D model
+ * 显示/隐藏指定类别的3D部件：用于在切换不同轮毂、尾翼时，隐藏旧的并显示新的
  */
 function togglePartVisibility(category, oldKey, newKey) {
     // Hide old meshes
@@ -453,6 +458,7 @@ function togglePartVisibility(category, oldKey, newKey) {
 
 /**
  * Refresh prices and selected specs in the UI summary panel
+ * 更新价格统计：根据选中的配件计算总价，并更新底部汇总面板的显示
  */
 function updateSummaryUI() {
     const rimsValEl = document.getElementById('summary-rims-price');
@@ -483,16 +489,16 @@ function initThree() {
     const modal = document.getElementById('configurator-modal');
     if (!canvasContainer || !canvas || !modal) return;
 
-    // 1. Create Scene
+    // 1. 创建场景 (Scene)：3D世界的容器，所有物体、光照都在这里
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x222226);
     scene.fog = new THREE.FogExp2(0x222226, 0.04);
 
-    // 2. Camera Setup
+    // 2. 摄像机设置 (Camera)：相当于人的眼睛，决定了我们从哪个角度看车
     camera = new THREE.PerspectiveCamera(40, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 100);
     camera.position.set(5.5, 2, 5.5);
 
-    // 3. Renderer Setup
+    // 3. 渲染器 (Renderer)：引擎的核心，负责把 3D 画面计算并渲染到网页的画布 (Canvas) 上
     renderer = new THREE.WebGLRenderer({
         canvas: canvas,
         antialias: true,
@@ -508,7 +514,7 @@ function initThree() {
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
 
-    // 4. Orbit Controls
+    // 4. 轨道控制器 (OrbitControls)：允许用户用鼠标拖动来旋转、缩放、平移视角
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
@@ -517,7 +523,7 @@ function initThree() {
     controls.maxDistance = 8.5;
     controls.target.set(0, 0.4, 0);
 
-    // 5. Lighting Setup
+    // 5. 光照设置 (Lighting)：打光让车身有立体感和材质反射（包含环境光、主光源、补光等）
     const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x2d2d35, 1.0);
     scene.add(hemisphereLight);
 
@@ -546,7 +552,7 @@ function initThree() {
     fillLight.position.set(-6, 3, 5);
     scene.add(fillLight);
 
-    // 6. Ground Studio floor grid
+    // 6. 影棚地板和网格 (Floor & Grid)：给车子一个落脚点，并且用来接收底部阴影
     const floorGeo = new THREE.PlaneGeometry(30, 30);
     const floorMat = new THREE.MeshStandardMaterial({
         color: 0x222226,
@@ -562,7 +568,7 @@ function initThree() {
     gridHelper.position.y = 0.005;
     scene.add(gridHelper);
 
-    // 7. Load GLB Model
+    // 7. 加载 3D 模型 (GLTF Loader)：通过加载器把服务器上的 .glb 汽车模型文件读取进来
     const modelUrl = modal.dataset.modelUrl || '/models/3d/car.glb';
     const loader = new GLTFLoader();
 
@@ -1051,6 +1057,7 @@ function toggleInteriorPos() {
 
 /**
  * Animate the camera smoothly towards the open door area
+ * 镜头移动动画：将镜头平滑移动到车门附近，引导用户观察开门动作
  */
 function animateCameraToDoorSide(callback) {
     if (!camera || !controls) {
