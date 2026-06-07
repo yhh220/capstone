@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 // Configuration Data
 const BASE_PRICE = 150000;
@@ -168,12 +169,16 @@ function isMeshBodyPaint(child, partInfo) {
         'AM-Window', 'AM-Glass-Supp', 'AM-Tire', 'AM-ForWheels', 'AM-Headlight',
         'AM-Back-Light', 'AM-Back-Small-Light', 'AM-Blinks', 'AM-Disk part 1',
         'AM-Gears', 'AM-Dashboard', 'AM-Dash', 'AM-Dash.001', 'AM-Dash.002',
-        'AM-Dash.003', 'AM-Digi', 'AM-Circle', 'AM-Brake'
+        'AM-Dash.003', 'AM-Digi', 'AM-Circle', 'AM-Brake', 'AM-Seat', 'AM-Seats', 'AM-Interior', 'AM-Steering'
     ];
 
     // Whichever front bumper is selected gets colored
     if (partInfo && partInfo.category === 'bumpers') {
         return true;
+    }
+
+    if (partInfo && (partInfo.category === 'rims' || partInfo.category === 'spoilers')) {
+        return false;
     }
 
     let current = child;
@@ -197,7 +202,9 @@ function isMeshBodyPaint(child, partInfo) {
             name.startsWith('AM-Tire') ||
             name.startsWith('AM-Headlight') ||
             name.startsWith('AM-Back-Light') ||
-            name.startsWith('AM-Back-Small-Light')) {
+            name.startsWith('AM-Back-Small-Light') ||
+            name.startsWith('AM-Seat') ||
+            name.startsWith('AM-Interior')) {
             isExcluded = true;
         }
 
@@ -498,6 +505,9 @@ function initThree() {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
 
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+
     // 4. Orbit Controls
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -671,7 +681,11 @@ function initThree() {
                             // Apply Rim material to rims category if not default
                             if (category === 'rims') {
                                 if (state.rimColor !== 'default') {
-                                    child.material = carRimMaterial;
+                                    const meshName = (child.name || '').toLowerCase();
+                                    const isTire = meshName.includes('tire') || meshName.includes('rubber') || meshName.includes('disk');
+                                    if (!isTire) {
+                                        child.material = carRimMaterial;
+                                    }
                                 }
                             }
                         } else if (category === 'bumperB1') {
@@ -1007,11 +1021,11 @@ function toggleInteriorPos() {
 
         // Reset controls target (pivot point is the eye)
         controls.target.copy(newPos);
-        
+
         // Position the camera slightly behind the pivot so it looks forward
         const direction = new THREE.Vector3().subVectors(newTarget, newPos).normalize();
         camera.position.copy(newPos).sub(direction.multiplyScalar(0.01));
-        
+
         controls.update();
 
         // Update button label and active state
@@ -1019,7 +1033,7 @@ function toggleInteriorPos() {
         if (interiorPosBtn) {
             const textSpan = interiorPosBtn.querySelector('span');
             if (textSpan) {
-                textSpan.textContent = (state.interiorPosMode === 'center') ? 'Driver View' : 'Center View';
+                textSpan.textContent = (state.interiorPosMode === 'center') ? 'Driver View' : 'Passenger View';
             }
             if (state.interiorPosMode === 'center') {
                 interiorPosBtn.classList.add('active');
@@ -1078,50 +1092,50 @@ function enterInteriorView() {
                     state.viewMode = 'interior';
                     const activePos = getActiveInteriorPos();
                     const activeTarget = getActiveInteriorTarget();
-                
-                controls.enabled = true;
-                controls.enableZoom = false;
-                controls.enablePan = false;
-                controls.minDistance = 0.01;
-                controls.maxDistance = 0.01;
-                controls.maxPolarAngle = Math.PI - 0.1; // Allow looking down at floor/console
-                
-                // Pivot is the eye position
-                controls.target.copy(activePos);
-                
-                // Camera is slightly offset backwards so it looks forward towards the target
-                const direction = new THREE.Vector3().subVectors(activeTarget, activePos).normalize();
-                camera.position.copy(activePos).sub(direction.multiplyScalar(0.01));
-                
-                controls.update();
 
-                // Show the interior position toggle button
-                const interiorPosBtn = document.getElementById('toggle-interior-pos-btn');
-                if (interiorPosBtn) {
-                    interiorPosBtn.style.display = 'inline-flex';
-                    const textSpan = interiorPosBtn.querySelector('span');
-                    if (textSpan) {
-                        textSpan.textContent = (state.interiorPosMode === 'center') ? 'Driver View' : 'Center View';
+                    controls.enabled = true;
+                    controls.enableZoom = false;
+                    controls.enablePan = false;
+                    controls.minDistance = 0.01;
+                    controls.maxDistance = 0.01;
+                    controls.maxPolarAngle = Math.PI - 0.1; // Allow looking down at floor/console
+
+                    // Pivot is the eye position
+                    controls.target.copy(activePos);
+
+                    // Camera is slightly offset backwards so it looks forward towards the target
+                    const direction = new THREE.Vector3().subVectors(activeTarget, activePos).normalize();
+                    camera.position.copy(activePos).sub(direction.multiplyScalar(0.01));
+
+                    controls.update();
+
+                    // Show the interior position toggle button
+                    const interiorPosBtn = document.getElementById('toggle-interior-pos-btn');
+                    if (interiorPosBtn) {
+                        interiorPosBtn.style.display = 'inline-flex';
+                        const textSpan = interiorPosBtn.querySelector('span');
+                        if (textSpan) {
+                            textSpan.textContent = (state.interiorPosMode === 'center') ? 'Driver View' : 'Passenger View';
+                        }
+                        if (state.interiorPosMode === 'center') {
+                            interiorPosBtn.classList.add('active');
+                        } else {
+                            interiorPosBtn.classList.remove('active');
+                        }
                     }
-                    if (state.interiorPosMode === 'center') {
-                        interiorPosBtn.classList.add('active');
-                    } else {
-                        interiorPosBtn.classList.remove('active');
+
+                    // Update View Toggle button UI
+                    const viewBtn = document.getElementById('toggle-view-btn');
+                    if (viewBtn) {
+                        const textSpan = viewBtn.querySelector('span');
+                        if (textSpan) textSpan.textContent = 'Exterior View';
+                        viewBtn.classList.add('active');
                     }
-                }
 
-                // Update View Toggle button UI
-                const viewBtn = document.getElementById('toggle-view-btn');
-                if (viewBtn) {
-                    const textSpan = viewBtn.querySelector('span');
-                    if (textSpan) textSpan.textContent = 'Exterior View';
-                    viewBtn.classList.add('active');
-                }
-
-                // 5. Screen fades back in
-                fadeScreen(false, () => {
-                    state.transitioning = false;
-                });
+                    // 5. Screen fades back in
+                    fadeScreen(false, () => {
+                        state.transitioning = false;
+                    });
                 });
             });
         });
@@ -1146,7 +1160,7 @@ function exitInteriorView() {
         // 2. Camera jumps back to exterior position (x=5, y=2, z=8)
         camera.position.set(5, 2, 8);
         controls.target.set(0, 0.4, 0);
-        
+
         controls.enabled = true;
         controls.enableZoom = true;
         controls.enablePan = true;
@@ -1199,9 +1213,13 @@ function updateRimMaterials() {
                     mesh.material = mesh.userData.originalMaterial;
                 }
             } else {
-                if (carRimMaterial && RIM_COLOR_MAP[state.rimColor]) {
+                const name = (mesh.name || '').toLowerCase();
+                const isTire = name.includes('tire') || name.includes('rubber') || name.includes('disk');
+                if (!isTire && carRimMaterial && RIM_COLOR_MAP[state.rimColor]) {
                     carRimMaterial.color.setHex(RIM_COLOR_MAP[state.rimColor].hex || 0xffffff);
                     mesh.material = carRimMaterial;
+                } else if (isTire && mesh.userData.originalMaterial) {
+                    mesh.material = mesh.userData.originalMaterial;
                 }
             }
         });

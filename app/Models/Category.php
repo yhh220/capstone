@@ -30,8 +30,7 @@ class Category extends Model
                 $category->slug = Str::slug($category->name);
             }
         });
-        static::saved(fn()   => Cache::forget('active_categories'));
-        static::deleted(fn() => Cache::forget('active_categories'));
+        // Cache for active categories removed due to unserialize issues
     }
 
     public function products()
