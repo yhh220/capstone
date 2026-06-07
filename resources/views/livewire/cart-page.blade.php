@@ -54,24 +54,28 @@
 
                         {{-- Quantity Controls --}}
                         <div class="flex items-center gap-3 mt-3">
-                            <button wire:click="decrementQuantity({{ $item->id }})"
-                                    wire:loading.attr="disabled"
-                                    wire:target="decrementQuantity({{ $item->id }})"
-                                    class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-bold"
-                                    aria-label="{{ __('Decrease quantity') }}">
-                                −
-                            </button>
+                            <x-tooltip text="{{ __('Decrease') }}">
+                                <button wire:click="decrementQuantity({{ $item->id }})"
+                                        wire:loading.attr="disabled"
+                                        wire:target="decrementQuantity({{ $item->id }})"
+                                        class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-bold"
+                                        aria-label="{{ __('Decrease quantity') }}">
+                                    −
+                                </button>
+                            </x-tooltip>
                             <span class="text-sm font-bold text-gray-800 dark:text-gray-200 w-8 text-center tabular-nums">
                                 {{ $item->quantity }}
                             </span>
-                            <button wire:click="incrementQuantity({{ $item->id }})"
-                                    wire:loading.attr="disabled"
-                                    wire:target="incrementQuantity({{ $item->id }})"
-                                    @if($item->product && $item->quantity >= $item->product->stock) disabled @endif
-                                    class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-bold disabled:opacity-40 disabled:cursor-not-allowed"
-                                    aria-label="{{ __('Increase quantity') }}">
-                                +
-                            </button>
+                            <x-tooltip text="{{ __('Increase') }}">
+                                <button wire:click="incrementQuantity({{ $item->id }})"
+                                        wire:loading.attr="disabled"
+                                        wire:target="incrementQuantity({{ $item->id }})"
+                                        @if($item->product && $item->quantity >= $item->product->stock) disabled @endif
+                                        class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+                                        aria-label="{{ __('Increase quantity') }}">
+                                    +
+                                </button>
+                            </x-tooltip>
                         </div>
                     </div>
 

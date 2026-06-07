@@ -105,11 +105,39 @@
 
             <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-center mb-6">
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">
+                    <p class="text-gray-500 dark:text-gray-400 text-sm"
+                       wire:loading.remove wire:target="search,category,minPrice,maxPrice,nextPage,previousPage,gotoPage">
                         {{ $products->total() }} {{ __('products found') }}
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm"
+                       wire:loading wire:target="search,category,minPrice,maxPrice,nextPage,previousPage,gotoPage">
+                        {{ __('Loading...') }}
                     </p>
                 </div>
 
+                {{-- Skeleton cards shown only during filter/search/pagination loading --}}
+                <div wire:loading wire:target="search,category,minPrice,maxPrice,nextPage,previousPage,gotoPage"
+                     class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" aria-hidden="true">
+                    @for($i = 0; $i < 6; $i++)
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col animate-pulse">
+                        <div class="bg-gray-200 dark:bg-gray-700 h-52"></div>
+                        <div class="p-4 pb-3 flex-1">
+                            <div class="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                            <div class="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
+                            <div class="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                            <div class="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
+                            <div class="h-3 w-5/6 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                            <div class="h-5 w-24 bg-gray-200 dark:bg-gray-700 rounded mt-1"></div>
+                        </div>
+                        <div class="px-4 pb-4 flex gap-2">
+                            <div class="h-9 flex-1 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                            <div class="h-9 flex-1 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                        </div>
+                    </div>
+                    @endfor
+                </div>
+
+                <div wire:loading.remove wire:target="search,category,minPrice,maxPrice,nextPage,previousPage,gotoPage">
                 @if($products->count() > 0)
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                     @foreach($products as $product)
@@ -164,8 +192,11 @@
                         <div class="px-4 pb-4 flex gap-2">
                             @if($shoppingEnabled && $product->stock > 0)
                                 <button wire:click="addToCart({{ $product->id }})"
+                                        wire:loading.attr="disabled"
+                                        wire:target="addToCart({{ $product->id }})"
                                         class="btn btn-primary btn-sm btn-shine flex-1">
-                                    <svg class="icon-sm group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
+                                    <svg wire:loading.remove wire:target="addToCart({{ $product->id }})" class="icon-sm group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
+                                    <svg wire:loading wire:target="addToCart({{ $product->id }})" class="icon-sm animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                                     {{ __('Add to Cart') }}
                                 </button>
                                 <a href="{{ route('product.show', $product->slug) }}"
@@ -207,6 +238,7 @@
                     </button>
                 </div>
                 @endif
+                </div>{{-- end wire:loading.remove --}}
             </div>
         </div>
     </div>

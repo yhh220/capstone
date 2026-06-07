@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -29,6 +30,8 @@ class Category extends Model
                 $category->slug = Str::slug($category->name);
             }
         });
+        static::saved(fn()   => Cache::forget('active_categories'));
+        static::deleted(fn() => Cache::forget('active_categories'));
     }
 
     public function products()

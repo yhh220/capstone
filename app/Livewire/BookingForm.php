@@ -76,7 +76,7 @@ class BookingForm extends Component
     {
         $rules = match ($this->currentStep) {
             1 => ['service_id' => 'required|exists:services,id'],
-            2 => ['preferred_date' => 'required|date|after_or_equal:today', 'preferred_time' => 'required'],
+            2 => ['preferred_date' => 'required|date|after_or_equal:today', 'preferred_time' => 'required|date_format:H:i'],
             3 => ['vehicle_model' => 'required|min:2|max:120', 'vehicle_plate' => 'nullable|max:30'],
             4 => ['customer_name' => 'required|min:2|max:100', 'customer_phone' => 'required|max:20', 'customer_email' => 'nullable|email|max:100'],
             default => [],
@@ -117,7 +117,7 @@ class BookingForm extends Component
             'vehicle_plate' => 'nullable|max:30',
             'service_id' => 'required|exists:services,id',
             'preferred_date' => 'required|date|after_or_equal:today',
-            'preferred_time' => 'required',
+            'preferred_time' => 'required|date_format:H:i',
             'notes' => 'nullable|max:1000',
         ];
     }

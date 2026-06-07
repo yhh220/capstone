@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -73,16 +74,16 @@ class ProductsPage extends Component
         }
 
         if ($min !== null) {
-            $query->where('price', '>=', $min);
+            $query->whereRaw('COALESCE(sale_price, price) >= ?', [$min]);
         }
 
         if ($max !== null) {
-            $query->where('price', '<=', $max);
+            $query->whereRaw('COALESCE(sale_price, price) <= ?', [$max]);
         }
 
         return view('livewire.products-page', [
             'products'        => $query->paginate(12),
-            'categories'      => Category::where('is_active', true)->orderBy('name')->get(),
+            'categories'      => Cache::remember('active_categories', 3600, fn () => Category::where('is_active', true)->orderBy('name')->get()),
             'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
         ])->layout('layouts.app');
     }
