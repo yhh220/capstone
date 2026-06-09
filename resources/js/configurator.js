@@ -185,7 +185,8 @@ function isMeshBodyPaint(child, partInfo) {
         'AM-Window', 'AM-Glass-Supp', 'AM-Tire', 'AM-ForWheels', 'AM-Headlight',
         'AM-Back-Light', 'AM-Back-Small-Light', 'AM-Blinks', 'AM-Disk part 1',
         'AM-Gears', 'AM-Dashboard', 'AM-Dash', 'AM-Dash.001', 'AM-Dash.002',
-        'AM-Dash.003', 'AM-Digi', 'AM-Circle', 'AM-Brake', 'AM-Seat', 'AM-Seats', 'AM-Interior', 'AM-Steering'
+        'AM-Dash.003', 'AM-Digi', 'AM-Circle', 'AM-Brake', 'AM-Seat', 'AM-Seats', 'AM-Interior', 'AM-Steering',
+        'AM-DoorL', 'AM-DoorR'
     ];
 
     // Whichever front bumper is selected gets colored (无论选择哪个前保险杠，都会被染色)
@@ -220,7 +221,9 @@ function isMeshBodyPaint(child, partInfo) {
             name.startsWith('AM-Back-Light') ||
             name.startsWith('AM-Back-Small-Light') ||
             name.startsWith('AM-Seat') ||
-            name.startsWith('AM-Interior')) {
+            name.startsWith('AM-Interior') ||
+            name.startsWith('AM-DoorL') ||
+            name.startsWith('AM-DoorR')) {
             isExcluded = true;
         }
 
