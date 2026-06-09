@@ -81,7 +81,7 @@
                         <a href="{{ $whatsAppUrl }}"
                            target="_blank"
                            rel="noopener noreferrer"
-                           class="btn btn-md btn-shine w-full" style="background:rgb(var(--brand-yellow-rgb));color:rgb(var(--brand-black-rgb));">
+                           class="btn btn-md btn-shine w-full" style="background:#25D366;color:#fff;border-color:#25D366;">
                             {{ __('Ask on WhatsApp') }}
                         </a>
                         <a href="{{ $mapUrl }}"

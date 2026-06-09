@@ -2,15 +2,26 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\SetsSeo;
 use App\Models\Booking;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 class BookingTracker extends Component
 {
+    use SetsSeo;
+
     public string $phone    = '';
     public string $token    = '';
     public bool   $searched = false;
+
+    public function mount(): void
+    {
+        $this->setSeo(
+            title: 'Track My Booking',
+            description: 'Check the status of your service booking at Win Win Car Audio. Enter your phone number or booking token to get updates.',
+        );
+    }
 
     protected array $rules = [
         'phone' => 'nullable|min:6|max:20',

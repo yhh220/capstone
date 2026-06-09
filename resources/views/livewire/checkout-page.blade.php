@@ -88,8 +88,8 @@
                 <h3 class="font-bold text-gray-800 dark:text-white mb-3 text-sm">{{ __('Order Summary') }}</h3>
                 @foreach($this->cartItems as $item)
                 <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 py-1">
-                    <span>{{ $item->product->name }} × {{ $item->quantity }}</span>
-                    <span class="tabular-nums">RM {{ number_format(($item->product->current_price ?? 0) * $item->quantity, 2) }}</span>
+                    <span>{{ $item->product?->name ?? __('Product unavailable') }} × {{ $item->quantity }}</span>
+                    <span class="tabular-nums">RM {{ number_format(($item->product?->current_price ?? 0) * $item->quantity, 2) }}</span>
                 </div>
                 @endforeach
                 <div class="border-t border-gray-200 dark:border-gray-600 mt-2 pt-2 flex justify-between font-bold text-gray-800 dark:text-white">

@@ -180,6 +180,7 @@ class CheckoutPage extends Component
                     'status' => 'pending',
                     'payment_status' => 'pending',
                     'payment_method' => $this->paymentMethod,
+                    'notes' => $this->orderNotes ?: null,
                 ]);
 
                 foreach ($lineItems as $lineItem) {

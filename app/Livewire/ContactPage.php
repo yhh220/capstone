@@ -27,7 +27,7 @@ class ContactPage extends Component
 
         $this->setSeo(
             title: 'Contact Us',
-            description: 'Get in touch with Win Win Car Studio. Send us a message, chat on WhatsApp, or visit our showroom in Kuala Lumpur.',
+            description: 'Get in touch with Win Win Car Studio. Send us a message, chat on WhatsApp, or visit our showroom in Shah Alam.',
         );
     }
 

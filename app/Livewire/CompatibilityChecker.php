@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\CarModel;
 use App\Models\Product;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
 
@@ -13,6 +14,11 @@ class CompatibilityChecker extends Component
     public string $selectedModel = '';
     public string $selectedYear  = '';
     public bool   $searched      = false;
+
+    private function hasCarModels(): bool
+    {
+        return Cache::remember('schema.has.car_models', 3600, fn() => Schema::hasTable('car_models'));
+    }
 
     public function updatedSelectedBrand(): void
     {
@@ -29,7 +35,7 @@ class CompatibilityChecker extends Component
 
     public function getBrandsProperty(): array
     {
-        if (!Schema::hasTable('car_models')) {
+        if (!$this->hasCarModels()) {
             return [];
         }
 
@@ -38,7 +44,7 @@ class CompatibilityChecker extends Component
 
     public function getModelsForBrandProperty(): array
     {
-        if ($this->selectedBrand === '' || !Schema::hasTable('car_models')) return [];
+        if ($this->selectedBrand === '' || !$this->hasCarModels()) return [];
 
         return CarModel::where('brand', $this->selectedBrand)
             ->distinct()
@@ -49,7 +55,7 @@ class CompatibilityChecker extends Component
 
     public function getYearsForModelProperty(): array
     {
-        if ($this->selectedBrand === '' || $this->selectedModel === '' || !Schema::hasTable('car_models')) return [];
+        if ($this->selectedBrand === '' || $this->selectedModel === '' || !$this->hasCarModels()) return [];
 
         // Aggregate ranges across multiple generations (e.g. Civic FD 2006-2011 + FC 2016-2021)
         $ranges = CarModel::where('brand', $this->selectedBrand)
@@ -79,7 +85,7 @@ class CompatibilityChecker extends Component
             || $this->selectedBrand === ''
             || $this->selectedModel === ''
             || $this->selectedYear === ''
-            || !Schema::hasTable('car_models')
+            || !$this->hasCarModels()
         ) {
             return collect();
         }

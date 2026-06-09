@@ -21,6 +21,8 @@ class ProductsPage extends Component
     protected $queryString = [
         'category' => ['except' => ''],
         'search'   => ['except' => ''],
+        'minPrice' => ['except' => ''],
+        'maxPrice' => ['except' => ''],
     ];
 
     public function mount(): void

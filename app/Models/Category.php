@@ -20,7 +20,11 @@ class Category extends Model
             ->dontLogEmptyChanges();
     }
 
-    protected $fillable = ['name', 'slug', 'description', 'image', 'is_active'];
+    protected $fillable = ['name', 'slug', 'description', 'image', 'is_active', 'sort_order'];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 
     protected static function boot()
     {

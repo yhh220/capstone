@@ -203,17 +203,41 @@
             </div>
 
             <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg" data-aos="fade-up">
-                <iframe
-                    src="https://maps.google.com/maps?q={{ rawurlencode('Win Win Car Audio, ' . $storeAddress) }}&output=embed&z=16"
-                    width="100%"
-                    class="w-full block"
-                    style="height: clamp(240px, 50vw, 420px); border: 0;"
-                    allowfullscreen=""
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
-                    title="{{ __('Win Win Car Audio showroom location') }}">
-                </iframe>
+                <div id="store-map" style="height: clamp(240px, 50vw, 420px); width: 100%;"></div>
             </div>
+
+            @push('scripts')
+            <script>
+            (function() {
+                function initMap() {
+                    var el = document.getElementById('store-map');
+                    if (!el || el._leaflet_id) return;
+                    var lat = 3.1491, lng = 101.5465;
+                    var map = L.map('store-map', { zoomControl: true, scrollWheelZoom: false }).setView([lat, lng], 17);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                        maxZoom: 19
+                    }).addTo(map);
+                    var icon = L.divIcon({
+                        html: '<div style="background:#C8413D;width:14px;height:14px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4);"></div>',
+                        iconSize: [14, 14], iconAnchor: [7, 7], className: ''
+                    });
+                    L.marker([lat, lng], { icon: icon })
+                        .addTo(map)
+                        .bindPopup('<strong>Win Win Car Audio</strong><br>No. 22, Jalan Dinar C U3/C<br>Taman Subang Perdana, Shah Alam')
+                        .openPopup();
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initMap);
+                } else {
+                    initMap();
+                }
+                document.addEventListener('livewire:navigated', function() {
+                    setTimeout(initMap, 100);
+                });
+            })();
+            </script>
+            @endpush
         </div>
     </section>
 </div>

@@ -21,6 +21,11 @@ class SettingResource extends Resource
     protected static ?int $navigationSort = 99;
     protected static ?string $navigationLabel = 'Settings';
 
+    public static function canViewAny(): bool
+    {
+        return \Filament\Facades\Filament::auth()->user()?->isAdmin() ?? false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([

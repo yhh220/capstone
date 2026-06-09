@@ -5,10 +5,11 @@ namespace App\Livewire;
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\GalleryItem;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class GalleryPage extends Component
 {
-    use SetsSeo;
+    use SetsSeo, WithPagination;
 
     public string $activeCategory = '';
 
@@ -22,7 +23,7 @@ class GalleryPage extends Component
 
     public function updatedActiveCategory(): void
     {
-        // reactive — Livewire handles re-render
+        $this->resetPage();
     }
 
     public function render()
@@ -34,7 +35,7 @@ class GalleryPage extends Component
         }
 
         return view('livewire.gallery-page', [
-            'items'      => $query->get(),
+            'items'      => $query->paginate(24),
             'categories' => GalleryItem::CATEGORIES,
         ])->layout('layouts.app');
     }

@@ -26,10 +26,11 @@ class HomePage extends Component
 
     public function render()
     {
-        $hasProductsTable = Schema::hasTable('products');
-        $hasCategoriesTable = Schema::hasTable('categories');
-        $hasBrandsTable = Schema::hasTable('brands');
-        $hasFeedbackTable = Schema::hasTable('feedback');
+        static $hasProductsTable, $hasCategoriesTable, $hasBrandsTable, $hasFeedbackTable;
+        $hasProductsTable    ??= Schema::hasTable('products');
+        $hasCategoriesTable  ??= Schema::hasTable('categories');
+        $hasBrandsTable      ??= Schema::hasTable('brands');
+        $hasFeedbackTable    ??= Schema::hasTable('feedback');
 
         if (!$hasProductsTable || !$hasCategoriesTable) {
             return view('livewire.home-page', [
@@ -48,8 +49,7 @@ class HomePage extends Component
         $testimonials = $hasFeedbackTable
             ? Feedback::where('is_active', true)
                 ->orderBy('sort_order')
-                ->latest('id')
-                ->take(6)
+                ->take(12)
                 ->get()
             : new Collection();
 
@@ -62,6 +62,8 @@ class HomePage extends Component
         return view('livewire.home-page', [
             'categories'      => Category::where('is_active', true)
                 ->withCount('products')
+                ->orderBy('sort_order')
+                ->orderBy('name')
                 ->take(6)
                 ->get(),
             'testimonials'    => $testimonials,
