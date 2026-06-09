@@ -7,11 +7,19 @@
     @endphp
 
     {{-- ── 1. HERO ── --}}
-    <section class="bg-white dark:bg-[#0C0C0E] relative overflow-hidden" aria-label="{{ __('Hero') }}">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20 lg:py-32">
+    <section class="relative overflow-hidden bg-white dark:bg-[#0C0C0E]" aria-label="{{ __('Hero') }}">
+        {{-- Video Background --}}
+        <div class="absolute inset-0 z-0 pointer-events-none">
+            <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover">
+                <source src="{{ asset('images/videos/hero-bg.mp4') }}" type="video/mp4">
+            </video>
+            <div class="absolute inset-0 bg-white/50 dark:bg-[#0C0C0E]/60"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20 lg:py-32">
             <div class="flex flex-col lg:flex-row items-center gap-10 lg:gap-20">
 
-                {{-- Left: Text --}}
+                {{-- Text Content --}}
                 <div class="flex-1 min-w-0 hero-enter text-center lg:text-left">
                     <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-gray-400 dark:text-white/35 mb-6 sm:mb-8">
                         Shah Alam, Selangor &nbsp;·&nbsp; Malaysia
@@ -41,16 +49,7 @@
                     </div>
                 </div>
 
-                {{-- Right: Image — hidden on mobile, visible md+ --}}
-                <div class="hidden md:block flex-shrink-0 w-full lg:w-[44%] xl:w-[460px] hero-enter-delay">
-                    <div class="relative">
-                        <div class="absolute -left-3 top-6 bottom-6 w-px bg-[#C8413D] opacity-35" aria-hidden="true"></div>
-                        <img src="{{ asset('images/storefront.png') }}"
-                             alt="{{ __('Win Win Car Audio showroom in Shah Alam') }}"
-                             class="w-full h-auto object-cover"
-                             loading="eager" width="480" height="534">
-                    </div>
-                </div>
+
             </div>
         </div>
         <div class="absolute bottom-0 left-0 right-0 h-px bg-gray-200 dark:bg-transparent" aria-hidden="true"></div>

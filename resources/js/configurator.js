@@ -25,6 +25,12 @@ const ACCESSORY_PRICES = {
         bumperF3: { name: 'Standard Sport (Default)', price: 0 },
         bumperF1: { name: 'Aggressive Aero Bumper', price: 1800 },
         bumperF2: { name: 'Widebody Spec Bumper', price: 2200 },
+    },
+    dashcams: {
+        dashcam0: { name: 'None (Default)', price: 0 },
+        dashcam1: { name: 'Mohawk', price: 0 },
+        dashcam2: { name: '70mai', price: 0 },
+        dashcam3: { name: 'DDPAI', price: 0 },
     }
 };
 
@@ -70,6 +76,7 @@ const state = {
     rims: 'rim7',
     spoilers: 'wing4',
     bumpers: 'bumperF3',
+    dashcams: 'dashcam0',
     rimColor: 'default',
     brakeColor: 'red',
     windowTint: '100',
@@ -107,6 +114,7 @@ const carParts = {
     rims: {},     // rim1 -> Array of meshes (轮毂1 -> 网格数组)
     spoilers: {}, // wing1 -> Array of meshes (尾翼1 -> 网格数组)
     bumpers: {},  // bumperF1 -> Array of meshes (前保险杠1 -> 网格数组)
+    dashcams: {}, // dashcam1 -> Array of meshes (行车记录仪1 -> 网格数组)
     body: [],     // Array of meshes for car_body (车身网格数组)
     glass: []     // Array of meshes for windows (车窗网格数组)
 };
@@ -144,6 +152,12 @@ function getPartInfo(child) {
             return { category: 'bumpers', key: `bumperF${bumperFMatch[1]}` };
         }
 
+        // Dashcams Regex match (1 to 3) (使用正则匹配行车记录仪：从1到3)
+        const dashcamMatch = name.match(/dashcam[_\s-]*0?([1-3])/i);
+        if (dashcamMatch) {
+            return { category: 'dashcams', key: `dashcam${dashcamMatch[1]}` };
+        }
+
         // Rear Bumper Regex match (bumperB1) (使用正则匹配后保险杠：仅bumperB1)
         const bumperBMatch = name.match(/bumper[_\s-]*b[_\s-]*0?1/i);
         if (bumperBMatch) {
@@ -179,7 +193,7 @@ function isMeshBodyPaint(child, partInfo) {
         return true;
     }
 
-    if (partInfo && (partInfo.category === 'rims' || partInfo.category === 'spoilers')) {
+    if (partInfo && (partInfo.category === 'rims' || partInfo.category === 'spoilers' || partInfo.category === 'dashcams')) {
         return false;
     }
 
@@ -392,6 +406,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 glassMaterial.transmission = config.transmission;
                 glassMaterial.opacity = config.opacity;
             }
+
+            const windowTintValEl = document.getElementById('summary-window-tint');
+            if (windowTintValEl) windowTintValEl.textContent = tintKey + '%';
         }
     });
 });
@@ -465,19 +482,22 @@ function updateSummaryUI() {
     const rimsValEl = document.getElementById('summary-rims-price');
     const spoilerValEl = document.getElementById('summary-spoiler-price');
     const bumperValEl = document.getElementById('summary-bumper-price');
+    const dashcamValEl = document.getElementById('summary-dashcam');
     const totalValEl = document.getElementById('summary-total-price');
 
     const rimSpec = ACCESSORY_PRICES.rims[state.rims];
     const spoilerSpec = ACCESSORY_PRICES.spoilers[state.spoilers];
     const bumperSpec = ACCESSORY_PRICES.bumpers[state.bumpers];
+    const dashcamSpec = ACCESSORY_PRICES.dashcams[state.dashcams];
 
     // Update prices on labels (更新标签上的价格显示)
     if (rimsValEl) rimsValEl.textContent = rimSpec.price === 0 ? 'Included' : `+ RM ${rimSpec.price.toLocaleString()}`;
     if (spoilerValEl) spoilerValEl.textContent = spoilerSpec.price === 0 ? 'Included' : `+ RM ${spoilerSpec.price.toLocaleString()}`;
     if (bumperValEl) bumperValEl.textContent = bumperSpec.price === 0 ? 'Included' : `+ RM ${bumperSpec.price.toLocaleString()}`;
+    if (dashcamValEl) dashcamValEl.textContent = dashcamSpec.name;
 
     // Calculate Grand Total (计算总价)
-    const total = BASE_PRICE + rimSpec.price + spoilerSpec.price + bumperSpec.price;
+    const total = BASE_PRICE + rimSpec.price + spoilerSpec.price + bumperSpec.price + dashcamSpec.price;
     if (totalValEl) totalValEl.textContent = `RM ${total.toLocaleString()}`;
 }
 
@@ -589,7 +609,7 @@ function initThree() {
                     const partInfo = getPartInfo(child);
                     if (partInfo) {
                         const { category, key } = partInfo;
-                        if (category === 'rims' || category === 'spoilers' || category === 'bumpers') {
+                        if (category === 'rims' || category === 'spoilers' || category === 'bumpers' || category === 'dashcams') {
                             child.visible = (key === state[category]);
                         } else if (category === 'bumperB1') {
                             child.visible = false;
@@ -660,6 +680,13 @@ function initThree() {
                 thickness: 0.05
             });
 
+            const dashcamMaterial = new THREE.MeshStandardMaterial({
+                color: 0x303030,
+                metalness: 0.2,
+                roughness: 0.8,
+                side: THREE.DoubleSide
+            });
+
             // Map and identify car meshes (遍历并分类标记汽车所有的网格模型)
             car.traverse((child) => {
                 if (child.isMesh) {
@@ -674,7 +701,7 @@ function initThree() {
                     if (partInfo) {
                         const { category, key } = partInfo;
 
-                        if (category === 'rims' || category === 'spoilers' || category === 'bumpers') {
+                        if (category === 'rims' || category === 'spoilers' || category === 'bumpers' || category === 'dashcams') {
                             if (!carParts[category][key]) {
                                 carParts[category][key] = [];
                             }
@@ -685,6 +712,10 @@ function initThree() {
 
                             // Store original material reference (保存原始材质的引用，以便重置时使用)
                             child.userData.originalMaterial = child.material;
+
+                            if (category === 'dashcams') {
+                                child.material = dashcamMaterial;
+                            }
 
                             // Apply Rim material to rims category if not default (如果不是默认颜色，则应用自定义轮毂材质)
                             if (category === 'rims') {
@@ -1266,8 +1297,9 @@ function sendWhatsAppEnquiry() {
     const bumperSpec = ACCESSORY_PRICES.bumpers[state.bumpers].name;
     const bumperPrice = ACCESSORY_PRICES.bumpers[state.bumpers].price === 0 ? 'Included' : `+RM ${ACCESSORY_PRICES.bumpers[state.bumpers].price.toLocaleString()}`;
     const windowTintSpec = state.windowTint + '%';
+    const dashcamSpec = ACCESSORY_PRICES.dashcams[state.dashcams];
 
-    const total = BASE_PRICE + ACCESSORY_PRICES.rims[state.rims].price + ACCESSORY_PRICES.spoilers[state.spoilers].price + ACCESSORY_PRICES.bumpers[state.bumpers].price;
+    const total = BASE_PRICE + ACCESSORY_PRICES.rims[state.rims].price + ACCESSORY_PRICES.spoilers[state.spoilers].price + ACCESSORY_PRICES.bumpers[state.bumpers].price + dashcamSpec.price;
 
     const storePhoneRaw = enquireBtn.dataset.phone || '60123456789';
 
@@ -1277,7 +1309,8 @@ function sendWhatsAppEnquiry() {
         `• Brake Caliper Color: ${brakeColorSpec}\n` +
         `• Spoiler Style: ${spoilerSpec} (${spoilerPrice})\n` +
         `• Front Bumper: ${bumperSpec} (${bumperPrice})\n` +
-        `• Window Tint: ${windowTintSpec}\n\n` +
+        `• Window Tint: ${windowTintSpec}\n` +
+        `• Dash Camera: ${dashcamSpec.name}\n\n` +
         `----------------------------\n` +
         `• Base Price: RM ${BASE_PRICE.toLocaleString()}\n` +
         `• Estimated Total: RM ${total.toLocaleString()}\n\n` +

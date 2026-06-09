@@ -322,13 +322,15 @@
 
             <!-- Tabs Navigation -->
             <div class="configurator-tabs">
-                <div class="tabs grid grid-cols-4 gap-2 md:gap-3 mb-4" style="max-width: 600px; margin: 0 auto 1rem auto;">
+                <div class="tabs grid grid-cols-3 gap-2 md:gap-3 mb-4" style="max-width: 600px; margin: 0 auto 1rem auto;">
                     <button class="tab-btn active" data-tab="paint">{{ __('Paint') }}</button>
                     <button class="tab-btn" data-tab="rims">{{ __('Rims') }}</button>
                     <button class="tab-btn" data-tab="spoilers">{{ __('Spoilers') }}</button>
                     <button class="tab-btn" data-tab="bumpers">{{ __('Bumpers') }}</button>
-                    <button class="tab-btn" data-tab="tint" style="grid-column: span 1;">{{ __('Tint') }}</button>
-                </div></div>
+                    <button class="tab-btn" data-tab="tint">{{ __('Tint') }}</button>
+                    <button class="tab-btn" data-tab="dashcams">{{ __('Dash Camera') }}</button>
+                </div>
+            </div>
 
             <!-- Sidebar Scrollable Sections -->
             <div class="sidebar-content">
@@ -522,15 +524,31 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Section 6: Dash Cameras -->
+                <div class="sidebar-section" id="section-dashcams">
+                    <div class="section-title">{{ __('Choose Dash Camera') }}</div>
+                    <div class="options-grid">
+                        <div class="option-card active" data-category="dashcams" data-item="dashcam0">
+                            <span class="option-name">{{ __('None (Default)') }}</span>
+                            <span class="option-price">{{ __('Included') }}</span>
+                        </div>
+                        <div class="option-card" data-category="dashcams" data-item="dashcam1">
+                            <span class="option-name">{{ __('Mohawk') }}</span>
+                        </div>
+                        <div class="option-card" data-category="dashcams" data-item="dashcam2">
+                            <span class="option-name">{{ __('70mai') }}</span>
+                        </div>
+                        <div class="option-card" data-category="dashcams" data-item="dashcam3">
+                            <span class="option-name">{{ __('DDPAI') }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Live Summary Panel -->
             <div class="summary-panel">
                 <div class="summary-list">
-                    <div class="summary-row">
-                        <span>{{ __('Base Car') }}</span>
-                        <span>RM 150,000</span>
-                    </div>
                     <div class="summary-row">
                         <span>{{ __('Body Color') }}</span>
                         <span id="summary-color-name">{{ __('Chalk White') }}</span>
@@ -558,6 +576,10 @@
                     <div class="summary-row">
                         <span>{{ __('Window Tint') }}</span>
                         <span id="summary-window-tint">100%</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>{{ __('Dash Camera') }}</span>
+                        <span id="summary-dashcam">{{ __('None') }}</span>
                     </div>
                     <div class="summary-row total">
                         <span>{{ __('Total Price') }}</span>

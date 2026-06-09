@@ -38,8 +38,8 @@
                         {{ __('Today, the website works as a trusted showcase that helps customers understand the range first, then continue the conversation in the showroom or on WhatsApp.') }}
                     </p>
                 </div>
-                <div class="bg-gray-100 dark:bg-gray-700 rounded-2xl h-48 sm:h-64 lg:h-80 flex items-center justify-center" role="img" aria-label="{{ __('Car illustration') }}" data-aos="fade-left" data-aos-delay="100">
-                    <svg class="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1z"></path><path d="M7 17v2"></path><path d="M17 17v2"></path><path d="M7 11V7a3 3 0 0 1 5.83-1"></path><circle cx="8" cy="14" r="1"></circle><circle cx="16" cy="14" r="1"></circle></svg>
+                <div class="rounded-2xl overflow-hidden shadow-md" data-aos="fade-left" data-aos-delay="100">
+                    <img src="{{ asset('images/storefront.png') }}" alt="{{ __('Win Win Car Audio showroom') }}" class="w-full h-auto" loading="lazy">
                 </div>
             </div>
         </div>
