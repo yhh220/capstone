@@ -63,19 +63,17 @@
 
         {{-- ── Header ── (z-30 so the language dropdown layers above the message list) --}}
         <div class="relative z-30 flex items-center justify-between gap-2 px-4 py-3.5 flex-shrink-0
-                    bg-gradient-to-br from-brand-red to-red-800 rounded-t-[1.75rem] md:rounded-t-[1.75rem]">
-            <div class="absolute inset-0 opacity-[0.07] mix-blend-overlay rounded-t-[1.75rem] pointer-events-none"
-                 style="background-image:url('https://www.transparenttextures.com/patterns/carbon-fibre.png')"></div>
+                    bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700/60">
 
             <div class="flex items-center gap-3 relative z-10 min-w-0">
-                <div class="w-10 h-10 flex-shrink-0 rounded-2xl bg-white/15 backdrop-blur-sm ring-1 ring-white/30 flex items-center justify-center text-white shadow-inner">
+                <div class="w-10 h-10 flex-shrink-0 rounded-xl bg-brand-red text-white flex items-center justify-center">
                     {!! $icon('car', 'w-6 h-6') !!}
                 </div>
                 <div class="min-w-0">
-                    <h3 class="font-bold text-white text-[15px] leading-tight truncate">{{ $ui['title'] }}</h3>
+                    <h3 class="font-bold text-brand-black dark:text-white text-[15px] leading-tight truncate">{{ $ui['title'] }}</h3>
                     <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                        <p class="text-red-100 text-[11px] font-medium">{{ $ui['online'] }}</p>
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                        <p class="text-gray-500 dark:text-gray-400 text-[11px] font-medium">{{ $ui['online'] }}</p>
                     </div>
                 </div>
             </div>
@@ -84,7 +82,7 @@
                 {{-- Language switcher --}}
                 <div class="relative" @click.outside="langOpen = false">
                     <button @click="langOpen = !langOpen"
-                            class="flex items-center gap-1 text-white/90 hover:text-white text-xs font-bold px-2 py-1.5 rounded-lg hover:bg-white/15 transition-colors"
+                            class="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-brand-red text-xs font-bold px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                             aria-label="{{ $ui['lang'] }}">
                         {!! $icon('languages', 'w-4 h-4') !!}
                         <span>{{ $langLabels[$chatLang] }}</span>
@@ -104,12 +102,12 @@
                 </div>
 
                 <button wire:click="clearChat"
-                        class="text-white/90 hover:text-white p-1.5 rounded-lg hover:bg-white/15 hover:rotate-[-45deg] transition-all duration-300"
+                        class="text-gray-500 dark:text-gray-400 hover:text-brand-red p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:rotate-[-45deg] transition-all duration-300"
                         aria-label="{{ $ui['clear'] }}" title="{{ $ui['clear'] }}">
                     {!! $icon('reset', 'w-[18px] h-[18px]') !!}
                 </button>
                 <button wire:click="close"
-                        class="text-white/90 hover:text-white p-1.5 rounded-lg hover:bg-white/15 hover:rotate-90 transition-all duration-300 active:scale-90"
+                        class="text-gray-500 dark:text-gray-400 hover:text-brand-red p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:rotate-90 transition-all duration-300 active:scale-90"
                         aria-label="{{ $ui['close'] }}">
                     {!! $icon('x', 'w-5 h-5') !!}
                 </button>
@@ -126,7 +124,7 @@
             @foreach($messages as $msg)
             <div class="flex {{ $msg['role'] === 'user' ? 'justify-end' : 'justify-start' }} items-end gap-2">
                 @if($msg['role'] !== 'user')
-                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-red to-red-700 flex items-center justify-center flex-shrink-0 shadow-sm ring-2 ring-white dark:ring-gray-900 text-white">
+                <div class="w-8 h-8 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center flex-shrink-0 border border-brand-red/20">
                     {!! $icon('car', 'w-[18px] h-[18px]') !!}
                 </div>
                 @endif
@@ -134,8 +132,8 @@
                 <div class="max-w-[80%] flex flex-col {{ $msg['role'] === 'user' ? 'items-end' : 'items-start' }}">
                     <div class="rounded-2xl px-4 py-2.5 shadow-sm
                         {{ $msg['role'] === 'user'
-                            ? 'bg-gradient-to-br from-brand-red to-red-700 text-white rounded-br-md'
-                            : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-gray-700/60 rounded-bl-md' }}">
+                            ? 'bg-brand-red text-white rounded-br-md'
+                            : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700/60 rounded-bl-md' }}">
                         <span class="leading-relaxed whitespace-pre-wrap text-[14px]">{!! $msg['role'] === 'user' ? e($msg['text']) : $formatBot($msg['text']) !!}</span>
                     </div>
 
@@ -156,7 +154,7 @@
 
             @if($isLoading)
             <div class="flex justify-start items-end gap-2">
-                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-red to-red-700 flex items-center justify-center flex-shrink-0 shadow-sm ring-2 ring-white dark:ring-gray-900 text-white">
+                <div class="w-8 h-8 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center flex-shrink-0 border border-brand-red/20">
                     {!! $icon('car', 'w-[18px] h-[18px]') !!}
                 </div>
                 <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/60 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5 shadow-sm">
@@ -243,7 +241,7 @@
         <div class="relative group">
             <button wire:click="{{ $isOpen ? 'close' : 'open' }}"
                     class="relative w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center overflow-hidden
-                           bg-gradient-to-br from-brand-red to-red-800 text-white
+                           bg-brand-red text-white
                            shadow-[0_8px_30px_rgb(var(--brand-red-rgb)_/_0.45)]
                            hover:shadow-[0_8px_40px_rgb(var(--brand-red-rgb)_/_0.65)] hover:scale-110 active:scale-95
                            transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-red/30"
