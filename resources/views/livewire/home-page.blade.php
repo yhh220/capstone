@@ -31,7 +31,10 @@
             <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover">
                 <source src="{{ asset('images/videos/hero-bg.mp4') }}" type="video/mp4">
             </video>
-            <div class="absolute inset-0 bg-white/50 dark:bg-[#0C0C0E]/60"></div>
+            {{-- The footage is dark, so light mode needs a strong wash where the
+                 text sits (left) fading out so the video stays visible (right) --}}
+            <div class="absolute inset-0 bg-white/70 dark:bg-[#0C0C0E]/55"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-white via-white/60 to-transparent dark:from-[#0C0C0E]/90 dark:via-[#0C0C0E]/40 dark:to-transparent"></div>
         </div>
 
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20 lg:py-32">
@@ -391,7 +394,7 @@
             if (!wrapper || !track) return;
             // Respect prefers-reduced-motion
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-            const BASE_SPEED = 0.55;
+            const BASE_SPEED = 0.35; // px per frame (~21px/s at 60fps) — moderate scroll
             let pos = 0, speed = BASE_SPEED, target = BASE_SPEED, halfW = 0;
             function measure() { halfW = track.scrollWidth / 2; }
             measure();
