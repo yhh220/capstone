@@ -127,7 +127,7 @@
                             @if($service->getImageUrl('thumb'))
                                 <div class="h-40 bg-gray-100 dark:bg-gray-900 overflow-hidden">
                                     <img src="{{ $service->getImageUrl('thumb') }}"
-                                         alt="{{ $service->name }}"
+                                         alt="{{ __($service->name) }}"
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                          loading="lazy">
                                 </div>
@@ -142,7 +142,7 @@
                                             </div>
                                         @endunless
                                         <h3 class="text-2xl text-brand-black dark:text-white leading-tight">
-                                            {{ $service->name }}
+                                            {{ __($service->name) }}
                                         </h3>
                                     </div>
                                     @if($service->price)
@@ -154,7 +154,7 @@
                                 </div>
 
                                 <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-5">
-                                    {{ $service->description }}
+                                    {{ __($service->description) }}
                                 </p>
 
                                 <div class="mt-auto">

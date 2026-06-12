@@ -174,7 +174,7 @@
                     @if($product->category)
                     <div>
                         <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('Category') }}:</span>
-                        {{ $product->category->name }}
+                        {{ __($product->category->name) }}
                     </div>
                     @endif
                     @if(!empty($product->compatible_vehicles))

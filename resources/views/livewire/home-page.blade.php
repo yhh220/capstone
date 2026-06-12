@@ -48,9 +48,9 @@
                         Shah Alam, Selangor &nbsp;·&nbsp; Malaysia
                     </p>
                     <h1 class="font-display text-[clamp(2.8rem,9vw,6.8rem)] leading-[0.93] uppercase text-gray-900 dark:text-white mb-6 sm:mb-8">
-                        SHAH ALAM'S<br>
-                        <span class="text-[#C8413D]">CAR AUDIO</span><br>
-                        SPECIALIST.
+                        {{ __("Shah Alam's") }}<br>
+                        <span class="text-[#C8413D]">{{ __('Car Audio') }}</span><br>
+                        {{ __('Specialist.') }}
                     </h1>
                     <p class="text-gray-500 dark:text-white/45 text-base sm:text-lg mb-8 sm:mb-10 max-w-md mx-auto lg:mx-0 leading-relaxed">
                         {{ __('Come in, browse the products, take a look around. Expert installation in Shah Alam.') }}
