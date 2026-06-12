@@ -41,6 +41,8 @@ return [
 
     'store' => [
         'name' => env('STORE_NAME', 'Win Win Car Audio Auto Accessories'),
+        // Brand name used in <title> / OG tags — matches the admin panel and webmanifest
+        'seo_name' => env('STORE_SEO_NAME', 'Win Win Car Audio'),
         'short_name' => env('STORE_SHORT_NAME', 'Win Win'),
         'tagline' => env('STORE_TAGLINE', 'Car Audio'),
         'phone_display' => env('STORE_PHONE_DISPLAY', '016-9150917'),

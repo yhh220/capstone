@@ -24,12 +24,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#E11D48" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0C0C0E" media="(prefers-color-scheme: dark)">
-    <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260609" type="image/svg+xml">
-    <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260609" sizes="any">
-    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20260609">
-    <link rel="apple-touch-icon" href="{{ asset('winwin-apple-touch-icon.png') }}?v=20260609">
-    <link rel="mask-icon" href="{{ asset('winwin-favicon.svg') }}?v=20260609" color="#C8413D">
-    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=20260609">
+    <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260613" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260613" sizes="any">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20260613">
+    <link rel="apple-touch-icon" href="{{ asset('winwin-apple-touch-icon.png') }}?v=20260613">
+    <link rel="mask-icon" href="{{ asset('winwin-favicon.svg') }}?v=20260613" color="#C8413D">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=20260613">
     {!! SEOMeta::generate() !!}
     {!! OpenGraph::generate() !!}
     {!! TwitterCard::generate() !!}

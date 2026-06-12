@@ -4,7 +4,7 @@ return [
     'inertia' => env('SEO_TOOLS_INERTIA', false),
     'meta' => [
         'defaults' => [
-            'title'       => config('services.store.name', 'Win Win Car Studio'),
+            'title'       => config('services.store.seo_name', 'Win Win Car Audio'),
             'titleBefore' => false,
             'description' => 'Browse car audio, tint, and accessories online. Visit our showroom or chat on WhatsApp for expert advice.',
             'separator'   => ' | ',
@@ -24,7 +24,7 @@ return [
     ],
     'opengraph' => [
         'defaults' => [
-            'title'       => config('services.store.name', 'Win Win Car Studio'),
+            'title'       => config('services.store.seo_name', 'Win Win Car Audio'),
             'description' => 'Browse car audio, tint, and accessories online. Visit our showroom or chat on WhatsApp for expert advice.',
             'url'         => null,
             'type'        => 'website',
@@ -39,7 +39,7 @@ return [
     ],
     'json-ld' => [
         'defaults' => [
-            'title'       => config('services.store.name', 'Win Win Car Studio'),
+            'title'       => config('services.store.seo_name', 'Win Win Car Audio'),
             'description' => 'Browse car audio, tint, and accessories online. Visit our showroom or chat on WhatsApp for expert advice.',
             'url'         => null,
             'type'        => 'AutoPartsStore',

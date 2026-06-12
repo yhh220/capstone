@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('Access Denied') }} - {{ config('services.store.name') }}</title>
-    <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260609" type="image/svg+xml">
-    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20260609">
-    <link rel="icon" href="{{ asset('winwin-favicon-32x32.png') }}?v=20260609" sizes="32x32" type="image/png">
-    <link rel="apple-touch-icon" href="{{ asset('winwin-apple-touch-icon.png') }}?v=20260609">
-    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=20260609">
+    <title>{{ __('Access Denied') }} - {{ config('services.store.seo_name') }}</title>
+    <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260613" type="image/svg+xml">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20260613">
+    <link rel="icon" href="{{ asset('winwin-favicon-32x32.png') }}?v=20260613" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="{{ asset('winwin-apple-touch-icon.png') }}?v=20260613">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=20260613">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">

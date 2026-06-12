@@ -35,7 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(asset('images/logo/logo-dark.svg'))    // light mode: dark logo (dark text on white)
             ->darkModeBrandLogo(asset('images/logo/logo-light.svg')) // dark mode: light logo (white text on dark)
             ->brandLogoHeight('2rem')
-            ->favicon(asset('winwin-favicon.svg') . '?v=20260609')
+            ->favicon(asset('winwin-favicon.svg') . '?v=20260613')
 
             // ── Theme ─────────────────────────────────────────────────
             ->defaultThemeMode(\Filament\Enums\ThemeMode::System)
