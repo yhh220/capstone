@@ -14,6 +14,7 @@ use Spatie\Honeypot\Http\Livewire\Concerns\UsesSpamProtection;
 
 class UserLogin extends Component
 {
+    use \App\Livewire\Concerns\SetsSeo;
     use UsesSpamProtection;
 
     // Tab toggle: true = Sign In, false = Register
@@ -53,6 +54,10 @@ class UserLogin extends Component
     public function mount(): void
     {
         $this->honeypotData = new HoneypotData();
+        $this->setSeo(
+            title: __('Login'),
+            description: 'Sign in or create an account to shop and track your orders at Win Win Car Audio.',
+        );
     }
 
     public function switchTab(bool $isLogin): void

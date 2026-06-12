@@ -28,10 +28,10 @@ class ProductsTable
                 TextColumn::make('slug')
                     ->searchable(),
                 TextColumn::make('price')
-                    ->money()
+                    ->money('MYR')
                     ->sortable(),
                 TextColumn::make('sale_price')
-                    ->money()
+                    ->money('MYR')
                     ->sortable(),
                 TextColumn::make('sku')
                     ->label('SKU')
