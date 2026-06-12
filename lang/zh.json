@@ -692,6 +692,7 @@
     "Too many login attempts. Please try again in :seconds seconds.": "登录尝试次数过多，请在 :seconds 秒后重试。",
     "Too many lookups. Please try again in :seconds seconds.": "查询过于频繁，请 :seconds 秒后再试。",
     "Too many messages. Please wait :seconds seconds before sending again, or WhatsApp us at :phone.": "消息发送过于频繁，请在 :seconds 秒后再试，或通过 WhatsApp 联系我们：:phone。",
+    "Too many orders placed. Please try again in :seconds seconds.": "下单过于频繁，请在 :seconds 秒后再试。",
     "Too many submissions. Please wait :seconds seconds before trying again.": "提交次数过多，请在 :seconds 秒后再试。",
     "Too many tracking attempts. Please try again in :seconds seconds.": "追踪次数过多，请在 :seconds 秒后重试。",
     "Total": "总计",

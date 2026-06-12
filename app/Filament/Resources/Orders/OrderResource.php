@@ -72,7 +72,7 @@ class OrderResource extends Resource
                         }
                         $rows = $items->map(fn ($item) =>
                             "<tr class='border-b dark:border-gray-700'>
-                                <td class='py-2 pr-4 text-sm'>{$item->product_name}</td>
+                                <td class='py-2 pr-4 text-sm'>" . e($item->product_name) . "</td>
                                 <td class='py-2 pr-4 text-sm text-center'>{$item->quantity}</td>
                                 <td class='py-2 pr-4 text-sm text-right'>RM " . number_format($item->unit_price, 2) . "</td>
                                 <td class='py-2 text-sm text-right font-semibold'>RM " . number_format($item->subtotal, 2) . "</td>

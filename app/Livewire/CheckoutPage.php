@@ -107,6 +107,17 @@ class CheckoutPage extends Component
             return;
         }
 
+        // Throttle order creation — a scripted account shouldn't be able to
+        // flood the orders table with junk.
+        $throttleKey = 'checkout:' . Auth::id();
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($throttleKey);
+            $this->addError('stock', __('Too many orders placed. Please try again in :seconds seconds.', ['seconds' => $seconds]));
+
+            return;
+        }
+        \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 3600);
+
         if (CartItem::forCurrentOwner()->count() === 0) {
             $this->redirect(route('cart'));
 
