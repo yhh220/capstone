@@ -148,6 +148,21 @@
                         {!! $icon('arrow-right', 'w-4 h-4 transition-transform duration-300 group-hover:translate-x-1') !!}
                     </a>
                     @endif
+
+                    {{-- "Did you mean…" / follow-up chips --}}
+                    @if(!empty($msg['suggest']))
+                    <div class="flex flex-wrap gap-1.5 mt-2">
+                        @foreach($msg['suggest'] as $sug)
+                        <button wire:click="quickAsk('{{ addslashes($sug['query']) }}')"
+                                wire:loading.attr="disabled"
+                                wire:target="sendMessage,quickAsk,generateReply"
+                                class="text-[12px] font-semibold px-3 py-1.5 rounded-full border border-brand-red/30 text-brand-red bg-brand-red/5
+                                       hover:bg-brand-red hover:text-white hover:border-brand-red active:scale-95 transition-all duration-300 disabled:opacity-50">
+                            {{ $sug['label'] }}
+                        </button>
+                        @endforeach
+                    </div>
+                    @endif
                 </div>
             </div>
             @endforeach

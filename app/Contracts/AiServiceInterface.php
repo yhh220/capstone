@@ -7,7 +7,12 @@ use Illuminate\Support\Collection;
 
 interface AiServiceInterface
 {
-    public function chat(array $messages, ?string $systemPrompt = null): string;
+    /**
+     * Answer a chat conversation.
+     *
+     * @return array{message: string, suggestions?: array<int, array{label: string, query: string}>}
+     */
+    public function chat(array $messages, ?string $systemPrompt = null): array;
 
     public function recommend(string $query, Collection $products): array;
 

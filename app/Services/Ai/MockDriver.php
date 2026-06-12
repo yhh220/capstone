@@ -4,8 +4,13 @@ namespace App\Services\Ai;
 
 use App\Contracts\AiServiceInterface;
 use App\Models\AiLog;
+use App\Models\Brand;
+use App\Models\ChatbotFaq;
 use App\Models\Product;
+use App\Models\Service;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 class MockDriver implements AiServiceInterface
 {
@@ -28,7 +33,7 @@ class MockDriver implements AiServiceInterface
     {
         $p = $this->phone;
 
-        return [
+        return array_merge($this->dbFaqRules(), [
             // Greetings (low priority — a real topic should win)
             [
                 'priority' => 10,
@@ -336,7 +341,156 @@ class MockDriver implements AiServiceInterface
                     'zh' => "不客气！😊 如有其他问题随时来问。期待在 Win Win Car Studio 见到您！🚗✨",
                 ],
             ],
+        ]);
+    }
+
+    /**
+     * Admin-managed FAQ entries (Filament → Chatbot FAQs), merged ahead of the
+     * built-in rules so the shop can add or override answers without code.
+     * Cached for an hour; the ChatbotFaq model busts the cache on save/delete.
+     */
+    private function dbFaqRules(): array
+    {
+        if (! Schema::hasTable('chatbot_faqs')) {
+            return [];
+        }
+
+        return Cache::remember('chatbot_faqs', 3600, function () {
+            return ChatbotFaq::where('is_active', true)
+                ->get()
+                ->map(fn (ChatbotFaq $faq) => [
+                    'priority' => $faq->priority,
+                    'keywords' => array_values(array_filter(array_map(
+                        fn ($k) => mb_strtolower(trim($k)),
+                        $faq->keywords ?? []
+                    ))),
+                    'reply' => array_filter([
+                        'en' => $faq->reply_en,
+                        'ms' => $faq->reply_ms,
+                        'zh' => $faq->reply_zh,
+                    ]),
+                ])
+                ->filter(fn ($rule) => $rule['keywords'] !== [] && $rule['reply'] !== [])
+                ->values()
+                ->all();
+        });
+    }
+
+    /**
+     * Typo-tolerant keyword check. Multi-word and CJK keywords use substring
+     * matching; single latin words of 5+ chars also match message words within
+     * a small edit distance ("warrenty" → "warranty", "subwofer" → "subwoofer").
+     */
+    private function keywordMatches(string $keyword, string $message, array $messageWords): bool
+    {
+        if (str_contains($message, $keyword)) {
+            return true;
+        }
+
+        $len = mb_strlen($keyword);
+        if ($len < 5 || str_contains($keyword, ' ') || preg_match('/[^\x00-\x7f]/', $keyword)) {
+            return false;
+        }
+
+        $maxDistance = $len >= 8 ? 2 : 1;
+        foreach ($messageWords as $word) {
+            if (abs(strlen($word) - $len) <= $maxDistance && levenshtein($word, $keyword) <= $maxDistance) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Curated topic list used for "did you mean…" suggestions when nothing
+     * matches. Each topic carries the query a tap should send (per language).
+     */
+    private function topics(): array
+    {
+        return [
+            ['keywords' => ['hour', 'open', 'close', 'waktu', 'buka', '营业', '开门'],
+             'label' => ['en' => 'Opening hours', 'ms' => 'Waktu operasi', 'zh' => '营业时间'],
+             'query' => ['en' => 'What are your operating hours?', 'ms' => 'Apakah waktu operasi anda?', 'zh' => '你们的营业时间是几点？']],
+            ['keywords' => ['location', 'address', 'direction', 'alamat', 'lokasi', '地址', '位置'],
+             'label' => ['en' => 'Location', 'ms' => 'Lokasi', 'zh' => '门店地址'],
+             'query' => ['en' => 'Where are you located?', 'ms' => 'Di mana lokasi anda?', 'zh' => '你们在哪里？']],
+            ['keywords' => ['book', 'appointment', 'tempah', '预约'],
+             'label' => ['en' => 'Book appointment', 'ms' => 'Buat tempahan', 'zh' => '预约服务'],
+             'query' => ['en' => 'I want to book an appointment', 'ms' => 'Saya mahu buat tempahan', 'zh' => '我想预约']],
+            ['keywords' => ['price', 'cost', 'harga', 'berapa', '价格', '多少钱'],
+             'label' => ['en' => 'Pricing', 'ms' => 'Harga', 'zh' => '价格'],
+             'query' => ['en' => 'How much does it cost?', 'ms' => 'Berapakah harganya?', 'zh' => '价格多少？']],
+            ['keywords' => ['warranty', 'guarantee', 'waranti', '保修', '保固'],
+             'label' => ['en' => 'Warranty', 'ms' => 'Waranti', 'zh' => '保修'],
+             'query' => ['en' => 'What is your warranty policy?', 'ms' => 'Apakah polisi waranti anda?', 'zh' => '保修政策是怎样的？']],
+            ['keywords' => ['audio', 'speaker', 'subwoofer', 'sound', '音响', '喇叭'],
+             'label' => ['en' => 'Car audio', 'ms' => 'Audio kereta', 'zh' => '汽车音响'],
+             'query' => ['en' => 'Tell me about car audio systems', 'ms' => 'Ceritakan tentang sistem audio kereta', 'zh' => '介绍一下汽车音响系统']],
+            ['keywords' => ['tint', 'film', 'tinted', '贴膜', '隔热膜'],
+             'label' => ['en' => 'Window tinting', 'ms' => 'Tinted tingkap', 'zh' => '车窗隔热膜'],
+             'query' => ['en' => 'Tell me about window tinting', 'ms' => 'Ceritakan tentang tinted tingkap', 'zh' => '介绍一下车窗隔热膜']],
+            ['keywords' => ['dashcam', 'camera', 'kamera', '记录仪', '行车'],
+             'label' => ['en' => 'Dashcams', 'ms' => 'Dashcam', 'zh' => '行车记录仪'],
+             'query' => ['en' => 'Tell me about dashcams', 'ms' => 'Ceritakan tentang dashcam', 'zh' => '介绍一下行车记录仪']],
+            ['keywords' => ['install', 'fitting', 'pasang', '安装'],
+             'label' => ['en' => 'Installation', 'ms' => 'Pemasangan', 'zh' => '安装服务'],
+             'query' => ['en' => 'Do you provide installation?', 'ms' => 'Adakah anda menyediakan pemasangan?', 'zh' => '你们提供安装服务吗？']],
+            ['keywords' => ['product', 'accessories', 'produk', '产品', '配件'],
+             'label' => ['en' => 'Products', 'ms' => 'Produk', 'zh' => '产品'],
+             'query' => ['en' => 'What products do you sell?', 'ms' => 'Apakah produk yang anda jual?', 'zh' => '你们卖什么产品？']],
         ];
+    }
+
+    /**
+     * "Did you mean…" chips for the fallback reply: fuzzy-score every topic
+     * against the message and return the closest few (or popular defaults).
+     */
+    private function fallbackSuggestions(string $lang, string $message): array
+    {
+        $messageWords = $this->latinWords($message);
+        $scored = [];
+
+        foreach ($this->topics() as $i => $topic) {
+            $score = 0;
+            foreach ($topic['keywords'] as $keyword) {
+                if ($this->keywordMatches($keyword, $message, $messageWords)) {
+                    $score += 10;
+                    continue;
+                }
+                // Partial similarity nudges near-misses up the list.
+                foreach ($messageWords as $word) {
+                    similar_text($word, $keyword, $percent);
+                    if ($percent >= 70) {
+                        $score += 3;
+                        break;
+                    }
+                }
+            }
+            $scored[$i] = $score;
+        }
+
+        arsort($scored);
+        $best = array_slice(array_keys($scored), 0, 3, true);
+
+        // If nothing is even close, offer the most popular topics instead.
+        if (($scored[array_key_first(array_slice($scored, 0, 1, true))] ?? 0) === 0) {
+            $best = [0, 2, 9]; // hours, booking, products
+        }
+
+        $topics = $this->topics();
+
+        return array_map(fn ($i) => [
+            'label' => $topics[$i]['label'][$lang] ?? $topics[$i]['label']['en'],
+            'query' => $topics[$i]['query'][$lang] ?? $topics[$i]['query']['en'],
+        ], $best);
+    }
+
+    private function latinWords(string $message): array
+    {
+        preg_match_all('/[a-z0-9]+/', $message, $m);
+
+        return array_values(array_filter($m[0], fn ($w) => strlen($w) >= 3));
     }
 
     /**
@@ -557,27 +711,207 @@ class MockDriver implements AiServiceInterface
         return preg_replace(array_keys($replacements), array_values($replacements), $msg) ?? $msg;
     }
 
-    public function chat(array $messages, ?string $systemPrompt = null): string
+    /**
+     * Live answers backed by the database, so pricing and product info never
+     * drift from what the admin panel says. Returns null when not applicable.
+     */
+    private function liveDataReply(string $lang, string $msg): ?array
+    {
+        return $this->servicePriceReply($lang, $msg) ?? $this->productSearchReply($lang, $msg);
+    }
+
+    /**
+     * Real service prices: "how much is tinting?" answers with the live
+     * price and duration of the matched service from the services table.
+     */
+    private function servicePriceReply(string $lang, string $msg): ?array
+    {
+        if (! Schema::hasTable('services')) {
+            return null;
+        }
+
+        $wantsPrice = (bool) preg_match('/price|cost|how much|berapa|harga|多少钱|价格|价钱|收费|rm\b/iu', $msg);
+        if (! $wantsPrice) {
+            return null;
+        }
+
+        // Cache plain arrays (not Eloquent models) so any cache store can
+        // serialise them safely.
+        $services = collect(Cache::remember('chatbot_services', 600, fn () => Service::where('is_active', true)
+            ->get(['name', 'price', 'duration_minutes'])
+            ->map(fn (Service $s) => [
+                'name' => $s->name,
+                'price' => $s->price,
+                'duration_label' => $s->duration_label,
+            ])
+            ->all()));
+
+        // Aliases let BM/ZH (and common shorthand) hit English service names.
+        $aliases = [
+            'tint'      => ['tint', 'tinted', 'film', '隔热膜', '贴膜', '车窗'],
+            'audio'     => ['audio', 'speaker', 'head unit', 'stereo', '音响', '喇叭', 'bunyi'],
+            'subwoofer' => ['subwoofer', 'amplifier', 'woofer', 'bass', '低音', '功放'],
+            'dashcam'   => ['dashcam', 'dash cam', 'kamera', '记录仪', '行车记录'],
+            'alarm'     => ['alarm', 'security', 'immobilizer', 'penggera', '防盗', '警报'],
+            'dsp'       => ['dsp', 'tuning', 'calibration', 'penalaan', '调音', '校准'],
+        ];
+
+        $matched = $services->filter(function (array $service) use ($msg, $aliases) {
+            $name = mb_strtolower($service['name']);
+            foreach ($aliases as $stem => $words) {
+                if (str_contains($name, $stem)) {
+                    foreach ($words as $word) {
+                        if (str_contains($msg, $word)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        });
+
+        if ($matched->isEmpty()) {
+            return null;
+        }
+
+        $lines = $matched->take(3)->map(function (array $service) use ($lang) {
+            $name = in_array($lang, ['ms', 'zh'], true) ? __($service['name'], [], $lang) : $service['name'];
+            $price = $service['price'] ? 'RM ' . number_format((float) $service['price'], 0) : null;
+
+            return '• ' . $name
+                . ($price ? match ($lang) {
+                    'ms' => " — dari {$price}",
+                    'zh' => " — {$price} 起",
+                    default => " — from {$price}",
+                } : '')
+                . ($service['duration_label'] ? " ({$service['duration_label']})" : '');
+        })->implode("\n");
+
+        $message = match ($lang) {
+            'ms' => "💰 Ini harga semasa untuk servis berkaitan:\n\n{$lines}\n\nHarga akhir bergantung pada kereta dan produk pilihan anda. Tempah slot atau WhatsApp {$this->phone} untuk sebut harga tepat! 😊",
+            'zh' => "💰 相关服务的最新价格：\n\n{$lines}\n\n最终价格视车型和所选产品而定。可以直接预约,或 WhatsApp {$this->phone} 获取准确报价！😊",
+            default => "💰 Here are our current prices for the related services:\n\n{$lines}\n\nFinal pricing depends on your car and chosen products. Book a slot or WhatsApp {$this->phone} for an exact quote! 😊",
+        };
+
+        return [
+            'message' => $message,
+            'suggestions' => [[
+                'label' => match ($lang) { 'ms' => 'Buat tempahan', 'zh' => '立即预约', default => 'Book appointment' },
+                'query' => match ($lang) { 'ms' => 'Saya mahu buat tempahan', 'zh' => '我想预约', default => 'I want to book an appointment' },
+            ]],
+        ];
+    }
+
+    /**
+     * Live product lookup: "do you have Sony?" / "got 70mai dashcam?" searches
+     * the real catalogue and answers with names and prices.
+     */
+    private function productSearchReply(string $lang, string $msg): ?array
+    {
+        if (! Schema::hasTable('products')) {
+            return null;
+        }
+
+        $hasIntent = (bool) preg_match('/\b(have|got|sell|stock|carry|looking for|find|any)\b|ada\b|jual|cari|有没有|有卖|有.*吗|找|卖不卖/iu', $msg);
+
+        // Brand names from the DB count as intent on their own ("Sony?").
+        $brands = Schema::hasTable('brands')
+            ? Cache::remember('chatbot_brands', 600, fn () => Brand::pluck('name')->map(fn ($b) => mb_strtolower($b))->all())
+            : [];
+        $mentionedBrand = collect($brands)->first(fn ($b) => str_contains($msg, $b));
+
+        if (! $hasIntent && ! $mentionedBrand) {
+            return null;
+        }
+
+        $query = Product::where('is_active', true);
+
+        if ($mentionedBrand) {
+            $query->where(fn ($q) => $q->where('brand', 'like', "%{$mentionedBrand}%")
+                ->orWhere('name', 'like', "%{$mentionedBrand}%"));
+        } else {
+            // Search by the message's meaningful words against name/brand.
+            $words = array_filter($this->latinWords($msg), fn ($w) => strlen($w) >= 4
+                && ! in_array($w, ['have', 'sell', 'stock', 'carry', 'looking', 'find', 'what', 'your', 'does', 'this', 'that', 'with'], true));
+            if ($words === []) {
+                return null;
+            }
+            $query->where(function ($q) use ($words) {
+                foreach ($words as $word) {
+                    $q->orWhere('name', 'like', "%{$word}%")->orWhere('brand', 'like', "%{$word}%");
+                }
+            });
+        }
+
+        $products = $query->take(3)->get();
+
+        // Brand recognised but nothing in the catalogue right now — still a
+        // useful answer (we carry the brand; stock changes often).
+        if ($products->isEmpty() && $mentionedBrand) {
+            $brandName = mb_convert_case($mentionedBrand, MB_CASE_TITLE);
+            $message = match ($lang) {
+                'ms' => "👍 Ya, kami ada jenama {$brandName}! Stok berubah dari semasa ke semasa, jadi WhatsApp kami di {$this->phone} untuk semak model dan harga terkini. 😊",
+                'zh' => "👍 有的,我们有 {$brandName} 这个品牌！库存型号经常更新,请 WhatsApp 我们：{$this->phone} 查询最新型号和价格。😊",
+                default => "👍 Yes, we carry {$brandName}! Stock changes from time to time, so WhatsApp us at {$this->phone} to check the latest models and prices. 😊",
+            };
+
+            return ['message' => $message, 'suggestions' => []];
+        }
+
+        if ($products->isEmpty()) {
+            return null; // fall through to keyword rules / fallback
+        }
+
+        $lines = $products->map(function (Product $product) {
+            $price = $product->current_price ? ' — RM ' . number_format((float) $product->current_price, 0) : '';
+            return "• {$product->name}" . ($product->brand ? " ({$product->brand})" : '') . $price;
+        })->implode("\n");
+
+        $message = match ($lang) {
+            'ms' => "🛒 Ya, kami ada! Ini padanan terbaik daripada katalog kami:\n\n{$lines}\n\nLayari halaman Produk untuk butiran penuh, atau WhatsApp {$this->phone} untuk semak stok. 😊",
+            'zh' => "🛒 有的！以下是我们目录中最匹配的产品：\n\n{$lines}\n\n可以到产品页面查看详情,或 WhatsApp {$this->phone} 确认库存。😊",
+            default => "🛒 Yes, we do! Here are the closest matches from our catalogue:\n\n{$lines}\n\nBrowse the Products page for full details, or WhatsApp {$this->phone} to confirm stock. 😊",
+        };
+
+        return [
+            'message' => $message,
+            'suggestions' => [[
+                'label' => match ($lang) { 'ms' => 'Lihat semua produk', 'zh' => '查看全部产品', default => 'View all products' },
+                'query' => match ($lang) { 'ms' => 'Apakah produk yang anda jual?', 'zh' => '你们卖什么产品？', default => 'What products do you sell?' },
+            ]],
+        ];
+    }
+
+    public function chat(array $messages, ?string $systemPrompt = null): array
     {
         $lang = $this->lang($systemPrompt ?? '');
         $raw = mb_strtolower(trim(collect($messages)->last()['content'] ?? ''));
         // Expand common chat slang ("what are u" → "what are you") so intents match.
         $lastMessage = $this->normalizeSlang($raw);
+        $messageWords = $this->latinWords($lastMessage);
+
+        $suggestions = [];
+        $isFallback = false;
 
         // 1) Everyday / dynamic intents (date, time, identity, small talk).
         $reply = $this->dynamicReply($lang, $lastMessage);
 
-        // 2) Keyword topics, scored by priority + number of matched keywords.
-        //    A single message can mention several topics; answer the top few
-        //    (max 3) instead of silently dropping all but one, and tell the
-        //    user to ask the rest one at a time.
+        // 2) Live database answers (real service prices, product search).
+        if ($reply === null && ($live = $this->liveDataReply($lang, $lastMessage))) {
+            $reply = $live['message'];
+            $suggestions = $live['suggestions'] ?? [];
+        }
+
+        // 3) Keyword topics (admin FAQs + built-ins), scored by priority +
+        //    matched keywords, with typo tolerance. A single message can
+        //    mention several topics; answer the top few (max 3).
         if ($reply === null) {
             $scored = [];
 
             foreach ($this->rules() as $rule) {
                 $matches = 0;
                 foreach ($rule['keywords'] as $keyword) {
-                    if (str_contains($lastMessage, $keyword)) {
+                    if ($this->keywordMatches($keyword, $lastMessage, $messageWords)) {
                         $matches++;
                     }
                 }
@@ -610,24 +944,30 @@ class MockDriver implements AiServiceInterface
             }
         }
 
-        // 3) Fallback — direct to the human team.
-        $p = $this->phone;
-        $reply ??= match ($lang) {
-            'ms' => "Terima kasih atas pertanyaan anda! 😊\n\nSaya tidak pasti tentang itu, tetapi pasukan kami boleh membantu.\n\n📞 WhatsApp kami di {$p} untuk respons pantas, atau singgah ke kedai kami di Shah Alam semasa waktu operasi.",
-            'zh' => "感谢您的提问！😊\n\n这个问题我不太确定，但我们的团队可以为您解答。\n\n📞 请 WhatsApp 我们：{$p}，或在营业时间内到访我们的莎阿南门店。",
-            default => "Thanks for your message! 😊\n\nI'm not sure about that, but our team can help you directly.\n\n📞 WhatsApp us at {$p} for the fastest response, or visit our Shah Alam showroom during business hours.",
-        };
+        // 4) Fallback — "did you mean…" chips + hand-off to the human team.
+        if ($reply === null) {
+            $isFallback = true;
+            $p = $this->phone;
+            $reply = match ($lang) {
+                'ms' => "Hmm, saya tidak pasti tentang itu. 🤔 Mungkin anda maksudkan salah satu topik di bawah?\n\nJika tidak, pasukan kami sedia membantu — WhatsApp {$p} untuk respons pantas. 😊",
+                'zh' => "嗯,这个问题我不太确定。🤔 您是不是想问下面这些？\n\n如果都不是,我们的团队随时为您服务——WhatsApp {$p} 获得最快回复。😊",
+                default => "Hmm, I'm not sure about that one. 🤔 Did you mean one of the topics below?\n\nIf not, our team is happy to help — WhatsApp us at {$p} for the fastest response. 😊",
+            };
+            $suggestions = $this->fallbackSuggestions($lang, $lastMessage);
+        }
 
         AiLog::record([
             'driver'           => 'mock',
             'feature'          => 'chat',
             'request_payload'  => ['messages' => $messages, 'lang' => $lang],
             'response_payload' => ['message' => $reply],
-            'status'           => 'success',
+            // 'fallback' lets the admin filter unanswered questions in AI Logs
+            // and turn them into Chatbot FAQ entries.
+            'status'           => $isFallback ? 'fallback' : 'success',
             'ip_address'       => request()->ip(),
         ]);
 
-        return $reply;
+        return ['message' => $reply, 'suggestions' => $suggestions];
     }
 
     public function recommend(string $query, Collection $products): array

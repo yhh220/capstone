@@ -324,6 +324,7 @@ class AiChatbot extends Component
         }
 
         $pending = $this->pendingText;
+        $suggestions = [];
 
         // "What page am I on?" — answered locally from the captured route.
         if ($this->isCurrentPageQuestion($pending)) {
@@ -340,7 +341,9 @@ class AiChatbot extends Component
                 ->all();
 
             try {
-                $reply = $this->ai()->chat($aiMessages, 'lang:' . $this->chatLang);
+                $response = $this->ai()->chat($aiMessages, 'lang:' . $this->chatLang);
+                $reply = $response['message'];
+                $suggestions = $response['suggestions'] ?? [];
             } catch (\Throwable) {
                 $phone = config('services.store.phone_display');
                 $reply = match ($this->chatLang) {
@@ -352,6 +355,11 @@ class AiChatbot extends Component
         }
 
         $assistantMessage = ['role' => 'assistant', 'text' => $reply];
+
+        // "Did you mean…" / follow-up chips rendered under the bot bubble.
+        if ($suggestions !== []) {
+            $assistantMessage['suggest'] = $suggestions;
+        }
 
         // Attach a page-redirect call-to-action when a navigation intent is found.
         if ($cta = $this->detectNavigation($pending)) {
