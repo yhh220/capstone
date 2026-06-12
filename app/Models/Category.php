@@ -20,7 +20,11 @@ class Category extends Model
             ->dontLogEmptyChanges();
     }
 
-    protected $fillable = ['name', 'slug', 'description', 'image', 'is_active'];
+    protected $fillable = ['name', 'slug', 'description', 'image', 'is_active', 'sort_order'];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 
     protected static function boot()
     {
@@ -30,8 +34,7 @@ class Category extends Model
                 $category->slug = Str::slug($category->name);
             }
         });
-        static::saved(fn()   => Cache::forget('active_categories'));
-        static::deleted(fn() => Cache::forget('active_categories'));
+        // Cache for active categories removed due to unserialize issues
     }
 
     public function products()

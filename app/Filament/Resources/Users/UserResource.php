@@ -30,6 +30,11 @@ class UserResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Users';
 
+    public static function canViewAny(): bool
+    {
+        return Filament::auth()->user()?->isAdmin() ?? false;
+    }
+
     /**
      * Only show owner / admin / staff — never clients.
      */

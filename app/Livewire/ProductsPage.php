@@ -21,6 +21,8 @@ class ProductsPage extends Component
     protected $queryString = [
         'category' => ['except' => ''],
         'search'   => ['except' => ''],
+        'minPrice' => ['except' => ''],
+        'maxPrice' => ['except' => ''],
     ];
 
     public function mount(): void
@@ -81,9 +83,11 @@ class ProductsPage extends Component
             $query->whereRaw('COALESCE(sale_price, price) <= ?', [$max]);
         }
 
+        $cats = Category::where('is_active', true)->orderBy('name')->get();
+
         return view('livewire.products-page', [
             'products'        => $query->paginate(12),
-            'categories'      => Cache::remember('active_categories', 3600, fn () => Category::where('is_active', true)->orderBy('name')->get()),
+            'allCategories'   => $cats,
             'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
         ])->layout('layouts.app');
     }

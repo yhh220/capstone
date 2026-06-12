@@ -24,11 +24,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#E11D48" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0C0C0E" media="(prefers-color-scheme: dark)">
-    <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260504" type="image/svg+xml">
-    <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260504" sizes="any">
-    <link rel="apple-touch-icon" href="{{ asset('winwin-apple-touch-icon.png') }}?v=20260504">
-    <link rel="mask-icon" href="{{ asset('winwin-favicon.svg') }}?v=20260504" color="#C8413D">
-    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=20260504">
+    <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260609" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v=20260609" sizes="any">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20260609">
+    <link rel="apple-touch-icon" href="{{ asset('winwin-apple-touch-icon.png') }}?v=20260609">
+    <link rel="mask-icon" href="{{ asset('winwin-favicon.svg') }}?v=20260609" color="#C8413D">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=20260609">
     {!! SEOMeta::generate() !!}
     {!! OpenGraph::generate() !!}
     {!! TwitterCard::generate() !!}
@@ -50,6 +51,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     @vite('resources/css/app.css')
 
     <style>
@@ -334,42 +336,43 @@
             justify-content: center;
             gap: 0.5rem;
             font-weight: 700;
-            border-radius: 0.75rem;   /* rounded-xl */
+            border-radius: 0.75rem;   /* rounded-xl — matches contact page */
             border: 2px solid transparent;
             cursor: pointer;
             text-decoration: none;
             white-space: normal;
             overflow-wrap: anywhere;
-            transition: transform 0.2s ease, box-shadow 0.2s ease,
-                        background-color 0.2s ease, border-color 0.2s ease,
-                        color 0.2s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease,
+                        background-color 0.3s ease, border-color 0.3s ease,
+                        color 0.3s ease;
             position: relative;
             overflow: hidden;
         }
-        .btn:active { transform: scale(0.96) !important; }
+        .btn:active { transform: scale(0.95) !important; }
         .btn:disabled, .btn[disabled] { opacity: 0.5; pointer-events: none; }
 
         /* Sizes */
-        .btn-sm  { padding: 0.5rem 1rem;      font-size: 0.8125rem; } /* py-2 px-4   */
-        .btn-md  { padding: 0.625rem 1.5rem;  font-size: 0.875rem;  } /* py-2.5 px-6 */
-        .btn-lg  { padding: 0.75rem 2rem;     font-size: 1rem;      } /* py-3 px-8   */
-        .btn-xl  { padding: 0.875rem 2.25rem; font-size: 1.0625rem; } /* py-3.5 px-9 */
+        .btn-sm  { padding: 0.5rem 1rem;      font-size: 0.8125rem; }
+        .btn-md  { padding: 0.625rem 1.5rem;  font-size: 0.875rem;  }
+        .btn-lg  { padding: 0.75rem 2rem;     font-size: 1rem;      font-weight: 900; }
+        .btn-xl  { padding: 0.875rem 2.25rem; font-size: 1.0625rem; font-weight: 900; }
 
-        /* Pill variant (hero / checkout flow) */
+        /* Pill variant */
         .btn-pill { border-radius: 9999px; }
 
         /* Primary — red fill */
         .btn-primary {
             background-color: rgb(var(--brand-red-rgb));
             color: #fff;
+            box-shadow: 0 6px 20px rgba(var(--brand-red-rgb), 0.35);
         }
         .btn-primary:hover {
             background-color: rgb(var(--brand-red-hover-rgb));
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(var(--brand-red-rgb) / 0.35);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(var(--brand-red-rgb), 0.5);
         }
 
-        /* Secondary — bordered */
+        /* Secondary — bordered, red on hover */
         .btn-secondary {
             background-color: transparent;
             border-color: rgb(220 220 220);
@@ -382,36 +385,40 @@
         .btn-secondary:hover {
             border-color: rgb(var(--brand-red-rgb));
             color: rgb(var(--brand-red-rgb));
-            transform: translateY(-2px);
+            background-color: rgba(249, 250, 251, 0.8);
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .dark .btn-secondary:hover {
+            background-color: rgba(31, 41, 55, 0.8);
         }
 
-        /* Ghost — text only, subtle bg on hover */
+        /* Ghost — text only */
         .btn-ghost {
             background-color: transparent;
             color: rgb(var(--brand-red-rgb));
         }
         .btn-ghost:hover {
-            background-color: rgb(var(--brand-red-rgb) / 0.08);
-            transform: translateY(-2px);
+            background-color: rgba(var(--brand-red-rgb), 0.08);
+            transform: translateY(-4px);
         }
 
-        /* Icon button (square, no text) */
-        .btn-icon {
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            gap: 0;
-        }
+        /* Icon button */
+        .btn-icon { padding: 0.5rem; border-radius: 0.5rem; gap: 0; }
 
-        /* Shine overlay — add .btn-shine to any .btn */
+        /* Shine overlay — skewed sweep matching contact page span pattern */
         .btn-shine::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.22) 50%, transparent 60%);
-            transform: translateX(-100%);
-            transition: transform 0.45s ease;
+            background: rgba(255,255,255,0.25);
+            transform: skewX(45deg) translateX(-150%);
+            transition: transform 0.7s ease;
         }
-        .btn-shine:hover::after { transform: translateX(100%); }
+        .btn-shine:hover::after { transform: skewX(45deg) translateX(150%); }
+
+        /* Arrow nudge */
+        .btn:hover .icon-arrow { transform: translateX(3px); }
 
         /* ═══════════════════════════════════════════════
            UNIFIED ICON SYSTEM  (Lucide)
@@ -551,12 +558,14 @@
                                     ['ms', 'Bahasa Melayu', 'BM'],
                                     ['zh', '中文',           'ZH'],
                                 ] as [$code, $name, $short])
-                                <a href="{{ route('lang', $code) }}"
+                                <button type="button"
                                    role="menuitem"
-                                   class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 {{ app()->getLocale() === $code ? 'bg-red-50 dark:bg-red-900/20 text-brand-red' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80' }}">
+                                   data-lang-code="{{ $code }}"
+                                   data-lang-url="{{ route('lang', $code) }}"
+                                   class="lang-option w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 {{ app()->getLocale() === $code ? 'bg-red-50 dark:bg-red-900/20 text-brand-red' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80' }}">
                                     <span class="flex-1 text-sm font-semibold">{{ $name }}</span>
                                     <svg class="lang-check w-4 h-4 text-brand-red shrink-0 {{ app()->getLocale() !== $code ? 'hidden' : '' }}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                </a>
+                                </button>
                                 @endforeach
                             </div>
                         </div>
@@ -833,7 +842,9 @@
                     </button>
                 </div>
                 <div class="flex-1">
-                    <livewire:cart-page />
+                    @if(!request()->is('cart'))
+                        <livewire:cart-page />
+                    @endif
                 </div>
             </aside>
         </div>
@@ -925,7 +936,7 @@
             </div>
 
             <div class="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-3">
-                <p>&copy; {{ $storeName }} 2025. <span>{{ __('All rights reserved.') }}</span></p>
+                <p>&copy; {{ $storeName }} {{ date('Y') }}. <span>{{ __('All rights reserved.') }}</span></p>
                 <div class="flex items-center gap-4">
                     <a href="{{ route('privacy-policy') }}" class="hover:text-brand-yellow transition-colors">{{ __('Privacy Policy') }}</a>
                     <span aria-hidden="true">·</span>
@@ -996,6 +1007,24 @@
             }
         });
 
+        // Seamless language switch — fetch sets session, then soft-navigate without full reload
+        document.querySelectorAll('.lang-option').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const url = btn.dataset.langUrl;
+                closeLang();
+                fetch(url, { redirect: 'follow', credentials: 'same-origin' })
+                    .then(function () {
+                        if (window.Livewire && typeof Livewire.navigate === 'function') {
+                            Livewire.navigate(location.href);
+                        } else {
+                            location.reload();
+                        }
+                    })
+                    .catch(function () { location.reload(); });
+            });
+        });
+
         const mobileBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         const iconHamburger = document.getElementById('icon-hamburger');
@@ -1015,6 +1044,9 @@
     @livewireScripts
     @stack('scripts')
 
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', () => lucide.createIcons()); document.addEventListener('livewire:navigated', () => lucide.createIcons());</script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
     <script>
         // ── AOS init ─────────────────────────────────────────

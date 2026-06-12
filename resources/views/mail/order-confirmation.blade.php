@@ -75,7 +75,7 @@
             </div>
 
             <p style="margin-top: 24px; font-size: 13px; color: #888;">
-                {{ __('Questions? WhatsApp us:') }} <strong>016-915 0917</strong>
+                {{ __('Questions? WhatsApp us:') }} <strong>{{ config('services.store.phone_display') }}</strong>
             </p>
         </div>
 
@@ -84,7 +84,7 @@
             No. 22, Ground Floor, Jalan Dinar CU3/C,<br>
             Taman Subang Perdana, Seksyen U3,<br>
             40150 Shah Alam, Selangor<br><br>
-            📞 016-915 0917
+            📞 {{ config('services.store.phone_display') }}
         </div>
     </div>
 </body>

@@ -22,6 +22,11 @@ class OrderResource extends Resource
     protected static \UnitEnum|string|null $navigationGroup = 'Shop';
     protected static ?int $navigationSort = 1;
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -86,6 +91,14 @@ class OrderResource extends Resource
                         ");
                     }),
             ])->visibleOn('edit'),
+
+            Forms\Components\Section::make('Order Notes')->schema([
+                Forms\Components\Textarea::make('notes')
+                    ->label('Customer Notes')
+                    ->placeholder('No notes from customer.')
+                    ->disabled()
+                    ->columnSpanFull(),
+            ])->visibleOn('edit')->collapsed(fn ($record) => blank($record?->notes)),
         ]);
     }
 

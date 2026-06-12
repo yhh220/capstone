@@ -25,7 +25,7 @@ class Order extends Model
         'user_id', 'order_number', 'tracking_number',
         'customer_name', 'customer_email', 'customer_phone',
         'shipping_address', 'subtotal', 'total_amount',
-        'status', 'payment_status', 'payment_method',
+        'status', 'payment_status', 'payment_method', 'notes',
     ];
 
     protected $casts = [
@@ -58,7 +58,7 @@ class Order extends Model
                 ->first();
 
             $count = $latestOrder
-                ? ((int) substr($latestOrder->order_number, -5)) + 1
+                ? ((int) substr($latestOrder->order_number, strrpos($latestOrder->order_number, '-') + 1)) + 1
                 : 1;
 
             return 'ORD-' . $year . '-' . str_pad((string) $count, 5, '0', STR_PAD_LEFT);

@@ -16,7 +16,6 @@
             'zoom-in'        => '<circle cx="11" cy="11" r="8"/><line stroke-linecap="round" x1="21" x2="16.65" y1="21" y2="16.65"/><line stroke-linecap="round" x1="11" x2="11" y1="8" y2="14"/><line stroke-linecap="round" x1="8" x2="14" y1="11" y2="11"/>',
             'smartphone'     => '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path stroke-linecap="round" d="M12 18h.01"/>',
             'layout-grid'    => '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
-            'calendar'       => '<path stroke-linecap="round" d="M8 2v4"/><path stroke-linecap="round" d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path stroke-linecap="round" d="M3 10h18"/>',
         ];
         $icon = fn (string $name, string $class = 'w-5 h-5') =>
             '<svg class="' . $class . '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">' . $lucide[$name] . '</svg>';
@@ -26,86 +25,56 @@
     @endphp
 
     {{-- ── 1. HERO ── --}}
-    <section class="relative overflow-hidden" aria-label="{{ __('Hero') }}">
-        {{-- Subtle contained accent, no full-bleed gradient --}}
-        <div class="absolute top-0 right-0 w-[40rem] h-[40rem] bg-brand-red/[0.06] dark:bg-brand-red/[0.08] rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none" aria-hidden="true"></div>
+    <section class="relative overflow-hidden bg-white dark:bg-[#0C0C0E]" aria-label="{{ __('Hero') }}">
+        {{-- Video Background --}}
+        <div class="absolute inset-0 z-0 pointer-events-none">
+            <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover">
+                <source src="{{ asset('images/videos/hero-bg.mp4') }}" type="video/mp4">
+            </video>
+            <div class="absolute inset-0 bg-white/50 dark:bg-[#0C0C0E]/60"></div>
+        </div>
 
-        <div class="max-w-7xl mx-auto px-4 pt-14 pb-16 sm:pt-20 sm:pb-24 relative">
-            <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-16 items-center">
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20 lg:py-32">
+            <div class="flex flex-col lg:flex-row items-center gap-10 lg:gap-20">
 
-                {{-- Left: text --}}
-                <div class="min-w-0">
-                    <div class="hero-reveal inline-flex items-center gap-2.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-bold tracking-wide px-4 py-2 rounded-full mb-7">
-                        <span class="w-2 h-2 rounded-full bg-brand-red animate-pulse" aria-hidden="true"></span>
-                        {{ __('Shah Alam Car Audio & Accessories') }}
-                    </div>
-
-                    <h1 class="hero-reveal-delay1 text-5xl sm:text-6xl xl:text-7xl text-brand-black dark:text-white leading-[1.02] mb-6">
-                        {{ __('Your car audio') }}<br>
-                        <span class="text-brand-red">{{ __('& accessories') }}</span><br>
-                        {{ __('specialist.') }}
-                    </h1>
-
-                    <p class="hero-reveal-delay2 text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-9 leading-relaxed max-w-xl">
-                        {{ __('Discover car audio and accessories online — then visit our showroom in Shah Alam for expert advice and professional installation.') }}
+                {{-- Text Content --}}
+                <div class="flex-1 min-w-0 hero-enter text-center lg:text-left">
+                    <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-gray-400 dark:text-white/35 mb-6 sm:mb-8">
+                        Shah Alam, Selangor &nbsp;·&nbsp; Malaysia
                     </p>
-
-                    <div class="hero-reveal-delay3 flex flex-col sm:flex-row gap-3">
-                        <a href="{{ route('products') }}" class="btn btn-primary btn-lg btn-shine">
-                            {{ __('Browse Products') }}
-                            {!! $icon('arrow-right', 'icon-md transition-transform duration-300 group-hover:translate-x-1') !!}
+                    <h1 class="font-display text-[clamp(2.8rem,9vw,6.8rem)] leading-[0.93] uppercase text-gray-900 dark:text-white mb-6 sm:mb-8">
+                        SHAH ALAM'S<br>
+                        <span class="text-[#C8413D]">CAR AUDIO</span><br>
+                        SPECIALIST.
+                    </h1>
+                    <p class="text-gray-500 dark:text-white/45 text-base sm:text-lg mb-8 sm:mb-10 max-w-md mx-auto lg:mx-0 leading-relaxed">
+                        {{ __('Come in, browse the products, take a look around. Expert installation in Shah Alam.') }}
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4">
+                        @if($shoppingEnabled)
+                        <a href="{{ route('products') }}"
+                           class="group relative inline-flex items-center justify-center gap-3 bg-[#C8413D] text-white px-8 py-4 rounded-xl font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgba(200,65,61,0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgba(200,65,61,0.5)] hover:-translate-y-1 active:scale-95 w-full sm:w-auto">
+                            <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
+                            <span class="relative z-10">{{ __('Browse Products') }}</span>
+                            <i data-lucide="arrow-right" class="icon-sm relative z-10 transition-transform duration-300 group-hover:translate-x-1"></i>
                         </a>
-                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg">
-                            {!! $icon('map-pin', 'icon-md') !!}
+                        @endif
+                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer"
+                           class="group inline-flex items-center justify-center gap-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 px-8 py-4 rounded-xl font-black text-lg hover:border-[#C8413D] hover:text-[#C8413D] hover:bg-gray-50 dark:hover:bg-gray-800 hover:-translate-y-1 hover:shadow-md transition-all duration-300 active:scale-95 w-full sm:w-auto">
+                            <i data-lucide="map-pin" class="icon-sm"></i>
                             {{ __('Visit Showroom') }}
                         </a>
                     </div>
-
-                    {{-- Trust row --}}
-                    <div class="hero-reveal-delay3 flex flex-wrap gap-x-8 gap-y-3 mt-10 pt-7 border-t border-gray-200 dark:border-gray-700/60">
-                        <div class="flex items-center gap-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400">
-                            <span class="text-brand-red">{!! $icon('badge-check', 'w-[18px] h-[18px]') !!}</span>
-                            {{ __('Curated Selection') }}
-                        </div>
-                        <div class="flex items-center gap-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400">
-                            <span class="text-brand-red">{!! $icon('wrench', 'w-[18px] h-[18px]') !!}</span>
-                            {{ __('Expert Installation') }}
-                        </div>
-                        <div class="flex items-center gap-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400">
-                            <span class="text-brand-red">{!! $icon('message-circle', 'w-[18px] h-[18px]') !!}</span>
-                            {{ __('Instant Support') }}
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Right: storefront photo --}}
-                <div class="hero-reveal-delay2 relative">
-                    <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm">
-                        <img src="{{ asset('images/storefront.png') }}"
-                             alt="{{ __('Win Win Car Audio & Auto Accessories showroom in Shah Alam') }}"
-                             class="w-full h-auto object-cover"
-                             loading="eager"
-                             width="480" height="534">
-                    </div>
-                    @if($testimonials->count() > 0)
-                    <div class="absolute -bottom-5 left-5 sm:left-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg px-4 py-3 flex items-center gap-3">
-                        <div class="flex text-amber-400" aria-hidden="true">
-                            @for($s = 0; $s < 5; $s++)
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
-                            @endfor
-                        </div>
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ __('Trusted by local drivers') }}</span>
-                    </div>
-                    @endif
                 </div>
 
             </div>
         </div>
+        <div class="absolute bottom-0 left-0 right-0 h-px bg-gray-200 dark:bg-transparent" aria-hidden="true"></div>
     </section>
 
     {{-- ── 2. BRAND MARQUEE ── --}}
     @if($brands->count() > 0)
-    <section class="py-12 border-y border-gray-200 dark:border-gray-700/60 overflow-hidden" aria-label="{{ __('Brands we carry') }}">
+    <section class="py-12 border-b border-gray-200 dark:border-gray-700/60 overflow-hidden" aria-label="{{ __('Brands we carry') }}">
         <div class="max-w-7xl mx-auto px-4 mb-7">
             <p class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500">{{ __('Official Partners & Brands') }}</p>
         </div>
@@ -228,12 +197,11 @@
                                 <div slot="progress-bar" style="display:none;"></div>
                                 <div slot="poster"
                                      style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#111827;">
-                                    <svg style="width:48px;height:48px;color:#C8413D;animation:spin 1s linear infinite;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                    <svg style="width:48px;height:48px;color:#C8413D;animation:spin3d 1s linear infinite;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/>
                                     </svg>
                                 </div>
                             </model-viewer>
-                            <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
                         </div>
                     </div>
                 </div>
@@ -286,32 +254,67 @@
                     {{ __('What Our Customers Say') }}
                 </h2>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                @foreach($testimonials as $i => $testimonial)
-                <article data-aos="fade-up" data-aos-delay="{{ $i * 75 }}"
-                         class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:border-brand-red/40 hover:shadow-md flex flex-col">
+
+            {{-- Pull quote: first testimonial --}}
+            <div class="mb-10 max-w-3xl" data-aos="fade-up">
+                <p class="font-display text-[clamp(1.4rem,3.5vw,2.4rem)] leading-tight text-gray-900 dark:text-white mb-5 uppercase">
+                    "{{ $testimonials->first()->message }}"
+                </p>
+                <div class="flex items-center gap-3">
+                    @if($testimonials->first()->image)
+                        <img src="{{ Storage::url($testimonials->first()->image) }}"
+                             alt="{{ $testimonials->first()->name }}"
+                             class="w-10 h-10 rounded-full object-cover"
+                             loading="lazy">
+                    @else
+                        <div class="w-10 h-10 bg-brand-red/10 text-brand-red rounded-full flex items-center justify-center font-black text-sm shrink-0">
+                            {{ mb_substr($testimonials->first()->name, 0, 1) }}
+                        </div>
+                    @endif
+                    <div>
+                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $testimonials->first()->name }}</span>
+                        @if($testimonials->first()->location)
+                        <span class="text-sm text-gray-400 dark:text-gray-500"> · {{ $testimonials->first()->location }}</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Scroll row: remaining testimonials --}}
+            @if($testimonials->count() > 1)
+            <div class="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide" data-aos="fade-up">
+                @foreach($testimonials->skip(1) as $testimonial)
+                <article class="snap-start shrink-0 w-72 sm:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 transition-all duration-300 hover:border-brand-red/40 hover:shadow-md flex flex-col">
                     <div class="flex text-amber-400 gap-0.5 mb-4" role="img" aria-label="{{ $testimonial->rating }}/5">
                         @for($s = 0; $s < $testimonial->rating; $s++)
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
                         @endfor
                     </div>
-                    <blockquote class="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed text-sm flex-1">"{{ $testimonial->message }}"</blockquote>
+                    <blockquote class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-5 flex-1">
+                        "{{ Str::limit($testimonial->message, 120) }}"
+                    </blockquote>
                     <div class="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/60">
                         @if($testimonial->image)
-                            <img src="{{ Storage::url($testimonial->image) }}" alt="{{ $testimonial->name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
+                            <img src="{{ Storage::url($testimonial->image) }}"
+                                 alt="{{ $testimonial->name }}"
+                                 class="w-8 h-8 rounded-full object-cover"
+                                 loading="lazy">
                         @else
-                            <div class="w-10 h-10 bg-brand-red/10 text-brand-red rounded-full flex items-center justify-center font-black text-sm">
+                            <div class="w-8 h-8 bg-brand-red/10 text-brand-red rounded-full flex items-center justify-center font-bold text-xs shrink-0">
                                 {{ mb_substr($testimonial->name, 0, 1) }}
                             </div>
                         @endif
                         <div>
-                            <div class="font-bold text-gray-800 dark:text-white text-sm">{{ $testimonial->name }}</div>
+                            <div class="text-xs font-bold text-gray-900 dark:text-white">{{ $testimonial->name }}</div>
+                            @if($testimonial->location)
                             <div class="text-xs text-gray-400 dark:text-gray-500">{{ $testimonial->location }}</div>
+                            @endif
                         </div>
                     </div>
                 </article>
                 @endforeach
             </div>
+            @endif
         </div>
     </section>
     @endif
@@ -335,8 +338,8 @@
                     </div>
                     <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 shrink-0">
                         <a href="{{ $whatsAppUrl }}" target="_blank" rel="noopener noreferrer"
-                           class="group inline-flex items-center justify-center gap-2.5 bg-white text-brand-black px-7 py-3.5 rounded-full font-extrabold text-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(255,255,255,0.15)] active:scale-95">
-                            <svg class="w-5 h-5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">{!! $waGlyph !!}</svg>
+                           class="group inline-flex items-center justify-center gap-2.5 bg-[#25D366] text-white px-7 py-3.5 rounded-full font-extrabold text-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(37,211,102,0.35)] active:scale-95">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">{!! $waGlyph !!}</svg>
                             {{ __('WhatsApp Support') }}
                         </a>
                         <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer"
@@ -352,14 +355,30 @@
 
     @push('styles')
     <style>
+        /* Hero entrance */
+        .hero-enter { animation: hp-in 0.55s ease both; }
+        .hero-enter-delay { animation: hp-in 0.55s 0.12s ease both; }
+        @keyframes hp-in {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 3D poster spinner */
+        @keyframes spin3d { to { transform: rotate(360deg); } }
+
+        /* Brand marquee */
         .brand-track {
             will-change: transform;
             backface-visibility: hidden;
-            transform-style: preserve-3d;
         }
         @media (prefers-reduced-motion: reduce) {
             .brand-track { animation: none !important; transform: none !important; }
+            .hero-enter, .hero-enter-delay { animation: none; opacity: 1; transform: none; }
         }
+
+        /* Hide scrollbar for testimonials row */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
     @endpush
 
@@ -370,34 +389,25 @@
             const wrapper = document.querySelector('.brand-marquee-wrapper');
             const track   = document.querySelector('.brand-track');
             if (!wrapper || !track) return;
-
-            const BASE_SPEED = 0.55; // px per frame (~33px/s at 60fps)
-            let pos     = 0;
-            let speed   = BASE_SPEED;
-            let target  = BASE_SPEED;
-            let halfW   = 0;
-            let raf     = null;
-
+            // Respect prefers-reduced-motion
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const BASE_SPEED = 0.55;
+            let pos = 0, speed = BASE_SPEED, target = BASE_SPEED, halfW = 0;
             function measure() { halfW = track.scrollWidth / 2; }
             measure();
             window.addEventListener('resize', measure);
-
             wrapper.addEventListener('mouseenter', () => { target = 0; });
             wrapper.addEventListener('mouseleave', () => { target = BASE_SPEED; });
-
+            let rafId;
             function tick() {
-                // Lerp: each frame speed moves 10% closer to target → smooth ease in/out
                 speed += (target - speed) * 0.1;
                 pos   -= speed;
                 if (pos <= -halfW) pos += halfW;
                 track.style.transform = 'translate3d(' + pos + 'px, 0, 0)';
-                raf = requestAnimationFrame(tick);
+                rafId = requestAnimationFrame(tick);
             }
-
-            raf = requestAnimationFrame(tick);
+            rafId = requestAnimationFrame(tick);
         }
-
-        // Run after Livewire hydrates (safe for both first load and navigations)
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initMarquee);
         } else {

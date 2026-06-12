@@ -58,6 +58,13 @@
             </div>
             @endforeach
         </div>
+
+        @if($items->hasPages())
+        <div class="mt-10">
+            {{ $items->links() }}
+        </div>
+        @endif
+
         @else
         <div class="text-center py-20 group" data-aos="fade-up">
             <div class="flex justify-center text-gray-300 dark:text-gray-600 mb-6" aria-hidden="true">

@@ -53,7 +53,7 @@
                                 id="product-category"
                                 class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-red transition">
                             <option value="">{{ __('All Categories') }}</option>
-                            @foreach($categories as $cat)
+                            @foreach($allCategories as $cat)
                                 <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                             @endforeach
                         </select>
@@ -81,7 +81,7 @@
                         <a href="{{ $whatsAppUrl }}"
                            target="_blank"
                            rel="noopener noreferrer"
-                           class="btn btn-md btn-shine w-full" style="background:rgb(var(--brand-yellow-rgb));color:rgb(var(--brand-black-rgb));">
+                           class="btn btn-md btn-shine w-full" style="background:#25D366;color:#fff;border-color:#25D366;">
                             {{ __('Ask on WhatsApp') }}
                         </a>
                         <a href="{{ $mapUrl }}"
@@ -293,9 +293,9 @@
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     <span>{{ __('Open Doors') }}</span>
                 </button>
-                <button id="toggle-interior-pos-btn" class="pill-btn" title="{{ __('Center View') }}" aria-label="{{ __('Center View') }}" style="display: none;">
+                <button id="toggle-interior-pos-btn" class="pill-btn" title="{{ __('Passenger View') }}" aria-label="{{ __('Passenger View') }}" style="display: none;">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                    <span>{{ __('Center View') }}</span>
+                    <span>{{ __('Passenger View') }}</span>
                 </button>
                 <button id="toggle-view-btn" class="pill-btn" title="{{ __('Interior View') }}" aria-label="{{ __('Interior View') }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -322,13 +322,15 @@
 
             <!-- Tabs Navigation -->
             <div class="configurator-tabs">
-                <div class="tabs grid grid-cols-4 gap-2 md:gap-3 mb-4" style="max-width: 600px; margin: 0 auto 1rem auto;">
+                <div class="tabs grid grid-cols-3 gap-2 md:gap-3 mb-4" style="max-width: 600px; margin: 0 auto 1rem auto;">
                     <button class="tab-btn active" data-tab="paint">{{ __('Paint') }}</button>
                     <button class="tab-btn" data-tab="rims">{{ __('Rims') }}</button>
                     <button class="tab-btn" data-tab="spoilers">{{ __('Spoilers') }}</button>
                     <button class="tab-btn" data-tab="bumpers">{{ __('Bumpers') }}</button>
-                    <button class="tab-btn" data-tab="tint" style="grid-column: span 1;">{{ __('Tint') }}</button>
-                </div></div>
+                    <button class="tab-btn" data-tab="tint">{{ __('Tint') }}</button>
+                    <button class="tab-btn" data-tab="dashcams">{{ __('Dash Camera') }}</button>
+                </div>
+            </div>
 
             <!-- Sidebar Scrollable Sections -->
             <div class="sidebar-content">
@@ -522,15 +524,31 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Section 6: Dash Cameras -->
+                <div class="sidebar-section" id="section-dashcams">
+                    <div class="section-title">{{ __('Choose Dash Camera') }}</div>
+                    <div class="options-grid">
+                        <div class="option-card active" data-category="dashcams" data-item="dashcam0">
+                            <span class="option-name">{{ __('None (Default)') }}</span>
+                            <span class="option-price">{{ __('Included') }}</span>
+                        </div>
+                        <div class="option-card" data-category="dashcams" data-item="dashcam1">
+                            <span class="option-name">{{ __('Mohawk') }}</span>
+                        </div>
+                        <div class="option-card" data-category="dashcams" data-item="dashcam2">
+                            <span class="option-name">{{ __('70mai') }}</span>
+                        </div>
+                        <div class="option-card" data-category="dashcams" data-item="dashcam3">
+                            <span class="option-name">{{ __('DDPAI') }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Live Summary Panel -->
             <div class="summary-panel">
                 <div class="summary-list">
-                    <div class="summary-row">
-                        <span>{{ __('Base Car') }}</span>
-                        <span>RM 150,000</span>
-                    </div>
                     <div class="summary-row">
                         <span>{{ __('Body Color') }}</span>
                         <span id="summary-color-name">{{ __('Chalk White') }}</span>
@@ -558,6 +576,10 @@
                     <div class="summary-row">
                         <span>{{ __('Window Tint') }}</span>
                         <span id="summary-window-tint">100%</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>{{ __('Dash Camera') }}</span>
+                        <span id="summary-dashcam">{{ __('None') }}</span>
                     </div>
                     <div class="summary-row total">
                         <span>{{ __('Total Price') }}</span>
