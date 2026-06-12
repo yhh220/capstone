@@ -21,6 +21,25 @@
     --color-brand-black: rgb(var(--brand-black-rgb));
 }
 
+/* AOS entrance animations offset elements (e.g. fade-left starts at
+   translateX(100px)) before they animate in, which widens the document and
+   causes horizontal scrolling on phones/tablets. Clip the overflow —
+   `clip` doesn't create a scroll container, so sticky positioning keeps
+   working; older browsers fall back to hidden. */
+@layer base {
+    html,
+    body {
+        overflow-x: clip;
+    }
+
+    @supports not (overflow: clip) {
+        html,
+        body {
+            overflow-x: hidden;
+        }
+    }
+}
+
 /* v3 → v4 compatibility: the views were written against the Tailwind v3 CDN,
    which used gray-200 default borders, pointer cursors on buttons and
    gray-400 placeholders. Keep those defaults so nothing shifts visually. */
