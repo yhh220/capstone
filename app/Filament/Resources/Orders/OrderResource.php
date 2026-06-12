@@ -120,7 +120,7 @@ class OrderResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('total_amount')
                     ->label('Total')
-                    ->money('MYR')
+                    ->money('MYR', locale: 'ms_MY')
                     ->sortable(),
                 BadgeColumn::make('status')
                     ->colors([
@@ -147,6 +147,7 @@ class OrderResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('status')
+                    ->multiple()
                     ->options([
                         'pending'    => 'Pending',
                         'processing' => 'Processing',
@@ -154,7 +155,29 @@ class OrderResource extends Resource
                         'delivered'  => 'Delivered',
                         'cancelled'  => 'Cancelled',
                     ]),
+                SelectFilter::make('payment_status')
+                    ->label('Payment')
+                    ->multiple()
+                    ->options([
+                        'pending' => 'Pending',
+                        'paid'    => 'Paid',
+                    ]),
+                \Filament\Tables\Filters\Filter::make('created_at')
+                    ->schema([
+                        Forms\Components\DatePicker::make('from')->label('Ordered from'),
+                        Forms\Components\DatePicker::make('until')->label('Ordered until'),
+                    ])
+                    ->query(fn ($query, array $data) => $query
+                        ->when($data['from'] ?? null, fn ($q, $d) => $q->whereDate('created_at', '>=', $d))
+                        ->when($data['until'] ?? null, fn ($q, $d) => $q->whereDate('created_at', '<=', $d)))
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['from'] ?? null) $indicators[] = 'From ' . $data['from'];
+                        if ($data['until'] ?? null) $indicators[] = 'Until ' . $data['until'];
+                        return $indicators;
+                    }),
             ])
+            ->persistFiltersInSession()
             ->recordActions([
                 EditAction::make(),
                 Action::make('advance')

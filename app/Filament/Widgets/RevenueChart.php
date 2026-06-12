@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Order;
+use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 
@@ -15,35 +16,52 @@ class RevenueChart extends ChartWidget
         'xl' => 7,
     ];
 
-    protected ?string $heading = 'Monthly Revenue';
+    protected ?string $heading = 'Revenue';
 
-    protected ?string $description = 'Completed order revenue over the past 12 months (RM)';
+    protected ?string $description = 'Completed order revenue (RM)';
+
+    public ?string $filter = '12';
+
+    protected function getFilters(): ?array
+    {
+        return [
+            '3'  => 'Last 3 months',
+            '6'  => 'Last 6 months',
+            '12' => 'Last 12 months',
+        ];
+    }
 
     protected function getData(): array
     {
+        $monthCount = (int) ($this->filter ?? 12);
+        $start = Carbon::now()->startOfMonth()->subMonths($monthCount - 1);
+
+        // One aggregated query instead of one query per month.
+        $totals = Order::where('status', 'completed')
+            ->where('created_at', '>=', $start)
+            ->get(['created_at', 'total_amount'])
+            ->groupBy(fn (Order $o) => $o->created_at->format('Y-m'))
+            ->map(fn ($orders) => (float) $orders->sum('total_amount'));
+
         $months  = [];
         $revenue = [];
-
-        for ($i = 11; $i >= 0; $i--) {
-            $date     = Carbon::now()->subMonths($i);
-            $months[] = $date->format('M Y');
-            $revenue[] = (float) Order::where('status', 'completed')
-                ->whereYear('created_at', $date->year)
-                ->whereMonth('created_at', $date->month)
-                ->sum('total_amount');
+        for ($i = $monthCount - 1; $i >= 0; $i--) {
+            $date      = Carbon::now()->subMonths($i);
+            $months[]  = $date->format('M Y');
+            $revenue[] = $totals[$date->format('Y-m')] ?? 0;
         }
 
         return [
             'datasets' => [
                 [
-                    'label'           => 'Revenue (RM)',
-                    'data'            => $revenue,
-                    'borderColor'     => '#C8413D',
-                    'backgroundColor' => 'rgba(200, 65, 61, 0.12)',
-                    'fill'            => true,
-                    'tension'         => 0.4,
-                    'pointRadius'     => 4,
-                    'pointHoverRadius'=> 6,
+                    'label'            => 'Revenue (RM)',
+                    'data'             => $revenue,
+                    'borderColor'      => '#C8413D',
+                    'backgroundColor'  => 'rgba(200, 65, 61, 0.12)',
+                    'fill'             => true,
+                    'tension'          => 0.4,
+                    'pointRadius'      => 4,
+                    'pointHoverRadius' => 6,
                 ],
             ],
             'labels' => $months,
@@ -55,20 +73,29 @@ class RevenueChart extends ChartWidget
         return 'line';
     }
 
-    protected function getOptions(): array
+    protected function getOptions(): RawJs
     {
-        return [
-            'plugins' => [
-                'legend' => ['display' => false],
-            ],
-            'scales' => [
-                'y' => [
-                    'beginAtZero' => true,
-                    'ticks'       => [
-                        'callback' => 'function(v){ return "RM " + v.toLocaleString(); }',
-                    ],
-                ],
-            ],
-        ];
+        // RawJs is required for JS callbacks — a plain string would be
+        // JSON-encoded and silently ignored by Chart.js.
+        return RawJs::make(<<<'JS'
+            {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => 'RM ' + ctx.parsed.y.toLocaleString(),
+                        },
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (v) => 'RM ' + v.toLocaleString(),
+                        },
+                    },
+                },
+            }
+        JS);
     }
 }

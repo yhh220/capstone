@@ -50,18 +50,36 @@ class BookingsTable
             ])
             ->filters([
                 SelectFilter::make('status')
+                    ->multiple()
                     ->options([
                         'pending'   => 'Pending',
                         'confirmed' => 'Confirmed',
                         'cancelled' => 'Cancelled',
                         'completed' => 'Completed',
                     ]),
+                SelectFilter::make('service')
+                    ->relationship('service', 'name')
+                    ->multiple()
+                    ->preload(),
+                \Filament\Tables\Filters\Filter::make('upcoming')
+                    ->label('Upcoming only')
+                    ->toggle()
+                    ->query(fn ($query) => $query->whereDate('preferred_date', '>=', today())),
             ])
+            ->persistFiltersInSession()
             ->recordActions([
                 EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    \Filament\Actions\BulkAction::make('confirm')
+                        ->label('Confirm selected')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action(fn (\Illuminate\Database\Eloquent\Collection $records) => $records
+                            ->each(fn ($b) => $b->status === 'pending' && $b->update(['status' => 'confirmed'])))
+                        ->deselectRecordsAfterCompletion(),
                     DeleteBulkAction::make(),
                 ]),
             ]);

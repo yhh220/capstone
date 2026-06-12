@@ -47,7 +47,7 @@ class RecentOrdersWidget extends BaseWidget
 
                 TextColumn::make('total_amount')
                     ->label('Total')
-                    ->money('MYR')
+                    ->money('MYR', locale: 'ms_MY')
                     ->sortable()
                     ->weight(\Filament\Support\Enums\FontWeight::SemiBold),
 

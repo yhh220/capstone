@@ -26,7 +26,7 @@ class ServicesTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('price')
-                    ->money('MYR')
+                    ->money('MYR', locale: 'ms_MY')
                     ->sortable()
                     ->placeholder('Contact for pricing'),
                 ToggleColumn::make('is_active')
