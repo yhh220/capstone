@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 // Configuration Data (配置数据：包含配件价格和颜色映射表)
@@ -242,7 +243,7 @@ function isMeshBodyPaint(child, partInfo) {
  * Initialize Event Delegation on document to ensure persistence against Livewire re-renders
  * 初始化事件代理：确保Livewire重新渲染后，点击事件依然生效（处理配置面板的点击）
  */
-document.addEventListener('DOMContentLoaded', () => {
+function wireConfiguratorEvents() {
     // Open Configurator (打开配置器)
     document.addEventListener('click', (e) => {
         if (e.target.closest('#open-configurator-btn')) {
@@ -414,7 +415,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (windowTintValEl) windowTintValEl.textContent = tintKey + '%';
         }
     });
-});
+}
+
+// This module is dynamic-imported on demand, usually long after
+// DOMContentLoaded has fired — wire immediately in that case.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wireConfiguratorEvents);
+} else {
+    wireConfiguratorEvents();
+}
+
+// Let the loader shim open the modal right after the module finishes loading.
+export { openConfigurator };
 
 /**
  * Open the configurator popup modal and load/run Three.js
@@ -426,12 +438,38 @@ function openConfigurator() {
     modal.classList.add('active');
     document.body.classList.add('overflow-hidden');
 
+    // 旧设备 / 被禁用 WebGL 时给出友好提示，而不是黑屏报错
+    if (!isInitialized && !isWebGLAvailable()) {
+        const loader = document.getElementById('configurator-loader');
+        if (loader) {
+            loader.innerHTML = '<div style="text-align:center;padding:2rem;color:#E8E0D8;max-width:22rem;margin:0 auto;">'
+                + '<div style="font-size:2.5rem;margin-bottom:0.75rem;">🚗</div>'
+                + '<p style="font-weight:700;margin-bottom:0.5rem;">3D viewer not supported on this device</p>'
+                + '<p style="font-size:0.85rem;opacity:0.7;">Your browser or device does not support WebGL. '
+                + 'Visit our showroom or WhatsApp us to explore the accessories instead.</p></div>';
+        }
+        return;
+    }
+
     if (!isInitialized) {
         initThree();
     } else {
         // Resume rendering (恢复渲染循环)
         animate();
         onWindowResize();
+    }
+}
+
+/**
+ * WebGL availability check (检测设备是否支持 WebGL)
+ */
+function isWebGLAvailable() {
+    try {
+        const canvas = document.createElement('canvas');
+        return !! (window.WebGLRenderingContext
+            && (canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+    } catch {
+        return false;
     }
 }
 
@@ -594,8 +632,12 @@ function initThree() {
     scene.add(gridHelper);
 
     // 7. 加载 3D 模型 (GLTF Loader)：通过加载器把服务器上的 .glb 汽车模型文件读取进来
-    const modelUrl = modal.dataset.modelUrl || '/models/3d/car.glb';
+    // 模型已用 Draco 压缩（171MB → ~25MB），需要 DRACOLoader 解码几何体
+    const modelUrl = modal.dataset.modelUrl || '/models/3d/car-draco.glb';
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('/draco/');
     const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
 
     loader.load(
         modelUrl,

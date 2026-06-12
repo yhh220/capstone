@@ -6,10 +6,10 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                'resources/css/app.css', 
+                'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/css/configurator.css',
-                'resources/js/configurator.js'
+                'resources/js/configurator-loader.js'
             ],
             refresh: true,
         }),

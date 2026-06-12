@@ -150,6 +150,9 @@
 
     {{-- ── 4. 3D SHOWCASE ── --}}
     <section class="py-16 sm:py-20" aria-labelledby="showcase-heading">
+        {{-- Draco decoder must be configured before model-viewer loads; the local
+             path keeps it inside our CSP (Google's CDN is not allowlisted). --}}
+        <script>self.ModelViewerElement = self.ModelViewerElement || {}; self.ModelViewerElement.dracoDecoderLocation = '{{ asset('draco') }}/';</script>
         <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
         <div class="max-w-7xl mx-auto px-4">
             <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[2rem] p-6 sm:p-10 lg:p-14">
@@ -188,7 +191,7 @@
                     <div data-aos="fade-left">
                         <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-900">
                             <model-viewer
-                                src="{{ asset('models/3d/city.glb') }}"
+                                src="{{ asset('models/3d/city-draco.glb') }}"
                                 alt="{{ __('3D car model — Win Win Car Studio') }}"
                                 auto-rotate
                                 auto-rotate-delay="1000"

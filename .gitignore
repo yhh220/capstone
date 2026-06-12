@@ -29,3 +29,4 @@ toJson*
 
 # Large 3D model asset
 /public/models/3d/car.glb
+/public/models/3d/city.glb
