@@ -26,15 +26,17 @@
 
     {{-- ── 1. HERO ── --}}
     <section class="relative overflow-hidden bg-white dark:bg-[#0C0C0E]" aria-label="{{ __('Hero') }}">
-        {{-- Video Background --}}
+        {{-- Background video — the footage is dark with warm tones, which turns
+             muddy brown under a white wash. Light mode greyscales + brightens the
+             video first so the wash reads as clean silver; dark mode keeps the
+             original colours under a dark gradient. --}}
         <div class="absolute inset-0 z-0 pointer-events-none">
-            <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover">
+            <video autoplay loop muted playsinline
+                   class="absolute inset-0 w-full h-full object-cover [filter:grayscale(1)_brightness(1.25)] dark:[filter:none]">
                 <source src="{{ asset('images/videos/hero-bg.mp4') }}" type="video/mp4">
             </video>
-            {{-- The footage is dark, so light mode needs a strong wash where the
-                 text sits (left) fading out so the video stays visible (right) --}}
-            <div class="absolute inset-0 bg-white/70 dark:bg-[#0C0C0E]/55"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-white via-white/60 to-transparent dark:from-[#0C0C0E]/90 dark:via-[#0C0C0E]/40 dark:to-transparent"></div>
+            <div class="absolute inset-0 bg-white/55 dark:bg-[#0C0C0E]/55"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-white via-white/55 to-white/10 dark:from-[#0C0C0E]/90 dark:via-[#0C0C0E]/40 dark:to-transparent"></div>
         </div>
 
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20 lg:py-32">
