@@ -50,27 +50,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                fontFamily: {
-                    sans: ['"DM Sans"', 'sans-serif'],
-                    display: ['"Anton"', 'sans-serif'],
-                },
-                extend: {
-                    colors: {
-                        brand: {
-                            red: 'rgb(var(--brand-red-rgb) / <alpha-value>)',
-                            yellow: 'rgb(var(--brand-yellow-rgb) / <alpha-value>)',
-                            black: 'rgb(var(--brand-black-rgb) / <alpha-value>)',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    @vite('resources/css/app.css')
 
     <style>
         h1, h2, h3, h4, h5, h6, .font-display {

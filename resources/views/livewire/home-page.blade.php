@@ -4,101 +4,215 @@
         $storeAddress  = config('services.store.address');
         $whatsAppUrl   = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hello, I would like to learn more about your products.');
         $mapUrl        = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($storeAddress);
+
+        // Lucide icons (lucide.dev) — stroke style, inherit currentColor
+        $lucide = [
+            'arrow-right'    => '<path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"/><path stroke-linecap="round" stroke-linejoin="round" d="m12 5 7 7-7 7"/>',
+            'map-pin'        => '<path stroke-linecap="round" stroke-linejoin="round" d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+            'wrench'         => '<path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+            'badge-check'    => '<path stroke-linecap="round" stroke-linejoin="round" d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 12 2 2 4-4"/>',
+            'message-circle' => '<path stroke-linecap="round" stroke-linejoin="round" d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+            'rotate-3d'      => '<path stroke-linecap="round" stroke-linejoin="round" d="M16.466 7.5C15.643 4.237 13.952 2 12 2 9.239 2 7 6.477 7 12s2.239 10 5 10c.342 0 .677-.069 1-.2"/><path stroke-linecap="round" stroke-linejoin="round" d="m15.194 13.707 3.814 1.86-1.86 3.814"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 15.57c-1.804.885-4.274 1.43-7 1.43-5.523 0-10-2.239-10-5s4.477-5 10-5c4.838 0 8.873 1.718 9.8 4"/>',
+            'zoom-in'        => '<circle cx="11" cy="11" r="8"/><line stroke-linecap="round" x1="21" x2="16.65" y1="21" y2="16.65"/><line stroke-linecap="round" x1="11" x2="11" y1="8" y2="14"/><line stroke-linecap="round" x1="8" x2="14" y1="11" y2="11"/>',
+            'smartphone'     => '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path stroke-linecap="round" d="M12 18h.01"/>',
+            'layout-grid'    => '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+            'calendar'       => '<path stroke-linecap="round" d="M8 2v4"/><path stroke-linecap="round" d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path stroke-linecap="round" d="M3 10h18"/>',
+        ];
+        $icon = fn (string $name, string $class = 'w-5 h-5') =>
+            '<svg class="' . $class . '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">' . $lucide[$name] . '</svg>';
+
+        // WhatsApp brand glyph (svgl.app)
+        $waGlyph = '<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>';
     @endphp
 
     {{-- ── 1. HERO ── --}}
-    <section class="hero-gradient text-white py-20 sm:py-28 relative overflow-hidden" aria-label="{{ __('Hero') }}">
-        <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-            <div class="absolute -top-20 -left-20 w-96 h-96 bg-brand-yellow/10 rounded-full blur-3xl orb-float"></div>
-            <div class="absolute -bottom-20 -right-20 w-[36rem] h-[36rem] bg-brand-red/10 rounded-full blur-3xl orb-float-alt"></div>
-        </div>
+    <section class="relative overflow-hidden" aria-label="{{ __('Hero') }}">
+        {{-- Subtle contained accent, no full-bleed gradient --}}
+        <div class="absolute top-0 right-0 w-[40rem] h-[40rem] bg-brand-red/[0.06] dark:bg-brand-red/[0.08] rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none" aria-hidden="true"></div>
 
-        <div class="max-w-7xl mx-auto px-4 relative z-10">
-            <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+        <div class="max-w-7xl mx-auto px-4 pt-14 pb-16 sm:pt-20 sm:pb-24 relative">
+            <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-16 items-center">
 
                 {{-- Left: text --}}
-                <div class="flex-1 min-w-0">
-                    <div class="hero-reveal inline-flex items-center gap-2 bg-brand-yellow/90 backdrop-blur-sm text-brand-black text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full mb-6 shadow-md">
-                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <div class="min-w-0">
+                    <div class="hero-reveal inline-flex items-center gap-2.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-bold tracking-wide px-4 py-2 rounded-full mb-7">
+                        <span class="w-2 h-2 rounded-full bg-brand-red animate-pulse" aria-hidden="true"></span>
                         {{ __('Shah Alam Car Audio & Accessories') }}
                     </div>
 
-                    <h1 class="hero-reveal-delay1 text-5xl sm:text-6xl md:text-7xl font-black leading-[1.05] mb-6 drop-shadow-sm">
+                    <h1 class="hero-reveal-delay1 text-5xl sm:text-6xl xl:text-7xl text-brand-black dark:text-white leading-[1.02] mb-6">
                         {{ __('Your car audio') }}<br>
-                        <span class="text-brand-yellow">{{ __('& accessories') }}</span><br>
+                        <span class="text-brand-red">{{ __('& accessories') }}</span><br>
                         {{ __('specialist.') }}
                     </h1>
 
-                    <p class="hero-reveal-delay2 text-lg sm:text-xl text-white/80 mb-10 leading-relaxed max-w-xl">
+                    <p class="hero-reveal-delay2 text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-9 leading-relaxed max-w-xl">
                         {{ __('Discover car audio and accessories online — then visit our showroom in Shah Alam for expert advice and professional installation.') }}
                     </p>
 
-                    <div class="hero-reveal-delay3 flex flex-col sm:flex-row gap-4">
-                        <a href="{{ route('products') }}"
-                           class="group relative inline-flex items-center justify-center px-8 py-4 bg-brand-yellow text-brand-black font-extrabold rounded-full overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(250,204,21,0.4)] active:scale-95">
-                            <span class="absolute inset-0 bg-white/30 -skew-x-12 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
-                            <span class="relative flex items-center gap-2">
-                                {{ __('Browse Products') }}
-                                <svg class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                            </span>
+                    <div class="hero-reveal-delay3 flex flex-col sm:flex-row gap-3">
+                        <a href="{{ route('products') }}" class="btn btn-primary btn-lg btn-shine">
+                            {{ __('Browse Products') }}
+                            {!! $icon('arrow-right', 'icon-md transition-transform duration-300 group-hover:translate-x-1') !!}
                         </a>
-                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer"
-                           class="group inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur-md text-white font-bold rounded-full border border-white/25 transition-all duration-300 hover:bg-white/20 hover:border-white/50 hover:-translate-y-1 active:scale-95">
-                            <svg class="w-5 h-5 mr-2 transition-transform duration-300 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg">
+                            {!! $icon('map-pin', 'icon-md') !!}
                             {{ __('Visit Showroom') }}
                         </a>
+                    </div>
+
+                    {{-- Trust row --}}
+                    <div class="hero-reveal-delay3 flex flex-wrap gap-x-8 gap-y-3 mt-10 pt-7 border-t border-gray-200 dark:border-gray-700/60">
+                        <div class="flex items-center gap-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400">
+                            <span class="text-brand-red">{!! $icon('badge-check', 'w-[18px] h-[18px]') !!}</span>
+                            {{ __('Curated Selection') }}
+                        </div>
+                        <div class="flex items-center gap-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400">
+                            <span class="text-brand-red">{!! $icon('wrench', 'w-[18px] h-[18px]') !!}</span>
+                            {{ __('Expert Installation') }}
+                        </div>
+                        <div class="flex items-center gap-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400">
+                            <span class="text-brand-red">{!! $icon('message-circle', 'w-[18px] h-[18px]') !!}</span>
+                            {{ __('Instant Support') }}
+                        </div>
                     </div>
                 </div>
 
                 {{-- Right: storefront photo --}}
-                <div class="hero-reveal-delay2 flex-shrink-0 w-full lg:w-[420px] xl:w-[480px]">
-                    <div class="relative rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] ring-1 ring-white/10">
+                <div class="hero-reveal-delay2 relative">
+                    <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm">
                         <img src="{{ asset('images/storefront.png') }}"
                              alt="{{ __('Win Win Car Audio & Auto Accessories showroom in Shah Alam') }}"
                              class="w-full h-auto object-cover"
                              loading="eager"
                              width="480" height="534">
-                        {{-- Subtle gradient overlay to blend with hero bg --}}
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" aria-hidden="true"></div>
                     </div>
+                    @if($testimonials->count() > 0)
+                    <div class="absolute -bottom-5 left-5 sm:left-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg px-4 py-3 flex items-center gap-3">
+                        <div class="flex text-amber-400" aria-hidden="true">
+                            @for($s = 0; $s < 5; $s++)
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
+                            @endfor
+                        </div>
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ __('Trusted by local drivers') }}</span>
+                    </div>
+                    @endif
                 </div>
 
             </div>
         </div>
     </section>
 
-    {{-- ── 2. 3D SHOWCASE ── --}}
-    <section class="py-24 bg-white dark:bg-gray-800" aria-labelledby="showcase-heading">
+    {{-- ── 2. BRAND MARQUEE ── --}}
+    @if($brands->count() > 0)
+    <section class="py-12 border-y border-gray-200 dark:border-gray-700/60 overflow-hidden" aria-label="{{ __('Brands we carry') }}">
+        <div class="max-w-7xl mx-auto px-4 mb-7">
+            <p class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500">{{ __('Official Partners & Brands') }}</p>
+        </div>
+
+        <div class="brand-marquee-wrapper relative overflow-hidden" aria-hidden="true">
+            <div class="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[rgb(var(--app-bg-rgb))] to-transparent z-10 pointer-events-none"></div>
+            <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[rgb(var(--app-bg-rgb))] to-transparent z-10 pointer-events-none"></div>
+
+            <div class="brand-track flex w-max items-center">
+                @foreach([1,2] as $_)
+                    @foreach($brands as $brand)
+                    <div class="brand-item flex items-center justify-center min-w-[140px] pr-24">
+                        @if($brand->logo)
+                            <img src="{{ Storage::url($brand->logo) }}"
+                                 alt="{{ $brand->name }}"
+                                 class="h-10 w-auto object-contain opacity-40 hover:opacity-100 transition-all duration-500 filter grayscale hover:grayscale-0"
+                                 loading="lazy">
+                        @else
+                            <span class="text-gray-300 dark:text-gray-600 hover:text-brand-red dark:hover:text-gray-300 font-black text-xl tracking-widest uppercase transition-colors duration-300 whitespace-nowrap cursor-default">
+                                {{ $brand->name }}
+                            </span>
+                        @endif
+                    </div>
+                    @endforeach
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
+    {{-- ── 3. BROWSE BY CATEGORY ── --}}
+    <section class="py-16 sm:py-20" aria-labelledby="categories-heading">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10" data-aos="fade-up">
+                <div>
+                    <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
+                        <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
+                        {{ __('Shop by type') }}
+                    </span>
+                    <h2 id="categories-heading" class="text-3xl sm:text-4xl text-brand-black dark:text-white">
+                        {{ __('Browse Categories') }}
+                    </h2>
+                </div>
+                <a href="{{ route('products') }}"
+                   class="group inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-red transition-colors">
+                    {{ __('View all products') }}
+                    {!! $icon('arrow-right', 'w-4 h-4 transition-transform duration-300 group-hover:translate-x-1') !!}
+                </a>
+            </div>
+
+            @if($categories->count() > 0)
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                @foreach($categories as $i => $category)
+                <a href="{{ route('products', ['category' => $category->id]) }}"
+                   data-aos="fade-up" data-aos-delay="{{ $i * 50 }}"
+                   class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 transition-all duration-300 hover:border-brand-red/50 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]">
+                    <div class="w-10 h-10 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center mb-4 transition-colors duration-300 group-hover:bg-brand-red group-hover:text-white" aria-hidden="true">
+                        {!! $icon('layout-grid', 'w-5 h-5') !!}
+                    </div>
+                    <div class="font-bold text-sm text-gray-800 dark:text-gray-100 leading-snug group-hover:text-brand-red transition-colors">{{ __($category->name) }}</div>
+                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-1 font-medium">{{ $category->products_count }} {{ __('ITEMS') }}</div>
+                </a>
+                @endforeach
+            </div>
+            @endif
+        </div>
+    </section>
+
+    {{-- ── 4. 3D SHOWCASE ── --}}
+    <section class="py-16 sm:py-20" aria-labelledby="showcase-heading">
         <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
         <div class="max-w-7xl mx-auto px-4">
-            <div class="grid lg:grid-cols-2 gap-16 items-center">
-                <div data-aos="fade-right" class="order-2 lg:order-1">
-                    <span class="inline-block text-xs font-black uppercase tracking-[0.2em] text-brand-red bg-brand-red/10 px-3 py-1.5 rounded-full mb-5">
-                        {{ __('Interactive 3D') }}
-                    </span>
-                    <h2 id="showcase-heading" class="text-4xl sm:text-5xl font-black text-brand-black dark:text-white mb-6 leading-tight">
-                        {{ __('Explore Your Car in 3D') }}
-                    </h2>
-                    <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed mb-6 max-w-md">
-                        {{ __('Rotate, zoom, and inspect every angle of our 3D car model. See how our accessories fit before you visit.') }}
-                    </p>
-                    <ul class="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-10">
-                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-red shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15"/></svg>{{ __('Drag to rotate') }}</li>
-                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-red shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6"/></svg>{{ __('Scroll to zoom') }}</li>
-                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-red shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>{{ __('Pinch to zoom on mobile') }}</li>
-                    </ul>
-                    <a href="{{ route('contact') }}"
-                       class="group relative inline-flex items-center gap-3 bg-brand-red text-white px-8 py-4 rounded-full font-black text-base transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-2 active:scale-95">
-                        <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
-                        <span class="relative z-10">{{ __('Visit Our Showroom') }}</span>
-                        <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </a>
-                </div>
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[2rem] p-6 sm:p-10 lg:p-14">
+                <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+                    <div data-aos="fade-right">
+                        <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
+                            <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
+                            {{ __('Interactive 3D') }}
+                        </span>
+                        <h2 id="showcase-heading" class="text-3xl sm:text-4xl text-brand-black dark:text-white mb-5">
+                            {{ __('Explore Your Car in 3D') }}
+                        </h2>
+                        <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-7 max-w-md">
+                            {{ __('Rotate, zoom, and inspect every angle of our 3D car model. See how our accessories fit before you visit.') }}
+                        </p>
+                        <ul class="space-y-3 text-sm font-semibold text-gray-600 dark:text-gray-400 mb-9">
+                            <li class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-lg bg-brand-red/10 text-brand-red flex items-center justify-center shrink-0">{!! $icon('rotate-3d', 'w-4 h-4') !!}</span>
+                                {{ __('Drag to rotate') }}
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-lg bg-brand-red/10 text-brand-red flex items-center justify-center shrink-0">{!! $icon('zoom-in', 'w-4 h-4') !!}</span>
+                                {{ __('Scroll to zoom') }}
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-lg bg-brand-red/10 text-brand-red flex items-center justify-center shrink-0">{!! $icon('smartphone', 'w-4 h-4') !!}</span>
+                                {{ __('Pinch to zoom on mobile') }}
+                            </li>
+                        </ul>
+                        <a href="{{ route('contact') }}" class="btn btn-primary btn-md btn-shine">
+                            {{ __('Visit Our Showroom') }}
+                            {!! $icon('arrow-right', 'icon-md') !!}
+                        </a>
+                    </div>
 
-                <div data-aos="fade-left" class="order-1 lg:order-2">
-                    <div class="relative group">
-                        <div class="absolute -inset-4 bg-gradient-to-tr from-brand-red/20 to-brand-yellow/20 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                        <div class="relative rounded-[2rem] overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-900 shadow-2xl">
+                    <div data-aos="fade-left">
+                        <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-900">
                             <model-viewer
                                 src="{{ asset('models/3d/city.glb') }}"
                                 alt="{{ __('3D car model — Win Win Car Studio') }}"
@@ -109,9 +223,8 @@
                                 touch-action="pan-y"
                                 shadow-intensity="1"
                                 exposure="0.8"
-                                style="width:100%; height:480px; background:transparent;"
+                                style="width:100%; height:440px; background:transparent;"
                                 loading="lazy">
-                                {{-- loading slot --}}
                                 <div slot="progress-bar" style="display:none;"></div>
                                 <div slot="poster"
                                      style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#111827;">
@@ -128,91 +241,32 @@
         </div>
     </section>
 
-    {{-- ── 3. BRAND CAROUSEL ── --}}
-    @if($brands->count() > 0)
-    <section class="py-16 bg-white dark:bg-brand-black border-y border-gray-100 dark:border-white/5 overflow-hidden" aria-label="{{ __('Brands we carry') }}">
-        <div class="max-w-7xl mx-auto px-4 mb-8 text-center" data-aos="fade-up">
-            <p class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 dark:text-white/30">{{ __('Official Partners & Brands') }}</p>
-        </div>
-
-        <div class="brand-marquee-wrapper relative overflow-hidden" aria-hidden="true" data-aos="fade-up" data-aos-delay="100">
-            <div class="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white dark:from-brand-black to-transparent z-10 pointer-events-none"></div>
-            <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white dark:from-brand-black to-transparent z-10 pointer-events-none"></div>
-
-            <div class="brand-track flex w-max items-center">
-                @foreach([1,2] as $_)
-                    @foreach($brands as $brand)
-                    <div class="brand-item flex items-center justify-center min-w-[140px] pr-24">
-                        @if($brand->logo)
-                            <img src="{{ Storage::url($brand->logo) }}"
-                                 alt="{{ $brand->name }}"
-                                 class="h-12 w-auto object-contain opacity-40 hover:opacity-100 transition-all duration-500 filter grayscale hover:grayscale-0 hover:scale-110"
-                                 loading="lazy">
-                        @else
-                            <span class="text-gray-300 dark:text-white/20 hover:text-brand-red dark:hover:text-white font-black text-2xl tracking-widest uppercase transition-all duration-300 whitespace-nowrap hover:scale-110 cursor-default">
-                                {{ $brand->name }}
-                            </span>
-                        @endif
-                    </div>
-                    @endforeach
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
-
-    {{-- ── 4. BROWSE BY CATEGORY ── --}}
-    <section class="py-24 bg-gray-50 dark:bg-gray-900" aria-labelledby="categories-heading">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-16" data-aos="fade-up">
-                <span class="inline-block text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">{{ __('Shop by type') }}</span>
-                <h2 id="categories-heading" class="text-4xl sm:text-5xl font-black text-brand-black dark:text-white mb-4">
-                    {{ __('Browse Categories') }}
-                </h2>
-                <div class="w-20 h-1.5 bg-brand-red mx-auto rounded-full"></div>
-            </div>
-
-            @if($categories->count() > 0)
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
-                @foreach($categories as $i => $category)
-                <a href="{{ route('products', ['category' => $category->id]) }}"
-                   data-aos="fade-up"
-                   class="category-card group bg-white dark:bg-gray-800 border-2 border-transparent rounded-3xl p-4 sm:p-6 md:p-8 text-center hover:-translate-y-2 hover:shadow-2xl hover:shadow-brand-red/20 hover:border-brand-red active:scale-95">
-                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gray-50 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-6 group-hover:bg-brand-red group-hover:text-white group-hover:rotate-[10deg] transition-all duration-500 shadow-sm" aria-hidden="true">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                    </div>
-                    <div class="font-bold text-base text-gray-800 dark:text-gray-100 group-hover:text-brand-red transition-colors">{{ __($category->name) }}</div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-2 font-medium tracking-wide">{{ $category->products_count }} {{ __('ITEMS') }}</div>
-                </a>
-                @endforeach
-            </div>
-            @endif
-        </div>
-    </section>
-
     {{-- ── 5. WHY CHOOSE WIN WIN ── --}}
-    <section class="py-24 bg-white dark:bg-brand-black" aria-labelledby="why-heading">
+    <section class="py-16 sm:py-20" aria-labelledby="why-heading">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-16" data-aos="fade-up">
-                <span class="inline-block text-xs font-black uppercase tracking-[0.2em] text-brand-red dark:text-brand-yellow mb-3">{{ __('The Experience') }}</span>
-                <h2 id="why-heading" class="text-4xl sm:text-5xl font-black text-brand-black dark:text-white mb-4">
+            <div class="mb-10" data-aos="fade-up">
+                <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
+                    <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
+                    {{ __('The Experience') }}
+                </span>
+                <h2 id="why-heading" class="text-3xl sm:text-4xl text-brand-black dark:text-white mb-3">
                     {{ __('Why Choose') }} <span class="text-brand-red">Win Win</span>?
                 </h2>
-                <p class="text-gray-500 dark:text-white/50 max-w-md mx-auto text-lg">{{ __('Expertise, Trust, and Professional Installation.') }}</p>
+                <p class="text-gray-500 dark:text-gray-400 max-w-md">{{ __('Expertise, Trust, and Professional Installation.') }}</p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 @foreach([
-                    ['<svg class="w-10 h-10 text-brand-yellow" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>', __('Curated Selection'), __('We only stock high-quality accessories that we personally test and recommend.')],
-                    ['<svg class="w-10 h-10 text-brand-red" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>', __('Visit Showroom'), __('Come see the products in person before making a decision. No guesswork.')],
-                    ['<svg class="w-10 h-10 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>', __('Instant Support'), __('Message us on WhatsApp for quick advice or to check stock availability.')],
-                    ['<svg class="w-10 h-10 text-gray-400 dark:text-white/60" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>', __('Expert Installation'), __('Professional fitting services ensure your new gear works perfectly and looks great.')],
-                ] as $i => [$icon, $title, $description])
-                <div data-aos="fade-up" data-aos-delay="{{ $i * 100 }}"
-                     class="group p-6 sm:p-8 lg:p-10 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-gray-100 dark:border-white/10 rounded-[2.5rem] transition-all duration-500 shadow-sm hover:shadow-2xl hover:-translate-y-2">
-                    <div class="mb-4 sm:mb-6 lg:mb-8 transform transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">{!! $icon !!}</div>
-                    <h3 class="text-2xl font-bold text-brand-red dark:text-brand-yellow mb-4">{{ $title }}</h3>
-                    <p class="text-gray-600 dark:text-white/50 text-base leading-relaxed">{{ $description }}</p>
+                    [$icon('badge-check'), __('Curated Selection'), __('We only stock high-quality accessories that we personally test and recommend.')],
+                    [$icon('map-pin'), __('Visit Showroom'), __('Come see the products in person before making a decision. No guesswork.')],
+                    ['<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">' . $waGlyph . '</svg>', __('Instant Support'), __('Message us on WhatsApp for quick advice or to check stock availability.')],
+                    [$icon('wrench'), __('Expert Installation'), __('Professional fitting services ensure your new gear works perfectly and looks great.')],
+                ] as $i => [$cardIcon, $title, $description])
+                <div data-aos="fade-up" data-aos-delay="{{ $i * 75 }}"
+                     class="group p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl transition-all duration-300 hover:border-brand-red/50 hover:shadow-md hover:-translate-y-0.5">
+                    <div class="w-11 h-11 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center mb-5 transition-colors duration-300 group-hover:bg-brand-red group-hover:text-white" aria-hidden="true">{!! $cardIcon !!}</div>
+                    <h3 class="text-xl text-brand-black dark:text-white mb-2.5">{{ $title }}</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{{ $description }}</p>
                 </div>
                 @endforeach
             </div>
@@ -221,34 +275,38 @@
 
     {{-- ── 6. CUSTOMER REVIEWS (TESTIMONIALS) ── --}}
     @if($testimonials->count() > 0)
-    <section class="py-24 bg-gray-50 dark:bg-gray-900" aria-labelledby="testimonials-heading">
+    <section class="py-16 sm:py-20" aria-labelledby="testimonials-heading">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-16" data-aos="fade-up">
-                <span class="inline-block text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">{{ __('Testimonials') }}</span>
-                <h2 id="testimonials-heading" class="text-4xl sm:text-5xl font-black text-brand-black dark:text-white mb-4">
+            <div class="mb-10" data-aos="fade-up">
+                <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
+                    <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
+                    {{ __('Testimonials') }}
+                </span>
+                <h2 id="testimonials-heading" class="text-3xl sm:text-4xl text-brand-black dark:text-white">
                     {{ __('What Our Customers Say') }}
                 </h2>
-                <div class="w-20 h-1.5 bg-brand-red mx-auto rounded-full"></div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 @foreach($testimonials as $i => $testimonial)
-                <article data-aos="fade-up" data-aos-delay="{{ $i * 150 }}"
-                         class="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-500">
-                    <div class="flex text-brand-yellow text-2xl mb-6">
-                        {{ str_repeat('★', $testimonial->rating) }}
+                <article data-aos="fade-up" data-aos-delay="{{ $i * 75 }}"
+                         class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:border-brand-red/40 hover:shadow-md flex flex-col">
+                    <div class="flex text-amber-400 gap-0.5 mb-4" role="img" aria-label="{{ $testimonial->rating }}/5">
+                        @for($s = 0; $s < $testimonial->rating; $s++)
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
+                        @endfor
                     </div>
-                    <blockquote class="text-gray-600 dark:text-gray-400 italic mb-8 leading-relaxed text-lg">"{{ $testimonial->message }}"</blockquote>
-                    <div class="flex items-center gap-4">
+                    <blockquote class="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed text-sm flex-1">"{{ $testimonial->message }}"</blockquote>
+                    <div class="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/60">
                         @if($testimonial->image)
-                            <img src="{{ Storage::url($testimonial->image) }}" alt="{{ $testimonial->name }}" class="w-12 h-12 rounded-full object-cover ring-2 ring-brand-red/20 shadow-md" loading="lazy">
+                            <img src="{{ Storage::url($testimonial->image) }}" alt="{{ $testimonial->name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
                         @else
-                            <div class="w-12 h-12 bg-brand-red text-white rounded-full flex items-center justify-center font-black text-lg shadow-md">
+                            <div class="w-10 h-10 bg-brand-red/10 text-brand-red rounded-full flex items-center justify-center font-black text-sm">
                                 {{ mb_substr($testimonial->name, 0, 1) }}
                             </div>
                         @endif
                         <div>
-                            <div class="font-bold text-gray-800 dark:text-white text-base">{{ $testimonial->name }}</div>
-                            <div class="text-sm text-gray-400 dark:text-gray-500">{{ $testimonial->location }}</div>
+                            <div class="font-bold text-gray-800 dark:text-white text-sm">{{ $testimonial->name }}</div>
+                            <div class="text-xs text-gray-400 dark:text-gray-500">{{ $testimonial->location }}</div>
                         </div>
                     </div>
                 </article>
@@ -259,35 +317,35 @@
     @endif
 
     {{-- ── 7. GET IN TOUCH (CTA) ── --}}
-    <section class="py-24 bg-brand-red text-white relative overflow-hidden" aria-labelledby="cta-heading">
-        <div class="absolute inset-0 opacity-10" aria-hidden="true">
-            <svg class="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <path d="M0 100 L100 0 L100 100 Z" fill="white" />
-            </svg>
-        </div>
-        <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
-            <div data-aos="zoom-in">
-                <h2 id="cta-heading" class="text-4xl sm:text-6xl font-black mb-6 leading-tight">
-                    {{ __('Ready to upgrade your car?') }}
-                </h2>
-                <p class="text-xl opacity-90 mb-12 max-w-2xl mx-auto font-medium">
-                    {{ __('Use the website to explore our products, then visit our showroom in Shah Alam for expert installation.') }}
-                </p>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center" data-aos="fade-up" data-aos-delay="200">
-                <a href="{{ $whatsAppUrl }}" target="_blank" rel="noopener noreferrer"
-                   class="group relative inline-flex items-center justify-center bg-brand-yellow text-brand-black px-8 py-4 sm:px-12 sm:py-5 rounded-full font-black text-lg sm:text-xl transition-all duration-300 shadow-[0_10px_40px_rgba(250,204,21,0.3)] overflow-hidden hover:shadow-[0_15px_50px_rgba(250,204,21,0.5)] hover:-translate-y-2 active:scale-95">
-                    <span class="absolute inset-0 bg-white/40 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-1000 ease-out"></span>
-                    <span class="relative z-10 flex items-center gap-3">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                        {{ __('WhatsApp Support') }}
-                    </span>
-                </a>
-                <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer"
-                   class="group inline-flex items-center justify-center border-2 border-white/80 px-8 py-4 sm:px-12 sm:py-5 rounded-full font-black text-lg sm:text-xl hover:bg-white hover:text-brand-red hover:border-white hover:shadow-2xl hover:-translate-y-2 active:scale-95 transition-all duration-500">
-                    <svg class="w-6 h-6 mr-3 transition-transform duration-300 group-hover:scale-125" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                    {{ __('Directions') }}
-                </a>
+    <section class="py-16 sm:py-20" aria-labelledby="cta-heading">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="relative overflow-hidden rounded-[2rem] bg-[#121212] dark:bg-[#1C1917] border border-gray-800 dark:border-gray-700 px-6 py-14 sm:px-14 sm:py-16" data-aos="fade-up">
+                {{-- Contained accent glow --}}
+                <div class="absolute -top-24 -right-24 w-96 h-96 bg-brand-red/25 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
+                <div class="absolute -bottom-32 -left-16 w-80 h-80 bg-brand-red/10 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
+
+                <div class="relative grid lg:grid-cols-[1.2fr_auto] gap-10 items-center">
+                    <div>
+                        <h2 id="cta-heading" class="text-3xl sm:text-5xl text-white mb-4 leading-tight">
+                            {{ __('Ready to upgrade your car?') }}
+                        </h2>
+                        <p class="text-white/70 text-base sm:text-lg max-w-xl">
+                            {{ __('Use the website to explore our products, then visit our showroom in Shah Alam for expert installation.') }}
+                        </p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 shrink-0">
+                        <a href="{{ $whatsAppUrl }}" target="_blank" rel="noopener noreferrer"
+                           class="group inline-flex items-center justify-center gap-2.5 bg-white text-brand-black px-7 py-3.5 rounded-full font-extrabold text-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(255,255,255,0.15)] active:scale-95">
+                            <svg class="w-5 h-5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">{!! $waGlyph !!}</svg>
+                            {{ __('WhatsApp Support') }}
+                        </a>
+                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer"
+                           class="group inline-flex items-center justify-center gap-2.5 border border-white/25 text-white px-7 py-3.5 rounded-full font-extrabold text-sm transition-all duration-300 hover:bg-white/10 hover:border-white/50 hover:-translate-y-0.5 active:scale-95">
+                            {!! $icon('map-pin', 'w-5 h-5') !!}
+                            {{ __('Directions') }}
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -301,17 +359,6 @@
         }
         @media (prefers-reduced-motion: reduce) {
             .brand-track { animation: none !important; transform: none !important; }
-        }
-        .category-card {
-            transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        .category-card:hover {
-            border-color: rgb(var(--brand-red-rgb)) !important;
-            box-shadow: 0 0 20px rgb(var(--brand-red-rgb) / 0.3) !important;
-        }
-        .category-card:active {
-            transform: scale(0.92) !important;
-            transition: transform 0.05s linear !important;
         }
     </style>
     @endpush

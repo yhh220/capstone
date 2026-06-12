@@ -4,9 +4,42 @@
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+@source '../../app/**/*.php';
+
+/* Class-based dark mode — theme toggle puts .dark on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
     --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
     --font-display: 'Anton', ui-sans-serif, system-ui, sans-serif;
+
+    /* Ember Carbon brand palette — the *-rgb vars live in layouts/app.blade.php
+       and flip values under .dark, so these resolve per-theme at runtime */
+    --color-brand-red: rgb(var(--brand-red-rgb));
+    --color-brand-yellow: rgb(var(--brand-yellow-rgb));
+    --color-brand-black: rgb(var(--brand-black-rgb));
+}
+
+/* v3 → v4 compatibility: the views were written against the Tailwind v3 CDN,
+   which used gray-200 default borders, pointer cursors on buttons and
+   gray-400 placeholders. Keep those defaults so nothing shifts visually. */
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+
+    button:not(:disabled),
+    [role='button']:not(:disabled) {
+        cursor: pointer;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: var(--color-gray-400);
+    }
 }

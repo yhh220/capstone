@@ -35,9 +35,10 @@ class SecurityHeaders
 
         // Content-Security-Policy for the public storefront. Skipped on /admin
         // so Filament's own asset/script/worker pipeline keeps working.
-        // Permissive on script/style (the site uses inline scripts + the Tailwind
-        // CDN), but the high-value directives — object-src 'none' (blocks SVG/
-        // plugin XSS), frame-ancestors, base-uri, form-action — are enforced.
+        // Tailwind is compiled by Vite (no CDN). 'unsafe-inline' stays for the
+        // page's inline scripts and 'unsafe-eval' for Livewire's bundled Alpine;
+        // the high-value directives — object-src 'none' (blocks SVG/plugin XSS),
+        // frame-ancestors, base-uri, form-action — are enforced.
         if (! $request->is('admin', 'admin/*')) {
             // In local dev, Vite serves assets from its own dev server.
             // Read the hot file to get the exact origin, then allow it in CSP.
@@ -53,7 +54,7 @@ class SecurityHeaders
 
             $csp = implode('; ', [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com{$viteOrigins}",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com{$viteOrigins}",
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com{$viteOrigins}",
                 "font-src 'self' https://fonts.gstatic.com data:",
                 "img-src 'self' data: blob: https:",
