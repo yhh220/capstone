@@ -140,7 +140,7 @@
 
             {{-- Demo Notice --}}
             <div class="mt-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4 text-center">
-                <div class="text-amber-600 dark:text-amber-400 font-bold text-sm mb-1">⚠️ DEMO MODE</div>
+                <div class="text-amber-600 dark:text-amber-400 font-bold text-sm mb-1">⚠️ {{ __('DEMO MODE') }}</div>
                 <div class="text-amber-600 dark:text-amber-400 text-xs">{{ __('No actual payment will be processed. This is a prototype demonstration.') }}</div>
             </div>
 

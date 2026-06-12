@@ -45,7 +45,7 @@
                 {{-- Text Content --}}
                 <div class="flex-1 min-w-0 hero-enter text-center lg:text-left">
                     <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-gray-400 dark:text-white/35 mb-6 sm:mb-8">
-                        Shah Alam, Selangor &nbsp;·&nbsp; Malaysia
+                        {{ __('Shah Alam, Selangor') }} &nbsp;·&nbsp; {{ __('Malaysia') }}
                     </p>
                     <h1 class="font-display text-[clamp(2.8rem,9vw,6.8rem)] leading-[0.93] uppercase text-gray-900 dark:text-white mb-6 sm:mb-8">
                         {{ __("Shah Alam's") }}<br>

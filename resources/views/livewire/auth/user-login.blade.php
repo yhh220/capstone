@@ -14,11 +14,11 @@
 
         {{-- Centre: Big text --}}
         <div class="relative z-10">
-            <p class="font-mono text-[10px] tracking-[0.3em] uppercase mb-6" style="color:rgba(200,65,61,0.8);">Shah Alam, Selangor</p>
+            <p class="font-mono text-[10px] tracking-[0.3em] uppercase mb-6" style="color:rgba(200,65,61,0.8);">{{ __('Shah Alam, Selangor') }}</p>
             <h2 class="font-display font-black text-[clamp(2.4rem,3.5vw,3.4rem)] leading-[0.93] uppercase text-white mb-8">
-                SHAH ALAM'S<br>
-                <span style="color:#C8413D;">CAR AUDIO</span><br>
-                SPECIALIST.
+                {{ __("Shah Alam's") }}<br>
+                <span style="color:#C8413D;">{{ __('Car Audio') }}</span><br>
+                {{ __('Specialist.') }}
             </h2>
             <div class="space-y-3">
                 @foreach([__('Curated brands & products'), __('Expert installation'), __('Walk-in showroom welcome')] as $point)
