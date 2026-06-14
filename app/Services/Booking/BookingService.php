@@ -3,13 +3,23 @@
 namespace App\Services\Booking;
 
 use App\Models\Booking;
-use App\Models\Service;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class BookingService
 {
-    public function getAvailableSlots(Service $service, Carbon $date): Collection
+    /**
+     * Length of one showroom visit slot, in minutes. Set by the admin
+     * (Settings → Appointment Slot Length) — not hardcoded. A booking is just
+     * a time to meet at the store, so every slot is the same length regardless
+     * of what the customer wants to discuss.
+     */
+    public function visitMinutes(): int
+    {
+        return max(15, (int) setting('BOOKING_SLOT_MINUTES', 30));
+    }
+
+    public function getAvailableSlots(Carbon $date): Collection
     {
         if ($this->isClosedDate($date)) {
             return collect();
@@ -17,26 +27,30 @@ class BookingService
 
         $start = Carbon::parse($date->format('Y-m-d').' '.setting('BUSINESS_HOURS_START', '09:00'));
         $end = Carbon::parse($date->format('Y-m-d').' '.setting('BUSINESS_HOURS_END', '18:00'));
+        $length = $this->visitMinutes();
         $slots = collect();
 
-        while ($start->copy()->addMinutes($service->duration_minutes) <= $end) {
-            if ($this->isSlotAvailable($service, $start)) {
+        while ($start->copy()->addMinutes($length) <= $end) {
+            if ($this->isSlotAvailable($start)) {
                 $slots->push($start->format('H:i'));
             }
 
-            $start->addMinutes(30);
+            $start->addMinutes($length);
         }
 
         return $slots;
     }
 
-    public function isSlotAvailable(Service $service, Carbon $startAt, ?int $ignoreBookingId = null): bool
+    /**
+     * Showroom-wide: one appointment per slot, regardless of service, since a
+     * booking is a meeting time at the store.
+     */
+    public function isSlotAvailable(Carbon $startAt, ?int $ignoreBookingId = null): bool
     {
-        $endAt = $startAt->copy()->addMinutes($service->duration_minutes + $service->buffer_after);
+        $endAt = $startAt->copy()->addMinutes($this->visitMinutes());
 
         return ! Booking::query()
             ->when($ignoreBookingId, fn ($query) => $query->whereKeyNot($ignoreBookingId))
-            ->where('service_id', $service->id)
             ->where('status', '!=', 'cancelled')
             ->whereNotNull('start_at')
             ->whereNotNull('end_at')
@@ -50,9 +64,9 @@ class BookingService
         return Carbon::createFromFormat('Y-m-d H:i', "{$date} {$time}");
     }
 
-    public function buildEndAt(Service $service, Carbon $startAt): Carbon
+    public function buildEndAt(Carbon $startAt): Carbon
     {
-        return $startAt->copy()->addMinutes($service->duration_minutes + $service->buffer_after);
+        return $startAt->copy()->addMinutes($this->visitMinutes());
     }
 
     public function isClosedDate(Carbon $date): bool

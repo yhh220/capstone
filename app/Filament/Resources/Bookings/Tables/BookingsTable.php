@@ -26,13 +26,17 @@ class BookingsTable
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('service.name')
-                    ->label('Service')
+                    ->label('About')
+                    ->placeholder('General visit')
+                    ->badge()
+                    ->color(fn ($state) => $state ? 'gray' : 'warning')
+                    ->formatStateUsing(fn ($state) => $state ?: 'General visit')
                     ->sortable(),
                 TextColumn::make('preferred_date')
                     ->date('D, d M Y')
                     ->sortable(),
                 TextColumn::make('confirm_token')
-                    ->label('Token')
+                    ->label('Booking ID')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
                     ->badge()

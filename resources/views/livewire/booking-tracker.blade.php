@@ -2,7 +2,7 @@
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
         <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Track Your Booking') }}</h1>
-            <p class="text-gray-400">{{ __('Enter your phone number or booking token to see appointment details.') }}</p>
+            <p class="text-gray-400">{{ __('Enter your phone number or booking ID to see appointment details.') }}</p>
         </div>
     </div>
 
@@ -20,7 +20,7 @@
                 <input wire:model="token"
                        wire:keydown.enter="search"
                        type="text"
-                       placeholder="{{ __('Booking token') }}"
+                       placeholder="{{ __('Booking ID') }}"
                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('token') border-red-400 @enderror">
 
                 <button wire:click="search"

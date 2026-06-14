@@ -35,10 +35,11 @@ class BookingForm
                 TextInput::make('vehicle_plate')
                     ->maxLength(30),
                 Select::make('service_id')
-                    ->label('Service')
+                    ->label('About (service)')
                     ->options(Service::where('is_active', true)->orderBy('name')->pluck('name', 'id'))
                     ->searchable()
-                    ->required(),
+                    ->placeholder('General visit')
+                    ->helperText('Leave blank for a general showroom visit.'),
                 DatePicker::make('preferred_date')
                     ->label('Preferred Date')
                     ->required()

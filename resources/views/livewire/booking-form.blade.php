@@ -3,7 +3,7 @@
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
         <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Book Your Appointment') }}</h1>
-            <p class="text-gray-400">{{ __('Select your service, pick a slot, and we will handle the rest.') }}</p>
+            <p class="text-gray-400">{{ __('Pick a date and time to drop by our showroom — we will see you there.') }}</p>
         </div>
     </div>
 
@@ -47,7 +47,7 @@
                     <div class="space-y-1">
                         @php
                             $steps = [
-                                1 => ['label' => __('Service'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/>'],
+                                1 => ['label' => __('About'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/>'],
                                 2 => ['label' => __('Date & Time'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z"/>'],
                                 3 => ['label' => __('Vehicle'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>'],
                                 4 => ['label' => __('Confirm'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>'],
@@ -71,8 +71,8 @@
                                 <p class="text-xs font-black uppercase tracking-wider {{ $num === $currentStep ? 'text-brand-red' : '' }}">
                                     {{ $step['label'] }}
                                 </p>
-                                @if($num === 1 && $selectedService && $currentStep > 1)
-                                    <p class="text-xs text-gray-400 truncate mt-0.5">{{ $selectedService->name }}</p>
+                                @if($num === 1 && $currentStep > 1)
+                                    <p class="text-xs text-gray-400 truncate mt-0.5">{{ $selectedService?->name ?? __('General visit') }}</p>
                                 @elseif($num === 2 && $preferred_date && $preferred_time && $currentStep > 2)
                                     <p class="text-xs text-gray-400 truncate mt-0.5">{{ \Carbon\Carbon::parse($preferred_date)->format('d M') }} · {{ $preferred_time }}</p>
                                 @elseif($num === 3 && $vehicle_model && $currentStep > 3)
@@ -95,14 +95,14 @@
                         </div>
                     </div>
 
-                    {{-- Summary card (visible after step 1) --}}
-                    @if($selectedService)
+                    {{-- Summary card (visible once a service or slot is chosen) --}}
+                    @if($selectedService || $preferred_date || $preferred_time)
                     <div class="mt-5 bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                         <p class="text-xs font-black uppercase tracking-wider text-gray-400 mb-3">{{ __('Summary') }}</p>
                         <div class="space-y-2">
                             <div class="flex justify-between items-start gap-2">
-                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('Service') }}</span>
-                                <span class="text-xs font-bold text-gray-800 dark:text-gray-200 text-right">{{ $selectedService->name }}</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('About') }}</span>
+                                <span class="text-xs font-bold text-gray-800 dark:text-gray-200 text-right">{{ $selectedService?->name ?? __('General visit') }}</span>
                             </div>
                             @if($preferred_date)
                             <div class="flex justify-between items-start gap-2">
@@ -114,17 +114,6 @@
                             <div class="flex justify-between items-start gap-2">
                                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('Time') }}</span>
                                 <span class="text-xs font-bold text-gray-800 dark:text-gray-200">{{ $preferred_time }}</span>
-                            </div>
-                            @endif
-                            @if($selectedService->price)
-                            <div class="pt-2 mt-2 border-t border-gray-200 dark:border-gray-600 flex justify-between items-center">
-                                <span class="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Est. Price') }}</span>
-                                <span class="text-base font-black text-brand-red">RM {{ number_format($selectedService->price, 2) }}</span>
-                            </div>
-                            @else
-                            <div class="pt-2 mt-2 border-t border-gray-200 dark:border-gray-600 flex justify-between items-center">
-                                <span class="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Est. Price') }}</span>
-                                <span class="text-sm font-black text-brand-yellow">{{ __('Quote-based') }}</span>
                             </div>
                             @endif
                         </div>
@@ -149,9 +138,9 @@
                     <div class="px-6 sm:px-8 py-5 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/20">
                         @php
                             $stepTitles = [
-                                1 => ['title' => __('Select Your Service'), 'sub' => __('Choose the service that best fits your needs.')],
+                                1 => ['title' => __('What would you like to discuss?'), 'sub' => __('Optional — pick what your visit is about, or just choose a general visit.')],
                                 2 => ['title' => __('Pick a Date & Time'), 'sub' => __('Business hours: :start – :end', ['start' => $businessStart, 'end' => $businessEnd]) . ($closedDaysLabel ? '. ' . __('Closed: :days', ['days' => $closedDaysLabel]) : '')],
-                                3 => ['title' => __('Vehicle Details'), 'sub' => __('Tell us about the car we will be working on.')],
+                                3 => ['title' => __('Vehicle Details'), 'sub' => __('Tell us about your car so we can prepare for your visit.')],
                                 4 => ['title' => __('Your Details & Confirm'), 'sub' => __('Almost done — fill in your contact info and submit.')],
                             ];
                         @endphp
@@ -161,9 +150,28 @@
 
                     <div class="px-6 sm:px-8 py-7">
 
-                        {{-- ══ STEP 1: SERVICE SELECTION ══ --}}
+                        {{-- ══ STEP 1: WHAT'S THE VISIT ABOUT (optional) ══ --}}
                         @if($currentStep === 1)
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {{-- General visit — the default, no specific service --}}
+                            <button wire:click="$set('service_id', '')"
+                                    type="button"
+                                    class="group relative text-left p-5 rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]
+                                        {{ $service_id === ''
+                                            ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10 shadow-[0_4px_20px_rgba(220,38,38,0.15)]'
+                                            : 'border-gray-100 dark:border-gray-700 hover:border-brand-red/40 bg-white dark:bg-gray-800' }}">
+                                @if($service_id === '')
+                                <div class="absolute top-3 right-3 w-5 h-5 bg-brand-red rounded-full flex items-center justify-center shadow">
+                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                @endif
+                                <div class="w-10 h-10 rounded-lg mb-3 flex items-center justify-center {{ $service_id === '' ? 'bg-brand-red text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 group-hover:bg-brand-red/10 group-hover:text-brand-red' }} transition-all duration-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                </div>
+                                <p class="font-black text-gray-900 dark:text-white text-sm leading-tight mb-1">{{ __('General visit') }}</p>
+                                <p class="text-xs text-gray-400 leading-relaxed">{{ __('Just coming in to look around or have a chat.') }}</p>
+                            </button>
+
                             @foreach($services as $svc)
                             <button wire:click="$set('service_id', '{{ $svc->id }}')"
                                     type="button"
@@ -191,19 +199,7 @@
                                 <p class="font-black text-gray-900 dark:text-white text-sm leading-tight mb-1">{{ $svc->name }}</p>
 
                                 @if($svc->description)
-                                <p class="text-xs text-gray-400 leading-relaxed mb-3 line-clamp-2">{{ $svc->description }}</p>
-                                @endif
-
-                                @if($svc->price)
-                                <span class="inline-flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-full
-                                    {{ $service_id == $svc->id ? 'bg-brand-red text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300' }}">
-                                    RM {{ number_format($svc->price, 2) }}
-                                </span>
-                                @else
-                                <span class="inline-flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-full
-                                    {{ $service_id == $svc->id ? 'bg-brand-yellow/20 text-yellow-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' }}">
-                                    {{ __('Quote-based') }}
-                                </span>
+                                <p class="text-xs text-gray-400 leading-relaxed line-clamp-2">{{ $svc->description }}</p>
                                 @endif
                             </button>
                             @endforeach
@@ -433,12 +429,8 @@
                                         @endif
 
                                         <div class="flex items-center justify-between pt-1">
-                                            <span class="text-xs font-black uppercase tracking-wider text-gray-400">{{ __('Est. Total') }}</span>
-                                            @if($selectedService?->price)
-                                            <span class="text-xl font-black text-brand-red">RM {{ number_format($selectedService->price, 2) }}</span>
-                                            @else
-                                            <span class="text-sm font-black text-brand-yellow">{{ __('Quote after visit') }}</span>
-                                            @endif
+                                            <span class="text-xs font-black uppercase tracking-wider text-gray-400">{{ __('About') }}</span>
+                                            <span class="text-sm font-bold text-white text-right">{{ $selectedService?->name ?? __('General visit') }}</span>
                                         </div>
                                     </div>
                                 </div>

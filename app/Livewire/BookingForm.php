@@ -75,7 +75,9 @@ class BookingForm extends Component
     private function validateCurrentStep(): void
     {
         $rules = match ($this->currentStep) {
-            1 => ['service_id' => 'required|exists:services,id'],
+            // Service is optional — a booking is just a visit. The customer can
+            // tell us what it's about, or leave it as a general visit.
+            1 => ['service_id' => 'nullable|exists:services,id'],
             2 => ['preferred_date' => 'required|date|after_or_equal:today', 'preferred_time' => 'required|date_format:H:i'],
             3 => ['vehicle_model' => 'required|min:2|max:120', 'vehicle_plate' => 'nullable|max:30'],
             4 => ['customer_name' => 'required|min:2|max:100', 'customer_phone' => 'required|max:20', 'customer_email' => 'nullable|email|max:100'],
@@ -115,7 +117,7 @@ class BookingForm extends Component
             'customer_email' => 'nullable|email|max:100',
             'vehicle_model' => 'required|min:2|max:120',
             'vehicle_plate' => 'nullable|max:30',
-            'service_id' => 'required|exists:services,id',
+            'service_id' => 'nullable|exists:services,id',
             'preferred_date' => 'required|date|after_or_equal:today',
             'preferred_time' => 'required|date_format:H:i',
             'notes' => 'nullable|max:1000',
@@ -124,18 +126,14 @@ class BookingForm extends Component
 
     public function getAvailableTimesProperty(): array
     {
-        if ($this->service_id === '' || $this->preferred_date === '') {
+        if ($this->preferred_date === '') {
             return [];
         }
 
-        $service = Service::find($this->service_id);
-
-        if (! $service) {
-            return [];
-        }
-
+        // Slots depend only on the date now — a visit is a fixed-length meeting,
+        // independent of which service (if any) the customer is interested in.
         $slots = $this->bookingService()
-            ->getAvailableSlots($service, Carbon::parse($this->preferred_date))
+            ->getAvailableSlots(Carbon::parse($this->preferred_date))
             ->all();
 
         return array_combine($slots, $slots) ?: [];
@@ -157,7 +155,12 @@ class BookingForm extends Component
 
         $this->validate();
 
-        $service = Service::findOrFail($this->service_id);
+        // Service is optional now; a null id is a general "just visiting" booking.
+        if ($this->service_id !== '' && ! Service::whereKey($this->service_id)->exists()) {
+            $this->addError('service_id', __('That service is no longer available. Please pick another or leave it blank.'));
+
+            return;
+        }
 
         try {
             $date = Carbon::parse($this->preferred_date);
@@ -181,7 +184,7 @@ class BookingForm extends Component
             return;
         }
 
-        if (! $this->bookingService()->isSlotAvailable($service, $startAt)) {
+        if (! $this->bookingService()->isSlotAvailable($startAt)) {
             $this->addError('preferred_time', __('This slot is already booked. Please pick another time.'));
 
             return;
@@ -190,8 +193,8 @@ class BookingForm extends Component
         RateLimiter::hit($throttleKey, 600);
 
         try {
-            $booking = DB::transaction(function () use ($service, $startAt) {
-                if (! $this->bookingService()->isSlotAvailable($service, $startAt)) {
+            $booking = DB::transaction(function () use ($startAt) {
+                if (! $this->bookingService()->isSlotAvailable($startAt)) {
                     throw new \RuntimeException(__('This slot is already booked. Please pick another time.'));
                 }
 
@@ -201,10 +204,10 @@ class BookingForm extends Component
                     'customer_email' => $this->customer_email ?: null,
                     'vehicle_model' => strip_tags($this->vehicle_model),
                     'vehicle_plate' => $this->vehicle_plate !== '' ? strtoupper(strip_tags($this->vehicle_plate)) : null,
-                    'service_id' => $this->service_id,
+                    'service_id' => $this->service_id !== '' ? $this->service_id : null,
                     'preferred_date' => $this->preferred_date,
                     'start_at' => $startAt,
-                    'end_at' => $this->bookingService()->buildEndAt($service, $startAt),
+                    'end_at' => $this->bookingService()->buildEndAt($startAt),
                     'notes' => strip_tags($this->notes),
                     'status' => 'pending',
                     'confirm_token' => (string) str()->uuid(),
