@@ -25,6 +25,29 @@ class MockDriver implements AiServiceInterface
     }
 
     /**
+     * Reply in the language the customer actually wrote in, so a Chinese
+     * question never gets an English answer. Chinese (any CJK) wins; clear
+     * Malay markers pick BM; latin text defaults to English; anything else
+     * (emoji, digits, "ok") falls back to the selector language.
+     */
+    private function detectLang(string $msg, string $selected): string
+    {
+        if (preg_match('/[\x{4e00}-\x{9fff}]/u', $msg)) {
+            return 'zh';
+        }
+
+        if (preg_match('/\b(saya|awak|anda|boleh|berapa|macam|mana|tak|tiada|ada|nak|kedai|harga|bila|tempah|pasang|hantar|barang|dengan|untuk|kereta|baiki|ansuran|waranti|tukar|jam|buka|tutup|nak|guna|jual|beli|murah|mahal)\b/iu', $msg)) {
+            return 'ms';
+        }
+
+        if (preg_match('/[a-z]{2,}/i', $msg)) {
+            return 'en';
+        }
+
+        return in_array($selected, ['en', 'ms', 'zh'], true) ? $selected : 'en';
+    }
+
+    /**
      * Keyword-matched knowledge base. Each rule has a `priority` so that
      * specific topics (a product, warranty) outrank generic ones (greetings,
      * "accessories") when a single message mentions several keywords.
@@ -594,9 +617,9 @@ class MockDriver implements AiServiceInterface
             || preg_match('/(siapa awak|awak siapa|anda siapa|awak ni siapa|awak ni apa|kenalkan diri|nama awak|apa yang boleh awak buat|awak (ni )?(bot|robot|ai))/iu', $msg)
             || preg_match('/(你是谁|你是什么|你是啥|你是个什么|你叫什么|你叫什么名字|你的名字|介绍一下你自己|自我介绍|你能做什么|你会什么|你能帮我什么|你是机器人吗|你是真人吗|你是人吗|你是不是机器人)/u', $msg)) {
             return match ($lang) {
-                'ms' => "Saya Pembantu Win Win 🚗 — chatbot AI rasmi untuk Win Win Car Studio (kedai audio & aksesori kereta di Shah Alam).\n\nSaya boleh bantu anda dengan:\n• Produk & aksesori\n• Servis & pemasangan\n• Tempahan bengkel\n• Harga, waktu operasi & lokasi\n\nApa yang boleh saya bantu hari ini? 😊",
-                'zh' => "我是 Win Win 智能助手 🚗 —— Win Win Car Studio（莎阿南的汽车音响与配件店）的官方 AI 聊天机器人。\n\n我可以帮您解答：\n• 产品与配件\n• 服务与安装\n• 工坊预约\n• 价格、营业时间与地址\n\n今天有什么可以帮您？😊",
-                default => "I'm the Win Win Assistant 🚗 — the official AI chatbot for Win Win Car Studio (a car audio & accessories shop in Shah Alam).\n\nI can help you with:\n• Products & accessories\n• Services & installation\n• Workshop bookings\n• Pricing, hours & location\n\nWhat can I help you with today? 😊",
+                'ms' => "Saya Pembantu Win Win 🚗 — pembantu maya rasmi untuk Win Win Car Studio (kedai audio & aksesori kereta di Shah Alam).\n\nSaya boleh bantu anda dengan:\n• Produk & aksesori\n• Servis & pemasangan\n• Tempahan bengkel\n• Harga, waktu operasi & lokasi\n\nApa yang boleh saya bantu hari ini? 😊",
+                'zh' => "我是 Win Win 智能助手 🚗 —— Win Win Car Studio（莎阿南的汽车音响与配件店）的官方在线客服助手。\n\n我可以帮您解答：\n• 产品与配件\n• 服务与安装\n• 工坊预约\n• 价格、营业时间与地址\n\n今天有什么可以帮您？😊",
+                default => "I'm the Win Win Assistant 🚗 — the official virtual assistant for Win Win Car Studio (a car audio & accessories shop in Shah Alam).\n\nI can help you with:\n• Products & accessories\n• Services & installation\n• Workshop bookings\n• Pricing, hours & location\n\nWhat can I help you with today? 😊",
             };
         }
 
@@ -993,8 +1016,9 @@ class MockDriver implements AiServiceInterface
 
     public function chat(array $messages, ?string $systemPrompt = null): array
     {
-        $lang = $this->lang($systemPrompt ?? '');
         $raw = mb_strtolower(trim(collect($messages)->last()['content'] ?? ''));
+        // Answer in the language the customer wrote in (selector is the fallback).
+        $lang = $this->detectLang($raw, $this->lang($systemPrompt ?? ''));
         // Fold Traditional Chinese to Simplified, then expand common chat slang
         // ("what are u" → "what are you") so intents match regardless of script.
         $lastMessage = $this->normalizeSlang($this->normalizeTraditional($raw));

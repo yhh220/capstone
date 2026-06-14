@@ -218,7 +218,7 @@
                        maxlength="500"
                        autocomplete="off"
                        placeholder="{{ $ui['placeholder'] }}"
-                       class="flex-1 bg-transparent border-none outline-none text-[15px] text-gray-800 dark:text-gray-200 placeholder-gray-400 disabled:opacity-50 focus:ring-0 px-2.5 py-1.5">
+                       class="flex-1 bg-transparent border-none outline-none text-[15px] text-gray-800 dark:text-gray-200 placeholder-gray-400 disabled:opacity-50 focus:ring-0 focus-visible:outline-none px-2.5 py-1.5">
 
                 <button wire:click="sendMessage"
                         wire:loading.attr="disabled"
