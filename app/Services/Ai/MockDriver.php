@@ -25,29 +25,6 @@ class MockDriver implements AiServiceInterface
     }
 
     /**
-     * Reply in the language the customer actually wrote in, so a Chinese
-     * question never gets an English answer. Chinese (any CJK) wins; clear
-     * Malay markers pick BM; latin text defaults to English; anything else
-     * (emoji, digits, "ok") falls back to the selector language.
-     */
-    private function detectLang(string $msg, string $selected): string
-    {
-        if (preg_match('/[\x{4e00}-\x{9fff}]/u', $msg)) {
-            return 'zh';
-        }
-
-        if (preg_match('/\b(saya|awak|anda|boleh|berapa|macam|mana|tak|tiada|ada|nak|kedai|harga|bila|tempah|pasang|hantar|barang|dengan|untuk|kereta|baiki|ansuran|waranti|tukar|jam|buka|tutup|nak|guna|jual|beli|murah|mahal)\b/iu', $msg)) {
-            return 'ms';
-        }
-
-        if (preg_match('/[a-z]{2,}/i', $msg)) {
-            return 'en';
-        }
-
-        return in_array($selected, ['en', 'ms', 'zh'], true) ? $selected : 'en';
-    }
-
-    /**
      * Keyword-matched knowledge base. Each rule has a `priority` so that
      * specific topics (a product, warranty) outrank generic ones (greetings,
      * "accessories") when a single message mentions several keywords.
@@ -1016,9 +993,10 @@ class MockDriver implements AiServiceInterface
 
     public function chat(array $messages, ?string $systemPrompt = null): array
     {
+        // The component detects the message language and passes it in, so the
+        // widget UI and the reply always agree.
+        $lang = $this->lang($systemPrompt ?? '');
         $raw = mb_strtolower(trim(collect($messages)->last()['content'] ?? ''));
-        // Answer in the language the customer wrote in (selector is the fallback).
-        $lang = $this->detectLang($raw, $this->lang($systemPrompt ?? ''));
         // Fold Traditional Chinese to Simplified, then expand common chat slang
         // ("what are u" → "what are you") so intents match regardless of script.
         $lastMessage = $this->normalizeSlang($this->normalizeTraditional($raw));
@@ -1101,7 +1079,9 @@ class MockDriver implements AiServiceInterface
             'ip_address'       => request()->ip(),
         ]);
 
-        return ['message' => $reply, 'suggestions' => $suggestions];
+        // Return the detected language so the widget can switch its UI (selector,
+        // placeholder, quick questions) to match what the customer wrote.
+        return ['message' => $reply, 'suggestions' => $suggestions, 'lang' => $lang];
     }
 
     public function recommend(string $query, Collection $products): array

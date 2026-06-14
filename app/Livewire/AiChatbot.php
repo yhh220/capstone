@@ -204,6 +204,30 @@ class AiChatbot extends Component
         $this->dispatch('chatbot-scroll');
     }
 
+    /**
+     * Reply and render in the language the customer wrote in. CJK → Chinese
+     * (incl. Traditional), clear Malay markers → BM, latin text → English;
+     * ambiguous input (emoji, digits, "ok") keeps the current language.
+     */
+    private function detectLang(string $msg, string $current): string
+    {
+        $msg = mb_strtolower($msg);
+
+        if (preg_match('/[\x{4e00}-\x{9fff}]/u', $msg)) {
+            return 'zh';
+        }
+
+        if (preg_match('/\b(saya|awak|anda|boleh|berapa|macam|mana|tak|tiada|ada|nak|kedai|harga|bila|tempah|pasang|hantar|barang|dengan|untuk|kereta|baiki|ansuran|waranti|tukar|jam|buka|tutup|guna|jual|beli|murah|mahal)\b/iu', $msg)) {
+            return 'ms';
+        }
+
+        if (preg_match('/[a-z]{2,}/i', $msg)) {
+            return 'en';
+        }
+
+        return in_array($current, ['en', 'ms', 'zh'], true) ? $current : 'en';
+    }
+
     private function langSwitchedNote(): string
     {
         return match ($this->chatLang) {
@@ -345,6 +369,14 @@ class AiChatbot extends Component
 
         $pending = $this->pendingText;
         $suggestions = [];
+
+        // Switch the whole widget (replies + selector + placeholder + quick
+        // questions) to the language the customer wrote in, without a page
+        // refresh. Livewire re-renders with the new $chatLang.
+        $detected = $this->detectLang($pending, $this->chatLang);
+        if ($detected !== $this->chatLang) {
+            $this->chatLang = $detected;
+        }
 
         // "What page am I on?" — answered locally from the captured route.
         if ($this->isCurrentPageQuestion($pending)) {
