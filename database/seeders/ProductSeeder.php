@@ -69,12 +69,15 @@ class ProductSeeder extends Seeder
                 ['slug' => Str::slug($name)],
                 [
                     'category_id'       => $category?->id,
+                    'brand'             => $brand,
                     'name'              => $name,
                     'short_description' => $desc,
                     'description'       => $fullDesc,
                     'price'             => $price,
                     'sale_price'        => null,
-                    'sku'               => 'WW-' . strtoupper(Str::random(6)),
+                    // Derive the SKU from the slug so re-seeding keeps it stable
+                    // (Str::random() regenerated it on every run before).
+                    'sku'               => 'WW-' . strtoupper(substr(md5(Str::slug($name)), 0, 6)),
                     'stock'             => $stock,
                     'is_active'         => true,
                     'is_featured'       => in_array($catName, ['Android Player', 'Dash Cam', 'Speaker 6x9', 'Tweeter', 'Tinted']),
