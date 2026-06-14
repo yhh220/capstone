@@ -331,6 +331,61 @@ class MockDriver implements AiServiceInterface
                 ],
             ],
 
+            // Instalment / financing
+            [
+                'priority' => 58,
+                'keywords' => ['installment', 'instalment', 'instalments', 'financing', 'monthly payment', 'pay monthly', 'ansuran', 'bayar bulanan', '分期', '分期付款', '月供'],
+                'reply' => [
+                    'en' => "💳 We can help with instalment options for selected items and installation packages — availability depends on the price and the plan.\n\nWhatsApp us at {$p} with the product you want and we'll let you know the instalment options. 😊",
+                    'ms' => "💳 Kami boleh bantu dengan pilihan ansuran untuk item terpilih dan pakej pemasangan — bergantung pada harga dan pelan.\n\nWhatsApp kami di {$p} dengan produk yang anda mahu dan kami akan maklumkan pilihan ansuran. 😊",
+                    'zh' => "💳 部分商品和安装套餐可以分期，具体看价格和方案。\n\n请把想要的产品 WhatsApp 给我们：{$p}，我们会告诉您分期选项。😊",
+                ],
+            ],
+
+            // Home / onsite service
+            [
+                'priority' => 58,
+                'keywords' => ['home service', 'onsite', 'on-site', 'come to my', 'mobile service', 'datang rumah', 'datang ke rumah', '上门', '上门服务', '到家'],
+                'reply' => [
+                    'en' => "🏠 Most installations are done at our Shah Alam showroom where we have the right tools and setup.\n\nFor onsite/home service, it depends on the job — WhatsApp us at {$p} and we'll see what we can arrange. 😊",
+                    'ms' => "🏠 Kebanyakan pemasangan dibuat di kedai kami di Shah Alam yang lengkap dengan peralatan.\n\nUntuk servis di rumah, ia bergantung pada kerja — WhatsApp kami di {$p} dan kami lihat apa yang boleh diatur. 😊",
+                    'zh' => "🏠 大部分安装都在我们莎阿南门店进行,那里有齐全的工具和设备。\n\n上门服务要看具体项目——请 WhatsApp 我们：{$p},看看能否安排。😊",
+                ],
+            ],
+
+            // Trade-in / second-hand
+            [
+                'priority' => 60,
+                'keywords' => ['trade in', 'trade-in', 'tradein', 'second hand', 'second-hand', 'secondhand', 'used unit', 'buy my old', 'terpakai', 'barang lama', '二手', '旧的', '回收'],
+                'reply' => [
+                    'en' => "🔁 Trade-ins depend on the item and its condition.\n\nSend us a photo and details of your current unit on WhatsApp at {$p} and our team will let you know if we can take it in. 😊",
+                    'ms' => "🔁 Tukar beli (trade-in) bergantung pada barang dan keadaannya.\n\nHantar gambar dan butiran unit anda melalui WhatsApp di {$p} dan pasukan kami akan maklumkan jika kami boleh terima. 😊",
+                    'zh' => "🔁 以旧换新要看物品和成色。\n\n请把现有设备的照片和详情 WhatsApp 给我们：{$p},团队会告诉您能否回收。😊",
+                ],
+            ],
+
+            // Social media
+            [
+                'priority' => 50,
+                'keywords' => ['facebook', 'instagram', 'social media', 'tiktok', 'follow you', '脸书', '面子书', '社交'],
+                'reply' => [
+                    'en' => "📱 Follow us on Facebook for our latest products, promos, and installation work — the link is in the footer at the bottom of the page.\n\nYou can also WhatsApp us anytime at {$p}. 😊",
+                    'ms' => "📱 Ikuti kami di Facebook untuk produk terkini, promosi dan hasil kerja pemasangan — pautan ada di bahagian bawah laman.\n\nAnda juga boleh WhatsApp kami pada bila-bila masa di {$p}. 😊",
+                    'zh' => "📱 关注我们的 Facebook 获取最新产品、促销和安装作品——链接在页面底部。\n\n也欢迎随时 WhatsApp 我们：{$p}。😊",
+                ],
+            ],
+
+            // Deposit / downpayment
+            [
+                'priority' => 56,
+                'keywords' => ['deposit', 'downpayment', 'down payment', 'booking fee', 'wang pendahuluan', 'cagaran', '定金', '订金', '押金'],
+                'reply' => [
+                    'en' => "💵 For some custom or special-order items we may ask for a deposit to secure your order — it goes towards the final price.\n\nWhatsApp us at {$p} for the exact terms on what you're after. 😊",
+                    'ms' => "💵 Untuk sesetengah barang custom atau tempahan khas, kami mungkin minta deposit untuk mengesahkan tempahan — ia ditolak daripada harga akhir.\n\nWhatsApp kami di {$p} untuk terma tepat. 😊",
+                    'zh' => "💵 部分定制或特别订购的商品可能需要付定金来确认订单,定金会从最终价格中扣除。\n\n请 WhatsApp 我们：{$p} 了解具体条款。😊",
+                ],
+            ],
+
             // Thank you
             [
                 'priority' => 15,
@@ -387,17 +442,25 @@ class MockDriver implements AiServiceInterface
     {
         // CJK has no word boundaries — substring is the correct match there.
         $isLatin = ! preg_match('/[^\x00-\x7f]/', $keyword);
+        $len = mb_strlen($keyword);
 
-        // Short latin keywords: whole-word match only (fixes "hi" ⊂ "chinese").
-        if ($isLatin && mb_strlen($keyword) <= 3) {
-            return (bool) preg_match('/\b' . preg_quote($keyword, '/') . '\b/i', $message);
+        if ($isLatin && ! str_contains($keyword, ' ')) {
+            // ≤3 chars: whole-word match — "hi" must not fire inside "chinese"
+            // or "high". Greeting/abbreviation tokens are complete words.
+            if ($len <= 3) {
+                return (bool) preg_match('/\b' . preg_quote($keyword, '/') . '\b/i', $message);
+            }
+            // 4 chars: word-start prefix — these are stems, so "book" should
+            // catch "booking" but not "facebook", "ship" not "relationship".
+            if ($len === 4) {
+                return (bool) preg_match('/\b' . preg_quote($keyword, '/') . '/i', $message);
+            }
         }
 
         if (str_contains($message, $keyword)) {
             return true;
         }
 
-        $len = mb_strlen($keyword);
         if ($len < 5 || str_contains($keyword, ' ') || ! $isLatin) {
             return false;
         }
@@ -722,6 +785,42 @@ class MockDriver implements AiServiceInterface
     }
 
     /**
+     * Normalise Traditional Chinese to Simplified so keyword rules (written in
+     * Simplified) also match Traditional input (營業 → 营业, 預約 → 预约). Covers
+     * the shop/car vocabulary used in the rules plus common function words;
+     * anything unmapped is left untouched.
+     */
+    private function normalizeTraditional(string $msg): string
+    {
+        static $map = [
+            '營' => '营', '業' => '业', '開' => '开', '關' => '关', '點' => '点', '預' => '预',
+            '約' => '约', '訂' => '订', '價' => '价', '錢' => '钱', '費' => '费', '質' => '质',
+            '氣' => '气', '調' => '调', '節' => '节', '響' => '响', '貼' => '贴', '車' => '车',
+            '曬' => '晒', '記' => '记', '錄' => '录', '攝' => '摄', '鍍' => '镀', '護' => '护',
+            '產' => '产', '賣' => '卖', '貨' => '货', '裝' => '装', '師' => '师', '轉' => '转',
+            '賬' => '账', '現' => '现', '遞' => '递', '郵' => '邮', '聯' => '联', '電' => '电',
+            '絡' => '络', '號' => '号', '碼' => '码', '隱' => '隐', '個' => '个', '資' => '资',
+            '訊' => '讯', '數' => '数', '據' => '据', '條' => '条', '務' => '务', '權' => '权',
+            '識' => '识', '協' => '协', '議' => '议', '適' => '适', '長' => '长', '間' => '间',
+            '時' => '时', '製' => '制', '購' => '购', '線' => '线', '單' => '单', '語' => '语',
+            '說' => '说', '會' => '会', '馬' => '马', '來' => '来', '優' => '优', '銷' => '销',
+            '換' => '换', '壞' => '坏', '謝' => '谢', '門' => '门', '舊' => '旧', '臉' => '脸',
+            '網' => '网', '鏡' => '镜', '輛' => '辆', '燈' => '灯', '陽' => '阳', '溫' => '温',
+            '聲' => '声', '響' => '响', '導' => '导', '航' => '航', '攜' => '携', '檔' => '档',
+            '錶' => '表', '額' => '额', '驗' => '验', '證' => '证', '實' => '实', '幣' => '币',
+            '嗎' => '吗', '們' => '们', '這' => '这', '麼' => '么', '幾' => '几', '還' => '还',
+            '與' => '与', '為' => '为', '後' => '后', '裡' => '里', '應' => '应', '將' => '将',
+            '給' => '给', '樣' => '样', '種' => '种', '區' => '区', '體' => '体', '試' => '试',
+            '認' => '认', '詢' => '询', '問' => '问', '過' => '过', '維' => '维', '別' => '别',
+            '經' => '经', '確' => '确', '處' => '处', '鐘' => '钟', '頭' => '头', '顯' => '显',
+            '觸' => '触', '機' => '机', '動' => '动', '員' => '员', '寫' => '写', '讓' => '让',
+            '錢' => '钱', '齊' => '齐', '辦' => '办', '裝' => '装', '幫' => '帮', '當' => '当',
+        ];
+
+        return strtr($msg, $map);
+    }
+
+    /**
      * Live answers backed by the database, so pricing and product info never
      * drift from what the admin panel says. Returns null when not applicable.
      */
@@ -896,8 +995,9 @@ class MockDriver implements AiServiceInterface
     {
         $lang = $this->lang($systemPrompt ?? '');
         $raw = mb_strtolower(trim(collect($messages)->last()['content'] ?? ''));
-        // Expand common chat slang ("what are u" → "what are you") so intents match.
-        $lastMessage = $this->normalizeSlang($raw);
+        // Fold Traditional Chinese to Simplified, then expand common chat slang
+        // ("what are u" → "what are you") so intents match regardless of script.
+        $lastMessage = $this->normalizeSlang($this->normalizeTraditional($raw));
         $messageWords = $this->latinWords($lastMessage);
 
         $suggestions = [];

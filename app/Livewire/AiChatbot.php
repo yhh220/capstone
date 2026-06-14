@@ -55,17 +55,24 @@ class AiChatbot extends Component
 
     public function mount(): void
     {
-        // Chat language always follows the site locale (en | ms | zh) so the two
-        // stay in sync; switching language in-chat redirects through /lang.
-        $locale = app()->getLocale();
-        $this->chatLang = in_array($locale, ['en', 'ms', 'zh'], true) ? $locale : 'en';
+        // The chat keeps its OWN language, independent of the site. It seeds
+        // from the site locale on first use, but once the visitor picks a chat
+        // language it sticks (persisted in the chatbot session) even if they
+        // switch the whole site to another language.
+        $saved = session('chatbot');
+        $savedLang = is_array($saved) ? ($saved['lang'] ?? null) : null;
+        if (in_array($savedLang, ['en', 'ms', 'zh'], true)) {
+            $this->chatLang = $savedLang;
+        } else {
+            $locale = app()->getLocale();
+            $this->chatLang = in_array($locale, ['en', 'ms', 'zh'], true) ? $locale : 'en';
+        }
 
         // Capture the current page route now — during later chat AJAX requests
         // request()->route() resolves to the Livewire update endpoint, not the page.
         $this->currentRoute = request()->route()?->getName() ?? '';
 
         // Restore an in-progress conversation so it survives page navigation.
-        $saved = session('chatbot');
         if (is_array($saved) && ! empty($saved['messages'])) {
             $this->messages = $saved['messages'];
             $this->isOpen = (bool) ($saved['open'] ?? false);
@@ -88,6 +95,7 @@ class AiChatbot extends Component
         session(['chatbot' => [
             'messages' => $this->messages,
             'open'     => $this->isOpen,
+            'lang'     => $this->chatLang,
         ]]);
     }
 
@@ -186,11 +194,23 @@ class AiChatbot extends Component
             return;
         }
 
-        // Switch the whole site language (keeps chat + site in sync). The
-        // conversation is persisted, so it survives the redirect/reload.
+        // Change only the chat's language — the site stays as-is. Livewire
+        // re-renders the widget in the new language; the choice is persisted so
+        // it survives navigation. A short note tells the user the switch took.
+        $this->chatLang = $lang;
         $this->isOpen = true;
+        $this->messages[] = ['role' => 'assistant', 'text' => $this->langSwitchedNote()];
         $this->persist();
-        $this->redirect(route('lang', $lang));
+        $this->dispatch('chatbot-scroll');
+    }
+
+    private function langSwitchedNote(): string
+    {
+        return match ($this->chatLang) {
+            'ms' => "Baik! Saya akan berbual dalam Bahasa Melayu sekarang. 😊 Apa yang boleh saya bantu?",
+            'zh' => "好的！我现在用中文为您服务。😊 有什么可以帮您？",
+            default => "Done! I'll chat in English now. 😊 How can I help?",
+        };
     }
 
     private function pushGreeting(): void
