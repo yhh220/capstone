@@ -147,8 +147,8 @@
                     <div wire:key="product-{{ $product->id }}" class="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-shadow overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col">
                         <a href="{{ route('product.show', $product->slug) }}" class="block flex-1">
                             <div class="relative bg-gray-100 dark:bg-gray-700 h-52 overflow-hidden">
-                                @if($product->image)
-                                <img src="{{ Storage::url($product->image) }}"
+                                @if($product->getImageUrl('thumb'))
+                                <img src="{{ $product->getImageUrl('thumb') }}"
                                      alt="{{ $product->name }}"
                                      loading="lazy"
                                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
