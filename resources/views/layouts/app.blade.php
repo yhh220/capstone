@@ -501,8 +501,9 @@
                     </div>
                 </a>
 
-                <!-- Desktop Nav (7 links) -->
-                <div class="hidden md:flex items-center gap-0.5" role="list">
+                <!-- Desktop Nav (7 links) — shows at lg+ so the longer BM labels
+                     (Laman Utama, Perkhidmatan…) don't overflow at tablet widths -->
+                <div class="hidden lg:flex items-center gap-0.5" role="list">
                     @foreach([
                         [route('home'),     __('Home'),     request()->routeIs('home')],
                         [route('products'), __('Products'), request()->routeIs('products*')],
@@ -513,7 +514,7 @@
                         [route('contact'),  __('Contact'),  request()->routeIs('contact')],
                     ] as [$href, $label, $active])
                     <a href="{{ $href }}"
-                       class="relative px-2.5 py-1.5 lg:px-4 lg:py-2 rounded-full text-xs lg:text-sm font-bold transition-all duration-300 ease-out whitespace-nowrap overflow-hidden
+                       class="relative px-2.5 py-1.5 lg:px-3 lg:py-2 xl:px-4 rounded-full text-xs lg:text-sm font-bold transition-all duration-300 ease-out whitespace-nowrap overflow-hidden
                               {{ $active ? 'text-brand-red bg-red-50 dark:bg-red-900/10' : 'text-gray-600 dark:text-gray-300 hover:text-brand-red after:content-[\'\'] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-0 hover:after:w-3/4 after:h-[2px] after:bg-brand-red after:transition-all after:duration-300' }}"
                        @if($active) aria-current="page" @endif>
                         {{ $label }}
@@ -698,7 +699,7 @@
 
                     <!-- Mobile menu button (Lucide Animated) -->
                     <button id="mobile-menu-btn"
-                            class="md:hidden group p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-300"
+                            class="lg:hidden group p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-300"
                             aria-label="{{ __('Toggle mobile menu') }}"
                             aria-expanded="false"
                             aria-controls="mobile-menu">
@@ -714,7 +715,7 @@
 
             <!-- Mobile Menu -->
             <div id="mobile-menu"
-                 class="hidden md:hidden pb-4 space-y-1 border-t border-gray-100 dark:border-gray-700 pt-3"
+                 class="hidden lg:hidden pb-4 space-y-1 border-t border-gray-100 dark:border-gray-700 pt-3"
                  role="menu">
 
                 <!-- Theme toggle inside mobile menu (xs screens) -->
