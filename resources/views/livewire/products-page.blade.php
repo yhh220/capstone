@@ -59,6 +59,8 @@
                         </select>
                     </div>
 
+                    {{-- Price filtering only shown when prices are visible (online shopping on) --}}
+                    @if($shoppingEnabled)
                     <div class="mb-5">
                         <label class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2 block">
                             {{ __('Price Range (RM)') }}
@@ -76,6 +78,7 @@
                                    class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-red transition">
                         </div>
                     </div>
+                    @endif
 
                     <div class="space-y-3 pt-5 border-t border-gray-100 dark:border-gray-700">
                         <a href="{{ $whatsAppUrl }}"
@@ -165,7 +168,7 @@
                             </div>
                             <div class="p-4 pb-3">
                                 <div class="text-xs text-gray-400 dark:text-gray-500 mb-1">
-                                    {{ $product->category?->name ?? 'Accessories' }}
+                                    {{ $product->category?->name ?? __('Accessories') }}
                                 </div>
                                 <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-2 group-hover:text-brand-red transition-colors line-clamp-2">
                                     {{ $product->name }}

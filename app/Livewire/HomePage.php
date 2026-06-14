@@ -34,10 +34,11 @@ class HomePage extends Component
 
         if (!$hasProductsTable || !$hasCategoriesTable) {
             return view('livewire.home-page', [
-                'categories'     => new Collection(),
-                'testimonials'   => new Collection(),
+                'categories'      => new Collection(),
+                'featuredProducts' => new Collection(),
+                'testimonials'    => new Collection(),
                 'showcaseProduct' => null,
-                'brands'         => new Collection(),
+                'brands'          => new Collection(),
                 'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
             ])->layout('layouts.app');
         }
@@ -59,6 +60,15 @@ class HomePage extends Component
             ->latest()
             ->first();
 
+        // Products the admin flagged "Show on Homepage" (is_featured). Falls back
+        // to nothing if none are flagged — the section hides itself.
+        $featuredProducts = Product::where('is_active', true)
+            ->where('is_featured', true)
+            ->with('category')
+            ->latest()
+            ->take(8)
+            ->get();
+
         return view('livewire.home-page', [
             'categories'      => Category::where('is_active', true)
                 ->withCount('products')
@@ -66,6 +76,7 @@ class HomePage extends Component
                 ->orderBy('name')
                 ->take(6)
                 ->get(),
+            'featuredProducts' => $featuredProducts,
             'testimonials'    => $testimonials,
             'showcaseProduct' => $showcaseProduct,
             'brands'          => $brands,

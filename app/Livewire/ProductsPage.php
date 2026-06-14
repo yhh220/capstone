@@ -51,11 +51,19 @@ class ProductsPage extends Component
 
     public function render()
     {
-        // Normalize price range — swap if user entered min > max
-        $min = ($this->minPrice !== '' && is_numeric($this->minPrice)) ? (float) $this->minPrice : null;
-        $max = ($this->maxPrice !== '' && is_numeric($this->maxPrice)) ? (float) $this->maxPrice : null;
-        if ($min !== null && $max !== null && $min > $max) {
-            [$min, $max] = [$max, $min];
+        $shoppingEnabled = setting('ONLINE_SHOPPING_ENABLED') === 'true';
+
+        // Price filtering only makes sense when prices are shown. When online
+        // shopping is off, prices/stock/cart are hidden, so a price-range filter
+        // would let customers filter by a number they can't see — ignore it.
+        $min = $max = null;
+        if ($shoppingEnabled) {
+            $min = ($this->minPrice !== '' && is_numeric($this->minPrice)) ? (float) $this->minPrice : null;
+            $max = ($this->maxPrice !== '' && is_numeric($this->maxPrice)) ? (float) $this->maxPrice : null;
+            // Normalize price range — swap if user entered min > max
+            if ($min !== null && $max !== null && $min > $max) {
+                [$min, $max] = [$max, $min];
+            }
         }
 
         $query = Product::where('is_active', true)
@@ -88,7 +96,7 @@ class ProductsPage extends Component
         return view('livewire.products-page', [
             'products'        => $query->paginate(12),
             'allCategories'   => $cats,
-            'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
+            'shoppingEnabled' => $shoppingEnabled,
         ])->layout('layouts.app');
     }
 }

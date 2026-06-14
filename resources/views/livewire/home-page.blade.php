@@ -148,6 +148,75 @@
         </div>
     </section>
 
+    {{-- ── 3b. FEATURED PRODUCTS ── (driven by the "Show on Homepage" toggle) --}}
+    @if($featuredProducts->count() > 0)
+    <section class="py-16 sm:py-20 bg-gray-50 dark:bg-gray-900/40" aria-labelledby="featured-heading">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10" data-aos="fade-up">
+                <div>
+                    <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
+                        <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
+                        {{ __('Handpicked') }}
+                    </span>
+                    <h2 id="featured-heading" class="text-3xl sm:text-4xl text-brand-black dark:text-white">
+                        {{ __('Featured Products') }}
+                    </h2>
+                </div>
+                <a href="{{ route('products') }}"
+                   class="group inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-red transition-colors">
+                    {{ __('View all products') }}
+                    {!! $icon('arrow-right', 'w-4 h-4 transition-transform duration-300 group-hover:translate-x-1') !!}
+                </a>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                @foreach($featuredProducts as $i => $product)
+                <a href="{{ route('product.show', $product->slug) }}"
+                   data-aos="fade-up" data-aos-delay="{{ $i % 4 * 60 }}"
+                   class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden transition-all duration-300 hover:border-brand-red/50 hover:shadow-md hover:-translate-y-0.5 flex flex-col">
+                    <div class="relative aspect-square bg-gray-100 dark:bg-gray-900 overflow-hidden">
+                        @if($product->getImageUrl('thumb'))
+                            <img src="{{ $product->getImageUrl('thumb') }}"
+                                 alt="{{ $product->name }}"
+                                 loading="lazy"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600" aria-hidden="true">
+                                {!! $icon('layout-grid', 'w-10 h-10') !!}
+                            </div>
+                        @endif
+                        @if($shoppingEnabled && $product->sale_price && $product->sale_price < $product->price)
+                        <span class="absolute top-3 left-3 bg-brand-red text-white text-xs font-bold px-2 py-1 rounded-full">{{ __('SALE') }}</span>
+                        @endif
+                    </div>
+                    <div class="p-4 flex flex-col flex-1">
+                        <div class="text-xs text-gray-400 dark:text-gray-500 mb-1">{{ $product->category?->name }}</div>
+                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 leading-snug line-clamp-2 group-hover:text-brand-red transition-colors">{{ $product->name }}</h3>
+                        @if($shoppingEnabled)
+                        <div class="mt-auto pt-3 flex items-center gap-2">
+                            @if($product->sale_price && $product->sale_price < $product->price)
+                                <span class="text-brand-red font-black">RM {{ number_format($product->sale_price, 2) }}</span>
+                                <span class="text-gray-400 line-through text-xs">RM {{ number_format($product->price, 2) }}</span>
+                            @else
+                                <span class="text-brand-red font-black">RM {{ number_format($product->price, 2) }}</span>
+                            @endif
+                        </div>
+                        @else
+                        <div class="mt-auto pt-3">
+                            <span class="inline-flex items-center gap-1 text-xs font-bold text-brand-red group-hover:gap-2 transition-all">
+                                {{ __('View Details') }}
+                                {!! $icon('arrow-right', 'w-3.5 h-3.5') !!}
+                            </span>
+                        </div>
+                        @endif
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
     {{-- ── 4. 3D SHOWCASE ── --}}
     <section class="py-16 sm:py-20" aria-labelledby="showcase-heading">
         {{-- Draco decoder must be configured before model-viewer loads; the local
