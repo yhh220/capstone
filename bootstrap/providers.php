@@ -2,6 +2,6 @@
 
 return [
     App\Providers\AppServiceProvider::class,
-    App\Providers\AiServiceProvider::class,
+    App\Providers\ChatServiceProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
 ];

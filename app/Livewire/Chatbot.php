@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Contracts\AiServiceInterface;
+use App\Contracts\ChatServiceInterface;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Computed;
@@ -10,7 +10,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-class AiChatbot extends Component
+class Chatbot extends Component
 {
     // #[Locked] = server-controlled only; the client cannot tamper with these
     // via the Livewire update endpoint. Only $userInput is client-writable
@@ -48,9 +48,9 @@ class AiChatbot extends Component
     private const ABUSE_BLOCK_THRESHOLD = 4;   // malicious attempts before a cooldown
     private const ABUSE_BLOCK_SECONDS = 600;   // 10-minute cooldown
 
-    private function ai(): AiServiceInterface
+    private function ai(): ChatServiceInterface
     {
-        return app(AiServiceInterface::class);
+        return app(ChatServiceInterface::class);
     }
 
     public function mount(): void
@@ -681,6 +681,6 @@ class AiChatbot extends Component
 
     public function render()
     {
-        return view('livewire.ai-chatbot');
+        return view('livewire.chatbot');
     }
 }

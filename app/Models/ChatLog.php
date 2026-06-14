@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 
-class AiLog extends Model
+class ChatLog extends Model
 {
     protected $fillable = [
         'driver',
@@ -24,7 +24,7 @@ class AiLog extends Model
 
     public static function record(array $attributes): void
     {
-        if (!Schema::hasTable('ai_logs')) {
+        if (!Schema::hasTable('chat_logs')) {
             return;
         }
 

@@ -1039,7 +1039,7 @@
         });
     </script>
     
-    @livewire('ai-chatbot')
+    @livewire('chatbot')
 
     @livewireScripts
     @stack('scripts')

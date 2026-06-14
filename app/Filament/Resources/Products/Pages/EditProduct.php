@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Products\Pages;
 
-use App\Contracts\AiServiceInterface;
+use App\Contracts\ChatServiceInterface;
 use App\Filament\Resources\Products\ProductResource;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -19,7 +19,7 @@ class EditProduct extends EditRecord
             Action::make('generateDescriptions')
                 ->label('Generate Description (AI)')
                 ->action(function (): void {
-                    $result = app(AiServiceInterface::class)->generateDescription($this->record);
+                    $result = app(ChatServiceInterface::class)->generateDescription($this->record);
 
                     $this->record->update([
                         'description' => $result['en'] ?: $this->record->description,

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Services\Ai;
+namespace App\Services\Chat;
 
-use App\Contracts\AiServiceInterface;
-use App\Models\AiLog;
+use App\Contracts\ChatServiceInterface;
+use App\Models\ChatLog;
 use App\Models\Brand;
 use App\Models\ChatbotFaq;
 use App\Models\Product;
@@ -12,7 +12,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
-class MockDriver implements AiServiceInterface
+class MockDriver implements ChatServiceInterface
 {
     private string $phone = '016-915 0917';
 
@@ -1068,7 +1068,7 @@ class MockDriver implements AiServiceInterface
             $suggestions = $this->fallbackSuggestions($lang, $lastMessage);
         }
 
-        AiLog::record([
+        ChatLog::record([
             'driver'           => 'mock',
             'feature'          => 'chat',
             'request_payload'  => ['messages' => $messages, 'lang' => $lang],
@@ -1100,7 +1100,7 @@ class MockDriver implements AiServiceInterface
             'follow_up'       => 'For a confirmed fitment check, WhatsApp us at ' . $this->phone . '.',
         ];
 
-        AiLog::record([
+        ChatLog::record([
             'driver'           => 'mock',
             'feature'          => 'recommend',
             'request_payload'  => ['query' => $query],
@@ -1120,7 +1120,7 @@ class MockDriver implements AiServiceInterface
             'zh' => "{$product->name} 是一款注重兼容性、耐用性与性价比的优质汽车配件。",
         ];
 
-        AiLog::record([
+        ChatLog::record([
             'driver'           => 'mock',
             'feature'          => 'generate_description',
             'request_payload'  => ['product_id' => $product->id],
