@@ -34,11 +34,11 @@ class SettingResource extends Resource
                 ->disabled()
                 ->label('Setting Key')
                 ->formatStateUsing(fn (string $state): string => match ($state) {
-                    'ONLINE_SHOPPING_ENABLED' => '🛒 Online Shopping Mode',
-                    'BUSINESS_HOURS_START'    => '🕒 Business Start Time',
-                    'BUSINESS_HOURS_END'      => '🕓 Business End Time',
-                    'BUSINESS_CLOSED_WEEKDAYS'=> '🚫 Closed Weekdays',
-                    'BOOKING_SLOT_MINUTES'    => '📅 Appointment Slot Length',
+                    'ONLINE_SHOPPING_ENABLED' => 'Online Shopping Mode',
+                    'BUSINESS_HOURS_START'    => 'Business Start Time',
+                    'BUSINESS_HOURS_END'      => 'Business End Time',
+                    'BUSINESS_CLOSED_WEEKDAYS'=> 'Closed Weekdays',
+                    'BOOKING_SLOT_MINUTES'    => 'Appointment Slot Length',
                     default                   => $state,
                 }),
             Forms\Components\TextInput::make('value')
@@ -72,11 +72,11 @@ class SettingResource extends Resource
                     ->sortable()
                     ->weight('bold')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'ONLINE_SHOPPING_ENABLED' => '🛒 Online Shopping Mode',
-                        'BUSINESS_HOURS_START'    => '🕒 Business Start Time',
-                        'BUSINESS_HOURS_END'      => '🕓 Business End Time',
-                        'BUSINESS_CLOSED_WEEKDAYS'=> '🚫 Closed Weekdays',
-                        'BOOKING_SLOT_MINUTES'    => '📅 Appointment Slot Length',
+                        'ONLINE_SHOPPING_ENABLED' => 'Online Shopping Mode',
+                        'BUSINESS_HOURS_START'    => 'Business Start Time',
+                        'BUSINESS_HOURS_END'      => 'Business End Time',
+                        'BUSINESS_CLOSED_WEEKDAYS'=> 'Closed Weekdays',
+                        'BOOKING_SLOT_MINUTES'    => 'Appointment Slot Length',
                         default                   => $state,
                     })
                     ->description(fn (Setting $record): string => match ($record->key) {

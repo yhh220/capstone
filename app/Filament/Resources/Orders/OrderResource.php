@@ -35,11 +35,11 @@ class OrderResource extends Resource
                 Forms\Components\TextInput::make('tracking_number')->disabled(),
                 Forms\Components\Select::make('status')
                     ->options([
-                        'pending'    => '📋 Pending',
-                        'processing' => '⏳ Processing',
-                        'shipped'    => '📦 Shipped',
-                        'delivered'  => '✅ Delivered',
-                        'cancelled'  => '❌ Cancelled',
+                        'pending'    => 'Pending',
+                        'processing' => 'Processing',
+                        'shipped'    => 'Shipped',
+                        'delivered'  => 'Delivered',
+                        'cancelled'  => 'Cancelled',
                     ])
                     ->required(),
                 Forms\Components\Select::make('payment_status')
