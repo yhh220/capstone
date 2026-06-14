@@ -438,6 +438,12 @@ function openConfigurator() {
     modal.classList.add('active');
     document.body.classList.add('overflow-hidden');
 
+    // Mark the configurator as open in the URL so a refresh re-opens it here
+    // instead of dropping the user back to the plain products page.
+    if (window.location.hash !== '#car-configurator') {
+        history.replaceState(null, '', window.location.pathname + window.location.search + '#car-configurator');
+    }
+
     // 旧设备 / 被禁用 WebGL 时给出友好提示，而不是黑屏报错
     if (!isInitialized && !isWebGLAvailable()) {
         const loader = document.getElementById('configurator-loader');
@@ -482,6 +488,11 @@ function closeConfigurator() {
     if (!modal) return;
     modal.classList.remove('active');
     document.body.classList.remove('overflow-hidden');
+
+    // Drop the #car-configurator marker so a later refresh stays on the page.
+    if (window.location.hash === '#car-configurator') {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
 
     // Pause animation render loop (暂停动画渲染循环)
     if (animationFrameId) {
@@ -639,10 +650,15 @@ function initThree() {
     const loader = new GLTFLoader();
     loader.setDRACOLoader(dracoLoader);
 
-    loader.load(
-        modelUrl,
-        // On Loaded Success (加载成功后的回调)
-        (gltf) => {
+    const setProgress = (percent) => {
+        const bar = document.getElementById('loader-progress-bar');
+        const pct = document.getElementById('loader-percentage');
+        if (bar) bar.style.width = `${percent}%`;
+        if (pct) pct.textContent = `${Math.round(percent)}%`;
+    };
+
+    // On Loaded Success (加载成功后的回调)
+    const onModelLoaded = (gltf) => {
             const car = gltf.scene;
             carModel = car;
 
@@ -837,32 +853,65 @@ function initThree() {
 
             isInitialized = true;
             animate();
-        },
+    };
 
-        // On Download Progress (加载进度回调)
-        (xhr) => {
-            if (xhr.lengthComputable) {
-                const percent = Math.round((xhr.loaded / xhr.total) * 100);
-                const progressBar = document.getElementById('loader-progress-bar');
-                const progressPercentage = document.getElementById('loader-percentage');
-                if (progressBar) progressBar.style.width = `${percent}%`;
-                if (progressPercentage) progressPercentage.textContent = `${percent}%`;
-            }
-        },
+    const onModelError = (error) => {
+        console.error('Error loading 3D model:', error);
+        const pct = document.getElementById('loader-percentage');
+        const sub = document.querySelector('.loader-subtitle');
+        if (pct) { pct.textContent = 'Failed to load — check your connection'; pct.style.color = '#ef4444'; }
+        if (sub) sub.textContent = '';
+    };
 
-        // On Loading Error (加载失败回调)
-        (error) => {
-            console.error('Error loading car.glb:', error);
-            const progressPercentage = document.getElementById('loader-percentage');
-            if (progressPercentage) {
-                progressPercentage.textContent = 'Failed to load model';
-                progressPercentage.style.color = '#ef4444';
-            }
-        }
-    );
+    // Stream the .glb so the bar reflects real downloaded bytes even when the
+    // server omits Content-Length (gzip/chunked). Download fills 0–90%; the
+    // last 10% covers Draco decode + scene setup so the bar never sits frozen
+    // at 100% while a slow device is still decoding 3M vertices.
+    const KNOWN_SIZE = 25_700_000; // ~ car-draco.glb, used only as a fallback total
+
+    streamGlb(modelUrl, KNOWN_SIZE, (frac) => setProgress(frac * 90))
+        .then((buffer) => {
+            setProgress(92);
+            const sub = document.querySelector('.loader-subtitle');
+            if (sub) sub.textContent = 'Preparing your car…';
+            // Give the browser a frame to paint 92% before the (blocking) decode.
+            requestAnimationFrame(() => {
+                loader.parse(buffer, '', (gltf) => { setProgress(100); onModelLoaded(gltf); }, onModelError);
+            });
+        })
+        .catch(onModelError);
 
     // Setup Window Resize hooks (设置窗口缩放监听钩子)
     window.addEventListener('resize', onWindowResize);
+}
+
+/**
+ * Fetch a .glb as a stream and report real download progress (0–1).
+ * Falls back to a known total when the server doesn't send Content-Length.
+ */
+async function streamGlb(url, knownSize, onProgress) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const lenHeader = response.headers.get('content-length');
+    const total = lenHeader ? parseInt(lenHeader, 10) : knownSize;
+
+    const reader = response.body.getReader();
+    const chunks = [];
+    let received = 0;
+    for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        received += value.length;
+        // Clamp below 1 so we never show 100% before parse() finishes.
+        onProgress(Math.min(received / total, 0.99));
+    }
+
+    const out = new Uint8Array(received);
+    let offset = 0;
+    for (const chunk of chunks) { out.set(chunk, offset); offset += chunk.length; }
+    return out.buffer;
 }
 
 /**

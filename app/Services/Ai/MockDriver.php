@@ -377,18 +377,28 @@ class MockDriver implements AiServiceInterface
     }
 
     /**
-     * Typo-tolerant keyword check. Multi-word and CJK keywords use substring
-     * matching; single latin words of 5+ chars also match message words within
-     * a small edit distance ("warrenty" → "warranty", "subwofer" → "subwoofer").
+     * Typo-tolerant keyword check. CJK keywords use substring matching; short
+     * latin keywords (≤3 chars like "hi") must match as whole words so they
+     * don't fire inside unrelated words ("hi" inside "c-hi-nese"); longer latin
+     * keywords keep substring matching so stems still catch variants ("tint" →
+     * "tinted") and tolerate small typos ("warrenty" → "warranty").
      */
     private function keywordMatches(string $keyword, string $message, array $messageWords): bool
     {
+        // CJK has no word boundaries — substring is the correct match there.
+        $isLatin = ! preg_match('/[^\x00-\x7f]/', $keyword);
+
+        // Short latin keywords: whole-word match only (fixes "hi" ⊂ "chinese").
+        if ($isLatin && mb_strlen($keyword) <= 3) {
+            return (bool) preg_match('/\b' . preg_quote($keyword, '/') . '\b/i', $message);
+        }
+
         if (str_contains($message, $keyword)) {
             return true;
         }
 
         $len = mb_strlen($keyword);
-        if ($len < 5 || str_contains($keyword, ' ') || preg_match('/[^\x00-\x7f]/', $keyword)) {
+        if ($len < 5 || str_contains($keyword, ' ') || ! $isLatin) {
             return false;
         }
 
