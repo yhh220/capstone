@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesOwner;
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\Booking;
 use App\Models\Service;
@@ -15,7 +16,7 @@ use Spatie\Honeypot\Http\Livewire\Concerns\UsesSpamProtection;
 
 class BookingForm extends Component
 {
-    use SetsSeo, UsesSpamProtection;
+    use NotifiesOwner, SetsSeo, UsesSpamProtection;
 
     public HoneypotData $honeypotData;
 
@@ -144,11 +145,21 @@ class BookingForm extends Component
         // Honeypot check (field + time gate) — silently rejects bot submissions.
         $this->protectAgainstSpam();
 
-        $throttleKey = 'booking-submit:'.request()->ip();
+        $ip = request()->ip();
+        $throttleKey = 'booking-submit:'.$ip;
 
+        // Burst limit: max 5 booking attempts per IP per 10 minutes.
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
             $this->addError('customer_phone', __('Too many booking attempts. Please wait :seconds seconds before trying again.', ['seconds' => $seconds]));
+
+            return;
+        }
+
+        // Daily cap: stops slow drip-spam that keeps resetting the burst window.
+        $dailyKey = 'booking-daily:'.$ip;
+        if (RateLimiter::tooManyAttempts($dailyKey, 8)) {
+            $this->addError('customer_phone', __('You have reached today’s booking limit. Please WhatsApp us directly instead.'));
 
             return;
         }
@@ -190,7 +201,8 @@ class BookingForm extends Component
             return;
         }
 
-        RateLimiter::hit($throttleKey, 600);
+        RateLimiter::hit($throttleKey, 600);   // 10-minute burst window
+        RateLimiter::hit($dailyKey, 86400);    // 24-hour daily window
 
         try {
             $booking = DB::transaction(function () use ($startAt) {
@@ -221,6 +233,20 @@ class BookingForm extends Component
 
         $this->manageUrl = $booking->manage_url;
         $this->submitted = true;
+
+        $this->notifyOwner(
+            'New booking request',
+            [
+                'Name'    => $booking->customer_name,
+                'Phone'   => $booking->customer_phone,
+                'Email'   => $booking->customer_email,
+                'Vehicle' => trim(($booking->vehicle_model ?? '') . ' ' . ($booking->vehicle_plate ?? '')),
+                'When'    => $booking->start_at?->format('D, d M Y · g:i A'),
+                'Notes'   => $booking->notes,
+            ],
+            url('/admin/bookings/' . $booking->getKey() . '/edit'),
+            'View booking',
+        );
 
         $this->reset([
             'customer_name',

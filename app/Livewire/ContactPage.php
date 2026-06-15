@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesOwner;
 use App\Livewire\Concerns\SetsSeo;
 use Livewire\Component;
 use App\Models\Contact;
@@ -11,7 +12,7 @@ use Spatie\Honeypot\Http\Livewire\Concerns\UsesSpamProtection;
 
 class ContactPage extends Component
 {
-    use SetsSeo, UsesSpamProtection;
+    use NotifiesOwner, SetsSeo, UsesSpamProtection;
 
     public HoneypotData $honeypotData;
 
@@ -44,25 +45,60 @@ class ContactPage extends Component
         // Honeypot check — powered by spatie/laravel-honeypot (field check + time gate)
         $this->protectAgainstSpam();
 
-        // Rate limiting: max 3 submissions per IP per 5 minutes
-        $key = 'contact.' . request()->ip();
+        $ip = request()->ip();
+
+        // Layer 1 — burst limit: max 3 submissions per IP per 5 minutes.
+        $key = 'contact.' . $ip;
         if (RateLimiter::tooManyAttempts($key, 3)) {
             $seconds = RateLimiter::availableIn($key);
             $this->addError('name', __('Too many submissions. Please wait :seconds seconds before trying again.', ['seconds' => $seconds]));
             return;
         }
 
+        // Layer 2 — daily cap: stops slow drip-spam that resets the burst window.
+        $dailyKey = 'contact-daily.' . $ip;
+        if (RateLimiter::tooManyAttempts($dailyKey, 8)) {
+            $this->addError('name', __('You have reached today’s message limit. Please WhatsApp us directly instead.'));
+            return;
+        }
+
         $this->validate();
 
-        RateLimiter::hit($key, 300); // 5-minute decay window
-
-        Contact::create([
+        $clean = [
             'name'    => strip_tags($this->name),
             'email'   => $this->email,
             'phone'   => strip_tags($this->phone),
             'subject' => strip_tags($this->subject),
             'message' => strip_tags($this->message),
-        ]);
+        ];
+
+        // Layer 3 — duplicate guard: an identical message from the same email in
+        // the last 10 minutes is treated as a silent success (no DB row, no hint
+        // to a spammer, no owner email), so repeat-submit spam goes nowhere.
+        $isDuplicate = Contact::where('email', $clean['email'])
+            ->where('message', $clean['message'])
+            ->where('created_at', '>=', now()->subMinutes(10))
+            ->exists();
+
+        RateLimiter::hit($key, 300);        // 5-minute burst window
+        RateLimiter::hit($dailyKey, 86400); // 24-hour daily window
+
+        if (! $isDuplicate) {
+            $contact = Contact::create($clean);
+
+            $this->notifyOwner(
+                'New enquiry',
+                [
+                    'Name'    => $clean['name'],
+                    'Email'   => $clean['email'],
+                    'Phone'   => $clean['phone'],
+                    'Subject' => $clean['subject'],
+                    'Message' => $clean['message'],
+                ],
+                url('/admin/contacts/' . $contact->getKey() . '/edit'),
+                'View enquiry',
+            );
+        }
 
         $this->reset(['name', 'email', 'phone', 'subject', 'message']);
         session()->flash('success', __('Thank you! Your message has been sent. We will get back to you shortly.'));
