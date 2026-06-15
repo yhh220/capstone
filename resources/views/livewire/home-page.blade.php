@@ -468,7 +468,7 @@
             if (!wrapper || !track) return;
             // Respect prefers-reduced-motion
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-            const BASE_SPEED = 0.35; // px per frame (~21px/s at 60fps) — moderate scroll
+            const BASE_SPEED = 0.22; // px per frame (~13px/s at 60fps) — slow, calm scroll
             let pos = 0, speed = BASE_SPEED, target = BASE_SPEED, halfW = 0;
             function measure() { halfW = track.scrollWidth / 2; }
             measure();
