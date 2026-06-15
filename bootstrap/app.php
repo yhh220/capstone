@@ -19,6 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\SecurityHeaders::class,
         ]);
+        // The theme cookie is written by client JS (plaintext) and read in the
+        // layout to render the right <html> class — exclude it from Laravel's
+        // cookie encryption so the server can read it (prevents a light-mode
+        // flash when switching language via Livewire.navigate).
+        $middleware->encryptCookies(except: ['app_theme']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (

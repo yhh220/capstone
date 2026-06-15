@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth {{ request()->cookie('app_theme') === 'dark' ? 'dark' : '' }}">
 @php
     use Artesaos\SEOTools\Facades\SEOMeta;
     use Artesaos\SEOTools\Facades\OpenGraph;
@@ -39,12 +39,13 @@
         (function () {
             var t = localStorage.getItem('site-theme');
             var dark = t === 'dark' || ((!t || t === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            if (dark) {
-                document.documentElement.classList.add('dark');
-                document.documentElement.style.backgroundColor = '#121212';
-            } else {
-                document.documentElement.style.backgroundColor = '#F7F5F3';
-            }
+            // localStorage is the source of truth — correct the server-rendered
+            // class if needed, and mirror the resolved value into a cookie so the
+            // server renders the right class on the next request/soft-navigation
+            // (no theme flash when switching language via Livewire.navigate).
+            document.documentElement.classList.toggle('dark', dark);
+            document.documentElement.style.backgroundColor = dark ? '#121212' : '#F7F5F3';
+            document.cookie = 'app_theme=' + (dark ? 'dark' : 'light') + '; path=/; max-age=31536000; SameSite=Lax';
         })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1023,8 +1024,12 @@
         }
         function applyTheme(theme) {
             var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.documentElement.classList.toggle('dark', theme === 'system' ? prefersDark : theme === 'dark');
+            var dark = theme === 'system' ? prefersDark : theme === 'dark';
+            document.documentElement.classList.toggle('dark', dark);
             localStorage.setItem('site-theme', theme);
+            // Mirror the resolved theme into a cookie so the server renders the
+            // matching class and Livewire soft-navigations never flash light.
+            document.cookie = 'app_theme=' + (dark ? 'dark' : 'light') + '; path=/; max-age=31536000; SameSite=Lax';
             updateThemeSegment(theme);
         }
         function syncTheme() { applyTheme(localStorage.getItem('site-theme') || 'system'); }
