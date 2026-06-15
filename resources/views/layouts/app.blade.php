@@ -441,16 +441,18 @@
             box-shadow: 0 10px 30px rgba(24, 119, 242, 0.45);
         }
 
-        /* Outline button for dark surfaces (e.g. the dark CTA card) — white-on-dark
-           regardless of theme, since the surface is always dark. */
+        /* Subtle outline button for dark surfaces (e.g. the dark CTA card) —
+           muted by default so it sits behind the primary action, brightening
+           only on hover. */
         .btn-outline-light {
             background-color: transparent;
-            border-color: rgba(255, 255, 255, 0.25);
-            color: #fff;
+            border-color: rgba(255, 255, 255, 0.12);
+            color: rgba(255, 255, 255, 0.72);
         }
         .btn-outline-light:hover {
-            border-color: rgba(255, 255, 255, 0.6);
-            background-color: rgba(255, 255, 255, 0.10);
+            border-color: rgba(255, 255, 255, 0.30);
+            background-color: rgba(255, 255, 255, 0.06);
+            color: #fff;
             transform: translateY(-4px);
         }
 
