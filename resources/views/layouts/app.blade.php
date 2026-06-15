@@ -950,94 +950,99 @@
     </footer>
 
     <script>
+    (function () {
+        // Bind once. The header lives in the layout and survives Livewire's
+        // wire:navigate morphs, so re-running this on every navigation used to
+        // redeclare these top-level consts (SyntaxError → all header buttons
+        // dead after a language switch). Delegated listeners on `document`
+        // keep working no matter how the header DOM is morphed.
+        if (window.__headerInit) return;
+        window.__headerInit = true;
+
         function updateThemeSegment(theme) {
-            document.querySelectorAll('.theme-option').forEach(btn => {
+            document.querySelectorAll('.theme-option').forEach(function (btn) {
                 btn.classList.toggle('theme-seg-active', btn.dataset.theme === theme);
             });
         }
-
         function applyTheme(theme) {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             document.documentElement.classList.toggle('dark', theme === 'system' ? prefersDark : theme === 'dark');
             localStorage.setItem('site-theme', theme);
             updateThemeSegment(theme);
         }
-
-        const savedTheme = localStorage.getItem('site-theme') || 'system';
-        applyTheme(savedTheme);
-
-        document.querySelectorAll('.theme-option').forEach(btn => {
-            btn.addEventListener('click', e => applyTheme(e.currentTarget.dataset.theme));
-        });
-
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            if (localStorage.getItem('site-theme') === 'system') applyTheme('system');
-        });
-
-        const langBtn = document.getElementById('lang-btn');
-        const langMenu = document.getElementById('lang-menu');
-        const langWrapper = document.getElementById('lang-wrapper');
+        function syncTheme() { applyTheme(localStorage.getItem('site-theme') || 'system'); }
 
         function openLang() {
-            langMenu.classList.remove('hidden');
-            langMenu.classList.remove('lang-menu-enter');
-            void langMenu.offsetWidth; // reflow to restart animation
-            langMenu.classList.add('lang-menu-enter');
-            langBtn.setAttribute('aria-expanded', 'true');
+            var menu = document.getElementById('lang-menu'), btn = document.getElementById('lang-btn');
+            if (!menu) return;
+            menu.classList.remove('hidden');
+            menu.classList.remove('lang-menu-enter');
+            void menu.offsetWidth; // reflow to restart animation
+            menu.classList.add('lang-menu-enter');
+            if (btn) btn.setAttribute('aria-expanded', 'true');
         }
-
         function closeLang() {
-            langMenu.classList.add('hidden');
-            langBtn.setAttribute('aria-expanded', 'false');
+            var menu = document.getElementById('lang-menu'), btn = document.getElementById('lang-btn');
+            if (!menu) return;
+            menu.classList.add('hidden');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
         }
-
-        langBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            langMenu.classList.contains('hidden') ? openLang() : closeLang();
-        });
+        function toggleMobile() {
+            var menu = document.getElementById('mobile-menu'),
+                ham = document.getElementById('icon-hamburger'),
+                close = document.getElementById('icon-close'),
+                btn = document.getElementById('mobile-menu-btn');
+            if (!menu) return;
+            var opening = menu.classList.contains('hidden');
+            menu.classList.toggle('hidden');
+            if (ham) ham.classList.toggle('hidden', opening);
+            if (close) close.classList.toggle('hidden', !opening);
+            if (btn) btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
+        }
 
         document.addEventListener('click', function (e) {
-            if (!langWrapper.contains(e.target)) {
-                closeLang();
+            var themeOpt = e.target.closest('.theme-option');
+            if (themeOpt) { applyTheme(themeOpt.dataset.theme); return; }
+
+            if (e.target.closest('#lang-btn')) {
+                e.stopPropagation();
+                var menu = document.getElementById('lang-menu');
+                (menu && menu.classList.contains('hidden')) ? openLang() : closeLang();
+                return;
             }
+
+            var langOpt = e.target.closest('.lang-option');
+            if (langOpt) {
+                e.preventDefault();
+                closeLang();
+                // Set the session locale, then soft-navigate (no full reload).
+                fetch(langOpt.dataset.langUrl, { redirect: 'follow', credentials: 'same-origin' })
+                    .then(function () {
+                        if (window.Livewire && typeof Livewire.navigate === 'function') Livewire.navigate(location.href);
+                        else location.reload();
+                    })
+                    .catch(function () { location.reload(); });
+                return;
+            }
+
+            if (e.target.closest('#mobile-menu-btn')) { toggleMobile(); return; }
+
+            // Click outside the language switcher closes its menu.
+            if (!e.target.closest('#lang-wrapper')) closeLang();
         });
 
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                closeLang();
-            }
+            if (e.key === 'Escape') closeLang();
         });
 
-        // Seamless language switch — fetch sets session, then soft-navigate without full reload
-        document.querySelectorAll('.lang-option').forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                const url = btn.dataset.langUrl;
-                closeLang();
-                fetch(url, { redirect: 'follow', credentials: 'same-origin' })
-                    .then(function () {
-                        if (window.Livewire && typeof Livewire.navigate === 'function') {
-                            Livewire.navigate(location.href);
-                        } else {
-                            location.reload();
-                        }
-                    })
-                    .catch(function () { location.reload(); });
-            });
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+            if (localStorage.getItem('site-theme') === 'system') applyTheme('system');
         });
 
-        const mobileBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const iconHamburger = document.getElementById('icon-hamburger');
-        const iconClose = document.getElementById('icon-close');
-
-        mobileBtn.addEventListener('click', function () {
-            const opening = mobileMenu.classList.contains('hidden');
-            mobileMenu.classList.toggle('hidden');
-            iconHamburger.classList.toggle('hidden', opening);
-            iconClose.classList.toggle('hidden', !opening);
-            this.setAttribute('aria-expanded', opening ? 'true' : 'false');
-        });
+        syncTheme();
+        // Re-assert the theme after a soft navigation (morph can reset the class).
+        document.addEventListener('livewire:navigated', syncTheme);
+    })();
     </script>
     
     @livewire('chatbot')
