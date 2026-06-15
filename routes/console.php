@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Auto-regenerate sitemap daily at midnight
 Schedule::command('sitemap:generate')->daily();
+
+// Prune chat logs older than 90 days so spam / nonsense can't bloat the table.
+Schedule::command('model:prune', ['--model' => [\App\Models\ChatLog::class]])->daily();

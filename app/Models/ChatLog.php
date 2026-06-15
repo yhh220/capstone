@@ -2,11 +2,24 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Support\Facades\Schema;
 
 class ChatLog extends Model
 {
+    use Prunable;
+
+    /**
+     * Auto-delete chat logs older than 90 days so spam / nonsense can't grow
+     * the table without bound. Pruned nightly by the scheduler (model:prune).
+     */
+    public function prunable(): Builder
+    {
+        return static::where('created_at', '<=', now()->subDays(90));
+    }
+
     protected $fillable = [
         'driver',
         'feature',

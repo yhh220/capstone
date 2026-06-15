@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Booking;
+use App\Models\ChatLog;
 use App\Models\Contact;
 use App\Models\Order;
 use App\Models\Product;
@@ -22,74 +23,76 @@ class StatsOverview extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        // Cache the dashboard aggregates for a minute — these 11 count/sum
-        // queries ran on every dashboard visit and every Livewire poll.
+        // Cache the dashboard aggregates for a minute — these count/sum queries
+        // ran on every dashboard visit and every Livewire poll.
         $s = Cache::remember('dashboard_stats', 60, fn () => [
+            'activeProducts'  => Product::where('is_active', true)->count(),
+            'totalBookings'   => Booking::count(),
             'pendingBookings' => Booking::where('status', 'pending')->count(),
             'todayBookings'   => Booking::whereDate('preferred_date', today())->count(),
             'unreadContacts'  => Contact::where('is_read', false)->count(),
+            'registeredUsers' => User::where('role', 'client')->count(),
             'totalOrders'     => Order::count(),
+            'pendingOrders'   => Order::where('status', 'pending')->count(),
             'monthRevenue'    => (float) Order::where('status', 'completed')
                 ->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
                 ->sum('total_amount'),
-            'registeredUsers' => User::where('role', 'client')->count(),
-            'activeProducts'  => Product::where('is_active', true)->count(),
-            'totalBookings'   => Booking::count(),
-            'totalRevenue'    => (float) Order::where('status', 'completed')->sum('total_amount'),
+            // Scope chat stats to the current month so spam / nonsense from the
+            // past never inflates the number — it resets monthly and reflects
+            // current activity. Old rows are pruned by the scheduler anyway.
+            'chatTotal'       => ChatLog::where('feature', 'chat')
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count(),
+            'chatFallback'    => ChatLog::where('feature', 'chat')
+                ->where('status', 'fallback')
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count(),
         ]);
-
-        $pendingBookings = $s['pendingBookings'];
-        $todayBookings   = $s['todayBookings'];
-        $unreadContacts  = $s['unreadContacts'];
-        $totalOrders     = $s['totalOrders'];
-        $monthRevenue    = $s['monthRevenue'];
-        $registeredUsers = $s['registeredUsers'];
 
         return [
             Stat::make('Active Products', $s['activeProducts'])
                 ->description('Products in catalogue')
                 ->descriptionIcon('heroicon-m-rectangle-stack')
-                ->chart([4, 7, 5, 9, 12, 10, 12])
                 ->color('info'),
 
-            Stat::make('Total Orders', $totalOrders)
-                ->description($pendingBookings . ' bookings pending')
-                ->descriptionIcon('heroicon-m-shopping-bag')
-                ->chart([0, 0, 0, 0, 0, 0, $totalOrders])
-                ->color($totalOrders > 0 ? 'warning' : 'gray'),
+            Stat::make('Total Bookings', $s['totalBookings'])
+                ->description($s['pendingBookings'] . ' awaiting confirmation')
+                ->descriptionIcon('heroicon-m-calendar-days')
+                ->color($s['pendingBookings'] > 0 ? 'warning' : 'gray'),
 
-            Stat::make('Unread Enquiries', $unreadContacts)
-                ->description('Contact form messages')
-                ->descriptionIcon('heroicon-m-envelope')
-                ->color($unreadContacts > 0 ? 'danger' : 'success'),
-
-            Stat::make('Revenue This Month', 'RM ' . number_format($monthRevenue, 2))
-                ->description('Completed orders revenue')
-                ->descriptionIcon('heroicon-m-banknotes')
-                ->chart([0, 0, 0, 0, 0, 0, $monthRevenue > 0 ? $monthRevenue : 0])
-                ->color('success'),
-
-            Stat::make("Today's Appointments", $todayBookings)
+            Stat::make("Today's Appointments", $s['todayBookings'])
                 ->description('Bookings scheduled today')
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('primary'),
 
-            Stat::make('Total Bookings', $s['totalBookings'])
-                ->description('All time bookings')
-                ->descriptionIcon('heroicon-m-calendar-days')
-                ->color('warning'),
+            Stat::make('Unread Enquiries', $s['unreadContacts'])
+                ->description('Contact form messages')
+                ->descriptionIcon('heroicon-m-envelope')
+                ->color($s['unreadContacts'] > 0 ? 'danger' : 'success'),
 
-            Stat::make('Registered Users', $registeredUsers)
+            Stat::make('Chatbot Questions', $s['chatTotal'])
+                ->description($s['chatFallback'] > 0
+                    ? $s['chatFallback'] . ' unanswered this month'
+                    : 'All answered this month')
+                ->descriptionIcon('heroicon-m-chat-bubble-left-right')
+                ->color($s['chatFallback'] > 0 ? 'warning' : 'success'),
+
+            Stat::make('Registered Users', $s['registeredUsers'])
                 ->description('Customer accounts')
                 ->descriptionIcon('heroicon-m-users')
-                ->chart([1, 1, 1, 1, 1, 1, $registeredUsers])
                 ->color('info'),
 
-            Stat::make('Total Revenue', 'RM ' . number_format($s['totalRevenue'], 2))
-                ->description('All completed sales')
-                ->descriptionIcon('heroicon-m-currency-dollar')
-                ->chart([7, 2, 10, 3, 15, 4, 17])
+            Stat::make('Total Orders', $s['totalOrders'])
+                ->description($s['pendingOrders'] . ' awaiting processing')
+                ->descriptionIcon('heroicon-m-shopping-bag')
+                ->color($s['pendingOrders'] > 0 ? 'warning' : 'gray'),
+
+            Stat::make('Revenue This Month', 'RM ' . number_format($s['monthRevenue'], 2))
+                ->description('Completed orders this month')
+                ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),
         ];
     }
