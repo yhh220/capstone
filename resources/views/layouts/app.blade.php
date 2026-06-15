@@ -1016,6 +1016,33 @@
             if (btn) btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
         }
 
+        // Set the session locale, then soft-navigate (no full reload).
+        // Guards: abort an in-flight switch if a newer one starts (so a slow
+        // earlier request can't land after a later one — race guard), and
+        // fail-fast with a hard reload if the request hangs past 5s.
+        var langAbort = null;
+        function switchLang(url) {
+            if (langAbort) langAbort.abort();
+            var controller = new AbortController();
+            langAbort = controller;
+            var timedOut = false;
+            var timer = setTimeout(function () { timedOut = true; controller.abort(); }, 5000);
+
+            fetch(url, { redirect: 'follow', credentials: 'same-origin', signal: controller.signal })
+                .then(function () {
+                    clearTimeout(timer);
+                    if (langAbort !== controller) return; // superseded by a newer switch
+                    if (window.Livewire && typeof Livewire.navigate === 'function') Livewire.navigate(location.href);
+                    else location.reload();
+                })
+                .catch(function () {
+                    clearTimeout(timer);
+                    // Only recover if THIS is still the latest attempt and it timed
+                    // out; an abort from a newer click is handled by that click.
+                    if (langAbort === controller && timedOut) location.reload();
+                });
+        }
+
         document.addEventListener('click', function (e) {
             var themeOpt = e.target.closest('.theme-option');
             if (themeOpt) { applyTheme(themeOpt.dataset.theme); return; }
@@ -1031,13 +1058,7 @@
             if (langOpt) {
                 e.preventDefault();
                 closeLang();
-                // Set the session locale, then soft-navigate (no full reload).
-                fetch(langOpt.dataset.langUrl, { redirect: 'follow', credentials: 'same-origin' })
-                    .then(function () {
-                        if (window.Livewire && typeof Livewire.navigate === 'function') Livewire.navigate(location.href);
-                        else location.reload();
-                    })
-                    .catch(function () { location.reload(); });
+                switchLang(langOpt.dataset.langUrl);
                 return;
             }
 
