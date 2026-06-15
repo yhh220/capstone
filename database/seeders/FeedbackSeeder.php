@@ -81,11 +81,13 @@ class FeedbackSeeder extends Seeder
                 'sort_order' => 10,
             ],
             [
+                // sort_order 0 → shown as the large hero pull-quote on the homepage.
+                // Concise, on-brand (tinting), and from a high-credibility reviewer.
                 'name'       => 'Sheila Abd Majid',
                 'location'   => 'Local Guide · 292 reviews',
                 'message'    => 'Highly recommended for tinted and other services. The staff and boss are really friendly and helpful.',
                 'rating'     => 5,
-                'sort_order' => 11,
+                'sort_order' => 0,
             ],
             [
                 'name'       => 'Aqmal',
@@ -159,8 +161,18 @@ class FeedbackSeeder extends Seeder
             ],
         ];
 
+        // Idempotent: upsert each real review by name so re-running never
+        // duplicates them.
         foreach ($reviews as $review) {
-            Feedback::create(array_merge($review, ['is_active' => true]));
+            Feedback::updateOrCreate(
+                ['name' => $review['name']],
+                array_merge($review, ['is_active' => true]),
+            );
         }
+
+        // Authoritative: drop anything not in the curated list (e.g. old
+        // placeholder/AI-generated test entries) so the table holds only these
+        // real Google reviews.
+        Feedback::whereNotIn('name', array_column($reviews, 'name'))->forceDelete();
     }
 }

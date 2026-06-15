@@ -299,26 +299,32 @@
                 </h2>
             </div>
 
-            {{-- Pull quote: first testimonial --}}
+            {{-- Pull quote: the first testimonial (lowest sort_order) is the hero. --}}
+            @php $hero = $testimonials->first(); @endphp
             <div class="mb-10 max-w-3xl" data-aos="fade-up">
+                <div class="flex text-amber-400 gap-0.5 mb-4" role="img" aria-label="{{ $hero->rating }}/5">
+                    @for($s = 0; $s < $hero->rating; $s++)
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
+                    @endfor
+                </div>
                 <p class="font-display text-[clamp(1.4rem,3.5vw,2.4rem)] leading-tight text-gray-900 dark:text-white mb-5 uppercase">
-                    "{{ $testimonials->first()->message }}"
+                    "{{ Str::limit($hero->message, 160) }}"
                 </p>
                 <div class="flex items-center gap-3">
-                    @if($testimonials->first()->image)
-                        <img src="{{ Storage::url($testimonials->first()->image) }}"
-                             alt="{{ $testimonials->first()->name }}"
+                    @if($hero->image)
+                        <img src="{{ Storage::url($hero->image) }}"
+                             alt="{{ $hero->name }}"
                              class="w-10 h-10 rounded-full object-cover"
                              loading="lazy">
                     @else
                         <div class="w-10 h-10 bg-brand-red/10 text-brand-red rounded-full flex items-center justify-center font-black text-sm shrink-0">
-                            {{ mb_substr($testimonials->first()->name, 0, 1) }}
+                            {{ mb_substr($hero->name, 0, 1) }}
                         </div>
                     @endif
                     <div>
-                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $testimonials->first()->name }}</span>
-                        @if($testimonials->first()->location)
-                        <span class="text-sm text-gray-400 dark:text-gray-500"> · {{ $testimonials->first()->location }}</span>
+                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $hero->name }}</span>
+                        @if($hero->location)
+                        <span class="text-sm text-gray-400 dark:text-gray-500"> · {{ $hero->location }}</span>
                         @endif
                     </div>
                 </div>
