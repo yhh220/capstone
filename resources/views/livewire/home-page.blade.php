@@ -374,8 +374,10 @@
             <div class="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[rgb(var(--app-bg-rgb))] to-transparent z-10 pointer-events-none"></div>
             <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[rgb(var(--app-bg-rgb))] to-transparent z-10 pointer-events-none"></div>
 
+            {{-- Three copies so the track always fills the viewport during the
+                 wrap (two left a sliver of empty space on wide screens). --}}
             <div class="brand-track flex w-max items-center">
-                @foreach([1,2] as $_)
+                @foreach([1,2,3] as $_)
                     @foreach($brands as $brand)
                     {{-- Clickable (opens the brand's site) when a website URL is set,
                          otherwise a plain block. The marquee is decorative
@@ -475,19 +477,25 @@
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
             const BASE_SPEED = 0.22; // px per frame (~13px/s at 60fps) — slow, calm scroll
             let pos = 0, speed = BASE_SPEED, target = BASE_SPEED, halfW = 0;
-            function measure() { halfW = track.scrollWidth / 2; }
+            // Measure the width of one copy and (re)start one copy to the left so
+            // the rightward scroll always has content to reveal. Logos are images
+            // that load after first paint and change the track width, so we
+            // re-measure on load/resize — measuring too early left a gap on the
+            // right and a wrong wrap point.
+            function measure() { halfW = track.scrollWidth / 3; pos = -halfW; }
             measure();
-            // Start one copy to the left so there's content to reveal while the
-            // track scrolls rightward.
-            pos = -halfW;
+            window.addEventListener('load', measure);
             window.addEventListener('resize', measure);
+            track.querySelectorAll('img').forEach((img) => {
+                if (!img.complete) img.addEventListener('load', measure, { once: true });
+            });
             wrapper.addEventListener('mouseenter', () => { target = 0; });
             wrapper.addEventListener('mouseleave', () => { target = BASE_SPEED; });
             let rafId;
             function tick() {
                 speed += (target - speed) * 0.1;
-                pos   += speed;            // move the track right
-                if (pos >= 0) pos -= halfW; // seamless wrap (two identical copies)
+                pos   += speed;                          // move the track right
+                if (halfW > 0 && pos >= 0) pos -= halfW; // seamless wrap (two identical copies)
                 track.style.transform = 'translate3d(' + pos + 'px, 0, 0)';
                 rafId = requestAnimationFrame(tick);
             }
