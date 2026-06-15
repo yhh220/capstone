@@ -11,6 +11,9 @@ class CartPage extends Component
 {
     use SetsSeo;
 
+    /** Compact single-column layout for the slide-over drawer (vs the full /cart page). */
+    public bool $compact = false;
+
     public function mount(): void
     {
         $this->setSeo(

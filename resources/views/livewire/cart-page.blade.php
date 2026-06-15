@@ -1,18 +1,20 @@
 <div>
+    @unless($compact)
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
         <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Shopping Cart') }}</h1>
             <p class="text-gray-400">{{ __('Review your items before checkout') }}</p>
         </div>
     </div>
+    @endunless
 
-    <div class="max-w-7xl mx-auto px-4 py-10">
+    <div class="{{ $compact ? 'px-4 py-5' : 'max-w-7xl mx-auto px-4 py-10' }}">
         @if($this->cartItems->count() > 0)
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 {{ $compact ? 'gap-5' : 'lg:grid-cols-3 gap-8' }}">
             {{-- Cart Items --}}
-            <div class="lg:col-span-2 space-y-4">
+            <div class="{{ $compact ? 'space-y-3' : 'lg:col-span-2 space-y-4' }}">
                 @foreach($this->cartItems as $item)
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 items-center" wire:key="cart-{{ $item->id }}">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 {{ $compact ? '' : 'sm:p-6' }} shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 items-center" wire:key="cart-{{ $item->id }}">
                     {{-- Product Image --}}
                     <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden flex-shrink-0">
                         @if($item->product?->image)
@@ -108,7 +110,7 @@
 
             {{-- Order Summary --}}
             <div>
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 sticky top-24">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 {{ $compact ? '' : 'sticky top-24' }}">
                     <h2 class="text-xl font-black text-gray-800 dark:text-white mb-6">{{ __('Order Summary') }}</h2>
 
                     <div class="space-y-3 text-sm">

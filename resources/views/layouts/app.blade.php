@@ -902,7 +902,7 @@
                 </div>
                 <div class="flex-1">
                     @if(!request()->is('cart'))
-                        <livewire:cart-page />
+                        <livewire:cart-page :compact="true" />
                     @endif
                 </div>
             </aside>
