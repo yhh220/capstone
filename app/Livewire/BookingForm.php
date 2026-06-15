@@ -56,6 +56,7 @@ class BookingForm extends Component
         $this->validateCurrentStep();
         if ($this->currentStep < $this->totalSteps) {
             $this->currentStep++;
+            $this->dispatch('booking-step');
         }
     }
 
@@ -63,6 +64,7 @@ class BookingForm extends Component
     {
         if ($this->currentStep > 1) {
             $this->currentStep--;
+            $this->dispatch('booking-step');
         }
     }
 
@@ -70,6 +72,7 @@ class BookingForm extends Component
     {
         if ($step < $this->currentStep) {
             $this->currentStep = $step;
+            $this->dispatch('booking-step');
         }
     }
 
@@ -80,7 +83,12 @@ class BookingForm extends Component
             // tell us what it's about, or leave it as a general visit.
             1 => ['service_id' => 'nullable|exists:services,id'],
             2 => ['preferred_date' => 'required|date|after_or_equal:today', 'preferred_time' => 'required|date_format:H:i'],
-            3 => ['vehicle_model' => 'required|min:2|max:120', 'vehicle_plate' => 'nullable|max:30'],
+            // Vehicle model only matters when a specific service is chosen (so we
+            // know what we're working on). For a general visit it's optional.
+            3 => [
+                'vehicle_model' => $this->service_id !== '' ? 'required|min:2|max:120' : 'nullable|max:120',
+                'vehicle_plate' => 'nullable|max:30',
+            ],
             4 => ['customer_name' => 'required|min:2|max:100', 'customer_phone' => 'required|max:20', 'customer_email' => 'nullable|email|max:100'],
             default => [],
         };
@@ -116,7 +124,9 @@ class BookingForm extends Component
             'customer_name' => 'required|min:2|max:100',
             'customer_phone' => 'required|max:20',
             'customer_email' => 'nullable|email|max:100',
-            'vehicle_model' => 'required|min:2|max:120',
+            // Required only when a specific service is chosen; optional for a
+            // general visit (matches the per-step rule).
+            'vehicle_model' => $this->service_id !== '' ? 'required|min:2|max:120' : 'nullable|max:120',
             'vehicle_plate' => 'nullable|max:30',
             'service_id' => 'nullable|exists:services,id',
             'preferred_date' => 'required|date|after_or_equal:today',

@@ -32,7 +32,9 @@
     {{-- ── MULTI-STEP BOOKING WIZARD ── --}}
     @else {{-- !$submitted --}}
     <x-honeypot livewire-model="honeypotData" />
-    <div class="max-w-7xl mx-auto px-4 py-10 sm:py-14">
+    <div class="max-w-7xl mx-auto px-4 py-10 sm:py-14 scroll-mt-24"
+         x-data
+         x-on:booking-step.window="$el.scrollIntoView({ behavior: 'smooth', block: 'start' })">
         <div class="flex flex-col lg:flex-row gap-6 items-start">
 
             {{-- ── LEFT: PROGRESS SIDEBAR ── --}}
@@ -280,11 +282,17 @@
                         <div class="space-y-5 max-w-lg">
                             <div>
                                 <label for="booking-vehicle-model" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                    {{ __('Vehicle Model') }} <span class="text-brand-red">*</span>
+                                    {{ __('Vehicle Model') }}
+                                    @if($service_id !== '')
+                                        <span class="text-brand-red">*</span>
+                                    @else
+                                        <span class="text-gray-400 font-normal text-xs ml-1">({{ __('optional') }})</span>
+                                    @endif
                                 </label>
                                 <input wire:model="vehicle_model"
                                        id="booking-vehicle-model"
                                        type="text"
+                                       maxlength="120"
                                        placeholder="{{ __('e.g. Perodua Myvi 1.5 AV 2022') }}"
                                        class="w-full border-2 border-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-red transition-colors text-sm @error('vehicle_model') border-red-400 @enderror">
                                 @error('vehicle_model')
@@ -303,6 +311,7 @@
                                 <input wire:model="vehicle_plate"
                                        id="booking-vehicle-plate"
                                        type="text"
+                                       maxlength="30"
                                        placeholder="{{ __('e.g. ABC 1234') }}"
                                        class="w-full border-2 border-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-red transition-colors text-sm @error('vehicle_plate') border-red-400 @enderror">
                                 @error('vehicle_plate')
@@ -318,6 +327,7 @@
                                 <textarea wire:model="notes"
                                           id="booking-notes"
                                           rows="4"
+                                          maxlength="1000"
                                           placeholder="{{ __('Describe any symptoms, preferred products, or special requests...') }}"
                                           class="w-full border-2 border-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-red transition-colors text-sm resize-none @error('notes') border-red-400 @enderror"></textarea>
                                 @error('notes')
@@ -339,6 +349,7 @@
                                     <input wire:model="customer_name"
                                            id="booking-name"
                                            type="text"
+                                           maxlength="100"
                                            placeholder="{{ __('Full name') }}"
                                            class="w-full border-2 border-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-red transition-colors text-sm @error('customer_name') border-red-400 @enderror">
                                     @error('customer_name')
@@ -356,6 +367,7 @@
                                     <input wire:model="customer_phone"
                                            id="booking-phone"
                                            type="tel"
+                                           maxlength="20"
                                            placeholder="e.g. 012-3456789"
                                            class="w-full border-2 border-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-red transition-colors text-sm @error('customer_phone') border-red-400 @enderror">
                                     @error('customer_phone')
@@ -374,6 +386,7 @@
                                     <input wire:model="customer_email"
                                            id="booking-email"
                                            type="email"
+                                           maxlength="100"
                                            placeholder="{{ __('your@email.com') }}"
                                            class="w-full border-2 border-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-red transition-colors text-sm @error('customer_email') border-red-400 @enderror">
                                     @error('customer_email')
