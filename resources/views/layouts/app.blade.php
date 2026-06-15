@@ -1073,8 +1073,23 @@
                 .then(function () {
                     clearTimeout(timer);
                     if (langAbort !== controller) return; // superseded by a newer switch
-                    if (window.Livewire && typeof Livewire.navigate === 'function') Livewire.navigate(location.href);
-                    else location.reload();
+                    if (window.Livewire && typeof Livewire.navigate === 'function') {
+                        // Switching language only swaps text — keep the reader where
+                        // they were instead of letting Livewire jump to the top.
+                        // Restore after paint (two rAFs) so it lands after Livewire's
+                        // own scroll-to-top during the swap.
+                        var y = window.scrollY;
+                        var restore = function () {
+                            document.removeEventListener('livewire:navigated', restore);
+                            requestAnimationFrame(function () {
+                                requestAnimationFrame(function () { window.scrollTo(0, y); });
+                            });
+                        };
+                        document.addEventListener('livewire:navigated', restore);
+                        Livewire.navigate(location.href);
+                    } else {
+                        location.reload();
+                    }
                 })
                 .catch(function () {
                     clearTimeout(timer);

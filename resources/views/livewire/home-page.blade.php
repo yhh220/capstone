@@ -57,16 +57,13 @@
                     </p>
                     <div class="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4">
                         @if($shoppingEnabled)
-                        <a href="{{ route('products') }}"
-                           class="group relative inline-flex items-center justify-center gap-3 bg-[#C8413D] text-white px-8 py-4 rounded-xl font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgba(200,65,61,0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgba(200,65,61,0.5)] hover:-translate-y-1 active:scale-95 w-full sm:w-auto">
-                            <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
+                        <a href="{{ route('products') }}" class="btn btn-primary btn-lg btn-shine w-full sm:w-auto">
                             <span class="relative z-10">{{ __('Browse Products') }}</span>
-                            <i data-lucide="arrow-right" class="icon-sm relative z-10 transition-transform duration-300 group-hover:translate-x-1"></i>
+                            <i data-lucide="arrow-right" class="icon-sm icon-arrow relative z-10"></i>
                         </a>
                         @endif
-                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer"
-                           class="group inline-flex items-center justify-center gap-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 px-8 py-4 rounded-xl font-black text-lg hover:border-[#C8413D] hover:text-[#C8413D] hover:bg-gray-50 dark:hover:bg-gray-800 hover:-translate-y-1 hover:shadow-md transition-all duration-300 active:scale-95 w-full sm:w-auto">
-                            <i data-lucide="map-pin" class="icon-sm"></i>
+                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-lg w-full sm:w-auto">
+                            <i data-lucide="map-pin" class="icon-sm btn-ico"></i>
                             {{ __('Visit Showroom') }}
                         </a>
                     </div>
