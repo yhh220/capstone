@@ -30,10 +30,11 @@ class BrandForm
                     ->maxLength(255),
                 FileUpload::make('logo')
                     ->image()
+                    ->disk('public')
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                     ->maxSize(4096)
                     ->directory('brand-logos')
-                    ->helperText('Upload brand logo. Only shown when display type is "Logo image".')
+                    ->helperText('Upload brand logo (PNG/JPG/WebP). Only shown when display type is "Logo image".')
                     ->visible(fn ($get) => $get('display_type') === 'image')
                     ->columnSpanFull(),
                 TextInput::make('sort_order')

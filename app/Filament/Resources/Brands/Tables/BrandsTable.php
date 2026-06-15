@@ -20,6 +20,7 @@ class BrandsTable
             ->defaultSort('sort_order')
             ->columns([
                 ImageColumn::make('logo')
+                    ->disk('public')
                     ->square()
                     ->size(40)
                     ->alignCenter()

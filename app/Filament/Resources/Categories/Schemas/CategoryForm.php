@@ -28,6 +28,8 @@ class CategoryForm
                     ->columnSpanFull(),
                 FileUpload::make('image')
                     ->image()
+                    ->disk('public')
+                    ->directory('category-images')
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                     ->maxSize(4096),
                 Toggle::make('is_active')

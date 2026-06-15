@@ -20,6 +20,7 @@ class FeedbackForm
                     ->schema([
                         FileUpload::make('image')
                             ->image()
+                            ->disk('public')
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(4096)
                             ->directory('feedback-images')

@@ -377,18 +377,23 @@
             <div class="brand-track flex w-max items-center">
                 @foreach([1,2] as $_)
                     @foreach($brands as $brand)
-                    <div class="brand-item flex items-center justify-center min-w-[140px] pr-24">
+                    {{-- Clickable (opens the brand's site) when a website URL is set,
+                         otherwise a plain block. The marquee is decorative
+                         (aria-hidden), so links stay out of the tab order. --}}
+                    @php $tag = $brand->website_url ? 'a' : 'div'; @endphp
+                    <{{ $tag }} class="brand-item flex items-center justify-center min-w-[140px] pr-24 {{ $brand->website_url ? 'cursor-pointer' : '' }}"
+                        @if($brand->website_url) href="{{ $brand->website_url }}" target="_blank" rel="noopener noreferrer" tabindex="-1" @endif>
                         @if($brand->display_type === 'image' && $brand->logo)
                             <img src="{{ Storage::url($brand->logo) }}"
                                  alt="{{ $brand->name }}"
-                                 class="h-10 w-auto object-contain opacity-40 hover:opacity-100 transition-all duration-500 filter grayscale hover:grayscale-0"
+                                 class="h-10 w-auto object-contain"
                                  loading="lazy">
                         @else
-                            <span class="text-gray-300 dark:text-gray-600 hover:text-brand-red dark:hover:text-gray-300 font-black text-xl tracking-widest uppercase transition-colors duration-300 whitespace-nowrap cursor-default">
+                            <span class="text-gray-600 dark:text-gray-300 font-black text-xl tracking-widest uppercase whitespace-nowrap">
                                 {{ $brand->name }}
                             </span>
                         @endif
-                    </div>
+                    </{{ $tag }}>
                     @endforeach
                 @endforeach
             </div>
