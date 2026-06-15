@@ -40,12 +40,18 @@ class ChatbotFaqResource extends Resource
                 ->label('Trigger keywords')
                 ->placeholder('Add a keyword and press Enter')
                 ->helperText('The bot answers when a customer message contains any of these words or phrases. Add keywords in English, Malay, and Chinese for full coverage. Typos within 1–2 letters still match.'),
-            Forms\Components\TextInput::make('priority')
-                ->numeric()
-                ->default(80)
-                ->minValue(1)
-                ->maxValue(200)
-                ->helperText('When a customer message matches several topics, the higher priority is answered first. Most topics sit at 30–75; use a higher number to make this one win.'),
+            Forms\Components\Select::make('priority')
+                ->label('Answer priority')
+                ->options([
+                    15  => 'Low — only if nothing better matches',
+                    50  => 'Normal (default)',
+                    75  => 'High — prefer this answer',
+                    100 => 'Highest — always answer this first',
+                ])
+                ->default(50)
+                ->selectablePlaceholder(false)
+                ->native(false)
+                ->helperText('If a customer message could match several topics, the higher priority is answered first. Leave most on “Normal”.'),
             Forms\Components\Textarea::make('reply_en')
                 ->required()
                 ->rows(4)
@@ -77,9 +83,21 @@ class ChatbotFaqResource extends Resource
                     ->limitList(4)
                     ->separator(','),
                 TextColumn::make('priority')
+                    ->label('Priority')
                     ->sortable()
                     ->badge()
-                    ->color('gray'),
+                    ->formatStateUsing(fn (int $state): string => match (true) {
+                        $state >= 100 => 'Highest',
+                        $state >= 75  => 'High',
+                        $state >= 40  => 'Normal',
+                        default       => 'Low',
+                    })
+                    ->color(fn (int $state): string => match (true) {
+                        $state >= 100 => 'danger',
+                        $state >= 75  => 'warning',
+                        $state >= 40  => 'gray',
+                        default       => 'gray',
+                    }),
                 IconColumn::make('is_active')
                     ->boolean()
                     ->label('Active'),
