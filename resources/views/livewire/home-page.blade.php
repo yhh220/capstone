@@ -397,13 +397,12 @@
     {{-- ── 6b. PARTNER BRANDS ── (credibility cue, sits with the social proof) --}}
     @if($brands->count() > 0)
     <section class="py-16 sm:py-20 overflow-hidden" aria-label="{{ __('Brands we carry') }}">
-        <div class="max-w-7xl mx-auto px-4 mb-10 text-center">
+        <div class="max-w-7xl mx-auto px-4 mb-10">
             <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
                 <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
                 {{ __('Official Partners & Brands') }}
-                <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
             </span>
-            <h2 class="text-2xl sm:text-3xl font-black text-brand-black dark:text-white">{{ __('Brands we carry') }}</h2>
+            <h2 class="text-3xl sm:text-4xl font-black text-brand-black dark:text-white">{{ __('Brands we carry') }}</h2>
         </div>
 
         <div class="brand-marquee-wrapper relative overflow-hidden" aria-hidden="true">
