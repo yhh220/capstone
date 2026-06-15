@@ -37,7 +37,7 @@
 
     <script>
         (function () {
-            var t = localStorage.getItem('theme');
+            var t = localStorage.getItem('site-theme');
             var dark = t === 'dark' || ((!t || t === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (dark) {
                 document.documentElement.classList.add('dark');
@@ -959,11 +959,11 @@
         function applyTheme(theme) {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             document.documentElement.classList.toggle('dark', theme === 'system' ? prefersDark : theme === 'dark');
-            localStorage.setItem('theme', theme);
+            localStorage.setItem('site-theme', theme);
             updateThemeSegment(theme);
         }
 
-        const savedTheme = localStorage.getItem('theme') || 'system';
+        const savedTheme = localStorage.getItem('site-theme') || 'system';
         applyTheme(savedTheme);
 
         document.querySelectorAll('.theme-option').forEach(btn => {
@@ -971,7 +971,7 @@
         });
 
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            if (localStorage.getItem('theme') === 'system') applyTheme('system');
+            if (localStorage.getItem('site-theme') === 'system') applyTheme('system');
         });
 
         const langBtn = document.getElementById('lang-btn');
