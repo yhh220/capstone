@@ -17,7 +17,13 @@ class EditProduct extends EditRecord
     {
         return [
             Action::make('generateDescriptions')
-                ->label('Generate Description (AI)')
+                ->label('Auto Generate Description')
+                ->icon('heroicon-o-sparkles')
+                ->color('gray')
+                ->requiresConfirmation()
+                ->modalHeading('Auto-generate descriptions?')
+                ->modalDescription('This writes fresh English, Malay, and Chinese descriptions from this product\'s brand, category, price, specs and compatible vehicles. It will overwrite the current descriptions.')
+                ->modalSubmitActionLabel('Generate')
                 ->action(function (): void {
                     $result = app(ChatServiceInterface::class)->generateDescription($this->record);
 
@@ -34,7 +40,7 @@ class EditProduct extends EditRecord
                     ]);
 
                     Notification::make()
-                        ->title('AI descriptions generated')
+                        ->title('Descriptions generated in all three languages')
                         ->success()
                         ->send();
                 }),

@@ -1130,12 +1130,110 @@ class MockDriver implements ChatServiceInterface
         return $response;
     }
 
+    /**
+     * Build a natural product description from the product's own data
+     * (brand, category, price, key specs, compatible vehicles, short blurb).
+     * It is rule-based — no external model — but composes real fields into
+     * readable copy in all three languages instead of a fixed template.
+     */
     public function generateDescription(Product $product): array
     {
+        $product->loadMissing('category');
+
+        $name     = trim((string) $product->name);
+        $brand    = trim((string) $product->brand);
+        $category = trim((string) ($product->category->name ?? ''));
+        $short    = trim((string) $product->short_description);
+
+        // Money formatter: RM850, RM99.90
+        $money = function ($v): string {
+            $v = (float) $v;
+            return 'RM' . ($v == floor($v) ? number_format($v, 0) : number_format($v, 2));
+        };
+
+        // Top key specs as "Key Value" fragments (specs is an assoc array).
+        $specs = [];
+        foreach ((array) $product->specs as $k => $v) {
+            $k = trim((string) $k);
+            $v = trim((string) $v);
+            if ($k !== '' && $v !== '') {
+                $specs[] = "{$k} {$v}";
+            }
+            if (count($specs) >= 4) {
+                break;
+            }
+        }
+
+        $vehicles = array_values(array_filter(array_map('trim', (array) $product->compatible_vehicles)));
+        $vehicles = array_slice($vehicles, 0, 5);
+
+        $onSale = $product->sale_price !== null && (float) $product->sale_price < (float) $product->price;
+
+        // ---- English ----------------------------------------------------
+        $catEn   = $category !== '' ? strtolower($category) : 'car accessory';
+        $article = in_array(strtolower($catEn[0] ?? 'c'), ['a', 'e', 'i', 'o', 'u'], true) ? 'an' : 'a';
+        $en   = [];
+        $en[] = $brand !== ''
+            ? "The {$name} is {$article} {$catEn} by {$brand}, hand-picked by the team at Win Win Car Audio for its build quality, fitment, and value."
+            : "The {$name} is {$article} {$catEn} hand-picked by the team at Win Win Car Audio for its build quality, fitment, and value.";
+        if ($short !== '') {
+            $en[] = rtrim($short, '.') . '.';
+        }
+        if ($specs) {
+            $en[] = 'Key specs: ' . implode(', ', $specs) . '.';
+        }
+        if ($vehicles) {
+            $en[] = 'A confirmed fit for: ' . implode(', ', $vehicles) . '.';
+        }
+        if ($product->price !== null) {
+            $en[] = $onSale
+                ? "Now on offer at {$money($product->sale_price)} (usual {$money($product->price)}) — great value while stock lasts."
+                : "Priced at {$money($product->price)}, it's strong value for the quality you get.";
+        }
+        $en[] = 'Drop by our Shah Alam showroom for a live demo, or book a visit and our installers will fit it to your car properly.';
+
+        // ---- Bahasa Malaysia -------------------------------------------
+        $catMs = $category !== '' ? $category : 'aksesori kereta';
+        $ms   = [];
+        $ms[] = $brand !== ''
+            ? "{$name} ialah {$catMs} dari {$brand}, dipilih khas oleh pasukan Win Win Car Audio kerana kualiti, kesesuaian, dan nilainya."
+            : "{$name} ialah {$catMs} yang dipilih khas oleh pasukan Win Win Car Audio kerana kualiti, kesesuaian, dan nilainya.";
+        if ($specs) {
+            $ms[] = 'Spesifikasi utama: ' . implode(', ', $specs) . '.';
+        }
+        if ($vehicles) {
+            $ms[] = 'Sesuai untuk: ' . implode(', ', $vehicles) . '.';
+        }
+        if ($product->price !== null) {
+            $ms[] = $onSale
+                ? "Kini pada harga {$money($product->sale_price)} (biasa {$money($product->price)}) — berbaloi selagi stok ada."
+                : "Pada harga {$money($product->price)}, ia menawarkan nilai yang baik untuk kualitinya.";
+        }
+        $ms[] = 'Singgah ke showroom kami di Shah Alam untuk demo, atau tempah lawatan dan pemasang kami akan memasangnya pada kereta anda dengan betul.';
+
+        // ---- Chinese ----------------------------------------------------
+        $catZh = $category !== '' ? "({$category})" : '';
+        $zh   = [];
+        $zh[] = $brand !== ''
+            ? "{$name} 是 {$brand} 出品的优质汽车配件{$catZh},由 Win Win Car Audio 团队精选,注重做工、适配与性价比。"
+            : "{$name} 是一款优质汽车配件{$catZh},由 Win Win Car Audio 团队精选,注重做工、适配与性价比。";
+        if ($specs) {
+            $zh[] = '主要规格:' . implode('、', $specs) . '。';
+        }
+        if ($vehicles) {
+            $zh[] = '适配车型:' . implode('、', $vehicles) . '。';
+        }
+        if ($product->price !== null) {
+            $zh[] = $onSale
+                ? "现特价 {$money($product->sale_price)}(原价 {$money($product->price)}),数量有限,售完即止。"
+                : "售价 {$money($product->price)},品质与价格兼顾。";
+        }
+        $zh[] = '欢迎到我们位于 Shah Alam 的展厅实地体验,或预约到访,由我们的师傅为您专业安装。';
+
         $response = [
-            'en' => "{$product->name} is a quality car accessory designed for compatibility, durability, and value.",
-            'ms' => "{$product->name} ialah aksesori kereta berkualiti yang direka untuk keserasian, ketahanan, dan nilai.",
-            'zh' => "{$product->name} 是一款注重兼容性、耐用性与性价比的优质汽车配件。",
+            'en' => implode(' ', $en),
+            'ms' => implode(' ', $ms),
+            'zh' => implode('', $zh),
         ];
 
         ChatLog::record([
