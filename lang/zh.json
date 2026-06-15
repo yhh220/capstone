@@ -61,6 +61,8 @@
     "Active services": "可预约服务",
     "Add to Cart": "加入购物车",
     "Cart": "购物车",
+    "Previous": "上一个",
+    "Next": "下一个",
     "Too Many Requests": "请求过于频繁",
     "Slow down a little": "请稍微慢一点",
     "You’ve made a lot of requests in a short time. Please wait a moment, then try again.": "您在短时间内发送了太多请求，请稍候片刻再试。",

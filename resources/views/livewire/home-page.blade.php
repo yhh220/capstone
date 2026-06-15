@@ -330,39 +330,58 @@
                 </div>
             </div>
 
-            {{-- Scroll row: remaining testimonials --}}
+            {{-- Auto-advancing carousel: slides to the next page every few
+                 seconds, pauses on hover, and can still be scrolled/swiped or
+                 stepped with the arrows. Respects prefers-reduced-motion. --}}
             @if($testimonials->count() > 1)
-            <div class="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide" data-aos="fade-up">
-                @foreach($testimonials->skip(1) as $testimonial)
-                <article class="snap-start shrink-0 w-72 sm:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 transition-all duration-300 hover:border-brand-red/40 hover:shadow-md flex flex-col">
-                    <div class="flex text-amber-400 gap-0.5 mb-4" role="img" aria-label="{{ $testimonial->rating }}/5">
-                        @for($s = 0; $s < $testimonial->rating; $s++)
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
-                        @endfor
-                    </div>
-                    <blockquote class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-5 flex-1">
-                        "{{ Str::limit($testimonial->message, 120) }}"
-                    </blockquote>
-                    <div class="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/60">
-                        @if($testimonial->image)
-                            <img src="{{ Storage::url($testimonial->image) }}"
-                                 alt="{{ $testimonial->name }}"
-                                 class="w-8 h-8 rounded-full object-cover"
-                                 loading="lazy">
-                        @else
-                            <div class="w-8 h-8 bg-brand-red/10 text-brand-red rounded-full flex items-center justify-center font-bold text-xs shrink-0">
-                                {{ mb_substr($testimonial->name, 0, 1) }}
-                            </div>
-                        @endif
-                        <div>
-                            <div class="text-xs font-bold text-gray-900 dark:text-white">{{ $testimonial->name }}</div>
-                            @if($testimonial->location)
-                            <div class="text-xs text-gray-400 dark:text-gray-500">{{ $testimonial->location }}</div>
-                            @endif
+            @php $cards = $testimonials->skip(1); @endphp
+            <div x-data="testimonialSlider()" class="relative" data-aos="fade-up"
+                 @mouseenter="pause()" @mouseleave="resume()">
+                <div x-ref="track"
+                     class="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 scroll-smooth">
+                    @foreach($cards as $testimonial)
+                    <article class="snap-start shrink-0 w-72 sm:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 transition-all duration-300 hover:border-brand-red/40 hover:shadow-md flex flex-col">
+                        <div class="flex text-amber-400 gap-0.5 mb-4" role="img" aria-label="{{ $testimonial->rating }}/5">
+                            @for($s = 0; $s < $testimonial->rating; $s++)
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
+                            @endfor
                         </div>
-                    </div>
-                </article>
-                @endforeach
+                        <blockquote class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-5 flex-1">
+                            "{{ Str::limit($testimonial->message, 120) }}"
+                        </blockquote>
+                        <div class="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/60">
+                            @if($testimonial->image)
+                                <img src="{{ Storage::url($testimonial->image) }}"
+                                     alt="{{ $testimonial->name }}"
+                                     class="w-8 h-8 rounded-full object-cover"
+                                     loading="lazy">
+                            @else
+                                <div class="w-8 h-8 bg-brand-red/10 text-brand-red rounded-full flex items-center justify-center font-bold text-xs shrink-0">
+                                    {{ mb_substr($testimonial->name, 0, 1) }}
+                                </div>
+                            @endif
+                            <div>
+                                <div class="text-xs font-bold text-gray-900 dark:text-white">{{ $testimonial->name }}</div>
+                                @if($testimonial->location)
+                                <div class="text-xs text-gray-400 dark:text-gray-500">{{ $testimonial->location }}</div>
+                                @endif
+                            </div>
+                        </div>
+                    </article>
+                    @endforeach
+                </div>
+
+                {{-- Manual controls --}}
+                <div class="flex justify-end gap-2 mt-3">
+                    <button type="button" @click="prev()" aria-label="{{ __('Previous') }}"
+                            class="w-9 h-9 rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-brand-red hover:text-white hover:border-brand-red transition-colors flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <button type="button" @click="next()" aria-label="{{ __('Next') }}"
+                            class="w-9 h-9 rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-brand-red hover:text-white hover:border-brand-red transition-colors flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
             </div>
             @endif
         </div>
@@ -538,6 +557,48 @@
         }
         document.addEventListener('livewire:navigated', initMarquee);
     }());
+    </script>
+
+    <script>
+    // Testimonial carousel — auto-advances one page every few seconds, pauses
+    // on hover, and resets the timer on manual arrow use. A global function (not
+    // alpine:init) so it resolves whether the homepage is the first load or
+    // reached via a Livewire navigation; destroy() clears the timer to avoid a
+    // leak when navigating away.
+    function testimonialSlider() {
+        return {
+            timer: null,
+            reduced: false,
+            init() {
+                this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                this.resume();
+            },
+            destroy() { this.pause(); },
+            step(dir) {
+                const t = this.$refs.track;
+                if (!t) return;
+                const amount = t.clientWidth * 0.9;
+                const max = t.scrollWidth - t.clientWidth;
+                if (dir > 0) {
+                    (t.scrollLeft >= max - 8)
+                        ? t.scrollTo({ left: 0, behavior: 'smooth' })
+                        : t.scrollBy({ left: amount, behavior: 'smooth' });
+                } else {
+                    (t.scrollLeft <= 8)
+                        ? t.scrollTo({ left: max, behavior: 'smooth' })
+                        : t.scrollBy({ left: -amount, behavior: 'smooth' });
+                }
+            },
+            next() { this.step(1); this.resume(); },
+            prev() { this.step(-1); this.resume(); },
+            resume() {
+                if (this.reduced) return;
+                this.pause();
+                this.timer = setInterval(() => this.step(1), 4500);
+            },
+            pause() { clearInterval(this.timer); this.timer = null; },
+        };
+    }
     </script>
     @endpush
 </div>
