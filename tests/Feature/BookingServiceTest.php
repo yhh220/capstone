@@ -35,7 +35,9 @@ class BookingServiceTest extends TestCase
 
         $bookingService = app(BookingService::class);
 
-        $this->assertTrue($bookingService->isSlotAvailable($service, Carbon::parse('2026-06-01 11:15')));
-        $this->assertFalse($bookingService->isSlotAvailable($service, Carbon::parse('2026-06-01 11:00')));
+        // Booking is now showroom-wide (one appointment per slot, no per-service
+        // duration), so isSlotAvailable() takes just the start time.
+        $this->assertTrue($bookingService->isSlotAvailable(Carbon::parse('2026-06-01 11:15')));
+        $this->assertFalse($bookingService->isSlotAvailable(Carbon::parse('2026-06-01 11:00')));
     }
 }
