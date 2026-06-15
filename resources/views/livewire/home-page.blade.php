@@ -338,6 +338,12 @@
             <div x-data="testimonialSlider()" class="relative" data-aos="fade-up"
                  @mouseenter="pause()" @mouseleave="resume()">
                 <div x-ref="track"
+                     @pointerdown="dragStart($event)"
+                     @pointermove="dragMove($event)"
+                     @pointerup="dragEnd()"
+                     @pointerleave="dragEnd()"
+                     @pointercancel="dragEnd()"
+                     :class="dragging ? 'cursor-grabbing select-none' : 'cursor-grab'"
                      class="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 scroll-smooth">
                     @foreach($cards as $testimonial)
                     <article class="snap-start shrink-0 w-72 sm:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 transition-all duration-300 hover:border-brand-red/40 hover:shadow-md flex flex-col">
@@ -390,9 +396,14 @@
 
     {{-- ── 6b. PARTNER BRANDS ── (credibility cue, sits with the social proof) --}}
     @if($brands->count() > 0)
-    <section class="py-12 border-t border-gray-200 dark:border-gray-700/60 overflow-hidden" aria-label="{{ __('Brands we carry') }}">
-        <div class="max-w-7xl mx-auto px-4 mb-7">
-            <p class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500">{{ __('Official Partners & Brands') }}</p>
+    <section class="py-16 sm:py-20 overflow-hidden" aria-label="{{ __('Brands we carry') }}">
+        <div class="max-w-7xl mx-auto px-4 mb-10 text-center">
+            <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
+                <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
+                {{ __('Official Partners & Brands') }}
+                <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-black text-brand-black dark:text-white">{{ __('Brands we carry') }}</h2>
         </div>
 
         <div class="brand-marquee-wrapper relative overflow-hidden" aria-hidden="true">
@@ -413,10 +424,10 @@
                         @if($brand->display_type === 'image' && $brand->logo)
                             <img src="{{ Storage::url($brand->logo) }}"
                                  alt="{{ $brand->name }}"
-                                 class="h-10 w-auto object-contain"
+                                 class="h-14 sm:h-16 w-auto object-contain"
                                  loading="lazy">
                         @else
-                            <span class="text-gray-600 dark:text-gray-300 font-black text-xl tracking-widest uppercase whitespace-nowrap">
+                            <span class="text-gray-600 dark:text-gray-300 font-black text-2xl sm:text-3xl tracking-widest uppercase whitespace-nowrap">
                                 {{ $brand->name }}
                             </span>
                         @endif
@@ -569,6 +580,9 @@
         return {
             timer: null,
             reduced: false,
+            dragging: false,
+            startX: 0,
+            startScroll: 0,
             init() {
                 this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                 this.resume();
@@ -592,11 +606,35 @@
             next() { this.step(1); this.resume(); },
             prev() { this.step(-1); this.resume(); },
             resume() {
-                if (this.reduced) return;
+                if (this.reduced || this.dragging) return;
                 this.pause();
                 this.timer = setInterval(() => this.step(1), 4500);
             },
             pause() { clearInterval(this.timer); this.timer = null; },
+
+            // Click-and-drag to scroll (desktop mouse). Touch/pen keep native
+            // scrolling so we don't fight the browser's momentum.
+            dragStart(e) {
+                if (e.pointerType !== 'mouse') return;
+                const t = this.$refs.track;
+                this.dragging = true;
+                this.startX = e.clientX;
+                this.startScroll = t.scrollLeft;
+                this.pause();
+                t.style.scrollBehavior = 'auto';   // instant follow while dragging
+                t.setPointerCapture?.(e.pointerId);
+            },
+            dragMove(e) {
+                if (!this.dragging) return;
+                e.preventDefault();
+                this.$refs.track.scrollLeft = this.startScroll - (e.clientX - this.startX);
+            },
+            dragEnd() {
+                if (!this.dragging) return;
+                this.dragging = false;
+                this.$refs.track.style.scrollBehavior = '';  // restore smooth snap
+                this.resume();
+            },
         };
     }
     </script>
