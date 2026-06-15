@@ -469,12 +469,25 @@
     @push('scripts')
     <script>
     (function () {
+        // Hoisted so each (re)init can cancel the previous loop. Livewire
+        // navigations re-run this script; without cancelling, every visit to
+        // the homepage stacked another rAF loop (all mutating the same
+        // transform → speed-up/jank) and the loop kept running against a
+        // detached node after navigating away.
+        let rafId = null;
+        let measureFn = null;
+        let listenersBound = false;
+
         function initMarquee() {
             const wrapper = document.querySelector('.brand-marquee-wrapper');
             const track   = document.querySelector('.brand-track');
             if (!wrapper || !track) return;
             // Respect prefers-reduced-motion
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            // Kill any loop left over from a previous page before starting one.
+            if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+
             const BASE_SPEED = 0.22; // px per frame (~13px/s at 60fps) — slow, calm scroll
             let pos = 0, speed = BASE_SPEED, target = BASE_SPEED, halfW = 0;
             // Measure the width of one copy and (re)start one copy to the left so
@@ -484,15 +497,26 @@
             // right and a wrong wrap point.
             function measure() { halfW = track.scrollWidth / 3; pos = -halfW; }
             measure();
-            window.addEventListener('load', measure);
-            window.addEventListener('resize', measure);
+
+            // Bind window listeners only once; they call whatever the current
+            // measure() is, so repeated inits don't pile up duplicate handlers.
+            measureFn = measure;
+            if (!listenersBound) {
+                listenersBound = true;
+                window.addEventListener('load',   () => { if (measureFn) measureFn(); });
+                window.addEventListener('resize', () => { if (measureFn) measureFn(); });
+            }
+
             track.querySelectorAll('img').forEach((img) => {
                 if (!img.complete) img.addEventListener('load', measure, { once: true });
             });
             wrapper.addEventListener('mouseenter', () => { target = 0; });
             wrapper.addEventListener('mouseleave', () => { target = BASE_SPEED; });
-            let rafId;
+
             function tick() {
+                // Stop once the track is gone (navigated away) instead of
+                // burning frames forever on a detached element.
+                if (!track.isConnected) { rafId = null; return; }
                 speed += (target - speed) * 0.1;
                 pos   += speed;                          // move the track right
                 if (halfW > 0 && pos >= 0) pos -= halfW; // seamless wrap (two identical copies)

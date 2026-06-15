@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -14,6 +15,13 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class Service extends Model implements HasMedia
 {
     use InteractsWithMedia, LogsActivity;
+
+    /** Keep the chatbot's live price list in sync the moment a service changes. */
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget('chatbot_services'));
+        static::deleted(fn () => Cache::forget('chatbot_services'));
+    }
 
     public function registerMediaCollections(): void
     {

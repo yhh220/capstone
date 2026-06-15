@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Brand extends Model
 {
@@ -19,4 +20,11 @@ class Brand extends Model
         'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
+
+    /** Keep the chatbot's brand list in sync the moment a brand changes. */
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget('chatbot_brands'));
+        static::deleted(fn () => Cache::forget('chatbot_brands'));
+    }
 }
