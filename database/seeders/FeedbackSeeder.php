@@ -162,8 +162,10 @@ class FeedbackSeeder extends Seeder
         ];
 
         // Idempotent: upsert each real review by name so re-running never
-        // duplicates them.
+        // duplicates them. Location is intentionally blanked — we don't show
+        // the Google "Local Guide / N reviews" badge under testimonials.
         foreach ($reviews as $review) {
+            $review['location'] = '';
             Feedback::updateOrCreate(
                 ['name' => $review['name']],
                 array_merge($review, ['is_active' => true]),
