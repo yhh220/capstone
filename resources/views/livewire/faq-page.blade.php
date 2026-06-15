@@ -9,12 +9,14 @@
     <div class="max-w-5xl mx-auto px-4 py-12" x-data="{ active: null }">
         <div class="space-y-4">
             @foreach([
-                ['Do you sell online?', 'Online shopping may be turned on or off depending on current operations. If prices are hidden, please WhatsApp the store for assistance.'],
-                ['Can I book a service online?', 'Yes. You can choose a service, pick an available date and time, and submit your vehicle details from the booking page.'],
+                ['Do you sell online?', 'Online shopping may be turned on or off depending on current operations. When it is off, you can still browse everything and visit or WhatsApp us to buy. If prices are hidden, please WhatsApp the store for assistance.'],
+                ['How do I book a visit?', 'Booking is simply scheduling a time to drop by our Shah Alam showroom. Pick a date and time on the booking page and leave your contact details — choosing a specific service is optional, so you can also just book a general visit to look around.'],
                 ['How do I know if a product fits my car?', 'Use the compatibility guidance on the site, then contact the showroom on WhatsApp for a final confirmation before visiting or purchasing.'],
                 ['Do you accept real online payments?', 'Online payments are currently processed through store confirmation. Our staff will guide you through the purchasing process.'],
-                ['Can I cancel my booking?', 'Yes. Use your booking manage link or token to review and cancel a booking before your appointment time.'],
-                ['Do you support multiple languages?', 'The site supports English, Bahasa Malaysia, and Chinese for customer browsing.'],
+                ['Can I cancel my booking?', 'Yes. Use your booking manage link, or look it up on the Track Booking page with your phone number or booking ID, to review or cancel before your appointment time.'],
+                ['Do you offer instalment plans?', 'We can help with instalment options on selected items and installation packages, depending on the price and the plan. WhatsApp us with the product you want and we will let you know the options.'],
+                ['Do you take trade-ins?', 'Sometimes — it depends on the item and its condition. Send us a photo and details of your current unit on WhatsApp and our team will let you know if we can take it in.'],
+                ['Do you support multiple languages?', 'Yes — the website and our chatbot support English, Bahasa Malaysia, and Chinese (including Traditional Chinese and mixed-language questions).'],
                 ['Where is your showroom located?', 'Our showroom is located in Shah Alam, Selangor. Visit us during operating hours for a hands-on experience with our products and services. Contact us on WhatsApp for the exact address and directions.'],
                 ['How long does installation take?', 'Installation time varies depending on the product and complexity. A basic audio setup may take 1–2 hours, while full custom installations may require a full day. Our team will give you an estimated time when you book.'],
                 ['Do you provide warranty for products?', 'Yes. Warranty coverage depends on the brand and product. Our staff will inform you of the warranty terms at the time of purchase. For warranty claims, please bring your receipt and visit the showroom.'],

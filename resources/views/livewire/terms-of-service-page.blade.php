@@ -7,7 +7,7 @@
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
         <div class="max-w-5xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Terms of Service') }}</h1>
-            <p class="text-gray-400">{{ __('Last Updated: April 2026') }}</p>
+            <p class="text-gray-400">{{ __('Last Updated: June 2026') }}</p>
         </div>
     </div>
 
@@ -26,7 +26,7 @@
 
             <section>
                 <h2 class="text-xl font-black text-gray-900 dark:text-white mb-3">{{ __('2. Bookings & Appointments') }}</h2>
-                <p>{{ __('When you request a booking online, it helps us know you’re coming, but it doesn’t guarantee an immediate slot until we confirm it with you. We ask that you provide accurate vehicle details and arrive on time so we can give your car the best care possible.') }}</p>
+                <p>{{ __('A booking is a request to visit our showroom at a chosen time — it helps us know you’re coming, but the slot isn’t guaranteed until we confirm it with you. Please provide accurate details and arrive on time so we can give you and your car the best attention.') }}</p>
             </section>
 
             <section>

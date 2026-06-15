@@ -7,7 +7,7 @@
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
         <div class="max-w-5xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Privacy Policy') }}</h1>
-            <p class="text-gray-400">{{ __('Last Updated: April 2025') }}</p>
+            <p class="text-gray-400">{{ __('Last Updated: June 2026') }}</p>
         </div>
     </div>
 
