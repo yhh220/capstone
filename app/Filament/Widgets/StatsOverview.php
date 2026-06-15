@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Cache;
 
 class StatsOverview extends StatsOverviewWidget
 {
@@ -21,18 +22,32 @@ class StatsOverview extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $pendingBookings   = Booking::where('status', 'pending')->count();
-        $todayBookings     = Booking::whereDate('preferred_date', today())->count();
-        $unreadContacts    = Contact::where('is_read', false)->count();
-        $totalOrders       = Order::count();
-        $monthRevenue      = Order::where('status', 'completed')
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->sum('total_amount');
-        $registeredUsers   = User::where('role', 'client')->count();
+        // Cache the dashboard aggregates for a minute — these 11 count/sum
+        // queries ran on every dashboard visit and every Livewire poll.
+        $s = Cache::remember('dashboard_stats', 60, fn () => [
+            'pendingBookings' => Booking::where('status', 'pending')->count(),
+            'todayBookings'   => Booking::whereDate('preferred_date', today())->count(),
+            'unreadContacts'  => Contact::where('is_read', false)->count(),
+            'totalOrders'     => Order::count(),
+            'monthRevenue'    => (float) Order::where('status', 'completed')
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->sum('total_amount'),
+            'registeredUsers' => User::where('role', 'client')->count(),
+            'activeProducts'  => Product::where('is_active', true)->count(),
+            'totalBookings'   => Booking::count(),
+            'totalRevenue'    => (float) Order::where('status', 'completed')->sum('total_amount'),
+        ]);
+
+        $pendingBookings = $s['pendingBookings'];
+        $todayBookings   = $s['todayBookings'];
+        $unreadContacts  = $s['unreadContacts'];
+        $totalOrders     = $s['totalOrders'];
+        $monthRevenue    = $s['monthRevenue'];
+        $registeredUsers = $s['registeredUsers'];
 
         return [
-            Stat::make('Active Products', Product::where('is_active', true)->count())
+            Stat::make('Active Products', $s['activeProducts'])
                 ->description('Products in catalogue')
                 ->descriptionIcon('heroicon-m-rectangle-stack')
                 ->chart([4, 7, 5, 9, 12, 10, 12])
@@ -60,7 +75,7 @@ class StatsOverview extends StatsOverviewWidget
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('primary'),
 
-            Stat::make('Total Bookings', Booking::count())
+            Stat::make('Total Bookings', $s['totalBookings'])
                 ->description('All time bookings')
                 ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('warning'),
@@ -71,7 +86,7 @@ class StatsOverview extends StatsOverviewWidget
                 ->chart([1, 1, 1, 1, 1, 1, $registeredUsers])
                 ->color('info'),
 
-            Stat::make('Total Revenue', 'RM ' . number_format(Order::where('status', 'completed')->sum('total_amount'), 2))
+            Stat::make('Total Revenue', 'RM ' . number_format($s['totalRevenue'], 2))
                 ->description('All completed sales')
                 ->descriptionIcon('heroicon-m-currency-dollar')
                 ->chart([7, 2, 10, 3, 15, 4, 17])
