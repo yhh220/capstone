@@ -77,40 +77,7 @@
         <div class="absolute bottom-0 left-0 right-0 h-px bg-gray-200 dark:bg-transparent" aria-hidden="true"></div>
     </section>
 
-    {{-- ── 2. BRAND MARQUEE ── --}}
-    @if($brands->count() > 0)
-    <section class="py-12 border-b border-gray-200 dark:border-gray-700/60 overflow-hidden" aria-label="{{ __('Brands we carry') }}">
-        <div class="max-w-7xl mx-auto px-4 mb-7">
-            <p class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500">{{ __('Official Partners & Brands') }}</p>
-        </div>
-
-        <div class="brand-marquee-wrapper relative overflow-hidden" aria-hidden="true">
-            <div class="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[rgb(var(--app-bg-rgb))] to-transparent z-10 pointer-events-none"></div>
-            <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[rgb(var(--app-bg-rgb))] to-transparent z-10 pointer-events-none"></div>
-
-            <div class="brand-track flex w-max items-center">
-                @foreach([1,2] as $_)
-                    @foreach($brands as $brand)
-                    <div class="brand-item flex items-center justify-center min-w-[140px] pr-24">
-                        @if($brand->logo)
-                            <img src="{{ Storage::url($brand->logo) }}"
-                                 alt="{{ $brand->name }}"
-                                 class="h-10 w-auto object-contain opacity-40 hover:opacity-100 transition-all duration-500 filter grayscale hover:grayscale-0"
-                                 loading="lazy">
-                        @else
-                            <span class="text-gray-300 dark:text-gray-600 hover:text-brand-red dark:hover:text-gray-300 font-black text-xl tracking-widest uppercase transition-colors duration-300 whitespace-nowrap cursor-default">
-                                {{ $brand->name }}
-                            </span>
-                        @endif
-                    </div>
-                    @endforeach
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
-
-    {{-- ── 3. BROWSE BY CATEGORY ── --}}
+    {{-- ── 2. BROWSE BY CATEGORY ── (show what you sell, right after the hero) --}}
     <section class="py-16 sm:py-20" aria-labelledby="categories-heading">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10" data-aos="fade-up">
@@ -148,7 +115,7 @@
         </div>
     </section>
 
-    {{-- ── 3b. FEATURED PRODUCTS ── (driven by the "Show on Homepage" toggle) --}}
+    {{-- ── 3. FEATURED PRODUCTS ── (real items hook the visitor — driven by the "Show on Homepage" toggle) --}}
     @if($featuredProducts->count() > 0)
     <section class="py-16 sm:py-20 bg-gray-50 dark:bg-gray-900/40" aria-labelledby="featured-heading">
         <div class="max-w-7xl mx-auto px-4">
@@ -217,8 +184,40 @@
     </section>
     @endif
 
-    {{-- ── 4. 3D SHOWCASE ── --}}
-    <section class="py-16 sm:py-20" aria-labelledby="showcase-heading">
+    {{-- ── 4. WHY CHOOSE WIN WIN ── (value props build trust right after the products) --}}
+    <section class="py-16 sm:py-20" aria-labelledby="why-heading">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="mb-10" data-aos="fade-up">
+                <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
+                    <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
+                    {{ __('The Experience') }}
+                </span>
+                <h2 id="why-heading" class="text-3xl sm:text-4xl text-brand-black dark:text-white mb-3">
+                    {{ __('Why Choose') }} <span class="text-brand-red">Win Win</span>?
+                </h2>
+                <p class="text-gray-500 dark:text-gray-400 max-w-md">{{ __('Expertise, Trust, and Professional Installation.') }}</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                @foreach([
+                    [$icon('badge-check'), __('Curated Selection'), __('We only stock high-quality accessories that we personally test and recommend.')],
+                    [$icon('map-pin'), __('Visit Showroom'), __('Come see the products in person before making a decision. No guesswork.')],
+                    ['<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">' . $waGlyph . '</svg>', __('Instant Support'), __('Message us on WhatsApp for quick advice or to check stock availability.')],
+                    [$icon('wrench'), __('Expert Installation'), __('Professional fitting services ensure your new gear works perfectly and looks great.')],
+                ] as $i => [$cardIcon, $title, $description])
+                <div data-aos="fade-up" data-aos-delay="{{ $i * 75 }}"
+                     class="group p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl transition-all duration-300 hover:border-brand-red/50 hover:shadow-md hover:-translate-y-0.5">
+                    <div class="w-11 h-11 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center mb-5 transition-colors duration-300 group-hover:bg-brand-red group-hover:text-white" aria-hidden="true">{!! $cardIcon !!}</div>
+                    <h3 class="text-xl text-brand-black dark:text-white mb-2.5">{{ $title }}</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{{ $description }}</p>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- ── 5. 3D SHOWCASE ── (interactive differentiator / delight moment) --}}
+    <section class="py-16 sm:py-20 bg-gray-50 dark:bg-gray-900/40" aria-labelledby="showcase-heading">
         {{-- Draco decoder must be configured before model-viewer loads; the local
              path keeps it inside our CSP (Google's CDN is not allowlisted). --}}
         <script>self.ModelViewerElement = self.ModelViewerElement || {}; self.ModelViewerElement.dracoDecoderLocation = '{{ asset('draco') }}/';</script>
@@ -286,39 +285,7 @@
         </div>
     </section>
 
-    {{-- ── 5. WHY CHOOSE WIN WIN ── --}}
-    <section class="py-16 sm:py-20" aria-labelledby="why-heading">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="mb-10" data-aos="fade-up">
-                <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
-                    <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
-                    {{ __('The Experience') }}
-                </span>
-                <h2 id="why-heading" class="text-3xl sm:text-4xl text-brand-black dark:text-white mb-3">
-                    {{ __('Why Choose') }} <span class="text-brand-red">Win Win</span>?
-                </h2>
-                <p class="text-gray-500 dark:text-gray-400 max-w-md">{{ __('Expertise, Trust, and Professional Installation.') }}</p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                @foreach([
-                    [$icon('badge-check'), __('Curated Selection'), __('We only stock high-quality accessories that we personally test and recommend.')],
-                    [$icon('map-pin'), __('Visit Showroom'), __('Come see the products in person before making a decision. No guesswork.')],
-                    ['<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">' . $waGlyph . '</svg>', __('Instant Support'), __('Message us on WhatsApp for quick advice or to check stock availability.')],
-                    [$icon('wrench'), __('Expert Installation'), __('Professional fitting services ensure your new gear works perfectly and looks great.')],
-                ] as $i => [$cardIcon, $title, $description])
-                <div data-aos="fade-up" data-aos-delay="{{ $i * 75 }}"
-                     class="group p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl transition-all duration-300 hover:border-brand-red/50 hover:shadow-md hover:-translate-y-0.5">
-                    <div class="w-11 h-11 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center mb-5 transition-colors duration-300 group-hover:bg-brand-red group-hover:text-white" aria-hidden="true">{!! $cardIcon !!}</div>
-                    <h3 class="text-xl text-brand-black dark:text-white mb-2.5">{{ $title }}</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{{ $description }}</p>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    {{-- ── 6. CUSTOMER REVIEWS (TESTIMONIALS) ── --}}
+    {{-- ── 6. SOCIAL PROOF ── (testimonials + partner brands together build credibility) --}}
     @if($testimonials->count() > 0)
     <section class="py-16 sm:py-20" aria-labelledby="testimonials-heading">
         <div class="max-w-7xl mx-auto px-4">
@@ -392,6 +359,39 @@
                 @endforeach
             </div>
             @endif
+        </div>
+    </section>
+    @endif
+
+    {{-- ── 6b. PARTNER BRANDS ── (credibility cue, sits with the social proof) --}}
+    @if($brands->count() > 0)
+    <section class="py-12 border-t border-gray-200 dark:border-gray-700/60 overflow-hidden" aria-label="{{ __('Brands we carry') }}">
+        <div class="max-w-7xl mx-auto px-4 mb-7">
+            <p class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500">{{ __('Official Partners & Brands') }}</p>
+        </div>
+
+        <div class="brand-marquee-wrapper relative overflow-hidden" aria-hidden="true">
+            <div class="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[rgb(var(--app-bg-rgb))] to-transparent z-10 pointer-events-none"></div>
+            <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[rgb(var(--app-bg-rgb))] to-transparent z-10 pointer-events-none"></div>
+
+            <div class="brand-track flex w-max items-center">
+                @foreach([1,2] as $_)
+                    @foreach($brands as $brand)
+                    <div class="brand-item flex items-center justify-center min-w-[140px] pr-24">
+                        @if($brand->logo)
+                            <img src="{{ Storage::url($brand->logo) }}"
+                                 alt="{{ $brand->name }}"
+                                 class="h-10 w-auto object-contain opacity-40 hover:opacity-100 transition-all duration-500 filter grayscale hover:grayscale-0"
+                                 loading="lazy">
+                        @else
+                            <span class="text-gray-300 dark:text-gray-600 hover:text-brand-red dark:hover:text-gray-300 font-black text-xl tracking-widest uppercase transition-colors duration-300 whitespace-nowrap cursor-default">
+                                {{ $brand->name }}
+                            </span>
+                        @endif
+                    </div>
+                    @endforeach
+                @endforeach
+            </div>
         </div>
     </section>
     @endif
