@@ -585,7 +585,7 @@
                                 aria-label="{{ __('Select language') }}"
                                 aria-expanded="false"
                                 aria-haspopup="true"
-                                class="flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-lg text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 hover:ring-brand-red/50 hover:text-brand-red transition-colors duration-200">
+                                class="flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-lg text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-brand-red transition-colors duration-200">
                             <svg class="w-3.5 h-3.5 text-brand-red" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                                 <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
                             </svg>
@@ -628,7 +628,7 @@
                     </div>
 
                     <!-- Theme switcher (segmented control) — hidden on xs, visible sm+ -->
-                    <div id="theme-wrapper" class="hidden sm:flex items-center h-9 p-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 gap-0.5">
+                    <div id="theme-wrapper" class="hidden sm:flex items-center h-9 p-0.5 rounded-lg bg-gray-100 dark:bg-gray-900 gap-0.5">
                         <button class="theme-option w-8 h-full flex items-center justify-center rounded-md transition-colors duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="light" title="{{ __('Light mode') }}" aria-label="{{ __('Light mode') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
@@ -778,7 +778,7 @@
                 <!-- Theme toggle inside mobile menu (xs screens) -->
                 <div class="sm:hidden flex items-center gap-2 px-3 py-2 mb-1">
                     <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 mr-1">{{ __('Theme') }}:</span>
-                    <div class="flex items-center h-9 p-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 gap-0.5">
+                    <div class="flex items-center h-9 p-0.5 rounded-lg bg-gray-100 dark:bg-gray-900 gap-0.5">
                         <button class="theme-option w-8 h-full flex items-center justify-center rounded-md transition-colors duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="light" title="{{ __('Light mode') }}" aria-label="{{ __('Light mode') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
                         </button>
@@ -1074,19 +1074,9 @@
                     clearTimeout(timer);
                     if (langAbort !== controller) return; // superseded by a newer switch
                     if (window.Livewire && typeof Livewire.navigate === 'function') {
-                        // Switching language only swaps text — keep the reader where
-                        // they were instead of letting Livewire jump to the top.
-                        // Restore after paint (two rAFs) so it lands after Livewire's
-                        // own scroll-to-top during the swap.
-                        var y = window.scrollY;
-                        var restore = function () {
-                            document.removeEventListener('livewire:navigated', restore);
-                            requestAnimationFrame(function () {
-                                requestAnimationFrame(function () { window.scrollTo(0, y); });
-                            });
-                        };
-                        document.addEventListener('livewire:navigated', restore);
-                        Livewire.navigate(location.href);
+                        // Switching language only swaps text — keep the reader exactly
+                        // where they are. Livewire's navigate supports this natively.
+                        Livewire.navigate(location.href, { preserveScroll: true });
                     } else {
                         location.reload();
                     }
