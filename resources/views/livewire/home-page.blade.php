@@ -477,14 +477,17 @@
             let pos = 0, speed = BASE_SPEED, target = BASE_SPEED, halfW = 0;
             function measure() { halfW = track.scrollWidth / 2; }
             measure();
+            // Start one copy to the left so there's content to reveal while the
+            // track scrolls rightward.
+            pos = -halfW;
             window.addEventListener('resize', measure);
             wrapper.addEventListener('mouseenter', () => { target = 0; });
             wrapper.addEventListener('mouseleave', () => { target = BASE_SPEED; });
             let rafId;
             function tick() {
                 speed += (target - speed) * 0.1;
-                pos   -= speed;
-                if (pos <= -halfW) pos += halfW;
+                pos   += speed;            // move the track right
+                if (pos >= 0) pos -= halfW; // seamless wrap (two identical copies)
                 track.style.transform = 'translate3d(' + pos + 'px, 0, 0)';
                 rafId = requestAnimationFrame(tick);
             }
