@@ -122,19 +122,19 @@
                 <div wire:loading wire:target="search,category,minPrice,maxPrice,nextPage,previousPage,gotoPage"
                      class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" aria-hidden="true">
                     @for($i = 0; $i < 6; $i++)
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col animate-pulse">
-                        <div class="bg-gray-200 dark:bg-gray-700 h-52"></div>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col">
+                        <div class="skeleton h-52 !rounded-none"></div>
                         <div class="p-4 pb-3 flex-1">
-                            <div class="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                            <div class="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
-                            <div class="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
-                            <div class="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
-                            <div class="h-3 w-5/6 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
-                            <div class="h-5 w-24 bg-gray-200 dark:bg-gray-700 rounded mt-1"></div>
+                            <div class="skeleton h-3 w-16 mb-2"></div>
+                            <div class="skeleton h-4 w-3/4 mb-1"></div>
+                            <div class="skeleton h-4 w-1/2 mb-3"></div>
+                            <div class="skeleton h-3 w-full mb-1"></div>
+                            <div class="skeleton h-3 w-5/6 mb-3"></div>
+                            <div class="skeleton h-5 w-24 mt-1"></div>
                         </div>
                         <div class="px-4 pb-4 flex gap-2">
-                            <div class="h-9 flex-1 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-                            <div class="h-9 flex-1 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                            <div class="skeleton h-9 flex-1 !rounded-lg"></div>
+                            <div class="skeleton h-9 flex-1 !rounded-lg"></div>
                         </div>
                     </div>
                     @endfor

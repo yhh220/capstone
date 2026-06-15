@@ -91,20 +91,24 @@
                 @if($product->stock > 0)
                 <div class="flex flex-col sm:flex-row gap-3 mb-6">
                     <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-2">
+                        <x-tooltip text="{{ __('Decrease') }}">
                         <button wire:click="decrementQuantity"
                                 class="w-10 h-10 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-bold text-lg"
                                 aria-label="{{ __('Decrease quantity') }}">
                             −
                         </button>
+                        </x-tooltip>
                         <span class="w-12 text-center font-bold text-gray-800 dark:text-gray-200 tabular-nums"
                               wire:key="qty-{{ $quantity }}">
                             {{ $quantity }}
                         </span>
+                        <x-tooltip text="{{ __('Increase') }}">
                         <button wire:click="incrementQuantity"
                                 class="w-10 h-10 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-bold text-lg"
                                 aria-label="{{ __('Increase quantity') }}">
                             +
                         </button>
+                        </x-tooltip>
                     </div>
                     <button wire:click="addToCart"
                             class="group relative overflow-hidden flex-1 bg-brand-red text-white py-3 px-8 rounded-full font-bold text-lg hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2">

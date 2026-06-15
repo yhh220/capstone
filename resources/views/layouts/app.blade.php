@@ -255,10 +255,24 @@
             box-shadow: 0 16px 40px rgba(0,0,0,0.12);
         }
 
-        /* ── Shimmer skeleton (optional, future use) ─────── */
+        /* ── Shimmer skeleton ────────────────────────────── */
         @keyframes shimmer {
             from { background-position: -200% 0; }
             to   { background-position:  200% 0; }
+        }
+        .skeleton {
+            background-image: linear-gradient(100deg,
+                rgba(0,0,0,0.06) 30%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.06) 70%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s ease-in-out infinite;
+            border-radius: 0.375rem;
+        }
+        .dark .skeleton {
+            background-image: linear-gradient(100deg,
+                rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.11) 50%, rgba(255,255,255,0.05) 70%);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .skeleton { animation: none; }
         }
 
         /* ── AOS customisation ───────────────────────────── */
@@ -681,6 +695,7 @@
 
                     <!-- Cart icon (only when shopping enabled) -->
                     @if($shoppingEnabled)
+                    <x-tooltip text="{{ __('Cart') }}" position="bottom">
                     <button type="button"
                             @click="cartOpen = true"
                             aria-label="{{ __('Open cart') }}"
@@ -694,6 +709,7 @@
                         </span>
                         @endif
                     </button>
+                    </x-tooltip>
                     @endif
                     </div>
 
