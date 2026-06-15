@@ -45,7 +45,7 @@ class ChatbotFaqResource extends Resource
                 ->default(80)
                 ->minValue(1)
                 ->maxValue(200)
-                ->helperText('Higher priority wins when several topics match one message. Built-in topics use 10–75, so 80+ overrides them.'),
+                ->helperText('When a customer message matches several topics, the higher priority is answered first. Most topics sit at 30–75; use a higher number to make this one win.'),
             Forms\Components\Textarea::make('reply_en')
                 ->required()
                 ->rows(4)

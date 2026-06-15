@@ -81,6 +81,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call(CarModelSeeder::class);
+        $this->call(ChatbotFaqSeeder::class);
 
         $services = [
             [

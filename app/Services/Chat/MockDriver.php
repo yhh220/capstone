@@ -31,9 +31,27 @@ class MockDriver implements ChatServiceInterface
      */
     private function rules(): array
     {
+        // Admin-managed FAQs (Chatbot FAQs) are the single source of truth once
+        // seeded. The built-in knowledge below is the fallback for a fresh,
+        // unseeded database AND the seed source for that table — so there is one
+        // set of QnA, never code + DB competing (which used to double-answer).
+        $db = $this->dbFaqRules();
+
+        return $db !== [] ? $db : $this->builtinKnowledge();
+    }
+
+    /**
+     * Built-in QnA, also used to seed the editable Chatbot FAQs table. Each
+     * rule's keywords mix all three languages in one list; the language
+     * handling (Traditional→Simplified, typo tolerance, mixed-language
+     * matching, per-message reply language) all lives in chat(), so moving the
+     * content to the DB changes nothing about how matching works.
+     */
+    public function builtinKnowledge(): array
+    {
         $p = $this->phone;
 
-        return array_merge($this->dbFaqRules(), [
+        return [
             // Greetings (low priority — a real topic should win)
             [
                 'priority' => 10,
@@ -396,7 +414,7 @@ class MockDriver implements ChatServiceInterface
                     'zh' => "不客气！😊 如有其他问题随时来问。期待在 Win Win Car Studio 见到您！🚗✨",
                 ],
             ],
-        ]);
+        ];
     }
 
     /**
