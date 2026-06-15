@@ -378,7 +378,7 @@
                 @foreach([1,2] as $_)
                     @foreach($brands as $brand)
                     <div class="brand-item flex items-center justify-center min-w-[140px] pr-24">
-                        @if($brand->logo)
+                        @if($brand->display_type === 'image' && $brand->logo)
                             <img src="{{ Storage::url($brand->logo) }}"
                                  alt="{{ $brand->name }}"
                                  class="h-10 w-auto object-contain opacity-40 hover:opacity-100 transition-all duration-500 filter grayscale hover:grayscale-0"
