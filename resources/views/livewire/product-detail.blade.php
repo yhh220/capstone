@@ -78,17 +78,19 @@
                             <span class="text-3xl font-black text-brand-red">RM {{ number_format($product->price, 2) }}</span>
                         @endif
                     </div>
-                    <div class="text-sm {{ $product->stock > 0 ? 'text-green-600' : 'text-red-500' }} font-semibold flex items-center gap-1.5">
-                        @if($product->stock > 0)
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg> {{ __('In Stock') }} ({{ $product->stock }} {{ __('available') }})
+                    {{-- Stock / backorder status (out-of-stock items can be backordered) --}}
+                    <div class="text-sm font-semibold flex items-center gap-1.5">
+                        @if($product->stock > 5)
+                            <span class="text-green-600 dark:text-green-400 inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-green-500" aria-hidden="true"></span>{{ __('In Stock') }}</span>
+                        @elseif($product->stock > 0)
+                            <span class="text-amber-600 dark:text-amber-400 inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500" aria-hidden="true"></span>{{ __('Only :n left', ['n' => $product->stock]) }}</span>
                         @else
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg> {{ __('Out of Stock') }}
+                            <span class="text-amber-600 dark:text-amber-400 inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500" aria-hidden="true"></span>{{ __('On backorder · ships in ~:days days', ['days' => (int) setting('BACKORDER_DAYS', 7)]) }}</span>
                         @endif
                     </div>
                 </div>
 
-                {{-- Quantity Selector + Add to Cart --}}
-                @if($product->stock > 0)
+                {{-- Quantity Selector + Add to Cart (out-of-stock items can be backordered) --}}
                 <div class="flex flex-col sm:flex-row gap-3 mb-6">
                     <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-2">
                         <x-tooltip text="{{ __('Decrease') }}">
@@ -117,13 +119,6 @@
                         <span class="relative z-10">{{ __('Add to Cart') }}</span>
                     </button>
                 </div>
-                @else
-                <div class="mb-6">
-                    <div class="bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 py-3 px-8 rounded-full font-bold text-lg text-center">
-                        {{ __('Out of Stock') }}
-                    </div>
-                </div>
-                @endif
 
                 <div class="flex flex-col sm:flex-row gap-3 mb-8">
                     <a href="{{ $whatsAppUrl }}"

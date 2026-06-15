@@ -33,7 +33,8 @@ class ProductDetail extends Component
 
     public function incrementQuantity(): void
     {
-        if ($this->quantity < ($this->product->stock ?? 99)) {
+        // Not stock-limited — out-of-stock items can be backordered.
+        if ($this->quantity < CartPage::MAX_QTY) {
             $this->quantity++;
         }
     }
@@ -47,13 +48,10 @@ class ProductDetail extends Component
 
     public function addToCart(): void
     {
-        if ($this->product->stock === 0) {
-            session()->flash('error', __('Out of stock!'));
-            return;
-        }
-
+        // No stock gate — out-of-stock items can be backordered.
         CartPage::addToCart($this->product->id, $this->quantity);
-        session()->flash('success', __('Added to cart!'));
+        $this->dispatch('cart-updated', count: CartPage::getCartCount()); // badge + mini-cart sync
+        $this->dispatch('cart-added');                                    // toast
         $this->quantity = 1;
     }
 

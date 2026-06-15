@@ -46,7 +46,8 @@ class ProductsPage extends Component
     public function addToCart(int $productId): void
     {
         CartPage::addToCart($productId);
-        session()->flash('success', __('Added to cart!'));
+        $this->dispatch('cart-updated', count: CartPage::getCartCount()); // badge + mini-cart sync
+        $this->dispatch('cart-added');                                    // toast
     }
 
     public function render()

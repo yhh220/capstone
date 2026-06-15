@@ -186,14 +186,18 @@
                                         <span class="text-brand-red font-black text-lg">RM {{ number_format($product->price, 2) }}</span>
                                     @endif
                                 </div>
-                                <div class="text-xs mt-1 {{ $product->stock > 0 ? 'text-green-500' : 'text-red-400' }}">
-                                    {{ $product->stock > 0 ? __('In Stock') . ' (' . $product->stock . ')' : __('Out of Stock') }}
-                                </div>
+                                @if($product->stock > 5)
+                                    <div class="text-xs mt-1 text-green-500">{{ __('In Stock') }}</div>
+                                @elseif($product->stock > 0)
+                                    <div class="text-xs mt-1 text-amber-500">{{ __('Only :n left', ['n' => $product->stock]) }}</div>
+                                @else
+                                    <div class="text-xs mt-1 text-amber-500">{{ __('On backorder · ships in ~:days days', ['days' => (int) setting('BACKORDER_DAYS', 7)]) }}</div>
+                                @endif
                                 @endif
                             </div>
                         </a>
                         <div class="px-4 pb-4 flex gap-2">
-                            @if($shoppingEnabled && $product->stock > 0)
+                            @if($shoppingEnabled)
                                 <button wire:click="addToCart({{ $product->id }})"
                                         wire:loading.attr="disabled"
                                         wire:target="addToCart({{ $product->id }})"

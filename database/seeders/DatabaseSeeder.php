@@ -163,6 +163,7 @@ class DatabaseSeeder extends Seeder
             ['key' => 'BUSINESS_HOURS_END',      'value' => '18:00', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'BUSINESS_CLOSED_WEEKDAYS','value' => '5',     'created_at' => now(), 'updated_at' => now()],
             ['key' => 'BOOKING_SLOT_MINUTES',    'value' => '30',    'created_at' => now(), 'updated_at' => now()],
+            ['key' => 'BACKORDER_DAYS',          'value' => '7',     'created_at' => now(), 'updated_at' => now()],
         ]);
 
         $brands = [

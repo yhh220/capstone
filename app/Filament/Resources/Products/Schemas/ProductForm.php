@@ -49,16 +49,24 @@ class ProductForm
                 TextInput::make('price')
                     ->required()
                     ->numeric()
+                    ->minValue(0)
+                    ->maxValue(1000000)
                     ->prefix('RM'),
                 TextInput::make('sale_price')
                     ->numeric()
+                    ->minValue(0)
+                    ->lte('price')
+                    ->helperText('Optional. Must not exceed the price.')
                     ->prefix('RM'),
                 TextInput::make('sku')
                     ->label('SKU'),
                 TextInput::make('stock')
                     ->required()
-                    ->numeric()
-                    ->default(0),
+                    ->integer()
+                    ->minValue(0)
+                    ->maxValue(999)
+                    ->default(0)
+                    ->helperText('On-hand units (0–999). Out-of-stock items can still be backordered.'),
                 KeyValue::make('specs')
                     ->columnSpanFull()
                     ->keyLabel('Specification')

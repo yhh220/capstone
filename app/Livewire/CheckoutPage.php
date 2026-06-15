@@ -146,16 +146,13 @@ class CheckoutPage extends Component
                     ->get()
                     ->keyBy('id');
 
-                // Pre-flight stock check — fail the whole order if anything is short.
+                // A product that vanished or was deactivated can't be ordered.
+                // Insufficient stock is fine — it's a backorder (stock may go
+                // negative, representing units owed).
                 foreach ($cartItems as $cartItem) {
                     $product = $products->get($cartItem->product_id);
-                    if (! $product) {
+                    if (! $product || ! $product->is_active) {
                         throw new \RuntimeException(__('A product in your cart is no longer available.'));
-                    }
-                    if (($product->stock ?? 0) < $cartItem->quantity) {
-                        throw new \RuntimeException(
-                            __('Insufficient stock for ":name" — only :stock left.', ['name' => $product->name, 'stock' => $product->stock])
-                        );
                     }
                 }
 

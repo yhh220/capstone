@@ -70,4 +70,50 @@ class CheckoutPageTest extends TestCase
 
         $this->assertSame(1, $product->fresh()->stock);
     }
+
+    public function test_out_of_stock_product_can_be_backordered(): void
+    {
+        $user = User::create([
+            'name' => 'Backorder Buyer',
+            'email' => 'backorder@example.test',
+            'password' => 'password',
+            'role' => 'client',
+        ]);
+
+        // Zero on-hand stock — should still be orderable as a backorder.
+        $product = Product::create([
+            'name' => 'Backorder Subwoofer',
+            'slug' => 'backorder-subwoofer',
+            'price' => 500,
+            'stock' => 0,
+            'is_active' => true,
+        ]);
+
+        CartItem::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'quantity' => 2,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(CheckoutPage::class)
+            ->set('customerName', 'Backorder Buyer')
+            ->set('customerEmail', 'backorder@example.test')
+            ->set('customerPhone', '0123456789')
+            ->set('street', '1 Jalan Test')
+            ->set('city', 'Shah Alam')
+            ->set('postcode', '40150')
+            ->set('state', 'Selangor')
+            ->call('placeOrder')
+            ->assertSet('step', 3)
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('orders', [
+            'user_id' => $user->id,
+            'total_amount' => 1000,
+        ]);
+
+        // Stock goes negative to represent the two units now owed.
+        $this->assertSame(-2, $product->fresh()->stock);
+    }
 }

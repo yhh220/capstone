@@ -335,6 +335,15 @@
         .lang-chevron { transition: transform 0.25s ease; }
         #lang-btn[aria-expanded="true"] .lang-chevron { transform: rotate(180deg); }
 
+        /* Cart badge pops when the count changes */
+        @keyframes cartBump {
+            0% { transform: scale(0.6); }
+            55% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+        .cart-badge-bump { animation: cartBump 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @media (prefers-reduced-motion: reduce) { .cart-badge-bump { animation: none; } }
+
         /* ═══════════════════════════════════════════════
            UNIFIED BUTTON SYSTEM
            Primary   .btn-primary   — red fill, white text
@@ -530,13 +539,12 @@
 
     @php
         $shoppingEnabled = setting('ONLINE_SHOPPING_ENABLED') === 'true';
-        $cartCount = 0;
-        if ($shoppingEnabled) {
-            $cartCount = (int) \App\Models\CartItem::forCurrentOwner()->sum('quantity');
-        }
+        // Initial badge count; JS keeps #cart-count-badge live on 'cart-updated'.
+        $cartCount = $shoppingEnabled ? (int) \App\Models\CartItem::forCurrentOwner()->sum('quantity') : 0;
     @endphp
 
     <nav x-data="{ cartOpen: false }"
+         @open-cart.window="cartOpen = true"
          class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50 border-b border-gray-100 dark:border-gray-700"
          role="navigation"
          aria-label="{{ __('Main navigation') }}">
@@ -735,7 +743,7 @@
                     </div>
                     @endif
 
-                    <!-- Cart icon (only when shopping enabled) -->
+                    <!-- Cart icon + live count (only when shopping enabled) -->
                     @if($shoppingEnabled)
                     <x-tooltip text="{{ __('Cart') }}" position="bottom">
                     <button type="button"
@@ -745,11 +753,11 @@
                         <svg class="w-4 h-4 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-[10deg]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
                         </svg>
-                        @if($cartCount > 0)
-                        <span class="absolute -top-1 -right-1 bg-brand-red text-white text-[10px] leading-none font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center transform transition-transform duration-300 group-hover:scale-110 group-hover:bg-white group-hover:text-brand-red shadow-sm">
-                            {{ $cartCount > 99 ? '99+' : $cartCount }}
+                        <span id="cart-count-badge"
+                              @if($cartCount <= 0) style="display:none;" @endif
+                              class="absolute -top-1 -right-1 bg-brand-red text-white text-[10px] leading-none font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center shadow-sm group-hover:bg-white group-hover:text-brand-red">
+                            {{ $cartCount > 9 ? '9+' : $cartCount }}
                         </span>
-                        @endif
                     </button>
                     </x-tooltip>
                     @endif
@@ -906,6 +914,27 @@
                     @endif
                 </div>
             </aside>
+        </div>
+
+        {{-- Add-to-cart toast — fires on the 'cart-added' Livewire event --}}
+        <div x-data="{ show: false, timer: null }"
+             @cart-toast.window="show = true; clearTimeout(timer); timer = setTimeout(() => show = false, 2400)"
+             x-show="show"
+             x-cloak
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-3"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 translate-y-3"
+             class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 bg-gray-900 dark:bg-gray-800 text-white pl-4 pr-2 py-2 rounded-full shadow-2xl ring-1 ring-white/10"
+             role="status" aria-live="polite" style="display:none;">
+            <svg class="w-5 h-5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="text-sm font-semibold">{{ __('Added to cart') }}</span>
+            <button type="button" @click="$dispatch('open-cart'); show = false"
+                    class="text-xs font-bold bg-brand-red hover:bg-red-700 text-white px-3 py-1.5 rounded-full transition-colors">
+                {{ __('View cart') }}
+            </button>
         </div>
         @endif
     </nav>
@@ -1136,6 +1165,33 @@
     @livewire('chatbot')
 
     @livewireScripts
+
+    {{-- Cart events: instantly update the header badge from the response payload
+         (no extra round-trip) and toast on add. --}}
+    <script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('cart-updated', (e) => {
+                var count = 0;
+                if (e && typeof e === 'object') {
+                    count = ('count' in e) ? e.count : (Array.isArray(e) && e[0] ? (e[0].count || 0) : 0);
+                }
+                count = parseInt(count, 10) || 0;
+                var badge = document.getElementById('cart-count-badge');
+                if (!badge) return;
+                if (count > 0) {
+                    badge.textContent = count > 9 ? '9+' : count;
+                    badge.style.display = '';
+                    badge.classList.remove('cart-badge-bump');
+                    void badge.offsetWidth;            // restart the pop animation
+                    badge.classList.add('cart-badge-bump');
+                } else {
+                    badge.style.display = 'none';
+                }
+            });
+            Livewire.on('cart-added', () => window.dispatchEvent(new CustomEvent('cart-toast')));
+        });
+    </script>
+
     @stack('scripts')
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>

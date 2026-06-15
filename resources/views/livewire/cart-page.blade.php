@@ -40,17 +40,13 @@
                         <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             RM {{ number_format($item->product?->current_price ?? 0, 2) }} {{ __('each') }}
                         </div>
-                        @if(!$item->product || ($item->product->stock ?? 0) <= 0)
+                        @if(!$item->product || !$item->product->is_active)
                         <div class="mt-2 text-xs font-semibold text-red-600 dark:text-red-400">
-                            {{ __('This item is currently out of stock. Please remove it before checkout.') }}
+                            {{ __('This item is no longer available. Please remove it before checkout.') }}
                         </div>
-                        @elseif($item->quantity > $item->product->stock)
+                        @elseif($item->quantity > ($item->product->stock ?? 0))
                         <div class="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                            {{ __('Only :stock left in stock. Please reduce the quantity before checkout.', ['stock' => $item->product->stock]) }}
-                        </div>
-                        @elseif($item->product->stock <= 3)
-                        <div class="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                            {{ __('Low stock: only :stock left.', ['stock' => $item->product->stock]) }}
+                            {{ __('On backorder · ships in ~:days days', ['days' => (int) setting('BACKORDER_DAYS', 7)]) }}
                         </div>
                         @endif
 
@@ -72,7 +68,7 @@
                                 <button wire:click="incrementQuantity({{ $item->id }})"
                                         wire:loading.attr="disabled"
                                         wire:target="incrementQuantity({{ $item->id }})"
-                                        @if($item->product && $item->quantity >= $item->product->stock) disabled @endif
+                                        @if($item->quantity >= 99) disabled @endif
                                         class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-bold disabled:opacity-40 disabled:cursor-not-allowed"
                                         aria-label="{{ __('Increase quantity') }}">
                                     +
@@ -130,7 +126,7 @@
 
                     @if($this->hasStockWarnings)
                     <div class="mt-6 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-sm font-semibold text-red-700 dark:text-red-300 text-center">
-                        {{ __('Please resolve stock warnings before checkout.') }}
+                        {{ __('Please remove unavailable items before checkout.') }}
                     </div>
                     <span class="block w-full bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-center py-3.5 rounded-full font-bold text-lg mt-3 cursor-not-allowed">
                         {{ __('Checkout unavailable') }}

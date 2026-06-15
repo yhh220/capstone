@@ -39,6 +39,7 @@ class SettingResource extends Resource
                     'BUSINESS_HOURS_END'      => 'Business End Time',
                     'BUSINESS_CLOSED_WEEKDAYS'=> 'Closed Weekdays',
                     'BOOKING_SLOT_MINUTES'    => 'Appointment Slot Length',
+                    'BACKORDER_DAYS'          => 'Backorder Lead Time (days)',
                     default                   => $state,
                 }),
             Forms\Components\TextInput::make('value')
@@ -49,6 +50,7 @@ class SettingResource extends Resource
                     'BUSINESS_CLOSED_WEEKDAYS' => 'e.g. 5 for Friday, or 0,5 for Sunday and Friday',
                     'ONLINE_SHOPPING_ENABLED' => 'true or false',
                     'BOOKING_SLOT_MINUTES' => 'e.g. 30',
+                    'BACKORDER_DAYS' => 'e.g. 7',
                     default => '',
                 })
                 ->helperText(fn (Setting $record): ?string => match ($record->key) {
@@ -57,6 +59,7 @@ class SettingResource extends Resource
                     'BUSINESS_HOURS_END'      => 'The latest time your shop accepts appointments (24h format, e.g., 18:00).',
                     'BUSINESS_CLOSED_WEEKDAYS'=> 'Comma-separated weekday numbers: 0=Sunday, 1=Monday, ... 5=Friday, 6=Saturday.',
                     'BOOKING_SLOT_MINUTES'    => 'How long each appointment slot is, in minutes (e.g. 30). Controls the times customers can pick.',
+                    'BACKORDER_DAYS'          => 'How many days to tell customers an out-of-stock (backordered) item takes to arrive.',
                     default                   => 'Enter the value for this setting.',
                 }),
         ]);
@@ -77,6 +80,7 @@ class SettingResource extends Resource
                         'BUSINESS_HOURS_END'      => 'Business End Time',
                         'BUSINESS_CLOSED_WEEKDAYS'=> 'Closed Weekdays',
                         'BOOKING_SLOT_MINUTES'    => 'Appointment Slot Length',
+                        'BACKORDER_DAYS'          => 'Backorder Lead Time (days)',
                         default                   => $state,
                     })
                     ->description(fn (Setting $record): string => match ($record->key) {
@@ -85,6 +89,7 @@ class SettingResource extends Resource
                         'BUSINESS_HOURS_END'      => 'Closing time for booking services.',
                         'BUSINESS_CLOSED_WEEKDAYS'=> 'Weekdays where bookings are unavailable.',
                         'BOOKING_SLOT_MINUTES'    => 'Length of each appointment slot, in minutes.',
+                        'BACKORDER_DAYS'          => 'Days quoted for out-of-stock (backordered) items to arrive.',
                         default                   => 'System configuration setting.',
                     }),
                 TextColumn::make('value')

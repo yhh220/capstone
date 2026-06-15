@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\CartItem;
 use App\Models\Product;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class CartPage extends Component
@@ -13,6 +14,16 @@ class CartPage extends Component
 
     /** Compact single-column layout for the slide-over drawer (vs the full /cart page). */
     public bool $compact = false;
+
+    /** Sane per-line cap — customers can backorder beyond on-hand stock. */
+    public const MAX_QTY = 99;
+
+    /** Re-render when the cart changes anywhere (mini-cart drawer stays in sync). */
+    #[On('cart-updated')]
+    public function refreshCart(): void
+    {
+        // Computed cartItems/subtotal re-query on render; this just triggers it.
+    }
 
     public function mount(): void
     {
@@ -34,10 +45,14 @@ class CartPage extends Component
         );
     }
 
+    /**
+     * Only a genuinely unavailable product (deleted or deactivated) blocks
+     * checkout. Ordering more than on-hand stock is fine — it's a backorder.
+     */
     public function getHasStockWarningsProperty(): bool
     {
         return $this->cartItems->contains(fn ($item): bool =>
-            !$item->product || ($item->product->stock ?? 0) < $item->quantity
+            !$item->product || !$item->product->is_active
         );
     }
 
@@ -45,8 +60,9 @@ class CartPage extends Component
     {
         $item = CartItem::forCurrentOwner()->where('id', $cartItemId)->first();
 
-        if ($item && $item->quantity < ($item->product?->stock ?? 99)) {
+        if ($item && $item->quantity < self::MAX_QTY) {
             $item->increment('quantity');
+            $this->dispatch('cart-updated', count: self::getCartCount());
         }
     }
 
@@ -60,31 +76,31 @@ class CartPage extends Component
             } else {
                 $item->decrement('quantity');
             }
+            $this->dispatch('cart-updated', count: self::getCartCount());
         }
     }
 
     public function removeItem(int $cartItemId): void
     {
         CartItem::forCurrentOwner()->where('id', $cartItemId)->delete();
+        $this->dispatch('cart-updated');
     }
 
     public function clearCart(): void
     {
         CartItem::forCurrentOwner()->delete();
+        $this->dispatch('cart-updated');
     }
 
     /**
-     * Static helper: add a product to the current owner's cart, clamped to stock.
+     * Static helper: add an active product to the current owner's cart. Not
+     * limited by stock — out-of-stock items can be backordered — only capped
+     * at a sane per-line maximum.
      */
     public static function addToCart(int $productId, int $quantity = 1): void
     {
-        $product = Product::find($productId);
+        $product = Product::where('is_active', true)->find($productId);
         if (!$product) {
-            return;
-        }
-
-        $maxStock = $product->stock ?? 99;
-        if ($maxStock <= 0) {
             return;
         }
 
@@ -93,10 +109,10 @@ class CartPage extends Component
             ->first();
 
         $currentQty = $existing?->quantity ?? 0;
-        $targetQty  = min($currentQty + $quantity, $maxStock);
+        $targetQty  = min($currentQty + $quantity, self::MAX_QTY);
 
         if ($targetQty <= $currentQty) {
-            return; // already at or above stock ceiling
+            return; // already at the per-line cap
         }
 
         if ($existing) {
