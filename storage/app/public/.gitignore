@@ -1,2 +1,7 @@
 *
 !.gitignore
+
+# Track brand logos so admin-uploaded marquee logos sync via git to teammates
+# (the rest of storage stays ignored).
+!brand-logos/
+!brand-logos/**
