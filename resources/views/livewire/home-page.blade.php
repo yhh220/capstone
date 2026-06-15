@@ -456,14 +456,9 @@
                         </p>
                     </div>
                     <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 shrink-0">
-                        <a href="{{ $whatsAppUrl }}" target="_blank" rel="noopener noreferrer"
-                           class="group inline-flex items-center justify-center gap-2.5 bg-[#25D366] text-white px-7 py-3.5 rounded-full font-extrabold text-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(37,211,102,0.35)] active:scale-95">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">{!! $waGlyph !!}</svg>
-                            {{ __('WhatsApp Support') }}
-                        </a>
-                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer"
-                           class="group inline-flex items-center justify-center gap-2.5 border border-white/25 text-white px-7 py-3.5 rounded-full font-extrabold text-sm transition-all duration-300 hover:bg-white/10 hover:border-white/50 hover:-translate-y-0.5 active:scale-95">
-                            {!! $icon('map-pin', 'w-5 h-5') !!}
+                        <x-btn.whatsapp :href="$whatsAppUrl" size="btn-lg">{{ __('WhatsApp Support') }}</x-btn.whatsapp>
+                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-lg">
+                            {!! $icon('map-pin', 'icon-md btn-ico') !!}
                             {{ __('Directions') }}
                         </a>
                     </div>

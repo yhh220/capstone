@@ -76,11 +76,7 @@
             <p class="text-gray-500 dark:text-gray-400">{{ __('Check our Facebook page for more photos!') }}</p>
             @php $fb = config('services.store.facebook_url'); @endphp
             @if($fb)
-            <a href="{{ $fb }}" target="_blank" rel="noopener noreferrer"
-               class="group relative inline-flex items-center gap-2 mt-4 bg-[#1877F2] text-white px-6 py-2.5 rounded-full font-semibold hover:shadow-[0_4px_15px_rgba(24,119,242,0.4)] hover:-translate-y-1 transition-all duration-300 active:scale-95 overflow-hidden">
-                <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
-                <span class="relative z-10">{{ __('Visit Our Facebook') }}</span>
-            </a>
+            <x-btn.facebook :href="$fb" class="mt-4 btn-pill">{{ __('Visit Our Facebook') }}</x-btn.facebook>
             @endif
         </div>
         @endif
