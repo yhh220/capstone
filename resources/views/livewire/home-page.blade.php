@@ -101,10 +101,9 @@
                    data-aos="fade-up" data-aos-delay="{{ $i * 50 }}"
                    class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 transition-all duration-300 hover:border-brand-red/50 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]">
                     <div class="w-10 h-10 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center mb-4 transition-colors duration-300 group-hover:bg-brand-red group-hover:text-white" aria-hidden="true">
-                        {!! $icon('layout-grid', 'w-5 h-5') !!}
+                        <i data-lucide="{{ $category->icon }}" class="w-5 h-5"></i>
                     </div>
                     <div class="font-bold text-sm text-gray-800 dark:text-gray-100 leading-snug group-hover:text-brand-red transition-colors">{{ __($category->name) }}</div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-1 font-medium">{{ $category->products_count }} {{ __('ITEMS') }}</div>
                 </a>
                 @endforeach
             </div>

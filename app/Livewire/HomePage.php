@@ -71,7 +71,6 @@ class HomePage extends Component
 
         return view('livewire.home-page', [
             'categories'      => Category::where('is_active', true)
-                ->withCount('products')
                 ->orderBy('sort_order')
                 ->orderBy('name')
                 ->take(6)
