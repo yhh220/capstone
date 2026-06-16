@@ -608,18 +608,19 @@ function initThree() {
     // 3. 渲染器 (Renderer)：引擎的核心，负责把 3D 画面计算并渲染到网页的画布 (Canvas) 上
     renderer = new THREE.WebGLRenderer({
         canvas: canvas,
-        antialias: !isLowEnd,
+        antialias: false, // MSAA multiplies fragment cost; too heavy for weak GPUs
         powerPreference: 'high-performance'
     });
     renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-    // Dynamic resolution: full res when still, lower res while dragging (motion
-    // hides the softness) so rotation stays smooth even on weak GPUs.
+    // Dynamic resolution: full res when still, render below native while dragging
+    // (motion hides the softness) so rotation stays smooth even on weak GPUs and
+    // 1x monitors.
     const idlePixelRatio = Math.min(window.devicePixelRatio, isLowEnd ? 1 : 1.5);
-    const dragPixelRatio = Math.min(window.devicePixelRatio, isLowEnd ? 0.6 : 1);
+    const dragPixelRatio = Math.min(window.devicePixelRatio, isLowEnd ? 0.5 : 0.7);
     renderer.setPixelRatio(idlePixelRatio);
     renderer.shadowMap.enabled = !isLowEnd;
     // The car is static while the camera orbits — so don't redraw the shadow map
-    // (all 2.3M shadow-casting verts) every frame. Refresh it only when geometry
+    // (all ~1.4M shadow-casting verts) every frame. Refresh it only when geometry
     // actually changes (part swaps, doors). This ~halves per-frame vertex work
     // during rotation, with no model/quality change.
     renderer.shadowMap.autoUpdate = false;
@@ -691,7 +692,7 @@ function initThree() {
 
     // 7. 加载 3D 模型 (GLTF Loader)
     // 模型用 meshopt 压缩 + 几何量化（位置 int16、法线 int8，显存约减半且不删三角形=不破面）、
-    // WebP 512 贴图、锁边简化(0.6)。低端设备再在渲染层降配：按需渲染、降像素比、关阴影、简化材质。
+    // WebP 512 贴图、锁边简化(~1.4M 顶点)。渲染层再降配：按需渲染、拖动降分辨率、静态阴影、关 MSAA、简化材质。
     const modelUrl = modal.dataset.modelUrl || '/models/3d/car-draco.glb';
     const loader = new GLTFLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);
@@ -924,8 +925,8 @@ function initThree() {
     // Stream the .glb so the bar reflects real downloaded bytes even when the
     // server omits Content-Length (gzip/chunked). Download fills 0–90%; the
     // last 10% covers mesh decode + scene setup so the bar never sits frozen
-    // at 100% while a slow device is still decoding ~2.3M vertices.
-    const KNOWN_SIZE = 19_800_000; // ~ car-draco.glb (meshopt), used only as a fallback total
+    // at 100% while a slow device is still decoding ~1.4M vertices.
+    const KNOWN_SIZE = 12_600_000; // ~ car-draco.glb (meshopt), used only as a fallback total
 
     streamGlb(modelUrl, KNOWN_SIZE, (frac) => setProgress(frac * 90))
         .then((buffer) => {
