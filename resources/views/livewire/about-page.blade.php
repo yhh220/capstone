@@ -31,11 +31,8 @@
                     <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
                         {{ __('Win Win Car Audio Auto Accessories was built around a simple idea: customers should be able to discover products online, then speak to real people before deciding what fits their car.') }}
                     </p>
-                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                        {{ __('Starting from a small workshop in Kuala Lumpur, the team focused on practical advice, in-person product viewing, and honest recommendations instead of pushing quick online purchases.') }}
-                    </p>
                     <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-                        {{ __('Today, the website works as a trusted showcase that helps customers understand the range first, then continue the conversation in the showroom or on WhatsApp.') }}
+                        {{ __('Starting from a small workshop in Kuala Lumpur, the team focused on practical advice, in-person product viewing, and honest recommendations instead of pushing quick online purchases.') }}
                     </p>
                 </div>
                 <div class="rounded-2xl overflow-hidden shadow-md" data-aos="fade-left" data-aos-delay="100">

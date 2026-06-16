@@ -14,27 +14,12 @@
     <div class="relative z-10 grid lg:grid-cols-2 min-h-screen">
 
         {{-- ════════ LEFT · BRAND PANEL ════════ --}}
-        <div class="hidden lg:flex flex-col justify-between p-12 xl:p-16 relative overflow-hidden">
-            {{-- giant faint logo watermark --}}
-            <img src="{{ asset('images/logo/logo-light.svg') }}" alt="" aria-hidden="true"
-                 class="pointer-events-none select-none absolute -right-24 bottom-4 w-[34rem] max-w-none opacity-[0.04]">
+        <div class="hidden lg:flex flex-col justify-center p-12 xl:p-16 relative overflow-hidden">
             {{-- thin red accent line down the divider edge --}}
             <div class="absolute top-0 right-0 h-full w-px bg-gradient-to-b from-transparent via-brand-red/40 to-transparent"></div>
 
-            {{-- Logo --}}
-            <div class="relative z-10">
-                <a href="{{ route('home') }}" class="inline-flex items-center group">
-                    <img src="{{ asset('images/logo/logo-light.svg') }}" alt="Win Win Car Audio" class="h-9 w-auto transition-transform duration-300 group-hover:scale-105">
-                </a>
-            </div>
-
-            {{-- Headline --}}
+            {{-- Centred brand block --}}
             <div class="relative z-10 max-w-md">
-                <span class="inline-flex items-center gap-2 rounded-full border border-brand-red/30 bg-brand-red/10 px-3 py-1 mb-7">
-                    <span class="w-1.5 h-1.5 rounded-full bg-brand-red animate-pulse"></span>
-                    <span class="font-mono text-[10px] tracking-[0.3em] uppercase text-brand-red">{{ __('Shah Alam, Selangor') }}</span>
-                </span>
-
                 <h2 class="font-display font-black text-[clamp(2.6rem,3.6vw,3.6rem)] leading-[0.92] uppercase text-white mb-8">
                     {{ __("Shah Alam's") }}<br>
                     <span class="text-brand-red">{{ __('Car Audio') }}</span><br>
@@ -51,18 +36,18 @@
                     </div>
                     @endforeach
                 </div>
-            </div>
 
-            {{-- Stats --}}
-            <div class="relative z-10 flex gap-8 items-center">
-                <div>
-                    <div class="font-display font-black text-3xl text-white">1000+</div>
-                    <div class="font-mono text-[10px] tracking-widest uppercase text-white/35 mt-0.5">{{ __('Installations') }}</div>
-                </div>
-                <div class="w-px h-10 bg-white/10"></div>
-                <div>
-                    <div class="font-display font-black text-3xl text-white">20+</div>
-                    <div class="font-mono text-[10px] tracking-widest uppercase text-white/35 mt-0.5">{{ __('Brands') }}</div>
+                {{-- Stats --}}
+                <div class="flex gap-8 items-center mt-12 pt-10 border-t border-white/10">
+                    <div>
+                        <div class="font-display font-black text-3xl text-white">1000+</div>
+                        <div class="font-mono text-[10px] tracking-widest uppercase text-white/35 mt-0.5">{{ __('Installations') }}</div>
+                    </div>
+                    <div class="w-px h-10 bg-white/10"></div>
+                    <div>
+                        <div class="font-display font-black text-3xl text-white">20+</div>
+                        <div class="font-mono text-[10px] tracking-widest uppercase text-white/35 mt-0.5">{{ __('Brands') }}</div>
+                    </div>
                 </div>
             </div>
         </div>
