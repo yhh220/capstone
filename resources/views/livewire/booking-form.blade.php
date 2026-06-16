@@ -1,9 +1,9 @@
 <div>
     {{-- ── PAGE HEADER ── --}}
-    <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Book Your Appointment') }}</h1>
-            <p class="text-gray-400 max-w-2xl mx-auto">{{ __('Pick a date and time to drop by our showroom — we will see you there.') }}</p>
+    <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-16">
+        <div class="max-w-3xl mx-auto px-4 text-center">
+            <h1 class="text-4xl sm:text-5xl font-black mb-4">{{ __('Book Your Appointment') }}</h1>
+            <p class="text-base sm:text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">{{ __('Pick a date and time to drop by our showroom — we will see you there.') }}</p>
         </div>
     </div>
 

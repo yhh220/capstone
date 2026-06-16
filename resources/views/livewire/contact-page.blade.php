@@ -12,11 +12,11 @@
     @endphp
 
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-16">
-        <div class="max-w-7xl mx-auto px-4 text-center">
+        <div class="max-w-3xl mx-auto px-4 text-center">
             <h1 class="text-4xl sm:text-5xl font-black mb-4">
                 {{ __('Contact') }} <span class="text-brand-yellow">{{ __('Us') }}</span>
             </h1>
-            <p class="text-gray-400">{{ __('Use WhatsApp for quick questions or visit our store for a closer look at the products.') }}</p>
+            <p class="text-base sm:text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">{{ __('Use WhatsApp for quick questions or visit our store for a closer look at the products.') }}</p>
         </div>
     </div>
 

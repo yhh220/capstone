@@ -8,11 +8,11 @@
     @endphp
 
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-16">
-        <div class="max-w-7xl mx-auto px-4 text-center">
+        <div class="max-w-3xl mx-auto px-4 text-center">
             <h1 class="text-4xl sm:text-5xl font-black mb-4" data-aos="fade-up">
                 {{ __('About') }} <span class="text-brand-yellow">Win Win</span>
             </h1>
-            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+            <p class="text-base sm:text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
                 {{ __('A showroom-first brand focused on trust, product visibility, and real customer conversations.') }}
             </p>
         </div>
