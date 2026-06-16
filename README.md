@@ -12,7 +12,7 @@
 ![Livewire](https://img.shields.io/badge/Livewire-4.2-FB70A9?style=for-the-badge&logo=livewire&logoColor=white)
 ![Filament](https://img.shields.io/badge/Filament-5-F59E0B?style=for-the-badge)
 ![PHP](https://img.shields.io/badge/PHP-8.3+-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-CDN-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-Dev-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 
 </div>
@@ -21,13 +21,24 @@
 
 ## About
 
-**Win Win Car Studio** is a full-stack web application built as a capstone project for academic demonstration purposes.
+**Win Win Car Studio** is a full-stack capstone project that simulates a Malaysian car-accessories showroom. Customers can browse products, book workshop appointments, track orders/bookings, and chat with a trilingual assistant; staff manage everything through a Filament admin panel.
 
-It simulates a real-world Malaysian car accessories showroom — allowing customers to browse products, book workshop appointments, and contact the store, while the owner manages everything through an admin panel.
+Built on the **TALL stack** (Tailwind, Alpine.js, Livewire, Laravel).
 
-The project is built on the **TALL stack**: Tailwind CSS, Alpine.js, Livewire, and Laravel.
+> For educational use only. All sample data, images, and business details are fictional.
 
-> **Note:** This project is for educational use only. All sample data, images, and business information are fictional and created solely for demonstration.
+---
+
+## Features
+
+- **Storefront** — Home, Products, Services, Booking, About, Contact, FAQ, 3D configurator
+- **Online Shopping** — cart, checkout, order history; toggleable view-only vs shopping mode (admin setting)
+- **Bookings & Orders** — appointment booking with time slots; guest lookup by reference + phone/email
+- **Trilingual (EN / BM / ZH)** — full i18n with translation-coverage tests
+- **Chatbot** — keyword assistant with typo tolerance and per-message language detection
+- **Admin Panel** — Filament resources for products, orders, bookings, customers, settings, and an audit log
+- **Light / dark mode** — flash-free, cookie-driven
+- **Security & a11y** — security headers, rate limiting, honeypot, WCAG-aligned accessibility
 
 ---
 
@@ -36,12 +47,12 @@ The project is built on the **TALL stack**: Tailwind CSS, Alpine.js, Livewire, a
 | Layer | Technology |
 |-------|------------|
 | Backend | Laravel 13 (PHP 8.3+) |
-| Reactive UI | Livewire 4.2 |
+| Reactive UI | Livewire 4 + Alpine.js |
 | Admin Panel | Filament 5 |
-| Styling | Tailwind CSS (CDN) |
+| Styling / Build | Tailwind CSS v4 via Vite |
+| 3D | Three.js |
 | Database | SQLite (dev) / MySQL (production) |
-| Media | Spatie Laravel MediaLibrary |
-| Language | EN / BM / ZH (trilingual) |
+| Media | Spatie MediaLibrary |
 
 ---
 
@@ -50,6 +61,7 @@ The project is built on the **TALL stack**: Tailwind CSS, Alpine.js, Livewire, a
 ```bash
 # Install dependencies
 composer install
+npm install
 
 # Set up environment
 cp .env.example .env
@@ -57,16 +69,17 @@ php artisan key:generate
 
 # Run migrations and seed demo data
 php artisan migrate --seed
-
-# Link storage
 php artisan storage:link
+
+# Build front-end assets (or `npm run dev` while developing)
+npm run build
 
 # Start the server
 php artisan serve
 ```
 
-- Storefront: `http://localhost:8000`  
-- Admin panel: `http://localhost:8000/admin`  
+- Storefront: `http://localhost:8000`
+- Admin panel: `http://localhost:8000/admin`
 - Default admin: `admin@example.com` / `password`
 
 ### Windows Note
