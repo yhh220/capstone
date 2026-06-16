@@ -572,16 +572,21 @@ function initThree() {
     camera = new THREE.PerspectiveCamera(40, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 100);
     camera.position.set(5.5, 2, 5.5);
 
+    // Phones / low-end machines: render at a lower pixel ratio and with cheaper
+    // shadows so the GPU isn't overwhelmed (the #1 cause of a "frozen" viewport
+    // on budget devices). Antialias is also dropped on mobile to save fill-rate.
+    const isMobile = window.matchMedia('(max-width: 991px)').matches;
+
     // 3. 渲染器 (Renderer)：引擎的核心，负责把 3D 画面计算并渲染到网页的画布 (Canvas) 上
     renderer = new THREE.WebGLRenderer({
         canvas: canvas,
-        antialias: true,
+        antialias: !isMobile,
         powerPreference: 'high-performance'
     });
     renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = isMobile ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
 
@@ -607,8 +612,8 @@ function initThree() {
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.6);
     keyLight.position.set(5, 6, 5);
     keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 2048;
-    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.mapSize.width = isMobile ? 1024 : 2048;
+    keyLight.shadow.mapSize.height = isMobile ? 1024 : 2048;
     keyLight.shadow.bias = -0.0005;
     keyLight.shadow.camera.near = 0.5;
     keyLight.shadow.camera.far = 15;
@@ -890,28 +895,41 @@ function initThree() {
  * Falls back to a known total when the server doesn't send Content-Length.
  */
 async function streamGlb(url, knownSize, onProgress) {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    // Abort if the connection stalls (no bytes for 30s) so a flaky mobile
+    // network surfaces a "check your connection" error instead of hanging the
+    // loader forever. The timer is reset every time a chunk arrives.
+    const STALL_MS = 30000;
+    const controller = new AbortController();
+    let stall = setTimeout(() => controller.abort(), STALL_MS);
 
-    const lenHeader = response.headers.get('content-length');
-    const total = lenHeader ? parseInt(lenHeader, 10) : knownSize;
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    const reader = response.body.getReader();
-    const chunks = [];
-    let received = 0;
-    for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-        received += value.length;
-        // Clamp below 1 so we never show 100% before parse() finishes.
-        onProgress(Math.min(received / total, 0.99));
+        const lenHeader = response.headers.get('content-length');
+        const total = lenHeader ? parseInt(lenHeader, 10) : knownSize;
+
+        const reader = response.body.getReader();
+        const chunks = [];
+        let received = 0;
+        for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            clearTimeout(stall);
+            stall = setTimeout(() => controller.abort(), STALL_MS);
+            chunks.push(value);
+            received += value.length;
+            // Clamp below 1 so we never show 100% before parse() finishes.
+            onProgress(Math.min(received / total, 0.99));
+        }
+
+        const out = new Uint8Array(received);
+        let offset = 0;
+        for (const chunk of chunks) { out.set(chunk, offset); offset += chunk.length; }
+        return out.buffer;
+    } finally {
+        clearTimeout(stall);
     }
-
-    const out = new Uint8Array(received);
-    let offset = 0;
-    for (const chunk of chunks) { out.set(chunk, offset); offset += chunk.length; }
-    return out.buffer;
 }
 
 /**

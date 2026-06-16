@@ -228,6 +228,7 @@
                         </span>
                         <h2 id="showcase-heading" class="text-3xl sm:text-4xl text-brand-black dark:text-white mb-5">
                             {{ __('Explore Your Car in 3D') }}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 align-middle">{{ __('Beta') }}</span>
                         </h2>
                         <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-7 max-w-md">
                             {{ __('Rotate, zoom, and inspect every angle of our 3D car model. See how our accessories fit before you visit.') }}
@@ -246,8 +247,8 @@
                                 {{ __('Pinch to zoom on mobile') }}
                             </li>
                         </ul>
-                        <a href="{{ route('contact') }}" class="btn btn-primary btn-md btn-shine">
-                            {{ __('Visit Our Showroom') }}
+                        <a href="{{ route('products') }}#car-configurator" class="btn btn-primary btn-md btn-shine">
+                            {{ __('Try Our 3D Configurator') }}
                             {!! $icon('arrow-right', 'icon-md') !!}
                         </a>
                     </div>

@@ -323,7 +323,7 @@
         <!-- Customizer Sidebar Panel -->
         <div class="configurator-sidebar">
             <div class="sidebar-header">
-                <h2>{{ __('3D CONFIGURATOR') }}</h2>
+                <h2>{{ __('3D CONFIGURATOR') }} <span class="beta-badge">{{ __('Beta') }}</span></h2>
                 <p>{{ __('Customize your premium sports build') }}</p>
             </div>
 
