@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSortableOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
 class Brand extends Model
 {
+    use HasSortableOrder;
+
     protected $fillable = [
         'name',
         'logo',

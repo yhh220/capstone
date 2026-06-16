@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSortableOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -10,7 +11,7 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class Category extends Model
 {
-    use LogsActivity;
+    use HasSortableOrder, LogsActivity;
 
     public function getActivitylogOptions(): LogOptions
     {

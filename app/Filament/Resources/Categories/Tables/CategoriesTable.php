@@ -15,16 +15,24 @@ class CategoriesTable
     public static function configure(Table $table): Table
     {
         return $table->paginated([10, 25, 50, 100, 'all'])
+            ->reorderable('sort_order')
+            ->defaultSort('sort_order')
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('slug')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 ImageColumn::make('image')
                     ->alignCenter(),
                 ToggleColumn::make('is_active')
                     ->label('Active')
                     ->alignCenter(),
+                TextColumn::make('sort_order')
+                    ->label('Order')
+                    ->alignCenter()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

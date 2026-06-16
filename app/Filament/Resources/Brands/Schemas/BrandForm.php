@@ -37,10 +37,6 @@ class BrandForm
                     ->helperText('Upload brand logo (PNG/JPG/WebP). Only shown when display type is "Logo image".')
                     ->visible(fn ($get) => $get('display_type') === 'image')
                     ->columnSpanFull(),
-                TextInput::make('sort_order')
-                    ->numeric()
-                    ->default(0)
-                    ->required(),
                 Toggle::make('is_active')
                     ->label('Show in carousel')
                     ->default(true),

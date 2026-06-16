@@ -78,7 +78,8 @@ class ProductForm
                 Toggle::make('is_active')
                     ->required(),
                 Toggle::make('is_featured')
-                    ->label('Show on Homepage'),
+                    ->label('Show on Homepage')
+                    ->helperText('Marks this product as featured so it appears in the “Featured Products” section on the homepage.'),
                 Toggle::make('has_3d')
                     ->label('Has 3D Model'),
                 TextInput::make('model_url')

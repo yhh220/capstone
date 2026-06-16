@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSortableOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -9,7 +10,7 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class Feedback extends Model
 {
-    use LogsActivity, SoftDeletes;
+    use HasSortableOrder, LogsActivity, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {

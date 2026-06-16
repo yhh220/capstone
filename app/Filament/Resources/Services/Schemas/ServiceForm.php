@@ -47,11 +47,6 @@ class ServiceForm
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->default(true),
-                TextInput::make('sort_order')
-                    ->label('Display Order')
-                    ->numeric()
-                    ->default(0)
-                    ->helperText('Lower numbers appear first. Drag-to-reorder also works in the list view.'),
             ]);
     }
 }

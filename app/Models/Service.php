@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSortableOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
@@ -14,7 +15,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Service extends Model implements HasMedia
 {
-    use InteractsWithMedia, LogsActivity;
+    use HasSortableOrder, InteractsWithMedia, LogsActivity;
 
     /** Keep the chatbot's live price list in sync the moment a service changes. */
     protected static function booted(): void

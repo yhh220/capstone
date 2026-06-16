@@ -34,10 +34,6 @@ class CategoryForm
                     ->maxSize(4096),
                 Toggle::make('is_active')
                     ->required(),
-                TextInput::make('sort_order')
-                    ->numeric()
-                    ->default(0)
-                    ->helperText('Lower number = shown first on homepage.'),
             ]);
     }
 }
