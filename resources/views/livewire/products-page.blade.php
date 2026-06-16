@@ -110,27 +110,30 @@
                 </div>
 
                 {{-- Skeleton cards shown only during filter/search/pagination loading --}}
-                <div wire:loading wire:target="search,category,minPrice,maxPrice,nextPage,previousPage,gotoPage"
-                     class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" aria-hidden="true">
+                <div wire:loading.grid wire:target="search,category,minPrice,maxPrice,nextPage,previousPage,gotoPage"
+                     class="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" style="display: none;" aria-hidden="true">
                     @for($i = 0; $i < 6; $i++)
                     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col">
-                        <div class="skeleton h-52 !rounded-none"></div>
-                        <div class="p-4 pb-3 flex-1">
-                            {{-- Category --}}
-                            <div class="skeleton h-4 w-20 mb-3"></div>
-                            {{-- Title --}}
-                            <div class="skeleton h-5 w-full mb-2"></div>
-                            <div class="skeleton h-5 w-2/3 mb-4"></div>
-                            {{-- Description --}}
-                            <div class="skeleton h-4 w-full mb-2"></div>
-                            <div class="skeleton h-4 w-5/6 mb-4"></div>
-                            {{-- Price & Stock --}}
-                            <div class="skeleton h-7 w-32 mb-2"></div>
-                            <div class="skeleton h-4 w-24"></div>
+                        <div class="block flex-1">
+                            <div class="relative w-full h-52 skeleton !rounded-none"></div>
+                            <div class="p-4 pb-3">
+                                {{-- Category --}}
+                                <div class="skeleton h-3 w-1/3 mb-2"></div>
+                                {{-- Title --}}
+                                <div class="skeleton h-4 w-full mb-1"></div>
+                                <div class="skeleton h-4 w-4/5 mb-3"></div>
+                                {{-- Description --}}
+                                <div class="skeleton h-3 w-full mb-1"></div>
+                                <div class="skeleton h-3 w-5/6 mb-3"></div>
+                                {{-- Price --}}
+                                <div class="skeleton h-5 w-1/2 mt-1 mb-1"></div>
+                                {{-- Stock --}}
+                                <div class="skeleton h-3 w-1/3 mt-2"></div>
+                            </div>
                         </div>
                         <div class="px-4 pb-4 flex gap-2">
-                            <div class="skeleton h-10 flex-1 !rounded-lg"></div>
-                            <div class="skeleton h-10 flex-1 !rounded-lg"></div>
+                            <div class="skeleton h-9 flex-1 !rounded-lg"></div>
+                            <div class="skeleton h-9 flex-1 !rounded-lg"></div>
                         </div>
                     </div>
                     @endfor
