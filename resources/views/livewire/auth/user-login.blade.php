@@ -9,9 +9,11 @@
              style="background: radial-gradient(circle, rgba(200,65,61,0.10) 0%, transparent 65%);"></div>
         {{-- subtle grid texture --}}
         <div class="absolute inset-0 auth-grid opacity-[0.5] dark:opacity-[0.7]"></div>
-        {{-- faint, blurred logo centred on the divider line --}}
-        <img src="{{ asset('images/logo/logo-light.svg') }}" alt="" aria-hidden="true"
-             class="hidden lg:block pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[42rem] max-w-none opacity-[0.05] blur-sm">
+        {{-- faint, blurred logo centred on the divider line (black in light mode, white in dark) --}}
+        <div class="hidden lg:block pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[42rem] opacity-[0.06] blur-sm">
+            <img src="{{ asset('images/logo/logo-dark.svg') }}" alt="" aria-hidden="true" class="w-full dark:hidden">
+            <img src="{{ asset('images/logo/logo-light.svg') }}" alt="" aria-hidden="true" class="w-full hidden dark:block">
+        </div>
     </div>
 
     <div class="relative z-10 grid lg:grid-cols-2 min-h-screen">
@@ -23,7 +25,7 @@
 
             {{-- Centred brand block --}}
             <div class="relative z-10 max-w-md">
-                <h2 class="font-display font-black text-[clamp(2.6rem,3.6vw,3.6rem)] leading-[0.92] uppercase text-white mb-8">
+                <h2 class="font-display font-black text-[clamp(2.6rem,3.6vw,3.6rem)] leading-[0.92] uppercase text-gray-900 dark:text-white mb-8">
                     {{ __("Shah Alam's") }}<br>
                     <span class="text-brand-red">{{ __('Car Audio') }}</span><br>
                     {{ __('Specialist.') }}
@@ -35,21 +37,21 @@
                         <span class="flex items-center justify-center w-6 h-6 rounded-full bg-brand-red/15 text-brand-red shrink-0">
                             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                         </span>
-                        <span class="text-sm text-white/70">{{ $point }}</span>
+                        <span class="text-sm text-gray-600 dark:text-white/70">{{ $point }}</span>
                     </div>
                     @endforeach
                 </div>
 
                 {{-- Stats --}}
-                <div class="flex gap-8 items-center justify-center mt-12 pt-10 border-t border-white/10">
+                <div class="flex gap-8 items-center justify-center mt-12 pt-10 border-t border-gray-200 dark:border-white/10">
                     <div>
-                        <div class="font-display font-black text-3xl text-white">1000+</div>
-                        <div class="font-mono text-[10px] tracking-widest uppercase text-white/35 mt-0.5">{{ __('Installations') }}</div>
+                        <div class="font-display font-black text-3xl text-gray-900 dark:text-white">1000+</div>
+                        <div class="font-mono text-[10px] tracking-widest uppercase text-gray-400 dark:text-white/40 mt-0.5">{{ __('Installations') }}</div>
                     </div>
-                    <div class="w-px h-10 bg-white/10"></div>
+                    <div class="w-px h-10 bg-gray-300 dark:bg-white/10"></div>
                     <div>
-                        <div class="font-display font-black text-3xl text-white">20+</div>
-                        <div class="font-mono text-[10px] tracking-widest uppercase text-white/35 mt-0.5">{{ __('Brands') }}</div>
+                        <div class="font-display font-black text-3xl text-gray-900 dark:text-white">20+</div>
+                        <div class="font-mono text-[10px] tracking-widest uppercase text-gray-400 dark:text-white/40 mt-0.5">{{ __('Brands') }}</div>
                     </div>
                 </div>
             </div>
