@@ -4,34 +4,33 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
-// Configuration Data (配置数据：包含配件价格和颜色映射表)
-const BASE_PRICE = 150000;
-const ACCESSORY_PRICES = {
+// Configuration Data (配置数据：配件名称与颜色映射表 — 纯展示，不含价格)
+const ACCESSORY_OPTIONS = {
     rims: {
-        rim7: { name: 'Sport Rims (Default)', price: 0 },
-        rim1: { name: 'Vossen CV3 Style', price: 1200 },
-        rim2: { name: 'BBS Super RS Style', price: 1800 },
-        rim3: { name: 'Rotiform LAS-R Style', price: 1500 },
-        rim4: { name: 'HRE P101 Style', price: 2200 },
-        rim5: { name: 'Advan Racing GT Style', price: 2000 },
-        rim6: { name: 'TE37 Black Edition', price: 2500 },
+        rim7: { name: 'Sport Rims (Default)' },
+        rim1: { name: 'Vossen CV3 Style' },
+        rim2: { name: 'BBS Super RS Style' },
+        rim3: { name: 'Rotiform LAS-R Style' },
+        rim4: { name: 'HRE P101 Style' },
+        rim5: { name: 'Advan Racing GT Style' },
+        rim6: { name: 'TE37 Black Edition' },
     },
     spoilers: {
-        wing4: { name: 'Integrated Lip (Default)', price: 0 },
-        wing1: { name: 'Carbon Fiber High Wing', price: 1200 },
-        wing2: { name: 'GT Performance Wing', price: 1500 },
-        wing3: { name: 'Sleek Ducktail Wing', price: 600 },
+        wing4: { name: 'Integrated Lip (Default)' },
+        wing1: { name: 'Carbon Fiber High Wing' },
+        wing2: { name: 'GT Performance Wing' },
+        wing3: { name: 'Sleek Ducktail Wing' },
     },
     bumpers: {
-        bumperF3: { name: 'Standard Sport (Default)', price: 0 },
-        bumperF1: { name: 'Aggressive Aero Bumper', price: 1800 },
-        bumperF2: { name: 'Widebody Spec Bumper', price: 2200 },
+        bumperF3: { name: 'Standard Sport (Default)' },
+        bumperF1: { name: 'Aggressive Aero Bumper' },
+        bumperF2: { name: 'Widebody Spec Bumper' },
     },
     dashcams: {
-        dashcam0: { name: 'None (Default)', price: 0 },
-        dashcam1: { name: 'Mohawk', price: 0 },
-        dashcam2: { name: '70mai', price: 0 },
-        dashcam3: { name: 'DDPAI', price: 0 },
+        dashcam0: { name: 'None (Default)' },
+        dashcam1: { name: 'Mohawk' },
+        dashcam2: { name: '70mai' },
+        dashcam3: { name: 'DDPAI' },
     }
 };
 
@@ -91,9 +90,11 @@ const state = {
 let scene, camera, renderer, controls, carModel;
 let isInitialized = false;
 let animationFrameId = null;
+let renderUntil = 0;
 let mixer;
 const doorActions = [];
 const clock = new THREE.Clock();
+const RENDER_WINDOW_MS = 350;
 
 const cameraAnimation = {
     active: false,
@@ -389,7 +390,7 @@ function wireConfiguratorEvents() {
 
             togglePartVisibility(category, oldItemKey, itemKey);
 
-            // Update Price Summary (更新价格汇总)
+            // Update selected-options summary.
             updateSummaryUI();
         }
     });
@@ -413,6 +414,12 @@ function wireConfiguratorEvents() {
 
             const windowTintValEl = document.getElementById('summary-window-tint');
             if (windowTintValEl) windowTintValEl.textContent = tintKey + '%';
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#configurator-modal')) {
+            requestRender();
         }
     });
 }
@@ -461,8 +468,8 @@ function openConfigurator() {
         initThree();
     } else {
         // Resume rendering (恢复渲染循环)
-        animate();
         onWindowResize();
+        requestRender(700);
     }
 }
 
@@ -476,6 +483,21 @@ function isWebGLAvailable() {
             && (canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
     } catch {
         return false;
+    }
+}
+
+function isConfiguratorOpen() {
+    return !!document.getElementById('configurator-modal')?.classList.contains('active');
+}
+
+function requestRender(duration = RENDER_WINDOW_MS) {
+    if (!renderer || !scene || !camera || !isConfiguratorOpen()) return;
+
+    renderUntil = Math.max(renderUntil, performance.now() + duration);
+
+    if (!animationFrameId) {
+        clock.getDelta();
+        animationFrameId = requestAnimationFrame(animate);
     }
 }
 
@@ -499,6 +521,7 @@ function closeConfigurator() {
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
     }
+    renderUntil = 0;
 }
 
 /**
@@ -527,30 +550,20 @@ function togglePartVisibility(category, oldKey, newKey) {
 }
 
 /**
- * Refresh prices and selected specs in the UI summary panel
- * 更新价格统计：根据选中的配件计算总价，并更新底部汇总面板的显示
+ * Refresh the selected-options summary panel.
+ * Showcase only — names of the chosen parts, no prices or totals.
+ * 更新底部汇总面板：只显示所选配件的名称，不显示价格（纯展示用途）。
  */
 function updateSummaryUI() {
-    const rimsValEl = document.getElementById('summary-rims-price');
-    const spoilerValEl = document.getElementById('summary-spoiler-price');
-    const bumperValEl = document.getElementById('summary-bumper-price');
+    const rimsValEl = document.getElementById('summary-rims');
+    const spoilerValEl = document.getElementById('summary-spoiler');
+    const bumperValEl = document.getElementById('summary-bumper');
     const dashcamValEl = document.getElementById('summary-dashcam');
-    const totalValEl = document.getElementById('summary-total-price');
 
-    const rimSpec = ACCESSORY_PRICES.rims[state.rims];
-    const spoilerSpec = ACCESSORY_PRICES.spoilers[state.spoilers];
-    const bumperSpec = ACCESSORY_PRICES.bumpers[state.bumpers];
-    const dashcamSpec = ACCESSORY_PRICES.dashcams[state.dashcams];
-
-    // Update prices on labels (更新标签上的价格显示)
-    if (rimsValEl) rimsValEl.textContent = rimSpec.price === 0 ? 'Included' : `+ RM ${rimSpec.price.toLocaleString()}`;
-    if (spoilerValEl) spoilerValEl.textContent = spoilerSpec.price === 0 ? 'Included' : `+ RM ${spoilerSpec.price.toLocaleString()}`;
-    if (bumperValEl) bumperValEl.textContent = bumperSpec.price === 0 ? 'Included' : `+ RM ${bumperSpec.price.toLocaleString()}`;
-    if (dashcamValEl) dashcamValEl.textContent = dashcamSpec.name;
-
-    // Calculate Grand Total (计算总价)
-    const total = BASE_PRICE + rimSpec.price + spoilerSpec.price + bumperSpec.price + dashcamSpec.price;
-    if (totalValEl) totalValEl.textContent = `RM ${total.toLocaleString()}`;
+    if (rimsValEl) rimsValEl.textContent = ACCESSORY_OPTIONS.rims[state.rims].name;
+    if (spoilerValEl) spoilerValEl.textContent = ACCESSORY_OPTIONS.spoilers[state.spoilers].name;
+    if (bumperValEl) bumperValEl.textContent = ACCESSORY_OPTIONS.bumpers[state.bumpers].name;
+    if (dashcamValEl) dashcamValEl.textContent = ACCESSORY_OPTIONS.dashcams[state.dashcams].name;
 }
 
 /**
@@ -588,8 +601,8 @@ function initThree() {
         powerPreference: 'high-performance'
     });
     renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isLowEnd ? 1.5 : 2));
-    renderer.shadowMap.enabled = true;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isLowEnd ? 1 : 2));
+    renderer.shadowMap.enabled = !isLowEnd;
     renderer.shadowMap.type = isLowEnd ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
@@ -606,6 +619,9 @@ function initThree() {
     controls.minDistance = 3.5;
     controls.maxDistance = 8.5;
     controls.target.set(0, 0.4, 0);
+    controls.addEventListener('change', () => requestRender());
+    controls.addEventListener('start', () => requestRender(1000));
+    controls.addEventListener('end', () => requestRender(700));
 
     // 5. 光照设置 (Lighting)：打光让车身有立体感和材质反射（包含环境光、主光源、补光等）
     const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x2d2d35, 1.0);
@@ -616,7 +632,7 @@ function initThree() {
 
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.6);
     keyLight.position.set(5, 6, 5);
-    keyLight.castShadow = true;
+    keyLight.castShadow = !isLowEnd;
     keyLight.shadow.mapSize.width = isLowEnd ? 1024 : 2048;
     keyLight.shadow.mapSize.height = isLowEnd ? 1024 : 2048;
     keyLight.shadow.bias = -0.0005;
@@ -645,7 +661,7 @@ function initThree() {
     });
     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
     floorMesh.rotation.x = -Math.PI / 2;
-    floorMesh.receiveShadow = true;
+    floorMesh.receiveShadow = !isLowEnd;
     scene.add(floorMesh);
 
     const gridHelper = new THREE.GridHelper(24, 24, 0x4a4a52, 0x33333c);
@@ -653,7 +669,8 @@ function initThree() {
     scene.add(gridHelper);
 
     // 7. 加载 3D 模型 (GLTF Loader)：通过加载器把服务器上的 .glb 汽车模型文件读取进来
-    // 模型已用 Draco 压缩 + WebP 贴图、网格简化至 ~1.4M 顶点、贴图上限 512（188MB → ~6MB），需要 DRACOLoader 解码几何体
+    // 模型用 Draco 压缩 + WebP 贴图（完整网格细节，避免简化产生破面）。低端设备的
+    // 性能改为在渲染层优化（按需渲染、降低像素比、关闭阴影），不再削减模型本身。
     const modelUrl = modal.dataset.modelUrl || '/models/3d/car-draco.glb';
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('/draco/');
@@ -761,8 +778,8 @@ function initThree() {
             // Map and identify car meshes (遍历并分类标记汽车所有的网格模型)
             car.traverse((child) => {
                 if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
+                    child.castShadow = !isLowEnd;
+                    child.receiveShadow = !isLowEnd;
 
                     const name = child.name;
                     const nameLower = name.toLowerCase();
@@ -862,7 +879,7 @@ function initThree() {
             }, 300);
 
             isInitialized = true;
-            animate();
+            requestRender(1200);
     };
 
     const onModelError = (error) => {
@@ -877,7 +894,7 @@ function initThree() {
     // server omits Content-Length (gzip/chunked). Download fills 0–90%; the
     // last 10% covers Draco decode + scene setup so the bar never sits frozen
     // at 100% while a slow device is still decoding 3M vertices.
-    const KNOWN_SIZE = 6_300_000; // ~ car-draco.glb, used only as a fallback total
+    const KNOWN_SIZE = 12_800_000; // ~ car-draco.glb, used only as a fallback total
 
     streamGlb(modelUrl, KNOWN_SIZE, (frac) => setProgress(frac * 90))
         .then((buffer) => {
@@ -950,12 +967,16 @@ async function streamGlb(url, knownSize, onProgress) {
  * 轨道控制器与渲染循环（每一帧的更新）
  */
 function animate() {
-    animationFrameId = requestAnimationFrame(animate);
+    animationFrameId = null;
 
+    const now = performance.now();
     const delta = clock.getDelta();
-    if (mixer) {
+    const doorAnimationActive = doorActions.some(action => action.isRunning());
+    if (mixer && doorAnimationActive) {
         mixer.update(delta);
     }
+
+    let keepRendering = doorAnimationActive || now < renderUntil;
 
     if (cameraAnimation.active) {
         const elapsed = performance.now() - cameraAnimation.startTime;
@@ -973,15 +994,21 @@ function animate() {
             if (cameraAnimation.onComplete) {
                 cameraAnimation.onComplete();
             }
+        } else {
+            keepRendering = true;
         }
     } else {
         if (controls && controls.enabled) {
-            controls.update();
+            keepRendering = controls.update() || keepRendering;
         }
     }
 
     if (renderer && scene && camera) {
         renderer.render(scene, camera);
+    }
+
+    if (isConfiguratorOpen() && (keepRendering || state.transitioning)) {
+        animationFrameId = requestAnimationFrame(animate);
     }
 }
 
@@ -997,6 +1024,7 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
 
     renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+    requestRender();
 }
 
 /**
@@ -1012,6 +1040,7 @@ function resetCamera() {
             camera.position.set(5.5, 2, 5.5);
             controls.target.set(0, 0.4, 0);
             controls.update();
+            requestRender(700);
         }
     }
 }
@@ -1022,6 +1051,7 @@ function resetCamera() {
  */
 function toggleDoors(open, onComplete) {
     if (doorActions.length === 0) {
+        requestRender();
         if (onComplete) onComplete();
         return;
     }
@@ -1048,6 +1078,8 @@ function toggleDoors(open, onComplete) {
         }
         action.play();
     });
+
+    requestRender((maxDuration * 1000) + 300);
 
     // Update doors toggle button UI state (更新开关车门按钮的UI状态)
     const doorBtn = document.getElementById('toggle-doors-btn');
@@ -1082,6 +1114,8 @@ function fadeScreen(fade, callback) {
     } else {
         overlay.classList.remove('active');
     }
+
+    requestRender(550);
 
     // CSS fade transition is 400ms, wait 450ms to ensure completion (CSS过渡动画为400毫秒，等待450毫秒确保执行完毕)
     setTimeout(() => {
@@ -1245,6 +1279,7 @@ function animateCameraToDoorSide(callback) {
     cameraAnimation.endTarget.copy(coords.doorTarget);
 
     cameraAnimation.onComplete = callback;
+    requestRender(cameraAnimation.duration + 300);
 }
 
 /**
@@ -1415,31 +1450,25 @@ function sendWhatsAppEnquiry() {
     const colorSpec = COLOR_MAP[state.color].name;
     const rimColorSpec = RIM_COLOR_MAP[state.rimColor].name;
     const brakeColorSpec = BRAKE_COLOR_MAP[state.brakeColor].name;
-    const rimSpec = ACCESSORY_PRICES.rims[state.rims].name;
-    const rimPrice = ACCESSORY_PRICES.rims[state.rims].price === 0 ? 'Included' : `+RM ${ACCESSORY_PRICES.rims[state.rims].price.toLocaleString()}`;
-    const spoilerSpec = ACCESSORY_PRICES.spoilers[state.spoilers].name;
-    const spoilerPrice = ACCESSORY_PRICES.spoilers[state.spoilers].price === 0 ? 'Included' : `+RM ${ACCESSORY_PRICES.spoilers[state.spoilers].price.toLocaleString()}`;
-    const bumperSpec = ACCESSORY_PRICES.bumpers[state.bumpers].name;
-    const bumperPrice = ACCESSORY_PRICES.bumpers[state.bumpers].price === 0 ? 'Included' : `+RM ${ACCESSORY_PRICES.bumpers[state.bumpers].price.toLocaleString()}`;
+    const rimSpec = ACCESSORY_OPTIONS.rims[state.rims].name;
+    const spoilerSpec = ACCESSORY_OPTIONS.spoilers[state.spoilers].name;
+    const bumperSpec = ACCESSORY_OPTIONS.bumpers[state.bumpers].name;
     const windowTintSpec = state.windowTint + '%';
-    const dashcamSpec = ACCESSORY_PRICES.dashcams[state.dashcams];
-
-    const total = BASE_PRICE + ACCESSORY_PRICES.rims[state.rims].price + ACCESSORY_PRICES.spoilers[state.spoilers].price + ACCESSORY_PRICES.bumpers[state.bumpers].price + dashcamSpec.price;
+    const dashcamSpec = ACCESSORY_OPTIONS.dashcams[state.dashcams];
 
     const storePhoneRaw = enquireBtn.dataset.phone || '60123456789';
 
-    const textMessage = `Hello Win Win Car Studio! 🚗\n\nI have customized a car on your website using the 3D Car Configurator. Here is my custom configuration details:\n\n` +
+    // Showcase enquiry — share the chosen build, no prices. The shop quotes
+    // availability and pricing over WhatsApp.
+    const textMessage = `Hello Win Win Car Studio! 🚗\n\nI designed a car using your 3D configurator and I'd like a quote for this build:\n\n` +
         `• Paint Color: ${colorSpec}\n` +
-        `• Rim Style: ${rimSpec} (Color: ${rimColorSpec}) (${rimPrice})\n` +
+        `• Rim Style: ${rimSpec} (Color: ${rimColorSpec})\n` +
         `• Brake Caliper Color: ${brakeColorSpec}\n` +
-        `• Spoiler Style: ${spoilerSpec} (${spoilerPrice})\n` +
-        `• Front Bumper: ${bumperSpec} (${bumperPrice})\n` +
+        `• Spoiler Style: ${spoilerSpec}\n` +
+        `• Front Bumper: ${bumperSpec}\n` +
         `• Window Tint: ${windowTintSpec}\n` +
         `• Dash Camera: ${dashcamSpec.name}\n\n` +
-        `----------------------------\n` +
-        `• Base Price: RM ${BASE_PRICE.toLocaleString()}\n` +
-        `• Estimated Total: RM ${total.toLocaleString()}\n\n` +
-        `Please check availability and guide me on ordering these accessories! Thank you.`;
+        `Please let me know availability and pricing for these accessories. Thank you!`;
 
     const whatsAppUrl = `https://wa.me/${storePhoneRaw}?text=${encodeURIComponent(textMessage)}`;
     window.open(whatsAppUrl, '_blank');

@@ -436,31 +436,24 @@
                     <div class="options-grid">
                         <div class="option-card active" data-category="rims" data-item="rim7">
                             <span class="option-name">{{ __('Sport Rims (Default)') }}</span>
-                            <span class="option-price">{{ __('Included') }}</span>
                         </div>
                         <div class="option-card" data-category="rims" data-item="rim1">
                             <span class="option-name">{{ __('Vossen CV3 Style') }}</span>
-                            <span class="option-price">+ RM 1,200</span>
                         </div>
                         <div class="option-card" data-category="rims" data-item="rim2">
                             <span class="option-name">{{ __('BBS Super RS Style') }}</span>
-                            <span class="option-price">+ RM 1,800</span>
                         </div>
                         <div class="option-card" data-category="rims" data-item="rim3">
                             <span class="option-name">{{ __('Rotiform LAS-R Style') }}</span>
-                            <span class="option-price">+ RM 1,500</span>
                         </div>
                         <div class="option-card" data-category="rims" data-item="rim4">
                             <span class="option-name">{{ __('HRE P101 Style') }}</span>
-                            <span class="option-price">+ RM 2,200</span>
                         </div>
                         <div class="option-card" data-category="rims" data-item="rim5">
                             <span class="option-name">{{ __('Advan Racing GT Style') }}</span>
-                            <span class="option-price">+ RM 2,000</span>
                         </div>
                         <div class="option-card" data-category="rims" data-item="rim6">
                             <span class="option-name">{{ __('TE37 Black Edition') }}</span>
-                            <span class="option-price">+ RM 2,500</span>
                         </div>
                     </div>
                 </div>
@@ -471,19 +464,15 @@
                     <div class="options-grid">
                         <div class="option-card active" data-category="spoilers" data-item="wing4">
                             <span class="option-name">{{ __('Integrated Lip (Default)') }}</span>
-                            <span class="option-price">{{ __('Included') }}</span>
                         </div>
                         <div class="option-card" data-category="spoilers" data-item="wing1">
                             <span class="option-name">{{ __('Carbon Fiber High Wing') }}</span>
-                            <span class="option-price">+ RM 1,200</span>
                         </div>
                         <div class="option-card" data-category="spoilers" data-item="wing2">
                             <span class="option-name">{{ __('GT Performance Wing') }}</span>
-                            <span class="option-price">+ RM 1,500</span>
                         </div>
                         <div class="option-card" data-category="spoilers" data-item="wing3">
                             <span class="option-name">{{ __('Sleek Ducktail Wing') }}</span>
-                            <span class="option-price">+ RM 600</span>
                         </div>
                     </div>
                 </div>
@@ -494,15 +483,12 @@
                     <div class="options-grid">
                         <div class="option-card active" data-category="bumpers" data-item="bumperF3">
                             <span class="option-name">{{ __('Standard Sport (Default)') }}</span>
-                            <span class="option-price">{{ __('Included') }}</span>
                         </div>
                         <div class="option-card" data-category="bumpers" data-item="bumperF1">
                             <span class="option-name">{{ __('Aggressive Aero Bumper') }}</span>
-                            <span class="option-price">+ RM 1,800</span>
                         </div>
                         <div class="option-card" data-category="bumpers" data-item="bumperF2">
                             <span class="option-name">{{ __('Widebody Spec Bumper') }}</span>
-                            <span class="option-price">+ RM 2,200</span>
                         </div>
                     </div>
                 </div>
@@ -538,7 +524,6 @@
                     <div class="options-grid">
                         <div class="option-card active" data-category="dashcams" data-item="dashcam0">
                             <span class="option-name">{{ __('None (Default)') }}</span>
-                            <span class="option-price">{{ __('Included') }}</span>
                         </div>
                         <div class="option-card" data-category="dashcams" data-item="dashcam1">
                             <span class="option-name">{{ __('Mohawk') }}</span>
@@ -570,15 +555,15 @@
                     </div>
                     <div class="summary-row">
                         <span>{{ __('Selected Rims') }}</span>
-                        <span id="summary-rims-price">{{ __('Included') }}</span>
+                        <span id="summary-rims">{{ __('Sport Rims (Default)') }}</span>
                     </div>
                     <div class="summary-row">
                         <span>{{ __('Selected Spoiler') }}</span>
-                        <span id="summary-spoiler-price">{{ __('Included') }}</span>
+                        <span id="summary-spoiler">{{ __('Integrated Lip (Default)') }}</span>
                     </div>
                     <div class="summary-row">
                         <span>{{ __('Front Bumper') }}</span>
-                        <span id="summary-bumper-price">{{ __('Included') }}</span>
+                        <span id="summary-bumper">{{ __('Standard Sport (Default)') }}</span>
                     </div>
                     <div class="summary-row">
                         <span>{{ __('Window Tint') }}</span>
@@ -587,10 +572,6 @@
                     <div class="summary-row">
                         <span>{{ __('Dash Camera') }}</span>
                         <span id="summary-dashcam">{{ __('None') }}</span>
-                    </div>
-                    <div class="summary-row total">
-                        <span>{{ __('Total Price') }}</span>
-                        <span id="summary-total-price">RM 150,000</span>
                     </div>
                 </div>
 
