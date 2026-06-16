@@ -572,26 +572,31 @@ function initThree() {
     camera = new THREE.PerspectiveCamera(40, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 100);
     camera.position.set(5.5, 2, 5.5);
 
-    // Phones / low-end machines: render at a lower pixel ratio and with cheaper
-    // shadows so the GPU isn't overwhelmed (the #1 cause of a "frozen" viewport
-    // on budget devices). Antialias is also dropped on mobile to save fill-rate.
-    const isMobile = window.matchMedia('(max-width: 991px)').matches;
+    // Detect low-end devices — small screens, but also weak desktops (few CPU
+    // cores or little RAM). On these we render at a lower pixel ratio with
+    // cheaper shadows and no antialias so the GPU isn't overwhelmed (the #1
+    // cause of a "frozen" viewport and runaway memory on budget hardware).
+    const smallScreen = window.matchMedia('(max-width: 991px)').matches;
+    const lowMemory   = (navigator.deviceMemory || 8) <= 4;        // GB (Chrome/Android)
+    const lowCores    = (navigator.hardwareConcurrency || 8) <= 4; // logical CPUs
+    const isLowEnd    = smallScreen || lowMemory || lowCores;
 
     // 3. 渲染器 (Renderer)：引擎的核心，负责把 3D 画面计算并渲染到网页的画布 (Canvas) 上
     renderer = new THREE.WebGLRenderer({
         canvas: canvas,
-        antialias: !isMobile,
+        antialias: !isLowEnd,
         powerPreference: 'high-performance'
     });
     renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isLowEnd ? 1.5 : 2));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = isMobile ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = isLowEnd ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmremGenerator.dispose(); // free the internal render targets once the env map is baked
 
     // 4. 轨道控制器 (OrbitControls)：允许用户用鼠标拖动来旋转、缩放、平移视角
     controls = new OrbitControls(camera, renderer.domElement);
@@ -612,8 +617,8 @@ function initThree() {
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.6);
     keyLight.position.set(5, 6, 5);
     keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = isMobile ? 1024 : 2048;
-    keyLight.shadow.mapSize.height = isMobile ? 1024 : 2048;
+    keyLight.shadow.mapSize.width = isLowEnd ? 1024 : 2048;
+    keyLight.shadow.mapSize.height = isLowEnd ? 1024 : 2048;
     keyLight.shadow.bias = -0.0005;
     keyLight.shadow.camera.near = 0.5;
     keyLight.shadow.camera.far = 15;
@@ -648,7 +653,7 @@ function initThree() {
     scene.add(gridHelper);
 
     // 7. 加载 3D 模型 (GLTF Loader)：通过加载器把服务器上的 .glb 汽车模型文件读取进来
-    // 模型已用 Draco 压缩 + WebP 贴图（188MB → ~12MB），需要 DRACOLoader 解码几何体
+    // 模型已用 Draco 压缩 + WebP 贴图、网格简化至 ~1.4M 顶点、贴图上限 512（188MB → ~6MB），需要 DRACOLoader 解码几何体
     const modelUrl = modal.dataset.modelUrl || '/models/3d/car-draco.glb';
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('/draco/');
@@ -872,7 +877,7 @@ function initThree() {
     // server omits Content-Length (gzip/chunked). Download fills 0–90%; the
     // last 10% covers Draco decode + scene setup so the bar never sits frozen
     // at 100% while a slow device is still decoding 3M vertices.
-    const KNOWN_SIZE = 13_000_000; // ~ car-draco.glb, used only as a fallback total
+    const KNOWN_SIZE = 6_300_000; // ~ car-draco.glb, used only as a fallback total
 
     streamGlb(modelUrl, KNOWN_SIZE, (frac) => setProgress(frac * 90))
         .then((buffer) => {
@@ -881,7 +886,15 @@ function initThree() {
             if (sub) sub.textContent = 'Preparing your car…';
             // Give the browser a frame to paint 92% before the (blocking) decode.
             requestAnimationFrame(() => {
-                loader.parse(buffer, '', (gltf) => { setProgress(100); onModelLoaded(gltf); }, onModelError);
+                loader.parse(buffer, '', (gltf) => {
+                    setProgress(100);
+                    onModelLoaded(gltf);
+                    // Free the Draco decoder worker/WASM and the compressed buffer
+                    // once decoding is done — they're not needed again and hold
+                    // tens of MB that low-end phones can't spare.
+                    dracoLoader.dispose();
+                    buffer = null;
+                }, onModelError);
             });
         })
         .catch(onModelError);
