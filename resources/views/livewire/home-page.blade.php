@@ -255,7 +255,7 @@
                     <div data-aos="fade-left">
                         <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-900">
                             <model-viewer
-                                src="{{ asset('models/3d/city-draco.glb') }}"
+                                src="{{ asset('models/3d/city-draco.glb') }}?v={{ @filemtime(public_path('models/3d/city-draco.glb')) ?: 1 }}"
                                 alt="{{ __('3D car model — Win Win Car Studio') }}"
                                 auto-rotate
                                 auto-rotate-delay="1000"

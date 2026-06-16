@@ -266,7 +266,7 @@
     </script>
 
     {{-- 3D CAR CONFIGURATOR POPUP MODAL --}}
-    <div id="configurator-modal" data-model-url="{{ asset('models/3d/car-draco.glb') }}">
+    <div id="configurator-modal" data-model-url="{{ asset('models/3d/car-draco.glb') }}?v={{ @filemtime(public_path('models/3d/car-draco.glb')) ?: 1 }}">
         <!-- Canvas Viewport -->
         <div class="configurator-viewport" id="configurator-viewport">
             <canvas id="configurator-canvas"></canvas>
