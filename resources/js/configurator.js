@@ -609,7 +609,11 @@ function initThree() {
         powerPreference: 'high-performance'
     });
     renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isLowEnd ? 1 : 1.5));
+    // Dynamic resolution: full res when still, lower res while dragging (motion
+    // hides the softness) so rotation stays smooth even on weak GPUs.
+    const idlePixelRatio = Math.min(window.devicePixelRatio, isLowEnd ? 1 : 1.5);
+    const dragPixelRatio = Math.min(window.devicePixelRatio, isLowEnd ? 0.6 : 1);
+    renderer.setPixelRatio(idlePixelRatio);
     renderer.shadowMap.enabled = !isLowEnd;
     renderer.shadowMap.type = isLowEnd ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -628,8 +632,8 @@ function initThree() {
     controls.maxDistance = 8.5;
     controls.target.set(0, 0.4, 0);
     controls.addEventListener('change', () => requestRender());
-    controls.addEventListener('start', () => requestRender(1000));
-    controls.addEventListener('end', () => requestRender(700));
+    controls.addEventListener('start', () => { renderer.setPixelRatio(dragPixelRatio); requestRender(1000); });
+    controls.addEventListener('end', () => { renderer.setPixelRatio(idlePixelRatio); requestRender(700); });
 
     // 5. 光照设置 (Lighting)：打光让车身有立体感和材质反射（包含环境光、主光源、补光等）
     const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x2d2d35, 1.0);
