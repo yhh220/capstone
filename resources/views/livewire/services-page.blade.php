@@ -30,80 +30,20 @@
         };
     @endphp
 
-    <section class="border-b border-gray-200 dark:border-gray-700/60" aria-labelledby="services-heading">
-        <div class="max-w-7xl mx-auto px-4 py-12 sm:py-16 lg:py-20">
-            <div class="grid lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-16 items-center">
-                <div>
-                    <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-4">
-                        <span class="w-8 h-px bg-brand-red"></span>
-                        {{ __('Installation Services') }}
-                    </span>
-                    <h1 id="services-heading" class="text-4xl sm:text-5xl lg:text-6xl text-brand-black dark:text-white leading-tight mb-5">
-                        {{ __('Professional car upgrades, fitted properly.') }}
-                    </h1>
-                    <p class="text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-2xl">
-                        {{ __('Choose a service, book an appointment, and let our team handle the installation, wiring, setup, and finishing details at the showroom.') }}
-                    </p>
-
-                    <div class="flex flex-col sm:flex-row gap-3 mt-8">
-                        <a href="{{ route('booking') }}"
-                           class="btn btn-primary btn-md btn-shine">
-                            <svg class="icon-md" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
-                            {{ __('Book Appointment') }}
-                        </a>
-                        <a href="{{ $generalWhatsAppUrl }}" target="_blank" rel="noopener noreferrer"
-                           class="btn btn-whatsapp btn-md btn-shine">
-                            <svg class="icon-md" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.8-2.8-1.5-3.9-3.3-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5s-.7-1.7-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4ZM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Z"></path></svg>
-                            {{ __('Ask First') }}
-                        </a>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 sm:p-6 shadow-sm">
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 p-4">
-                            <div class="text-3xl font-black text-brand-red">{{ $services->count() }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">{{ __('Active services') }}</div>
-                        </div>
-                        <div class="rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 p-4">
-                            <div class="text-3xl font-black text-brand-red">3</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">{{ __('Steps to book') }}</div>
-                        </div>
-                        <div class="rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 p-4">
-                            <div class="text-3xl font-black text-brand-red">1</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1">{{ __('Showroom team') }}</div>
-                        </div>
-                    </div>
-
-                    <div class="mt-5 pt-5 border-t border-gray-100 dark:border-gray-700">
-                        <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">{{ __('What to prepare') }}</p>
-                        <div class="grid sm:grid-cols-2 gap-3 text-sm text-gray-600 dark:text-gray-400">
-                            <div class="flex gap-2">
-                                <span class="mt-2 w-1.5 h-1.5 rounded-full bg-brand-red shrink-0"></span>
-                                <span>{{ __('Car model and year') }}</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <span class="mt-2 w-1.5 h-1.5 rounded-full bg-brand-red shrink-0"></span>
-                                <span>{{ __('Preferred date and time') }}</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <span class="mt-2 w-1.5 h-1.5 rounded-full bg-brand-red shrink-0"></span>
-                                <span>{{ __('Current setup or issue') }}</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <span class="mt-2 w-1.5 h-1.5 rounded-full bg-brand-red shrink-0"></span>
-                                <span>{{ __('Budget or product preference') }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-16">
+        <div class="max-w-3xl mx-auto px-4 text-center">
+            <h1 id="services-heading" class="text-4xl sm:text-5xl font-black leading-tight mb-4">
+                {{ __('Professional car upgrades, fitted properly.') }}
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">
+                {{ __('Choose a service, book an appointment, and let our team handle the installation, wiring, setup, and finishing details at the showroom.') }}
+            </p>
         </div>
-    </section>
+    </div>
 
     <section class="py-16 sm:py-24 overflow-hidden" aria-labelledby="services-list-heading">
-        <div class="max-w-6xl mx-auto px-6">
-            <div class="text-center max-w-2xl mx-auto mb-16 sm:mb-24">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
                 <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
                     <span class="w-8 h-px bg-brand-red"></span>{{ __('Service Menu') }}<span class="w-8 h-px bg-brand-red"></span>
                 </span>
@@ -122,65 +62,64 @@
                         ['bg-gray-800 text-brand-yellow',                        'svc-blob-alt'],
                     ];
                 @endphp
-                <div class="space-y-20 md:space-y-28">
-                    @foreach($services as $service)
-                        @php
-                            $serviceWhatsAppUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hi Win Win Car Studio! I would like to enquire about ' . $service->name . '.');
-                            [$blobClass, $blobAnim] = $blobStyles[$loop->index % count($blobStyles)];
-                            $img = $service->getImageUrl('thumb');
-                        @endphp
-                        <div class="relative flex flex-col md:flex-row items-center gap-10 md:gap-16">
 
-                            {{-- Illustration (alternates sides) --}}
-                            <div class="w-full md:w-1/2 flex justify-center {{ $loop->even ? 'md:order-2' : '' }}" data-aos="zoom-in">
-                                <div class="{{ $blobAnim }} relative w-48 h-48 lg:w-64 lg:h-64 flex items-center justify-center overflow-hidden shadow-xl {{ $img ? '' : $blobClass }}">
-                                    @if($img)
-                                        <img src="{{ $img }}" alt="{{ __($service->name) }}" class="w-full h-full object-cover" loading="lazy">
-                                    @else
-                                        <div class="drop-shadow-sm">{!! str_replace('w-6 h-6', 'w-16 h-16 lg:w-20 lg:h-20', $iconFor($service->name)) !!}</div>
-                                    @endif
+                {{-- Vertical track that fills as you scroll (no step numbers) --}}
+                <div class="relative"
+                     x-data="{ scrollProgress: 0, activeStep: 0 }"
+                     x-ref="flowTrack"
+                     @scroll.window="
+                        let c = $refs.flowTrack; let r = c.getBoundingClientRect();
+                        let mid = window.innerHeight * 0.6;
+                        scrollProgress = Math.max(0, Math.min(100, ((mid - r.top) / r.height) * 100));
+                        let nodes = c.querySelectorAll('.step-node'); let cur = 0;
+                        nodes.forEach((n, i) => { if (n.getBoundingClientRect().top < mid + 20) cur = i + 1; });
+                        activeStep = cur;
+                     ">
+
+                    {{-- The line + its fill --}}
+                    <div class="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700 md:-translate-x-1/2 z-0">
+                        <div class="w-full flow-path" :style="`height: ${scrollProgress}%`"></div>
+                    </div>
+
+                    <div class="relative space-y-16 md:space-y-24">
+                        @foreach($services as $service)
+                            @php
+                                [$blobClass, $blobAnim] = $blobStyles[$loop->index % count($blobStyles)];
+                                $img = $service->getImageUrl('thumb');
+                                $odd = $loop->odd; // content on the left (text-right) for odd rows
+                            @endphp
+                            <div class="relative flex flex-col md:flex-row items-center">
+
+                                {{-- Content --}}
+                                <div class="w-full md:w-1/2 pl-20 md:pl-0 text-left {{ $odd ? 'md:order-1 md:pr-14 md:text-right' : 'md:order-2 md:pl-14' }}"
+                                     data-aos="{{ $odd ? 'fade-right' : 'fade-left' }}">
+                                    <h3 class="text-2xl sm:text-3xl font-black text-brand-black dark:text-white uppercase tracking-tight leading-tight mb-4">
+                                        {{ __($service->name) }}
+                                    </h3>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base font-medium leading-relaxed max-w-sm {{ $odd ? 'md:ml-auto' : '' }}">
+                                        {{ __($service->description) }}
+                                    </p>
                                 </div>
-                            </div>
 
-                            {{-- Content --}}
-                            <div class="w-full md:w-1/2 text-center md:text-left {{ $loop->even ? 'md:order-1' : '' }}" data-aos="{{ $loop->even ? 'fade-right' : 'fade-left' }}" data-aos-delay="100">
-                                @if($service->price)
-                                    <div class="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-3">
-                                        {{ __('From') }} <span class="text-brand-red">RM {{ number_format((float) $service->price, 0) }}</span>
+                                {{-- Node on the line (no number) --}}
+                                <div class="step-node absolute left-8 md:left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-white dark:bg-gray-900 border-2 z-20 flex items-center justify-center transition-all duration-300"
+                                     :class="activeStep >= {{ $loop->iteration }} ? 'border-brand-red scale-110 shadow-md shadow-brand-red/20' : 'border-gray-300 dark:border-gray-600'">
+                                    <span class="w-2 h-2 rounded-full transition-colors duration-300" :class="activeStep >= {{ $loop->iteration }} ? 'bg-brand-red' : 'bg-transparent'"></span>
+                                </div>
+
+                                {{-- Illustration (hidden on mobile) --}}
+                                <div class="hidden md:flex md:w-1/2 justify-center {{ $odd ? 'md:order-2 md:pl-14' : 'md:order-1 md:pr-14' }}" data-aos="zoom-in">
+                                    <div class="{{ $blobAnim }} w-28 h-28 lg:w-36 lg:h-36 flex items-center justify-center overflow-hidden shadow-lg {{ $img ? '' : $blobClass }}">
+                                        @if($img)
+                                            <img src="{{ $img }}" alt="{{ __($service->name) }}" class="w-full h-full object-cover" loading="lazy">
+                                        @else
+                                            <div class="drop-shadow-sm">{!! str_replace('w-6 h-6', 'w-10 h-10 lg:w-12 lg:h-12', $iconFor($service->name)) !!}</div>
+                                        @endif
                                     </div>
-                                @endif
-                                <h3 class="text-2xl sm:text-3xl font-black text-brand-black dark:text-white uppercase tracking-tight leading-tight mb-4">
-                                    {{ __($service->name) }}
-                                </h3>
-                                <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base font-medium leading-relaxed mb-6 max-w-md mx-auto md:mx-0">
-                                    {{ __($service->description) }}
-                                </p>
-
-                                <div class="flex flex-wrap gap-2 justify-center md:justify-start mb-7">
-                                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-400">
-                                        <svg class="w-3.5 h-3.5 text-brand-red" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
-                                        {{ $service->duration_label }}
-                                    </span>
-                                    @if($service->buffer_after > 0)
-                                        <span class="inline-flex items-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-400">
-                                            {{ __('Buffer') }} {{ $service->buffer_after }} {{ __('min') }}
-                                        </span>
-                                    @endif
-                                </div>
-
-                                <div class="flex flex-wrap gap-3 justify-center md:justify-start">
-                                    <a href="{{ route('booking', ['service' => $service->id]) }}" class="btn btn-primary btn-md btn-shine">
-                                        <svg class="icon-md btn-ico" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
-                                        {{ __('Book') }}
-                                    </a>
-                                    <a href="{{ $serviceWhatsAppUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-md btn-shine">
-                                        <svg class="icon-md btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.8-2.8-1.5-3.9-3.3-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5s-.7-1.7-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4ZM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Z"></path></svg>
-                                        WhatsApp
-                                    </a>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
             @else
                 <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-10 text-center">
@@ -190,8 +129,15 @@
             @endif
         </div>
 
-        {{-- Organic blob shapes for the service illustrations --}}
+        {{-- Track fill + organic blob shapes --}}
         <style>
+            .flow-path {
+                background: linear-gradient(to bottom, rgba(var(--brand-red-rgb), 0.6), rgb(var(--brand-red-rgb)));
+                border-radius: 9999px;
+                box-shadow: 0 0 12px rgba(var(--brand-red-rgb), 0.45);
+                transition: height 0.12s ease-out;
+                will-change: height;
+            }
             @keyframes svcBlob {
                 0%   { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
                 50%  { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
@@ -209,35 +155,6 @@
                 .svc-blob, .svc-blob-alt { animation: none; border-radius: 1.75rem; }
             }
         </style>
-    </section>
-
-    <section class="py-14 sm:py-20" aria-labelledby="booking-process-heading">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="mb-10">
-                <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
-                    <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
-                    {{ __('Booking Process') }}
-                </span>
-                <h2 id="booking-process-heading" class="text-3xl sm:text-4xl text-brand-black dark:text-white mb-3">
-                    {{ __('Simple from enquiry to handover') }}
-                </h2>
-                <p class="text-gray-600 dark:text-gray-400 max-w-2xl">{{ __('We keep the service flow clear so you know what happens before your car goes into the workshop.') }}</p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-5 sm:gap-6">
-                @foreach([
-                    ['01', __('Pick a service'), __('Choose the installation or upgrade you need and share your car model details.')],
-                    ['02', __('Confirm your slot'), __('Select an available appointment time or ask our team for advice on WhatsApp.')],
-                    ['03', __('Arrive and install'), __('Bring your car to the showroom and we handle fitting, setup, and final checks.')],
-                ] as [$number, $title, $body])
-                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 transition-all duration-300 hover:border-brand-red/40 hover:shadow-md">
-                        <div class="w-11 h-11 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center font-black text-base mb-5" aria-hidden="true">{{ $number }}</div>
-                        <h3 class="text-2xl text-brand-black dark:text-white mb-3">{{ $title }}</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ $body }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
     </section>
 
     <section class="py-14 sm:py-20" aria-labelledby="service-cta-heading">

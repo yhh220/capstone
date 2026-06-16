@@ -50,11 +50,11 @@ class LocalizationCoverageTest extends TestCase
 
         $this->withSession(['locale' => 'zh'])
             ->get('/services')
-            ->assertSee('安装服务');
+            ->assertSee('选择合适服务');
 
         $this->withSession(['locale' => 'ms'])
             ->get('/services')
-            ->assertSee('Servis Pemasangan');
+            ->assertSee('Pilih servis yang sesuai');
     }
 
     public function test_error_pages_render_localized_copy(): void
