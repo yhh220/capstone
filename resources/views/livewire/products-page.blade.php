@@ -116,16 +116,21 @@
                     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col">
                         <div class="skeleton h-52 !rounded-none"></div>
                         <div class="p-4 pb-3 flex-1">
-                            <div class="skeleton h-3 w-16 mb-2"></div>
-                            <div class="skeleton h-4 w-3/4 mb-1"></div>
-                            <div class="skeleton h-4 w-1/2 mb-3"></div>
-                            <div class="skeleton h-3 w-full mb-1"></div>
-                            <div class="skeleton h-3 w-5/6 mb-3"></div>
-                            <div class="skeleton h-5 w-24 mt-1"></div>
+                            {{-- Category --}}
+                            <div class="skeleton h-4 w-20 mb-3"></div>
+                            {{-- Title --}}
+                            <div class="skeleton h-5 w-full mb-2"></div>
+                            <div class="skeleton h-5 w-2/3 mb-4"></div>
+                            {{-- Description --}}
+                            <div class="skeleton h-4 w-full mb-2"></div>
+                            <div class="skeleton h-4 w-5/6 mb-4"></div>
+                            {{-- Price & Stock --}}
+                            <div class="skeleton h-7 w-32 mb-2"></div>
+                            <div class="skeleton h-4 w-24"></div>
                         </div>
                         <div class="px-4 pb-4 flex gap-2">
-                            <div class="skeleton h-9 flex-1 !rounded-lg"></div>
-                            <div class="skeleton h-9 flex-1 !rounded-lg"></div>
+                            <div class="skeleton h-10 flex-1 !rounded-lg"></div>
+                            <div class="skeleton h-10 flex-1 !rounded-lg"></div>
                         </div>
                     </div>
                     @endfor
