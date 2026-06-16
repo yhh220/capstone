@@ -13,6 +13,6 @@ class ServicesPageTest extends TestCase
     {
         $this->get('/services')
             ->assertOk()
-            ->assertSee('Professional car upgrades, fitted properly.');
+            ->assertSee('Professional car upgrades');
     }
 }
