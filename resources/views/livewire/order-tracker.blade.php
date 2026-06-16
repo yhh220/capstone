@@ -11,14 +11,14 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700 mb-8">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Order Number') }}</label>
-                    <input wire:model="orderNumber" type="text" placeholder="ORD-2026-00001"
+                    <label for="ot-order-number" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Order Number') }}</label>
+                    <input wire:model="orderNumber" id="ot-order-number" type="text" placeholder="ORD-2026-00001"
                            class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                     @error('orderNumber') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Email Address') }}</label>
-                    <input wire:model="email" type="email" placeholder="{{ __('your@email.com') }}"
+                    <label for="ot-email" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Email Address') }}</label>
+                    <input wire:model="email" id="ot-email" type="email" placeholder="{{ __('your@email.com') }}"
                            class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                     @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>

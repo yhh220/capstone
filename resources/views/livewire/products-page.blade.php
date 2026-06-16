@@ -69,11 +69,13 @@
                             <input wire:model.live.debounce.400ms="minPrice"
                                    type="number"
                                    min="0"
+                                   aria-label="{{ __('Minimum price (RM)') }}"
                                    placeholder="{{ __('Min') }}"
                                    class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-red transition">
                             <input wire:model.live.debounce.400ms="maxPrice"
                                    type="number"
                                    min="0"
+                                   aria-label="{{ __('Maximum price (RM)') }}"
                                    placeholder="{{ __('Max') }}"
                                    class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-red transition">
                         </div>

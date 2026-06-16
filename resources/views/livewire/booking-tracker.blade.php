@@ -17,8 +17,9 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Booking Reference') }}</label>
+                    <label for="bt-reference" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Booking Reference') }}</label>
                     <input wire:model="reference"
+                           id="bt-reference"
                            wire:keydown.enter="search"
                            type="text"
                            placeholder="BK-{{ date('Y') }}-00001"
@@ -26,8 +27,9 @@
                     @error('reference') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Phone Number') }}</label>
+                    <label for="bt-phone" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Phone Number') }}</label>
                     <input wire:model="phone"
+                           id="bt-phone"
                            wire:keydown.enter="search"
                            type="tel"
                            placeholder="{{ __('Your phone number, e.g. 012-3456789') }}"

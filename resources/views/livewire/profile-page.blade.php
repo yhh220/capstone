@@ -16,23 +16,23 @@
                 </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Name') }} *</label>
-                        <input wire:model="name" type="text" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
+                        <label for="pf-name" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Name') }} *</label>
+                        <input wire:model="name" id="pf-name" autocomplete="name" type="text" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
                         @error('name') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Email') }}</label>
-                        <input type="email" value="{{ $email }}" disabled class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded-xl px-4 py-3 text-sm bg-gray-50 cursor-not-allowed">
+                        <label for="pf-email" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Email') }}</label>
+                        <input id="pf-email" type="email" value="{{ $email }}" disabled class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded-xl px-4 py-3 text-sm bg-gray-50 cursor-not-allowed">
                         <span class="text-xs text-gray-400 mt-1">{{ __('Email cannot be changed') }}</span>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Phone Number') }}</label>
-                        <input wire:model="phone" type="tel" placeholder="016-XXX XXXX" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                        <label for="pf-phone" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Phone Number') }}</label>
+                        <input wire:model="phone" id="pf-phone" autocomplete="tel" type="tel" placeholder="016-XXX XXXX" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                         @error('phone') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Gender') }}</label>
-                        <select wire:model="gender" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                        <label for="pf-gender" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Gender') }}</label>
+                        <select wire:model="gender" id="pf-gender" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                             <option value="">{{ __('Select') }}</option>
                             <option value="male">{{ __('Male') }}</option>
                             <option value="female">{{ __('Female') }}</option>
@@ -50,20 +50,20 @@
                 </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="sm:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Street Address') }}</label>
-                        <input wire:model="addressLine" type="text" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                        <label for="pf-street" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Street Address') }}</label>
+                        <input wire:model="addressLine" id="pf-street" autocomplete="street-address" type="text" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('City') }}</label>
-                        <input wire:model="city" type="text" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                        <label for="pf-city" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('City') }}</label>
+                        <input wire:model="city" id="pf-city" autocomplete="address-level2" type="text" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Postcode') }}</label>
-                        <input wire:model="postcode" type="text" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                        <label for="pf-postcode" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Postcode') }}</label>
+                        <input wire:model="postcode" id="pf-postcode" autocomplete="postal-code" type="text" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('State') }}</label>
-                        <select wire:model="state" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                        <label for="pf-state" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('State') }}</label>
+                        <select wire:model="state" id="pf-state" autocomplete="address-level1" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                             <option value="">{{ __('Select State') }}</option>
                             @foreach(['Selangor','Kuala Lumpur','Johor','Penang','Perak','Pahang','Negeri Sembilan','Melaka','Kedah','Kelantan','Terengganu','Perlis','Sabah','Sarawak','Putrajaya','Labuan'] as $s)
                                 <option value="{{ $s }}">{{ $s }}</option>

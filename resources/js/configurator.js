@@ -896,8 +896,6 @@ function initThree() {
                 }
             });
 
-            console.log('Mapped Car Parts:', carParts);
-
             // Hide Loading Overlay (隐藏加载动画遮罩)
             setTimeout(() => {
                 const progressContainer = document.getElementById('configurator-loader');
