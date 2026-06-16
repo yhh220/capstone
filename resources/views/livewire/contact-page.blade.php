@@ -13,16 +13,16 @@
 
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-16">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <h1 class="text-4xl sm:text-5xl font-black mb-4" data-aos="fade-up">
+            <h1 class="text-4xl sm:text-5xl font-black mb-4">
                 {{ __('Contact') }} <span class="text-brand-yellow">{{ __('Us') }}</span>
             </h1>
-            <p class="text-gray-400" data-aos="fade-up" data-aos-delay="100">{{ __('Use WhatsApp for quick questions or visit our store for a closer look at the products.') }}</p>
+            <p class="text-gray-400">{{ __('Use WhatsApp for quick questions or visit our store for a closer look at the products.') }}</p>
         </div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 py-16">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-            <div class="space-y-6" data-aos="fade-right">
+            <div class="space-y-6">
                 <h2 class="text-2xl font-black text-brand-black dark:text-white mb-6">{{ __('Get In Touch') }}</h2>
 
                 <div class="flex items-start gap-4 group">
@@ -79,12 +79,13 @@
                 </div>
             </div>
 
-            <div class="lg:col-span-2" data-aos="fade-left" data-aos-delay="100">
+            <div class="lg:col-span-2">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 sm:p-8">
                     <h2 class="text-2xl font-black text-brand-black dark:text-white mb-6">{{ __('Leave us a message') }}</h2>
 
                     @if(session('success'))
-                    <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 rounded-xl px-4 py-3 mb-6" role="alert" aria-live="polite">
+                    <div wire:transition.opacity.duration.300ms
+                         class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 rounded-xl px-4 py-3 mb-6" role="alert" aria-live="polite">
                         {{ session('success') }}
                     </div>
                     @endif
@@ -176,7 +177,7 @@
 
     <section class="py-16 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700" aria-labelledby="contact-location-heading">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-10" data-aos="fade-up">
+            <div class="text-center mb-10">
                 <div class="inline-block bg-brand-red/10 dark:bg-brand-red/20 text-brand-red text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
                     {{ __('Find Us') }}
                 </div>
@@ -185,7 +186,7 @@
                 </h2>
             </div>
 
-            <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg" data-aos="fade-up">
+            <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg" wire:ignore>
                 <div id="store-map" style="height: clamp(240px, 50vw, 420px); width: 100%;"></div>
             </div>
 
