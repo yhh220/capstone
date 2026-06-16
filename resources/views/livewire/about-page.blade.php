@@ -124,20 +124,30 @@
         </div>
     </section>
 
-    <section class="py-16 bg-white dark:bg-gray-800 text-center" aria-labelledby="about-cta-heading">
-        <div class="max-w-2xl mx-auto px-4" data-aos="zoom-in">
-            <h2 id="about-cta-heading" class="text-3xl font-black text-brand-black dark:text-white mb-4">
-                {{ __('Ready to visit or enquire?') }}
-            </h2>
-            <p class="text-gray-500 dark:text-gray-400 mb-8">
-                {{ __('See the products online first, then continue the conversation in store or on WhatsApp.') }}
-            </p>
-            <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                <x-btn.whatsapp :href="$whatsAppUrl" size="btn-lg">{{ __('WhatsApp us') }}</x-btn.whatsapp>
-                <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg">
-                    <svg class="icon-md btn-ico" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                    {{ __('Visit the Showroom') }}
-                </a>
+    <section class="py-16 sm:py-20" aria-labelledby="about-cta-heading">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="relative overflow-hidden rounded-[2rem] bg-[#121212] dark:bg-[#1C1917] border border-gray-800 dark:border-gray-700 px-6 py-14 sm:px-14 sm:py-16" data-aos="fade-up">
+                {{-- Contained accent glow --}}
+                <div class="absolute -top-24 -right-24 w-96 h-96 bg-brand-red/25 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
+                <div class="absolute -bottom-32 -left-16 w-80 h-80 bg-brand-red/10 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
+
+                <div class="relative grid lg:grid-cols-[1.2fr_auto] gap-10 items-center">
+                    <div>
+                        <h2 id="about-cta-heading" class="text-3xl sm:text-5xl text-white mb-4 leading-tight">
+                            {{ __('Ready to visit or enquire?') }}
+                        </h2>
+                        <p class="text-white/70 text-base sm:text-lg max-w-xl">
+                            {{ __('See the products online first, then continue the conversation in store or on WhatsApp.') }}
+                        </p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 shrink-0">
+                        <x-btn.whatsapp :href="$whatsAppUrl" size="btn-lg">{{ __('WhatsApp us') }}</x-btn.whatsapp>
+                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-lg">
+                            <svg class="icon-md btn-ico" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            {{ __('Visit the Showroom') }}
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
