@@ -188,7 +188,7 @@
                 <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ $ui['quick'] }}</span>
             </div>
             {{-- pt/pb give the hover lift room — overflow-x-auto also clips the y-axis --}}
-            <div class="flex gap-2 overflow-x-auto pt-1.5 pb-2 -mx-1 px-1" style="scrollbar-width:thin;">
+            <div class="flex gap-2 overflow-x-auto scrollbar-hide pt-1.5 pb-2 -mx-1 px-1">
                 @foreach($this->suggestions as $chip)
                 <button wire:click="quickAsk('{{ addslashes($chip['query']) }}')"
                         wire:loading.attr="disabled"

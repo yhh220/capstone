@@ -344,6 +344,10 @@
         .cart-badge-bump { animation: cartBump 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
         @media (prefers-reduced-motion: reduce) { .cart-badge-bump { animation: none; } }
 
+        /* Hide scrollbars on horizontal scroll rows (chips, carousels) */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
         /* ═══════════════════════════════════════════════
            UNIFIED BUTTON SYSTEM
            Primary   .btn-primary   — red fill, white text
