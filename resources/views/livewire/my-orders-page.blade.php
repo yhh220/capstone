@@ -7,6 +7,34 @@
     </div>
 
     <div class="max-w-5xl mx-auto px-4 py-10">
+
+        {{-- Skeleton shown while Livewire hydrates --}}
+        <div wire:loading.flex wire:target="render" class="flex-col space-y-4" aria-hidden="true">
+            @for($i = 0; $i < 3; $i++)
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-5 border-b border-gray-100 dark:border-gray-700">
+                    <div class="space-y-2">
+                        <div class="skeleton h-5 w-40"></div>
+                        <div class="skeleton h-3 w-32"></div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="skeleton h-6 w-20 !rounded-full"></div>
+                        <div class="skeleton h-5 w-16"></div>
+                    </div>
+                </div>
+                <div class="px-5 py-3 space-y-2">
+                    <div class="skeleton h-4 w-3/4"></div>
+                    <div class="skeleton h-4 w-1/2"></div>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/30 px-5 py-3 flex justify-between">
+                    <div class="skeleton h-3 w-40"></div>
+                    <div class="skeleton h-3 w-20"></div>
+                </div>
+            </div>
+            @endfor
+        </div>
+
+        <div wire:loading.remove wire:target="render">
         @if($orders->count() > 0)
         <div class="space-y-4">
             @foreach($orders as $order)
@@ -71,5 +99,6 @@
             </a>
         </div>
         @endif
+        </div>{{-- end wire:loading.remove --}}
     </div>
 </div>

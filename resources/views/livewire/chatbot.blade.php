@@ -108,7 +108,8 @@
                 </button>
                 <button wire:click="close"
                         class="text-gray-500 dark:text-gray-400 hover:text-brand-red p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:rotate-90 transition-all duration-300 active:scale-90"
-                        aria-label="{{ $ui['close'] }}">
+                        aria-label="{{ $ui['close'] }}"
+                        title="{{ $ui['close'] }}">
                     {!! $icon('x', 'w-5 h-5') !!}
                 </button>
             </div>

@@ -33,6 +33,35 @@
             </button>
         </div>
 
+        {{-- Skeleton while searching --}}
+        <div wire:loading wire:target="trackOrder" class="mb-8" aria-hidden="true">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700 space-y-6">
+                <div class="flex justify-between items-start">
+                    <div class="space-y-2">
+                        <div class="skeleton h-5 w-40"></div>
+                        <div class="skeleton h-3 w-36"></div>
+                    </div>
+                    <div class="skeleton h-7 w-24 !rounded-full"></div>
+                </div>
+                {{-- Timeline skeleton --}}
+                <div class="flex items-center justify-between relative">
+                    <div class="absolute top-5 left-0 right-0 h-0.5 skeleton"></div>
+                    @for($i = 0; $i < 4; $i++)
+                    <div class="flex flex-col items-center gap-2 z-10" style="width:25%">
+                        <div class="skeleton w-10 h-10 !rounded-full"></div>
+                        <div class="skeleton h-3 w-14"></div>
+                    </div>
+                    @endfor
+                </div>
+                {{-- Items skeleton --}}
+                <div class="border-t border-gray-100 dark:border-gray-700 pt-4 space-y-3">
+                    <div class="skeleton h-4 w-3/4"></div>
+                    <div class="skeleton h-4 w-1/2"></div>
+                    <div class="skeleton h-4 w-2/3"></div>
+                </div>
+            </div>
+        </div>
+
         {{-- Error Message --}}
         @if($searched && $errorMsg)
         <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-6 text-center mb-8">

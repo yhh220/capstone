@@ -676,6 +676,7 @@
                     <!-- User dropdown (desktop) -->
                     @if($shoppingEnabled || auth()->check())
                     <div class="hidden md:block relative" x-data="{ open: false }">
+                        <x-tooltip text="{{ auth()->check() ? Auth::user()->name : __('Account') }}" position="bottom">
                         <button @click="open = !open"
                                 @click.outside="open = false"
                                 type="button"
@@ -691,6 +692,7 @@
                                 </svg>
                             @endauth
                         </button>
+                        </x-tooltip>
 
                         <div x-show="open" x-cloak
                              x-transition:enter="transition ease-out duration-150"

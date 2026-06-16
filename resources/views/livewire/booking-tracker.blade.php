@@ -46,6 +46,27 @@
                 <span class="relative z-10" wire:loading wire:target="search">{{ __('Searching...') }}</span>
             </button>
 
+            {{-- Skeleton while searching --}}
+            <div wire:loading wire:target="search" class="mt-8" aria-hidden="true">
+                <div class="border border-gray-100 dark:border-gray-700 rounded-xl p-5 sm:p-6 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <div class="space-y-2">
+                            <div class="skeleton h-3 w-32"></div>
+                            <div class="skeleton h-5 w-40"></div>
+                        </div>
+                        <div class="skeleton h-6 w-20 !rounded-full"></div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="skeleton h-4 w-48"></div>
+                        <div class="skeleton h-3 w-36"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="skeleton h-3 w-full"></div>
+                        <div class="skeleton h-3 w-full"></div>
+                    </div>
+                </div>
+            </div>
+
             @if($searched && $errorMsg)
             <div class="mt-6 text-center py-8">
                 <div class="flex justify-center text-gray-300 dark:text-gray-600 mb-4" aria-hidden="true">
