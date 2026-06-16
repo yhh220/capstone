@@ -485,9 +485,6 @@
                         <div class="option-card active" data-category="bumpers" data-item="bumperF3">
                             <span class="option-name">{{ __('Standard Sport (Default)') }}</span>
                         </div>
-                        <div class="option-card" data-category="bumpers" data-item="bumperF1">
-                            <span class="option-name">{{ __('Aggressive Aero Bumper') }}</span>
-                        </div>
                         <div class="option-card" data-category="bumpers" data-item="bumperF2">
                             <span class="option-name">{{ __('Widebody Spec Bumper') }}</span>
                         </div>

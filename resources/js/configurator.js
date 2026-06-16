@@ -1,36 +1,36 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
-// Configuration Data (配置数据：配件名称与颜色映射表 — 纯展示，不含价格)
-const ACCESSORY_OPTIONS = {
+// Configuration Data (配置数据：包含配件价格和颜色映射表)
+const BASE_PRICE = 150000;
+const ACCESSORY_PRICES = {
     rims: {
-        rim7: { name: 'Sport Rims (Default)' },
-        rim1: { name: 'Vossen CV3 Style' },
-        rim2: { name: 'BBS Super RS Style' },
-        rim3: { name: 'Rotiform LAS-R Style' },
-        rim4: { name: 'HRE P101 Style' },
-        rim5: { name: 'Advan Racing GT Style' },
-        rim6: { name: 'TE37 Black Edition' },
+        rim7: { name: 'Sport Rims (Default)', price: 0 },
+        rim1: { name: 'Vossen CV3 Style', price: 1200 },
+        rim2: { name: 'BBS Super RS Style', price: 1800 },
+        rim3: { name: 'Rotiform LAS-R Style', price: 1500 },
+        rim4: { name: 'HRE P101 Style', price: 2200 },
+        rim5: { name: 'Advan Racing GT Style', price: 2000 },
+        rim6: { name: 'TE37 Black Edition', price: 2500 },
     },
     spoilers: {
-        wing4: { name: 'Integrated Lip (Default)' },
-        wing1: { name: 'Carbon Fiber High Wing' },
-        wing2: { name: 'GT Performance Wing' },
-        wing3: { name: 'Sleek Ducktail Wing' },
+        wing4: { name: 'Integrated Lip (Default)', price: 0 },
+        wing1: { name: 'Carbon Fiber High Wing', price: 1200 },
+        wing2: { name: 'GT Performance Wing', price: 1500 },
+        wing3: { name: 'Sleek Ducktail Wing', price: 600 },
     },
     bumpers: {
-        bumperF3: { name: 'Standard Sport (Default)' },
-        bumperF1: { name: 'Aggressive Aero Bumper' },
-        bumperF2: { name: 'Widebody Spec Bumper' },
+        bumperF3: { name: 'Standard Sport (Default)', price: 0 },
+        bumperF2: { name: 'Widebody Spec Bumper', price: 2200 },
     },
     dashcams: {
-        dashcam0: { name: 'None (Default)' },
-        dashcam1: { name: 'Mohawk' },
-        dashcam2: { name: '70mai' },
-        dashcam3: { name: 'DDPAI' },
+        dashcam0: { name: 'None (Default)', price: 0 },
+        dashcam1: { name: 'Mohawk', price: 0 },
+        dashcam2: { name: '70mai', price: 0 },
+        dashcam3: { name: 'DDPAI', price: 0 },
     }
 };
 
@@ -94,7 +94,6 @@ let renderUntil = 0;
 let mixer;
 const doorActions = [];
 const clock = new THREE.Clock();
-const RENDER_WINDOW_MS = 350;
 
 const cameraAnimation = {
     active: false,
@@ -390,7 +389,7 @@ function wireConfiguratorEvents() {
 
             togglePartVisibility(category, oldItemKey, itemKey);
 
-            // Update selected-options summary.
+            // Update Price Summary (更新价格汇总)
             updateSummaryUI();
         }
     });
@@ -412,16 +411,21 @@ function wireConfiguratorEvents() {
                     glassMaterial.transmission = config.transmission;
                     glassMaterial.opacity = config.opacity;
                 } else {
-                    // Low-end glass has no transmission — express the tint as opacity
-                    // (lower % = darker = more opaque).
                     const pct = parseInt(tintKey, 10);
-                    glassMaterial.color.setHex(0x14181d);
-                    glassMaterial.opacity = Math.min(0.9, 1 - (pct / 100) * 0.78);
+                    glassMaterial.color.setHex(0x000000); // 绝对纯黑
+                    
+                    // opacity calculation: 100% (Fully Transparent) -> 0.0 opacity, 5% (Darkest) -> 0.95 opacity
+                    // We set a minimum of 0.1 so the glass doesn't completely disappear at 100%
+                    let desiredOpacity = 1.0 - (pct / 100.0);
+                    if (desiredOpacity < 0.15) desiredOpacity = 0.15; // default clear glass has some reflection
+                    
+                    glassMaterial.opacity = desiredOpacity;
                 }
             }
 
             const windowTintValEl = document.getElementById('summary-window-tint');
             if (windowTintValEl) windowTintValEl.textContent = tintKey + '%';
+            requestRender();
         }
     });
 
@@ -475,9 +479,22 @@ function openConfigurator() {
     if (!isInitialized) {
         initThree();
     } else {
-        // Resume rendering (恢复渲染循环)
-        onWindowResize();
         requestRender(700);
+    }
+}
+
+function isConfiguratorOpen() {
+    return !!document.getElementById('configurator-modal')?.classList.contains('active');
+}
+
+function requestRender(duration = 350) {
+    if (!renderer || !scene || !camera || !isConfiguratorOpen()) return;
+
+    renderUntil = Math.max(renderUntil, performance.now() + duration);
+
+    if (!animationFrameId) {
+        clock.getDelta();
+        animationFrameId = requestAnimationFrame(animate);
     }
 }
 
@@ -487,25 +504,10 @@ function openConfigurator() {
 function isWebGLAvailable() {
     try {
         const canvas = document.createElement('canvas');
-        return !! (window.WebGLRenderingContext
+        return !!(window.WebGLRenderingContext
             && (canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
     } catch {
         return false;
-    }
-}
-
-function isConfiguratorOpen() {
-    return !!document.getElementById('configurator-modal')?.classList.contains('active');
-}
-
-function requestRender(duration = RENDER_WINDOW_MS) {
-    if (!renderer || !scene || !camera || !isConfiguratorOpen()) return;
-
-    renderUntil = Math.max(renderUntil, performance.now() + duration);
-
-    if (!animationFrameId) {
-        clock.getDelta();
-        animationFrameId = requestAnimationFrame(animate);
     }
 }
 
@@ -529,7 +531,6 @@ function closeConfigurator() {
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
     }
-    renderUntil = 0;
 }
 
 /**
@@ -556,25 +557,35 @@ function togglePartVisibility(category, oldKey, newKey) {
         updateRimMaterials();
     }
 
-    // Visible geometry changed — refresh the (otherwise static) shadow map once.
     if (renderer) renderer.shadowMap.needsUpdate = true;
+    requestRender(700);
 }
 
 /**
- * Refresh the selected-options summary panel.
- * Showcase only — names of the chosen parts, no prices or totals.
- * 更新底部汇总面板：只显示所选配件的名称，不显示价格（纯展示用途）。
+ * Refresh prices and selected specs in the UI summary panel
+ * 更新价格统计：根据选中的配件计算总价，并更新底部汇总面板的显示
  */
 function updateSummaryUI() {
-    const rimsValEl = document.getElementById('summary-rims');
-    const spoilerValEl = document.getElementById('summary-spoiler');
-    const bumperValEl = document.getElementById('summary-bumper');
+    const rimsValEl = document.getElementById('summary-rims-price');
+    const spoilerValEl = document.getElementById('summary-spoiler-price');
+    const bumperValEl = document.getElementById('summary-bumper-price');
     const dashcamValEl = document.getElementById('summary-dashcam');
+    const totalValEl = document.getElementById('summary-total-price');
 
-    if (rimsValEl) rimsValEl.textContent = ACCESSORY_OPTIONS.rims[state.rims].name;
-    if (spoilerValEl) spoilerValEl.textContent = ACCESSORY_OPTIONS.spoilers[state.spoilers].name;
-    if (bumperValEl) bumperValEl.textContent = ACCESSORY_OPTIONS.bumpers[state.bumpers].name;
-    if (dashcamValEl) dashcamValEl.textContent = ACCESSORY_OPTIONS.dashcams[state.dashcams].name;
+    const rimSpec = ACCESSORY_PRICES.rims[state.rims];
+    const spoilerSpec = ACCESSORY_PRICES.spoilers[state.spoilers];
+    const bumperSpec = ACCESSORY_PRICES.bumpers[state.bumpers];
+    const dashcamSpec = ACCESSORY_PRICES.dashcams[state.dashcams];
+
+    // Update prices on labels (更新标签上的价格显示)
+    if (rimsValEl) rimsValEl.textContent = rimSpec.price === 0 ? 'Included' : `+ RM ${rimSpec.price.toLocaleString()}`;
+    if (spoilerValEl) spoilerValEl.textContent = spoilerSpec.price === 0 ? 'Included' : `+ RM ${spoilerSpec.price.toLocaleString()}`;
+    if (bumperValEl) bumperValEl.textContent = bumperSpec.price === 0 ? 'Included' : `+ RM ${bumperSpec.price.toLocaleString()}`;
+    if (dashcamValEl) dashcamValEl.textContent = dashcamSpec.name;
+
+    // Calculate Grand Total (计算总价)
+    const total = BASE_PRICE + rimSpec.price + spoilerSpec.price + bumperSpec.price + dashcamSpec.price;
+    if (totalValEl) totalValEl.textContent = `RM ${total.toLocaleString()}`;
 }
 
 /**
@@ -582,10 +593,15 @@ function updateSummaryUI() {
  * 核心 Three.js 初始化设置
  */
 function initThree() {
+    isInitialized = true; // Set immediately to prevent race conditions from double-clicks or auto-open
+
     const canvasContainer = document.getElementById('configurator-viewport');
     const canvas = document.getElementById('configurator-canvas');
     const modal = document.getElementById('configurator-modal');
-    if (!canvasContainer || !canvas || !modal) return;
+    if (!canvasContainer || !canvas || !modal) {
+        isInitialized = false;
+        return;
+    }
 
     // 1. 创建场景 (Scene)：3D世界的容器，所有物体、光照都在这里
     scene = new THREE.Scene();
@@ -596,42 +612,24 @@ function initThree() {
     camera = new THREE.PerspectiveCamera(40, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 100);
     camera.position.set(5.5, 2, 5.5);
 
-    // Detect low-end devices — small screens, but also weak desktops (few CPU
-    // cores or little RAM). On these we render at a lower pixel ratio with
-    // cheaper shadows and no antialias so the GPU isn't overwhelmed (the #1
-    // cause of a "frozen" viewport and runaway memory on budget hardware).
-    const smallScreen = window.matchMedia('(max-width: 991px)').matches;
-    const lowMemory   = (navigator.deviceMemory || 8) <= 4;        // GB (Chrome/Android)
-    const lowCores    = (navigator.hardwareConcurrency || 8) <= 4; // logical CPUs
-    const isLowEnd    = smallScreen || lowMemory || lowCores;
-
     // 3. 渲染器 (Renderer)：引擎的核心，负责把 3D 画面计算并渲染到网页的画布 (Canvas) 上
     renderer = new THREE.WebGLRenderer({
         canvas: canvas,
-        antialias: false, // MSAA multiplies fragment cost; too heavy for weak GPUs
+        antialias: true,
         powerPreference: 'high-performance'
     });
     renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-    // Dynamic resolution: full res when still, render below native while dragging
-    // (motion hides the softness) so rotation stays smooth even on weak GPUs and
-    // 1x monitors.
-    const idlePixelRatio = Math.min(window.devicePixelRatio, isLowEnd ? 1 : 1.5);
-    const dragPixelRatio = Math.min(window.devicePixelRatio, isLowEnd ? 0.5 : 0.7);
-    renderer.setPixelRatio(idlePixelRatio);
-    renderer.shadowMap.enabled = !isLowEnd;
-    // The car is static while the camera orbits — so don't redraw the shadow map
-    // (all ~1.4M shadow-casting verts) every frame. Refresh it only when geometry
-    // actually changes (part swaps, doors). This ~halves per-frame vertex work
-    // during rotation, with no model/quality change.
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.shadowMap.enabled = true;
     renderer.shadowMap.autoUpdate = false;
     renderer.shadowMap.needsUpdate = true;
-    renderer.shadowMap.type = isLowEnd ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
-    pmremGenerator.dispose(); // free the internal render targets once the env map is baked
+    pmremGenerator.dispose();
 
     // 4. 轨道控制器 (OrbitControls)：允许用户用鼠标拖动来旋转、缩放、平移视角
     controls = new OrbitControls(camera, renderer.domElement);
@@ -642,8 +640,6 @@ function initThree() {
     controls.maxDistance = 8.5;
     controls.target.set(0, 0.4, 0);
     controls.addEventListener('change', () => requestRender());
-    controls.addEventListener('start', () => { renderer.setPixelRatio(dragPixelRatio); requestRender(1000); });
-    controls.addEventListener('end', () => { renderer.setPixelRatio(idlePixelRatio); requestRender(700); });
 
     // 5. 光照设置 (Lighting)：打光让车身有立体感和材质反射（包含环境光、主光源、补光等）
     const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x2d2d35, 1.0);
@@ -654,9 +650,9 @@ function initThree() {
 
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.6);
     keyLight.position.set(5, 6, 5);
-    keyLight.castShadow = !isLowEnd;
-    keyLight.shadow.mapSize.width = 1024;
-    keyLight.shadow.mapSize.height = 1024;
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 2048;
+    keyLight.shadow.mapSize.height = 2048;
     keyLight.shadow.bias = -0.0005;
     keyLight.shadow.camera.near = 0.5;
     keyLight.shadow.camera.far = 15;
@@ -683,19 +679,20 @@ function initThree() {
     });
     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
     floorMesh.rotation.x = -Math.PI / 2;
-    floorMesh.receiveShadow = !isLowEnd;
+    floorMesh.receiveShadow = true;
     scene.add(floorMesh);
 
     const gridHelper = new THREE.GridHelper(24, 24, 0x4a4a52, 0x33333c);
     gridHelper.position.y = 0.005;
     scene.add(gridHelper);
 
-    // 7. 加载 3D 模型 (GLTF Loader)
-    // 模型用 meshopt 压缩 + 几何量化（位置 int16、法线 int8，显存约减半且不删三角形=不破面）、
-    // WebP 512 贴图、锁边简化(~1.4M 顶点)。渲染层再降配：按需渲染、拖动降分辨率、静态阴影、关 MSAA、简化材质。
+    // 7. 加载 3D 模型 (GLTF Loader)：通过加载器把服务器上的 .glb 汽车模型文件读取进来
+    // 模型用 Draco 压缩，需要 DRACOLoader 解码几何体
     const modelUrl = modal.dataset.modelUrl || '/models/3d/car-draco.glb';
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('/draco/');
     const loader = new GLTFLoader();
-    loader.setMeshoptDecoder(MeshoptDecoder);
+    loader.setDRACOLoader(dracoLoader);
 
     const setProgress = (percent) => {
         const bar = document.getElementById('loader-progress-bar');
@@ -706,214 +703,210 @@ function initThree() {
 
     // On Loaded Success (加载成功后的回调)
     const onModelLoaded = (gltf) => {
-            const car = gltf.scene;
-            carModel = car;
+        const car = gltf.scene;
+        carModel = car;
 
-            scene.add(car);
+        scene.add(car);
 
-            // Pre-traverse to hide non-default accessories so they do not corrupt the ground level bounding box calculation (预遍历以隐藏非默认配件，避免它们影响底部包围盒的计算)
-            car.traverse((child) => {
-                if (child.isMesh) {
-                    const partInfo = getPartInfo(child);
-                    if (partInfo) {
-                        const { category, key } = partInfo;
-                        if (category === 'rims' || category === 'spoilers' || category === 'bumpers' || category === 'dashcams') {
-                            child.visible = (key === state[category]);
-                        } else if (category === 'bumperB1') {
-                            child.visible = false;
-                        }
+        // Pre-traverse to hide non-default accessories so they do not corrupt the ground level bounding box calculation (预遍历以隐藏非默认配件，避免它们影响底部包围盒的计算)
+        car.traverse((child) => {
+            if (child.isMesh) {
+                const partInfo = getPartInfo(child);
+                if (partInfo) {
+                    const { category, key } = partInfo;
+                    if (category === 'rims' || category === 'spoilers' || category === 'bumpers' || category === 'dashcams') {
+                        child.visible = (key === state[category]);
+                    } else if (category === 'bumperB1') {
+                        child.visible = false;
                     }
-                }
-            });
-
-            // Step 1: Center X and Z first (步骤1：先在X和Z轴上居中)
-            const box1 = new THREE.Box3().setFromObject(car);
-            const center = box1.getCenter(new THREE.Vector3());
-            car.position.x = -center.x;
-            car.position.z = -center.z;
-
-            // Step 2: Recalculate bounding box after centering, then fix Y (步骤2：居中后重新计算包围盒，然后修正Y轴以贴合地面)
-            car.updateMatrixWorld(true);
-            const box2 = new THREE.Box3().setFromObject(car);
-            car.position.y = -box2.min.y;
-
-            // Setup Animation Mixer (设置动画混合器，用于播放开关门动画)
-            if (gltf.animations && gltf.animations.length > 0) {
-                mixer = new THREE.AnimationMixer(car);
-
-                const clip1 = gltf.animations.find(clip => clip.name === 'AM-Door动作');
-                const clip2 = gltf.animations.find(clip => clip.name === 'AM-Door2动作');
-
-                if (clip1) {
-                    const action1 = mixer.clipAction(clip1);
-                    action1.setLoop(THREE.LoopOnce, 1);
-                    action1.clampWhenFinished = true;
-                    doorActions.push(action1);
-                }
-                if (clip2) {
-                    const action2 = mixer.clipAction(clip2);
-                    action2.setLoop(THREE.LoopOnce, 1);
-                    action2.clampWhenFinished = true;
-                    doorActions.push(action2);
                 }
             }
-            // Initialize materials (初始化车漆、轮毂等材质)
-            // Low-end: plain MeshStandardMaterial (no clearcoat) for a cheaper shader.
-            carBodyMaterial = isLowEnd
-                ? new THREE.MeshStandardMaterial({
-                    color: COLOR_MAP[state.color].hex,
-                    metalness: 0.85,
-                    roughness: 0.22,
-                })
-                : new THREE.MeshPhysicalMaterial({
-                    color: COLOR_MAP[state.color].hex,
-                    metalness: 0.9,
-                    roughness: 0.12,
-                    clearcoat: 1.0,
-                    clearcoatRoughness: 0.05
-                });
+        });
 
-            carRimMaterial = new THREE.MeshStandardMaterial({
-                color: RIM_COLOR_MAP[state.rimColor].hex,
-                metalness: 0.8,
-                roughness: 0.25
-            });
+        // Step 1: Center X and Z first (步骤1：先在X和Z轴上居中)
+        const box1 = new THREE.Box3().setFromObject(car);
+        const center = box1.getCenter(new THREE.Vector3());
+        car.position.x = -center.x;
+        car.position.z = -center.z;
 
-            carBrakeMaterial = new THREE.MeshStandardMaterial({
-                color: BRAKE_COLOR_MAP[state.brakeColor].hex,
-                metalness: 0.6,
-                roughness: 0.4
-            });
+        // Step 2: Recalculate bounding box after centering, then fix Y (步骤2：居中后重新计算包围盒，然后修正Y轴以贴合地面)
+        car.updateMatrixWorld(true);
+        const box2 = new THREE.Box3().setFromObject(car);
+        car.position.y = -box2.min.y;
 
-            // Low-end: a plain transparent material instead of transmission glass.
-            // A plain transparent material for ALL devices — never transmission.
-            // MeshPhysicalMaterial transmission forces a full extra scene render
-            // pass every frame AND allocates a screen-sized render target; on weak
-            // GPUs / low-RAM machines that alone can freeze the page. We trade glass
-            // refraction for a configurator that actually runs everywhere.
-            glassMaterial = new THREE.MeshStandardMaterial({
-                color: 0x202428,
-                metalness: 0.0,
-                roughness: 0.1,
-                transparent: true,
-                opacity: 0.3,
-            });
+        // Setup Animation Mixer (设置动画混合器，用于播放开关门动画)
+        if (gltf.animations && gltf.animations.length > 0) {
+            mixer = new THREE.AnimationMixer(car);
 
-            const dashcamMaterial = new THREE.MeshStandardMaterial({
-                color: 0x303030,
-                metalness: 0.2,
-                roughness: 0.8,
-                side: THREE.DoubleSide
-            });
+            const clip1 = gltf.animations.find(clip => clip.name === 'AM-Door动作');
+            const clip2 = gltf.animations.find(clip => clip.name === 'AM-Door2动作');
 
-            // Map and identify car meshes (遍历并分类标记汽车所有的网格模型)
-            car.traverse((child) => {
-                if (child.isMesh) {
-                    child.castShadow = !isLowEnd;
-                    child.receiveShadow = !isLowEnd;
+            if (clip1) {
+                const action1 = mixer.clipAction(clip1);
+                action1.setLoop(THREE.LoopOnce, 1);
+                action1.clampWhenFinished = true;
+                doorActions.push(action1);
+            }
+            if (clip2) {
+                const action2 = mixer.clipAction(clip2);
+                action2.setLoop(THREE.LoopOnce, 1);
+                action2.clampWhenFinished = true;
+                doorActions.push(action2);
+            }
+        }
+        // Initialize materials (初始化车漆、轮毂等材质)
+        carBodyMaterial = new THREE.MeshPhysicalMaterial({
+            color: COLOR_MAP[state.color].hex,
+            metalness: 0.9,
+            roughness: 0.12,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.05
+        });
 
-                    const name = child.name;
-                    const nameLower = name.toLowerCase();
+        carRimMaterial = new THREE.MeshStandardMaterial({
+            color: RIM_COLOR_MAP[state.rimColor].hex,
+            metalness: 0.8,
+            roughness: 0.25
+        });
 
-                    // Check if it belongs to one of the custom accessories (检查当前网格是否属于自定义配件)
-                    const partInfo = getPartInfo(child);
-                    if (partInfo) {
-                        const { category, key } = partInfo;
+        carBrakeMaterial = new THREE.MeshStandardMaterial({
+            color: BRAKE_COLOR_MAP[state.brakeColor].hex,
+            metalness: 0.6,
+            roughness: 0.4
+        });
 
-                        if (category === 'rims' || category === 'spoilers' || category === 'bumpers' || category === 'dashcams') {
-                            if (!carParts[category][key]) {
-                                carParts[category][key] = [];
-                            }
-                            carParts[category][key].push(child);
+        glassMaterial = new THREE.MeshStandardMaterial({
+            color: 0x000000,
+            metalness: 0.1,
+            roughness: 0.05,
+            transparent: true,
+            opacity: 0.15, // 100% Transparent default
+        });
 
-                            // Hide non-default on load (在加载时隐藏非默认配件)
-                            child.visible = (key === state[category]);
+        const dashcamMaterial = new THREE.MeshStandardMaterial({
+            color: 0x303030,
+            metalness: 0.2,
+            roughness: 0.8,
+            side: THREE.DoubleSide
+        });
 
-                            // Store original material reference (保存原始材质的引用，以便重置时使用)
-                            child.userData.originalMaterial = child.material;
+        // Map and identify car meshes (遍历并分类标记汽车所有的网格模型)
+        car.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
 
-                            if (category === 'dashcams') {
-                                child.material = dashcamMaterial;
-                            }
+                const name = child.name;
+                const nameLower = name.toLowerCase();
 
-                            // Apply Rim material to rims category if not default (如果不是默认颜色，则应用自定义轮毂材质)
-                            if (category === 'rims') {
-                                if (state.rimColor !== 'default') {
-                                    const meshName = (child.name || '').toLowerCase();
-                                    const isTire = meshName.includes('tire') || meshName.includes('rubber') || meshName.includes('disk');
-                                    if (!isTire) {
-                                        child.material = carRimMaterial;
-                                    }
+                // Check if it belongs to one of the custom accessories (检查当前网格是否属于自定义配件)
+                const partInfo = getPartInfo(child);
+                if (partInfo) {
+                    const { category, key } = partInfo;
+
+                    if (category === 'rims' || category === 'spoilers' || category === 'bumpers' || category === 'dashcams') {
+                        if (!carParts[category][key]) {
+                            carParts[category][key] = [];
+                        }
+                        carParts[category][key].push(child);
+
+                        // Hide non-default on load (在加载时隐藏非默认配件)
+                        child.visible = (key === state[category]);
+
+                        // Store original material reference (保存原始材质的引用，以便重置时使用)
+                        child.userData.originalMaterial = child.material;
+
+                        if (category === 'dashcams') {
+                            child.material = dashcamMaterial;
+                        }
+
+                        // Apply Rim material to rims category if not default (如果不是默认颜色，则应用自定义轮毂材质)
+                        if (category === 'rims') {
+                            if (state.rimColor !== 'default') {
+                                const meshName = (child.name || '').toLowerCase();
+                                const isTire = meshName.includes('tire') || meshName.includes('rubber') || meshName.includes('disk');
+                                if (!isTire) {
+                                    child.material = carRimMaterial;
                                 }
                             }
-                        } else if (category === 'bumperB1') {
-                            child.visible = false; // Hide loose misplaced bumper mesh (隐藏多余错位的保险杠网格)
                         }
+                    } else if (category === 'bumperB1') {
+                        child.visible = false; // Hide loose misplaced bumper mesh (隐藏多余错位的保险杠网格)
                     }
+                }
 
-                    // Apply Brake material to brake parts (给刹车部件应用刹车卡钳材质)
-                    const isBrake = name.startsWith('AM-Brake') || name.split('.')[0] === 'AM-Brake';
-                    if (isBrake) {
-                        child.material = carBrakeMaterial;
+                // 修复：模型文件内部存在不小心多导出的重叠车门，这里自动将带有 .001 的冗余车门隐藏
+                if (name.includes('door') || name.includes('Door')) {
+                    if (name.includes('.001')) {
+                        child.visible = false;
                     }
+                }
 
-                    // Check if this is one of the explicitly excluded fake windows (检查是否是那些被显式排除的假车窗网格)
-                    let isExcludedWindow = false;
-                    let tempObj = child;
-                    while (tempObj && tempObj.parent) {
-                        const tempName = (tempObj.name || '').toLowerCase();
-                        if (tempName.match(/window[._\s]*00[12]/)) {
-                            isExcludedWindow = true;
+                // Apply Brake material to brake parts (给刹车部件应用刹车卡钳材质)
+                const isBrake = name.startsWith('AM-Brake') || name.split('.')[0] === 'AM-Brake';
+                if (isBrake) {
+                    child.material = carBrakeMaterial;
+                }
+
+                // Check if this is one of the explicitly excluded fake windows (检查是否是那些被显式排除的假车窗网格)
+                let isExcludedWindow = false;
+                let tempObj = child;
+                while (tempObj && tempObj.parent) {
+                    const tempName = (tempObj.name || '').toLowerCase();
+                    if (tempName.match(/window[._\s]*00[12]/)) {
+                        isExcludedWindow = true;
+                        break;
+                    }
+                    tempObj = tempObj.parent;
+                }
+
+                // Apply Glass material if it matches glass/window name and is NOT excluded (如果是车窗/玻璃且未被排除，则应用玻璃材质)
+                let isGlass = false;
+                if (!isExcludedWindow) {
+                    let currentObj = child;
+                    while (currentObj && currentObj.parent) {
+                        const curName = (currentObj.name || '').toLowerCase();
+                        if (curName.includes('glass') || curName.includes('window') || curName.includes('windshield') || curName.includes('windscreen')) {
+                            isGlass = true;
                             break;
                         }
-                        tempObj = tempObj.parent;
-                    }
-
-                    // Apply Glass material if it matches glass/window name and is NOT excluded (如果是车窗/玻璃且未被排除，则应用玻璃材质)
-                    let isGlass = false;
-                    if (!isExcludedWindow) {
-                        let currentObj = child;
-                        while (currentObj && currentObj.parent) {
-                            const curName = (currentObj.name || '').toLowerCase();
-                            if (curName.includes('glass') || curName.includes('window') || curName.includes('windshield') || curName.includes('windscreen')) {
-                                isGlass = true;
-                                break;
-                            }
-                            currentObj = currentObj.parent;
-                        }
-                    }
-
-                    if (isGlass) {
-                        carParts.glass.push(child);
-                        child.material = glassMaterial;
-                    } else if (!isExcludedWindow) {
-                        // Apply Body paint color strictly to matching targets (and nested body meshes) AND active front bumpers (严格为目标部件、嵌套的车身网格以及当前激活的前保险杠应用车漆颜色)
-                        if (isMeshBodyPaint(child, partInfo)) {
-                            carParts.body.push(child);
-                            child.material = carBodyMaterial;
-                        }
+                        currentObj = currentObj.parent;
                     }
                 }
-            });
 
-            // Hide Loading Overlay (隐藏加载动画遮罩)
-            setTimeout(() => {
-                const progressContainer = document.getElementById('configurator-loader');
-                if (progressContainer) {
-                    progressContainer.style.opacity = '0';
-                    setTimeout(() => {
-                        progressContainer.style.display = 'none';
-                    }, 500);
+                if (isGlass) {
+                    carParts.glass.push(child);
+                    child.material = glassMaterial;
+                } else if (!isExcludedWindow) {
+                    // Apply Body paint color strictly to matching targets (and nested body meshes) AND active front bumpers (严格为目标部件、嵌套的车身网格以及当前激活的前保险杠应用车漆颜色)
+                    if (isMeshBodyPaint(child, partInfo)) {
+                        carParts.body.push(child);
+                        child.material = carBodyMaterial;
+                    }
                 }
-            }, 300);
+            }
+        });
 
-            isInitialized = true;
-            if (renderer) renderer.shadowMap.needsUpdate = true; // bake the shadow once now that the car is in
-            requestRender(1200);
+        console.log('Mapped Car Parts:', carParts);
+
+        // Hide Loading Overlay (隐藏加载动画遮罩)
+        setTimeout(() => {
+            const progressContainer = document.getElementById('configurator-loader');
+            if (progressContainer) {
+                progressContainer.style.opacity = '0';
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                }, 500);
+            }
+        }, 300);
+
+        if (renderer) renderer.shadowMap.needsUpdate = true;
+        requestRender(1200);
     };
 
     const onModelError = (error) => {
         console.error('Error loading 3D model:', error);
+        isInitialized = false; // Reset so user can try again
         const pct = document.getElementById('loader-percentage');
         const sub = document.querySelector('.loader-subtitle');
         if (pct) { pct.textContent = 'Failed to load — check your connection'; pct.style.color = '#ef4444'; }
@@ -922,9 +915,9 @@ function initThree() {
 
     // Stream the .glb so the bar reflects real downloaded bytes even when the
     // server omits Content-Length (gzip/chunked). Download fills 0–90%; the
-    // last 10% covers mesh decode + scene setup so the bar never sits frozen
-    // at 100% while a slow device is still decoding ~1.4M vertices.
-    const KNOWN_SIZE = 12_600_000; // ~ car-draco.glb (meshopt), used only as a fallback total
+    // last 10% covers Draco decode + scene setup so the bar never sits frozen
+    // at 100% while a slow device is still decoding 3M vertices.
+    const KNOWN_SIZE = 25_700_000; // ~ car-draco.glb, used only as a fallback total
 
     streamGlb(modelUrl, KNOWN_SIZE, (frac) => setProgress(frac * 90))
         .then((buffer) => {
@@ -936,8 +929,6 @@ function initThree() {
                 loader.parse(buffer, '', (gltf) => {
                     setProgress(100);
                     onModelLoaded(gltf);
-                    // Free the compressed buffer once decoding is done — low-end
-                    // phones can't spare the extra ~19MB.
                     buffer = null;
                 }, onModelError);
             });
@@ -953,41 +944,28 @@ function initThree() {
  * Falls back to a known total when the server doesn't send Content-Length.
  */
 async function streamGlb(url, knownSize, onProgress) {
-    // Abort if the connection stalls (no bytes for 30s) so a flaky mobile
-    // network surfaces a "check your connection" error instead of hanging the
-    // loader forever. The timer is reset every time a chunk arrives.
-    const STALL_MS = 30000;
-    const controller = new AbortController();
-    let stall = setTimeout(() => controller.abort(), STALL_MS);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    try {
-        const response = await fetch(url, { signal: controller.signal });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const lenHeader = response.headers.get('content-length');
+    const total = lenHeader ? parseInt(lenHeader, 10) : knownSize;
 
-        const lenHeader = response.headers.get('content-length');
-        const total = lenHeader ? parseInt(lenHeader, 10) : knownSize;
-
-        const reader = response.body.getReader();
-        const chunks = [];
-        let received = 0;
-        for (;;) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            clearTimeout(stall);
-            stall = setTimeout(() => controller.abort(), STALL_MS);
-            chunks.push(value);
-            received += value.length;
-            // Clamp below 1 so we never show 100% before parse() finishes.
-            onProgress(Math.min(received / total, 0.99));
-        }
-
-        const out = new Uint8Array(received);
-        let offset = 0;
-        for (const chunk of chunks) { out.set(chunk, offset); offset += chunk.length; }
-        return out.buffer;
-    } finally {
-        clearTimeout(stall);
+    const reader = response.body.getReader();
+    const chunks = [];
+    let received = 0;
+    for (; ;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        received += value.length;
+        // Clamp below 1 so we never show 100% before parse() finishes.
+        onProgress(Math.min(received / total, 0.99));
     }
+
+    const out = new Uint8Array(received);
+    let offset = 0;
+    for (const chunk of chunks) { out.set(chunk, offset); offset += chunk.length; }
+    return out.buffer;
 }
 
 /**
@@ -995,18 +973,19 @@ async function streamGlb(url, knownSize, onProgress) {
  * 轨道控制器与渲染循环（每一帧的更新）
  */
 function animate() {
-    animationFrameId = null;
-
     const now = performance.now();
     const delta = clock.getDelta();
-    const doorAnimationActive = doorActions.some(action => action.isRunning());
-    if (mixer && doorAnimationActive) {
-        mixer.update(delta);
-        // Doors are moving — let the shadow follow them this frame.
-        if (renderer) renderer.shadowMap.needsUpdate = true;
-    }
 
-    let keepRendering = doorAnimationActive || now < renderUntil;
+    let keepRendering = now < renderUntil;
+
+    if (mixer) {
+        const doorAnimationActive = doorActions.some(action => action.isRunning());
+        if (doorAnimationActive) {
+            mixer.update(delta);
+            if (renderer) renderer.shadowMap.needsUpdate = true;
+            keepRendering = true;
+        }
+    }
 
     if (cameraAnimation.active) {
         const elapsed = performance.now() - cameraAnimation.startTime;
@@ -1019,17 +998,17 @@ function animate() {
         currentTarget.lerpVectors(cameraAnimation.startTarget, cameraAnimation.endTarget, t);
         camera.lookAt(currentTarget);
 
+        keepRendering = true;
+
         if (progress >= 1) {
             cameraAnimation.active = false;
             if (cameraAnimation.onComplete) {
                 cameraAnimation.onComplete();
             }
-        } else {
-            keepRendering = true;
         }
     } else {
         if (controls && controls.enabled) {
-            keepRendering = controls.update() || keepRendering;
+            controls.update();
         }
     }
 
@@ -1037,8 +1016,10 @@ function animate() {
         renderer.render(scene, camera);
     }
 
-    if (isConfiguratorOpen() && (keepRendering || state.transitioning)) {
+    if (keepRendering) {
         animationFrameId = requestAnimationFrame(animate);
+    } else {
+        animationFrameId = null;
     }
 }
 
@@ -1054,7 +1035,6 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
 
     renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-    requestRender();
 }
 
 /**
@@ -1070,7 +1050,6 @@ function resetCamera() {
             camera.position.set(5.5, 2, 5.5);
             controls.target.set(0, 0.4, 0);
             controls.update();
-            requestRender(700);
         }
     }
 }
@@ -1081,7 +1060,6 @@ function resetCamera() {
  */
 function toggleDoors(open, onComplete) {
     if (doorActions.length === 0) {
-        requestRender();
         if (onComplete) onComplete();
         return;
     }
@@ -1108,8 +1086,6 @@ function toggleDoors(open, onComplete) {
         }
         action.play();
     });
-
-    requestRender((maxDuration * 1000) + 300);
 
     // Update doors toggle button UI state (更新开关车门按钮的UI状态)
     const doorBtn = document.getElementById('toggle-doors-btn');
@@ -1144,8 +1120,6 @@ function fadeScreen(fade, callback) {
     } else {
         overlay.classList.remove('active');
     }
-
-    requestRender(550);
 
     // CSS fade transition is 400ms, wait 450ms to ensure completion (CSS过渡动画为400毫秒，等待450毫秒确保执行完毕)
     setTimeout(() => {
@@ -1309,7 +1283,6 @@ function animateCameraToDoorSide(callback) {
     cameraAnimation.endTarget.copy(coords.doorTarget);
 
     cameraAnimation.onComplete = callback;
-    requestRender(cameraAnimation.duration + 300);
 }
 
 /**
@@ -1480,25 +1453,31 @@ function sendWhatsAppEnquiry() {
     const colorSpec = COLOR_MAP[state.color].name;
     const rimColorSpec = RIM_COLOR_MAP[state.rimColor].name;
     const brakeColorSpec = BRAKE_COLOR_MAP[state.brakeColor].name;
-    const rimSpec = ACCESSORY_OPTIONS.rims[state.rims].name;
-    const spoilerSpec = ACCESSORY_OPTIONS.spoilers[state.spoilers].name;
-    const bumperSpec = ACCESSORY_OPTIONS.bumpers[state.bumpers].name;
+    const rimSpec = ACCESSORY_PRICES.rims[state.rims].name;
+    const rimPrice = ACCESSORY_PRICES.rims[state.rims].price === 0 ? 'Included' : `+RM ${ACCESSORY_PRICES.rims[state.rims].price.toLocaleString()}`;
+    const spoilerSpec = ACCESSORY_PRICES.spoilers[state.spoilers].name;
+    const spoilerPrice = ACCESSORY_PRICES.spoilers[state.spoilers].price === 0 ? 'Included' : `+RM ${ACCESSORY_PRICES.spoilers[state.spoilers].price.toLocaleString()}`;
+    const bumperSpec = ACCESSORY_PRICES.bumpers[state.bumpers].name;
+    const bumperPrice = ACCESSORY_PRICES.bumpers[state.bumpers].price === 0 ? 'Included' : `+RM ${ACCESSORY_PRICES.bumpers[state.bumpers].price.toLocaleString()}`;
     const windowTintSpec = state.windowTint + '%';
-    const dashcamSpec = ACCESSORY_OPTIONS.dashcams[state.dashcams];
+    const dashcamSpec = ACCESSORY_PRICES.dashcams[state.dashcams];
+
+    const total = BASE_PRICE + ACCESSORY_PRICES.rims[state.rims].price + ACCESSORY_PRICES.spoilers[state.spoilers].price + ACCESSORY_PRICES.bumpers[state.bumpers].price + dashcamSpec.price;
 
     const storePhoneRaw = enquireBtn.dataset.phone || '60123456789';
 
-    // Showcase enquiry — share the chosen build, no prices. The shop quotes
-    // availability and pricing over WhatsApp.
-    const textMessage = `Hello Win Win Car Studio! 🚗\n\nI designed a car using your 3D configurator and I'd like a quote for this build:\n\n` +
+    const textMessage = `Hello Win Win Car Studio! 🚗\n\nI have customized a car on your website using the 3D Car Configurator. Here is my custom configuration details:\n\n` +
         `• Paint Color: ${colorSpec}\n` +
-        `• Rim Style: ${rimSpec} (Color: ${rimColorSpec})\n` +
+        `• Rim Style: ${rimSpec} (Color: ${rimColorSpec}) (${rimPrice})\n` +
         `• Brake Caliper Color: ${brakeColorSpec}\n` +
-        `• Spoiler Style: ${spoilerSpec}\n` +
-        `• Front Bumper: ${bumperSpec}\n` +
+        `• Spoiler Style: ${spoilerSpec} (${spoilerPrice})\n` +
+        `• Front Bumper: ${bumperSpec} (${bumperPrice})\n` +
         `• Window Tint: ${windowTintSpec}\n` +
         `• Dash Camera: ${dashcamSpec.name}\n\n` +
-        `Please let me know availability and pricing for these accessories. Thank you!`;
+        `----------------------------\n` +
+        `• Base Price: RM ${BASE_PRICE.toLocaleString()}\n` +
+        `• Estimated Total: RM ${total.toLocaleString()}\n\n` +
+        `Please check availability and guide me on ordering these accessories! Thank you.`;
 
     const whatsAppUrl = `https://wa.me/${storePhoneRaw}?text=${encodeURIComponent(textMessage)}`;
     window.open(whatsAppUrl, '_blank');
