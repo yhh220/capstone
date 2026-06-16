@@ -643,7 +643,7 @@ function initThree() {
     scene.add(gridHelper);
 
     // 7. 加载 3D 模型 (GLTF Loader)：通过加载器把服务器上的 .glb 汽车模型文件读取进来
-    // 模型已用 Draco 压缩（171MB → ~25MB），需要 DRACOLoader 解码几何体
+    // 模型已用 Draco 压缩 + WebP 贴图（188MB → ~12MB），需要 DRACOLoader 解码几何体
     const modelUrl = modal.dataset.modelUrl || '/models/3d/car-draco.glb';
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('/draco/');
@@ -867,7 +867,7 @@ function initThree() {
     // server omits Content-Length (gzip/chunked). Download fills 0–90%; the
     // last 10% covers Draco decode + scene setup so the bar never sits frozen
     // at 100% while a slow device is still decoding 3M vertices.
-    const KNOWN_SIZE = 25_700_000; // ~ car-draco.glb, used only as a fallback total
+    const KNOWN_SIZE = 13_000_000; // ~ car-draco.glb, used only as a fallback total
 
     streamGlb(modelUrl, KNOWN_SIZE, (frac) => setProgress(frac * 90))
         .then((buffer) => {
