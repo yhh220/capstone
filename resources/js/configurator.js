@@ -555,6 +555,9 @@ function togglePartVisibility(category, oldKey, newKey) {
     if (category === 'rims') {
         updateRimMaterials();
     }
+
+    // Visible geometry changed — refresh the (otherwise static) shadow map once.
+    if (renderer) renderer.shadowMap.needsUpdate = true;
 }
 
 /**
@@ -615,6 +618,12 @@ function initThree() {
     const dragPixelRatio = Math.min(window.devicePixelRatio, isLowEnd ? 0.6 : 1);
     renderer.setPixelRatio(idlePixelRatio);
     renderer.shadowMap.enabled = !isLowEnd;
+    // The car is static while the camera orbits — so don't redraw the shadow map
+    // (all 2.3M shadow-casting verts) every frame. Refresh it only when geometry
+    // actually changes (part swaps, doors). This ~halves per-frame vertex work
+    // during rotation, with no model/quality change.
+    renderer.shadowMap.autoUpdate = false;
+    renderer.shadowMap.needsUpdate = true;
     renderer.shadowMap.type = isLowEnd ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
@@ -900,6 +909,7 @@ function initThree() {
             }, 300);
 
             isInitialized = true;
+            if (renderer) renderer.shadowMap.needsUpdate = true; // bake the shadow once now that the car is in
             requestRender(1200);
     };
 
@@ -993,6 +1003,8 @@ function animate() {
     const doorAnimationActive = doorActions.some(action => action.isRunning());
     if (mixer && doorAnimationActive) {
         mixer.update(delta);
+        // Doors are moving — let the shadow follow them this frame.
+        if (renderer) renderer.shadowMap.needsUpdate = true;
     }
 
     let keepRendering = doorAnimationActive || now < renderUntil;
