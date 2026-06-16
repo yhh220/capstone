@@ -119,20 +119,30 @@ class DatabaseSeeder extends Seeder
             ['key' => 'BACKORDER_DAYS',          'value' => '7',     'created_at' => now(), 'updated_at' => now()],
         ]);
 
+        // Logo files live (committed) in storage/app/public/brand-logos/ — the
+        // 'logo' path here references them, so a fresh teammate seed shows the
+        // real marquee logos (needs `php artisan storage:link`). Brands without
+        // a logo fall back to a styled text label.
         $brands = [
-            ['name' => 'Mohawk',   'sort_order' => 1],
-            ['name' => '70mai',    'sort_order' => 2],
-            ['name' => 'Alpine',   'sort_order' => 3],
-            ['name' => 'Skynavi',  'sort_order' => 4],
-            ['name' => 'Sparko',   'sort_order' => 5],
-            ['name' => 'SONY',     'sort_order' => 6],
-            ['name' => 'Dynavin',  'sort_order' => 7],
-            ['name' => 'MBquart',  'sort_order' => 8],
+            ['name' => 'Mohawk',  'sort_order' => 1, 'logo' => 'brand-logos/01KV5GMX88MRN42ZP0MXEB5V76.png', 'website_url' => 'https://www.mohawkseries.com/'],
+            ['name' => '70mai',   'sort_order' => 2, 'logo' => 'brand-logos/01KV5HTDSH4MTGTN11BXY5CN8B.png', 'website_url' => 'https://www.70mai.com/my/'],
+            ['name' => 'Alpine',  'sort_order' => 3, 'logo' => 'brand-logos/01KV5J2C9S97ZZV8BFHHQF7RBP.png', 'website_url' => 'https://alpinemalaysia.com.my/'],
+            ['name' => 'Skynavi', 'sort_order' => 4, 'logo' => 'brand-logos/01KV5J8VFAX75NVP1363EVQDAN.jpg', 'website_url' => null],
+            ['name' => 'Sparko',  'sort_order' => 5, 'logo' => null,                                          'website_url' => null],
+            ['name' => 'SONY',    'sort_order' => 6, 'logo' => 'brand-logos/01KV5JF5D0SV74NRVXF32H9H3S.png', 'website_url' => null],
+            ['name' => 'Dynavin', 'sort_order' => 7, 'logo' => 'brand-logos/01KV5JGH348V61T612QPHCCN7Z.png', 'website_url' => 'https://dynavin.com.my/'],
+            ['name' => 'MBquart', 'sort_order' => 8, 'logo' => 'brand-logos/01KV5HNYQKGBB5JT6BTJAJV2DH.png', 'website_url' => 'https://mbquart.com/'],
         ];
         foreach ($brands as $brand) {
-            Brand::firstOrCreate(
+            Brand::updateOrCreate(
                 ['name' => $brand['name']],
-                ['display_type' => 'text', 'sort_order' => $brand['sort_order'], 'is_active' => true]
+                [
+                    'display_type' => $brand['logo'] ? 'image' : 'text',
+                    'logo'         => $brand['logo'],
+                    'website_url'  => $brand['website_url'],
+                    'sort_order'   => $brand['sort_order'],
+                    'is_active'    => true,
+                ]
             );
         }
     }
