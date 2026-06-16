@@ -609,7 +609,7 @@ function initThree() {
         powerPreference: 'high-performance'
     });
     renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isLowEnd ? 1 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isLowEnd ? 1 : 1.5));
     renderer.shadowMap.enabled = !isLowEnd;
     renderer.shadowMap.type = isLowEnd ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -641,8 +641,8 @@ function initThree() {
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.6);
     keyLight.position.set(5, 6, 5);
     keyLight.castShadow = !isLowEnd;
-    keyLight.shadow.mapSize.width = isLowEnd ? 1024 : 2048;
-    keyLight.shadow.mapSize.height = isLowEnd ? 1024 : 2048;
+    keyLight.shadow.mapSize.width = 1024;
+    keyLight.shadow.mapSize.height = 1024;
     keyLight.shadow.bias = -0.0005;
     keyLight.shadow.camera.near = 0.5;
     keyLight.shadow.camera.far = 15;
@@ -772,25 +772,18 @@ function initThree() {
             });
 
             // Low-end: a plain transparent material instead of transmission glass.
-            // transmission forces an extra full-scene render pass every frame — the
-            // single biggest fps/memory cost on phones. We trade refraction for speed.
-            glassMaterial = isLowEnd
-                ? new THREE.MeshStandardMaterial({
-                    color: 0x202428,
-                    metalness: 0.0,
-                    roughness: 0.1,
-                    transparent: true,
-                    opacity: 0.28,
-                })
-                : new THREE.MeshPhysicalMaterial({
-                    color: 0xffffff,
-                    transparent: true,
-                    opacity: 1.0,
-                    transmission: 1.0,
-                    roughness: 0.05,
-                    ior: 1.5,
-                    thickness: 0.05
-                });
+            // A plain transparent material for ALL devices — never transmission.
+            // MeshPhysicalMaterial transmission forces a full extra scene render
+            // pass every frame AND allocates a screen-sized render target; on weak
+            // GPUs / low-RAM machines that alone can freeze the page. We trade glass
+            // refraction for a configurator that actually runs everywhere.
+            glassMaterial = new THREE.MeshStandardMaterial({
+                color: 0x202428,
+                metalness: 0.0,
+                roughness: 0.1,
+                transparent: true,
+                opacity: 0.3,
+            });
 
             const dashcamMaterial = new THREE.MeshStandardMaterial({
                 color: 0x303030,
