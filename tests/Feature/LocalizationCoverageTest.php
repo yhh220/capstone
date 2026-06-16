@@ -101,7 +101,6 @@ class LocalizationCoverageTest extends TestCase
             '/contact',
             '/booking',
             '/booking/track',
-            '/gallery',
             '/track-order',
             '/faq',
             '/privacy-policy',

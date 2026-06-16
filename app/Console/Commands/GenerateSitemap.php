@@ -22,7 +22,6 @@ class GenerateSitemap extends Command
             ['route' => 'home',          'priority' => '1.0', 'freq' => Url::CHANGE_FREQUENCY_DAILY],
             ['route' => 'products',      'priority' => '0.9', 'freq' => Url::CHANGE_FREQUENCY_DAILY],
             ['route' => 'services',      'priority' => '0.8', 'freq' => Url::CHANGE_FREQUENCY_WEEKLY],
-            ['route' => 'gallery',       'priority' => '0.7', 'freq' => Url::CHANGE_FREQUENCY_WEEKLY],
             ['route' => 'booking',       'priority' => '0.8', 'freq' => Url::CHANGE_FREQUENCY_MONTHLY],
             ['route' => 'about',         'priority' => '0.6', 'freq' => Url::CHANGE_FREQUENCY_MONTHLY],
             ['route' => 'contact',       'priority' => '0.6', 'freq' => Url::CHANGE_FREQUENCY_MONTHLY],

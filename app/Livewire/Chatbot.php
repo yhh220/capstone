@@ -458,11 +458,6 @@ class Chatbot extends Component
                 'label' => ['en' => 'View our Services', 'ms' => 'Lihat Servis kami', 'zh' => '查看服务项目'],
             ],
             [
-                'words' => ['gallery', 'showcase', 'portfolio', 'galeri', 'hasil kerja', '作品', '相册', '案例', '展示'],
-                'route' => 'gallery',
-                'label' => ['en' => 'Browse our Gallery', 'ms' => 'Lihat Galeri kami', 'zh' => '浏览作品相册'],
-            ],
-            [
                 'words' => ['contact', 'whatsapp', 'call', 'reach', 'hubungi', 'telefon', '联系', '联络', '电话'],
                 'route' => 'contact',
                 'label' => ['en' => 'Go to Contact page', 'ms' => 'Pergi ke halaman Hubungi', 'zh' => '前往联系页面'],
@@ -522,7 +517,6 @@ class Chatbot extends Component
             'services'          => ['en' => 'Services', 'ms' => 'Servis', 'zh' => '服务'],
             'booking'           => ['en' => 'Booking', 'ms' => 'Tempahan', 'zh' => '预约'],
             'booking.track'     => ['en' => 'Booking Tracker', 'ms' => 'Jejak Tempahan', 'zh' => '预约查询'],
-            'gallery'           => ['en' => 'Gallery', 'ms' => 'Galeri', 'zh' => '作品集'],
             'track-order'       => ['en' => 'Order Tracking', 'ms' => 'Jejak Pesanan', 'zh' => '订单查询'],
             'about'             => ['en' => 'About Us', 'ms' => 'Tentang Kami', 'zh' => '关于我们'],
             'contact'           => ['en' => 'Contact', 'ms' => 'Hubungi Kami', 'zh' => '联系我们'],
