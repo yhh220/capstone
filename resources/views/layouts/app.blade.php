@@ -348,6 +348,14 @@
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* Chat window sits above the sticky nav and never taller than the space
+           between the nav and its bottom offset, so its header is never hidden
+           behind the header on short (laptop) viewports. */
+        .chatbot-window { z-index: 55 !important; }
+        @media (min-width: 768px) {
+            .chatbot-window { max-height: calc(100vh - 12rem) !important; }
+        }
+
         /* ═══════════════════════════════════════════════
            UNIFIED BUTTON SYSTEM
            Primary   .btn-primary   — red fill, white text

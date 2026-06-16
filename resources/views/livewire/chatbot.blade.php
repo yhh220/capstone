@@ -45,7 +45,7 @@
 
     {{-- ② Chat Window --}}
     @if($isOpen)
-    <div class="fixed z-[49] flex flex-col overflow-hidden
+    <div class="chatbot-window fixed z-[49] flex flex-col overflow-hidden
                 inset-x-0 bottom-0 h-[90vh] rounded-t-[1.75rem]
                 md:inset-auto md:bottom-24 md:right-6 md:h-[620px] md:max-h-[85vh] md:w-[400px] md:rounded-[1.75rem]
                 bg-white dark:bg-gray-900
