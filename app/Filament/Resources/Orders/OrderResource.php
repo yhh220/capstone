@@ -12,6 +12,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Forms;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
@@ -30,7 +31,7 @@ class OrderResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Forms\Components\Section::make('Order Information')->schema([
+            Section::make('Order Information')->schema([
                 Forms\Components\TextInput::make('order_number')->disabled(),
                 Forms\Components\TextInput::make('tracking_number')->disabled(),
                 Forms\Components\Select::make('status')
@@ -50,7 +51,7 @@ class OrderResource extends Resource
                     ->required(),
             ])->columns(['default' => 1, 'sm' => 2]),
 
-            Forms\Components\Section::make('Customer Details')->schema([
+            Section::make('Customer Details')->schema([
                 Forms\Components\TextInput::make('customer_name')->disabled(),
                 Forms\Components\TextInput::make('customer_email')->disabled(),
                 Forms\Components\TextInput::make('customer_phone')->disabled(),
@@ -59,7 +60,7 @@ class OrderResource extends Resource
                     ->disabled(),
             ])->columns(['default' => 1, 'sm' => 2]),
 
-            Forms\Components\Section::make('Order Items')->schema([
+            Section::make('Order Items')->schema([
                 Forms\Components\Placeholder::make('items_list')
                     ->label('')
                     ->content(function ($record): \Illuminate\Support\HtmlString {
@@ -92,7 +93,7 @@ class OrderResource extends Resource
                     }),
             ])->visibleOn('edit'),
 
-            Forms\Components\Section::make('Order Notes')->schema([
+            Section::make('Order Notes')->schema([
                 Forms\Components\Textarea::make('notes')
                     ->label('Customer Notes')
                     ->placeholder('No notes from customer.')
