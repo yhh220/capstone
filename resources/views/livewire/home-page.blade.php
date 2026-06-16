@@ -522,8 +522,12 @@
             // that load after first paint and change the track width, so we
             // re-measure on load/resize — measuring too early left a gap on the
             // right and a wrong wrap point.
-            function measure() { halfW = track.scrollWidth / 3; pos = -halfW; }
+            // Re-measuring must NOT reset pos, or the strip visibly jumps back to
+            // the start when logos finish loading / on resize. Only update the
+            // wrap width here; the starting position is set once, below.
+            function measure() { halfW = track.scrollWidth / 3; }
             measure();
+            pos = -halfW;
 
             // Bind window listeners only once; they call whatever the current
             // measure() is, so repeated inits don't pile up duplicate handlers.
@@ -546,7 +550,12 @@
                 if (!track.isConnected) { rafId = null; return; }
                 speed += (target - speed) * 0.1;
                 pos   += speed;                          // move the track right
-                if (halfW > 0 && pos >= 0) pos -= halfW; // seamless wrap (two identical copies)
+                // Seamless wrap — keep pos within one copy width either way, so a
+                // re-measure that changed halfW can never cause a visible jump.
+                if (halfW > 0) {
+                    if (pos >= 0) pos -= halfW;
+                    else if (pos < -halfW) pos += halfW;
+                }
                 track.style.transform = 'translate3d(' + pos + 'px, 0, 0)';
                 rafId = requestAnimationFrame(tick);
             }
