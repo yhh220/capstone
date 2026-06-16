@@ -16,61 +16,34 @@ class ChatbotFaqSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin-facing topic labels, in the same order as builtinKnowledge().
-        $topics = [
-            'Greeting',
-            'Operating hours',
-            'Location & directions',
-            'Booking an appointment',
-            'Pricing',
-            'Warranty',
-            'Air-conditioning (aircond)',
-            'Pickup / takeaway',
-            'Car audio systems',
-            'Window tinting',
-            'Dashcams',
-            'Wrap / PPF / coating',
-            'Accessories (general)',
-            'Installation',
-            'Payment methods',
-            'Delivery / shipping',
-            'Contact details',
-            'Privacy & data',
-            'Terms of service',
-            'Vehicle fitment',
-            'Installation duration',
-            'Custom installation',
-            'Cancel / reschedule booking',
-            'Online shopping',
-            'Languages supported',
-            'Promotions & discounts',
-            'Returns & refunds',
-            'Instalment / financing',
-            'Home / onsite service',
-            'Trade-in / second-hand',
-            'Social media',
-            'Deposit / downpayment',
-            'Thank you',
-        ];
+        $jsonPath = __DIR__ . '/chatbot_faqs.json';
+        
+        if (!file_exists($jsonPath)) {
+            $this->command?->error("FAQ JSON file not found at {$jsonPath}");
+            return;
+        }
 
-        $rules = (new MockDriver())->builtinKnowledge();
+        $rules = json_decode(file_get_contents($jsonPath), true);
 
-        foreach ($rules as $i => $rule) {
-            $topic = $topics[$i] ?? ('Topic ' . ($i + 1));
+        if (!$rules) {
+            $this->command?->error("Failed to decode FAQ JSON.");
+            return;
+        }
 
+        foreach ($rules as $rule) {
             ChatbotFaq::updateOrCreate(
-                ['topic' => $topic],
+                ['topic' => $rule['topic']],
                 [
                     'keywords'  => $rule['keywords'] ?? [],
                     'priority'  => $rule['priority'] ?? 50,
-                    'reply_en'  => $rule['reply']['en'] ?? '',
-                    'reply_ms'  => $rule['reply']['ms'] ?? null,
-                    'reply_zh'  => $rule['reply']['zh'] ?? null,
-                    'is_active' => true,
+                    'reply_en'  => $rule['reply_en'] ?? '',
+                    'reply_ms'  => $rule['reply_ms'] ?? null,
+                    'reply_zh'  => $rule['reply_zh'] ?? null,
+                    'is_active' => $rule['is_active'] ?? true,
                 ]
             );
         }
 
-        $this->command?->info('Seeded ' . count($rules) . ' chatbot FAQs.');
+        $this->command?->info('Seeded ' . count($rules) . ' chatbot FAQs from JSON.');
     }
 }
