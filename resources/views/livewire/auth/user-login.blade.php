@@ -9,12 +9,15 @@
              style="background: radial-gradient(circle, rgba(200,65,61,0.10) 0%, transparent 65%);"></div>
         {{-- subtle grid texture --}}
         <div class="absolute inset-0 auth-grid opacity-[0.5] dark:opacity-[0.7]"></div>
+        {{-- faint, blurred logo centred on the divider line --}}
+        <img src="{{ asset('images/logo/logo-light.svg') }}" alt="" aria-hidden="true"
+             class="hidden lg:block pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[42rem] max-w-none opacity-[0.05] blur-sm">
     </div>
 
     <div class="relative z-10 grid lg:grid-cols-2 min-h-screen">
 
         {{-- ════════ LEFT · BRAND PANEL ════════ --}}
-        <div class="hidden lg:flex flex-col justify-center p-12 xl:p-16 relative overflow-hidden">
+        <div class="hidden lg:flex flex-col justify-center items-center text-center p-12 xl:p-16 relative">
             {{-- thin red accent line down the divider edge --}}
             <div class="absolute top-0 right-0 h-full w-px bg-gradient-to-b from-transparent via-brand-red/40 to-transparent"></div>
 
@@ -28,7 +31,7 @@
 
                 <div class="space-y-3.5">
                     @foreach([__('Curated brands & products'), __('Expert installation'), __('Walk-in showroom welcome')] as $point)
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-center gap-3">
                         <span class="flex items-center justify-center w-6 h-6 rounded-full bg-brand-red/15 text-brand-red shrink-0">
                             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                         </span>
@@ -38,7 +41,7 @@
                 </div>
 
                 {{-- Stats --}}
-                <div class="flex gap-8 items-center mt-12 pt-10 border-t border-white/10">
+                <div class="flex gap-8 items-center justify-center mt-12 pt-10 border-t border-white/10">
                     <div>
                         <div class="font-display font-black text-3xl text-white">1000+</div>
                         <div class="font-mono text-[10px] tracking-widest uppercase text-white/35 mt-0.5">{{ __('Installations') }}</div>

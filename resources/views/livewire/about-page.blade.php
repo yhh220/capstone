@@ -22,9 +22,10 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div data-aos="fade-right">
-                    <div class="inline-block bg-brand-red/10 dark:bg-brand-red/20 text-brand-red text-sm font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">
+                    <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
+                        <span class="w-8 h-px bg-brand-red" aria-hidden="true"></span>
                         {{ __('Our Story') }}
-                    </div>
+                    </span>
                     <h2 id="story-heading" class="text-3xl sm:text-4xl font-black text-brand-black dark:text-white mb-6">
                         {{ __('We help customers choose with confidence') }}
                     </h2>
