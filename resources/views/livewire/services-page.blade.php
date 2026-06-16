@@ -101,88 +101,85 @@
         </div>
     </section>
 
-    <section class="py-14 sm:py-20" aria-labelledby="services-list-heading">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-8 sm:mb-10">
-                <div>
-                    <span class="inline-block text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">{{ __('Service Menu') }}</span>
-                    <h2 id="services-list-heading" class="text-3xl sm:text-4xl text-brand-black dark:text-white">
-                        {{ __('Choose the right job') }}
-                    </h2>
-                </div>
-                <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer"
-                   class="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-red transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                    {{ __('Visit showroom') }}
-                </a>
+    <section class="py-16 sm:py-24 overflow-hidden" aria-labelledby="services-list-heading">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16 sm:mb-24">
+                <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
+                    <span class="w-8 h-px bg-brand-red"></span>{{ __('Service Menu') }}<span class="w-8 h-px bg-brand-red"></span>
+                </span>
+                <h2 id="services-list-heading" class="text-3xl sm:text-5xl font-black text-brand-black dark:text-white uppercase tracking-tight">
+                    {{ __('Choose the right job') }}
+                </h2>
             </div>
 
             @if($services->count() > 0)
-                <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
+                @php
+                    // Cycle blob colour + morph animation for variety (icon blobs only).
+                    $blobStyles = [
+                        ['bg-brand-red/10 dark:bg-brand-red/15 text-brand-red', 'svc-blob'],
+                        ['bg-gray-900 text-brand-red',                           'svc-blob-alt'],
+                        ['bg-brand-red text-white',                              'svc-blob'],
+                        ['bg-gray-800 text-brand-yellow',                        'svc-blob-alt'],
+                    ];
+                @endphp
+                <div class="space-y-20 md:space-y-28">
                     @foreach($services as $service)
                         @php
                             $serviceWhatsAppUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hi Win Win Car Studio! I would like to enquire about ' . $service->name . '.');
+                            [$blobClass, $blobAnim] = $blobStyles[$loop->index % count($blobStyles)];
+                            $img = $service->getImageUrl('thumb');
                         @endphp
-                        <article class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden transition-all duration-300 hover:border-brand-red/50 hover:shadow-md hover:-translate-y-0.5 flex flex-col">
-                            @if($service->getImageUrl('thumb'))
-                                <div class="h-40 bg-gray-100 dark:bg-gray-900 overflow-hidden">
-                                    <img src="{{ $service->getImageUrl('thumb') }}"
-                                         alt="{{ __($service->name) }}"
-                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                         loading="lazy">
-                                </div>
-                            @endif
+                        <div class="relative flex flex-col md:flex-row items-center gap-10 md:gap-16">
 
-                            <div class="p-5 sm:p-6 flex flex-col flex-1">
-                                <div class="flex items-start justify-between gap-4 mb-4">
-                                    <div class="flex items-start gap-3.5 min-w-0">
-                                        @unless($service->getImageUrl('thumb'))
-                                            <div class="w-11 h-11 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center shrink-0 transition-colors duration-300 group-hover:bg-brand-red group-hover:text-white" aria-hidden="true">
-                                                {!! $iconFor($service->name) !!}
-                                            </div>
-                                        @endunless
-                                        <h3 class="text-2xl text-brand-black dark:text-white leading-tight">
-                                            {{ __($service->name) }}
-                                        </h3>
-                                    </div>
-                                    @if($service->price)
-                                        <div class="text-right shrink-0">
-                                            <div class="text-xs text-gray-400 font-bold">{{ __('From') }}</div>
-                                            <div class="font-black text-brand-red">RM {{ number_format((float) $service->price, 0) }}</div>
-                                        </div>
+                            {{-- Illustration (alternates sides) --}}
+                            <div class="w-full md:w-1/2 flex justify-center {{ $loop->even ? 'md:order-2' : '' }}" data-aos="zoom-in">
+                                <div class="{{ $blobAnim }} relative w-48 h-48 lg:w-64 lg:h-64 flex items-center justify-center overflow-hidden shadow-xl {{ $img ? '' : $blobClass }}">
+                                    @if($img)
+                                        <img src="{{ $img }}" alt="{{ __($service->name) }}" class="w-full h-full object-cover" loading="lazy">
+                                    @else
+                                        <div class="drop-shadow-sm">{!! str_replace('w-6 h-6', 'w-16 h-16 lg:w-20 lg:h-20', $iconFor($service->name)) !!}</div>
                                     @endif
                                 </div>
+                            </div>
 
-                                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-5">
+                            {{-- Content --}}
+                            <div class="w-full md:w-1/2 text-center md:text-left {{ $loop->even ? 'md:order-1' : '' }}" data-aos="{{ $loop->even ? 'fade-right' : 'fade-left' }}" data-aos-delay="100">
+                                @if($service->price)
+                                    <div class="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-3">
+                                        {{ __('From') }} <span class="text-brand-red">RM {{ number_format((float) $service->price, 0) }}</span>
+                                    </div>
+                                @endif
+                                <h3 class="text-2xl sm:text-3xl font-black text-brand-black dark:text-white uppercase tracking-tight leading-tight mb-4">
+                                    {{ __($service->name) }}
+                                </h3>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base font-medium leading-relaxed mb-6 max-w-md mx-auto md:mx-0">
                                     {{ __($service->description) }}
                                 </p>
 
-                                <div class="mt-auto">
-                                    <div class="flex flex-wrap gap-2 mb-5">
-                                        <span class="inline-flex items-center gap-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-400">
-                                            <svg class="w-3.5 h-3.5 text-brand-red" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
-                                            {{ $service->duration_label }}
+                                <div class="flex flex-wrap gap-2 justify-center md:justify-start mb-7">
+                                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-brand-red" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                                        {{ $service->duration_label }}
+                                    </span>
+                                    @if($service->buffer_after > 0)
+                                        <span class="inline-flex items-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-400">
+                                            {{ __('Buffer') }} {{ $service->buffer_after }} {{ __('min') }}
                                         </span>
-                                        @if($service->buffer_after > 0)
-                                            <span class="inline-flex items-center rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-bold text-gray-600 dark:text-gray-400">
-                                                {{ __('Buffer') }} {{ $service->buffer_after }} {{ __('min') }}
-                                            </span>
-                                        @endif
-                                    </div>
+                                    @endif
+                                </div>
 
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <a href="{{ route('booking', ['service' => $service->id]) }}"
-                                           class="btn btn-primary btn-sm btn-shine">
-                                            {{ __('Book') }}
-                                        </a>
-                                        <a href="{{ $serviceWhatsAppUrl }}" target="_blank" rel="noopener noreferrer"
-                                           class="btn btn-whatsapp btn-sm btn-shine">
-                                            WhatsApp
-                                        </a>
-                                    </div>
+                                <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+                                    <a href="{{ route('booking', ['service' => $service->id]) }}" class="btn btn-primary btn-md btn-shine">
+                                        <svg class="icon-md btn-ico" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                                        {{ __('Book') }}
+                                    </a>
+                                    <a href="{{ $serviceWhatsAppUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-md btn-shine">
+                                        <svg class="icon-md btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.8-2.8-1.5-3.9-3.3-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5s-.7-1.7-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.5 1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4ZM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Z"></path></svg>
+                                        WhatsApp
+                                    </a>
                                 </div>
                             </div>
-                        </article>
+                        </div>
                     @endforeach
                 </div>
             @else
@@ -192,6 +189,26 @@
                 </div>
             @endif
         </div>
+
+        {{-- Organic blob shapes for the service illustrations --}}
+        <style>
+            @keyframes svcBlob {
+                0%   { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+                50%  { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+                100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            }
+            @keyframes svcBlobAlt {
+                0%   { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+                50%  { border-radius: 70% 30% 40% 60% / 60% 40% 50% 60%; }
+                100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            }
+            .svc-blob     { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; animation: svcBlob 8s ease-in-out infinite; }
+            .svc-blob-alt { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: svcBlobAlt 9s ease-in-out infinite; }
+            .svc-blob:hover, .svc-blob-alt:hover { animation-duration: 3s; filter: brightness(1.04); }
+            @media (prefers-reduced-motion: reduce) {
+                .svc-blob, .svc-blob-alt { animation: none; border-radius: 1.75rem; }
+            }
+        </style>
     </section>
 
     <section class="py-14 sm:py-20" aria-labelledby="booking-process-heading">
