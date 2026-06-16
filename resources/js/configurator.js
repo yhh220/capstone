@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 // Configuration Data (配置数据：配件名称与颜色映射表 — 纯展示，不含价格)
@@ -407,9 +407,17 @@ function wireConfiguratorEvents() {
 
             if (glassMaterial && TINT_MAP[tintKey]) {
                 const config = TINT_MAP[tintKey];
-                glassMaterial.color.setHex(config.color);
-                glassMaterial.transmission = config.transmission;
-                glassMaterial.opacity = config.opacity;
+                if (glassMaterial.isMeshPhysicalMaterial) {
+                    glassMaterial.color.setHex(config.color);
+                    glassMaterial.transmission = config.transmission;
+                    glassMaterial.opacity = config.opacity;
+                } else {
+                    // Low-end glass has no transmission — express the tint as opacity
+                    // (lower % = darker = more opaque).
+                    const pct = parseInt(tintKey, 10);
+                    glassMaterial.color.setHex(0x14181d);
+                    glassMaterial.opacity = Math.min(0.9, 1 - (pct / 100) * 0.78);
+                }
             }
 
             const windowTintValEl = document.getElementById('summary-window-tint');
@@ -668,14 +676,12 @@ function initThree() {
     gridHelper.position.y = 0.005;
     scene.add(gridHelper);
 
-    // 7. 加载 3D 模型 (GLTF Loader)：通过加载器把服务器上的 .glb 汽车模型文件读取进来
-    // 模型用 Draco 压缩 + WebP 贴图（完整网格细节，避免简化产生破面）。低端设备的
-    // 性能改为在渲染层优化（按需渲染、降低像素比、关闭阴影），不再削减模型本身。
+    // 7. 加载 3D 模型 (GLTF Loader)
+    // 模型用 meshopt 压缩 + 几何量化（位置 int16、法线 int8，显存约减半且不删三角形=不破面）、
+    // WebP 512 贴图、锁边简化(0.6)。低端设备再在渲染层降配：按需渲染、降像素比、关阴影、简化材质。
     const modelUrl = modal.dataset.modelUrl || '/models/3d/car-draco.glb';
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('/draco/');
     const loader = new GLTFLoader();
-    loader.setDRACOLoader(dracoLoader);
+    loader.setMeshoptDecoder(MeshoptDecoder);
 
     const setProgress = (percent) => {
         const bar = document.getElementById('loader-progress-bar');
@@ -738,13 +744,20 @@ function initThree() {
                 }
             }
             // Initialize materials (初始化车漆、轮毂等材质)
-            carBodyMaterial = new THREE.MeshPhysicalMaterial({
-                color: COLOR_MAP[state.color].hex,
-                metalness: 0.9,
-                roughness: 0.12,
-                clearcoat: 1.0,
-                clearcoatRoughness: 0.05
-            });
+            // Low-end: plain MeshStandardMaterial (no clearcoat) for a cheaper shader.
+            carBodyMaterial = isLowEnd
+                ? new THREE.MeshStandardMaterial({
+                    color: COLOR_MAP[state.color].hex,
+                    metalness: 0.85,
+                    roughness: 0.22,
+                })
+                : new THREE.MeshPhysicalMaterial({
+                    color: COLOR_MAP[state.color].hex,
+                    metalness: 0.9,
+                    roughness: 0.12,
+                    clearcoat: 1.0,
+                    clearcoatRoughness: 0.05
+                });
 
             carRimMaterial = new THREE.MeshStandardMaterial({
                 color: RIM_COLOR_MAP[state.rimColor].hex,
@@ -758,15 +771,26 @@ function initThree() {
                 roughness: 0.4
             });
 
-            glassMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0xffffff,
-                transparent: true,
-                opacity: 1.0,
-                transmission: 1.0,
-                roughness: 0.05,
-                ior: 1.5,
-                thickness: 0.05
-            });
+            // Low-end: a plain transparent material instead of transmission glass.
+            // transmission forces an extra full-scene render pass every frame — the
+            // single biggest fps/memory cost on phones. We trade refraction for speed.
+            glassMaterial = isLowEnd
+                ? new THREE.MeshStandardMaterial({
+                    color: 0x202428,
+                    metalness: 0.0,
+                    roughness: 0.1,
+                    transparent: true,
+                    opacity: 0.28,
+                })
+                : new THREE.MeshPhysicalMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 1.0,
+                    transmission: 1.0,
+                    roughness: 0.05,
+                    ior: 1.5,
+                    thickness: 0.05
+                });
 
             const dashcamMaterial = new THREE.MeshStandardMaterial({
                 color: 0x303030,
@@ -892,9 +916,9 @@ function initThree() {
 
     // Stream the .glb so the bar reflects real downloaded bytes even when the
     // server omits Content-Length (gzip/chunked). Download fills 0–90%; the
-    // last 10% covers Draco decode + scene setup so the bar never sits frozen
-    // at 100% while a slow device is still decoding 3M vertices.
-    const KNOWN_SIZE = 12_800_000; // ~ car-draco.glb, used only as a fallback total
+    // last 10% covers mesh decode + scene setup so the bar never sits frozen
+    // at 100% while a slow device is still decoding ~2.3M vertices.
+    const KNOWN_SIZE = 19_800_000; // ~ car-draco.glb (meshopt), used only as a fallback total
 
     streamGlb(modelUrl, KNOWN_SIZE, (frac) => setProgress(frac * 90))
         .then((buffer) => {
@@ -906,10 +930,8 @@ function initThree() {
                 loader.parse(buffer, '', (gltf) => {
                     setProgress(100);
                     onModelLoaded(gltf);
-                    // Free the Draco decoder worker/WASM and the compressed buffer
-                    // once decoding is done — they're not needed again and hold
-                    // tens of MB that low-end phones can't spare.
-                    dracoLoader.dispose();
+                    // Free the compressed buffer once decoding is done — low-end
+                    // phones can't spare the extra ~19MB.
                     buffer = null;
                 }, onModelError);
             });
