@@ -187,8 +187,19 @@
                 {!! $icon('sparkles', 'w-3 h-3 text-brand-red') !!}
                 <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ $ui['quick'] }}</span>
             </div>
-            {{-- pt/pb give the hover lift room — overflow-x-auto also clips the y-axis --}}
-            <div class="flex gap-2 overflow-x-auto scrollbar-hide pt-1.5 pb-2 -mx-1 px-1">
+            {{-- pt/pb give the hover lift room; drag-to-scroll works on desktop & touch --}}
+            <div x-data="{
+                    isDown: false, startX: 0, scrollLeft: 0, hasDragged: false,
+                    start(e) { this.isDown = true; this.hasDragged = false; this.startX = e.pageX - this.$el.offsetLeft; this.scrollLeft = this.$el.scrollLeft; },
+                    stop()   { this.isDown = false; },
+                    move(e)  { if (!this.isDown) return; e.preventDefault(); const walk = (e.pageX - this.$el.offsetLeft - this.startX) * 1.5; if (Math.abs(walk) > 4) this.hasDragged = true; this.$el.scrollLeft = this.scrollLeft - walk; }
+                 }"
+                 @mousedown="start($event)"
+                 @mouseleave="stop()"
+                 @mouseup="stop()"
+                 @mousemove="move($event)"
+                 @click.capture="if (hasDragged) { $event.stopPropagation(); $event.preventDefault(); hasDragged = false; }"
+                 class="flex gap-2 overflow-x-auto scrollbar-hide pt-1.5 pb-2 -mx-1 px-1 touch-pan-x cursor-grab active:cursor-grabbing select-none">
                 @foreach($this->suggestions as $chip)
                 <button wire:click="quickAsk('{{ addslashes($chip['query']) }}')"
                         wire:loading.attr="disabled"
