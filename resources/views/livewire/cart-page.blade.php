@@ -132,11 +132,20 @@
                         {{ __('Checkout unavailable') }}
                     </span>
                     @else
+                    @auth
                     <a href="{{ route('checkout') }}"
                        class="group relative overflow-hidden block w-full bg-brand-red text-white text-center py-3.5 rounded-full font-bold text-lg mt-6 transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95">
                         <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
                         <span class="relative z-10">{{ __('Proceed to Checkout') }}</span>
                     </a>
+                    @else
+                    {{-- Guests must sign in first — show a prompt instead of a silent redirect --}}
+                    <button type="button" onclick="window.dispatchEvent(new CustomEvent('require-signin'))"
+                       class="group relative overflow-hidden block w-full bg-brand-red text-white text-center py-3.5 rounded-full font-bold text-lg mt-6 transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95">
+                        <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                        <span class="relative z-10">{{ __('Proceed to Checkout') }}</span>
+                    </button>
+                    @endauth
                     @endif
 
                     <a href="{{ route('products') }}"

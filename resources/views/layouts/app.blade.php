@@ -557,6 +557,7 @@
 
     <nav x-data="{ cartOpen: false }"
          @open-cart.window="cartOpen = true"
+         @require-signin.window="cartOpen = false"
          class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50 border-b border-gray-100 dark:border-gray-700"
          role="navigation"
          aria-label="{{ __('Main navigation') }}">
@@ -924,6 +925,36 @@
                     @endif
                 </div>
             </aside>
+        </div>
+
+        {{-- Sign-in-required prompt — fires on the 'require-signin' window event --}}
+        <div x-data="{ show: false }"
+             @require-signin.window="show = true"
+             @keydown.escape.window="show = false"
+             x-show="show" x-cloak
+             class="fixed inset-0 z-[90] flex items-center justify-center px-4"
+             style="display:none;" role="dialog" aria-modal="true">
+            <div x-show="show"
+                 x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                 @click="show = false" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+            <div x-show="show"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                 class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 p-7 text-center">
+                <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-brand-red/10 text-brand-red flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">{{ __('Please sign in first') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('You need to sign in to continue to checkout.') }}</p>
+                <a href="{{ route('checkout') }}" class="btn btn-primary btn-md btn-shine w-full !rounded-xl">
+                    {{ __('Sign In') }}
+                </a>
+                <button type="button" @click="show = false" class="block w-full text-sm text-gray-500 dark:text-gray-400 hover:text-brand-red transition-colors py-2.5 mt-1 font-semibold">
+                    {{ __('Maybe later') }}
+                </button>
+            </div>
         </div>
 
         {{-- Add-to-cart toast — fires on the 'cart-added' Livewire event --}}
