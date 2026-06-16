@@ -173,7 +173,6 @@ class CheckoutPage extends Component
                 $order = Order::create([
                     'user_id' => Auth::id(),
                     'order_number' => Order::generateOrderNumber(),
-                    'tracking_number' => Order::generateTrackingNumber(),
                     'customer_name' => $this->customerName,
                     'customer_email' => $this->customerEmail,
                     'customer_phone' => $this->customerPhone,

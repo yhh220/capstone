@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Bookings\Pages;
 
 use App\Filament\Resources\Bookings\BookingResource;
+use App\Models\Booking;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Str;
 
 class CreateBooking extends CreateRecord
 {
@@ -12,7 +12,7 @@ class CreateBooking extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['confirm_token'] ??= (string) Str::uuid();
+        $data['reference'] ??= Booking::generateReference();
 
         return $data;
     }

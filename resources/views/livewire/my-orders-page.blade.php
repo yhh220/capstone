@@ -45,7 +45,7 @@
                 {{-- Order Footer --}}
                 <div class="bg-gray-50 dark:bg-gray-700/30 px-5 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                     <div>
-                        {{ __('Tracking') }}: <span class="font-mono font-bold text-gray-700 dark:text-gray-300">{{ $order->tracking_number }}</span>
+                        {{ __('Order Number') }}: <span class="font-mono font-bold text-gray-700 dark:text-gray-300">{{ $order->order_number }}</span>
                     </div>
                     <a href="{{ route('track-order') }}" class="text-brand-red font-bold hover:underline">
                         {{ __('Track Order') }} <span aria-hidden="true">→</span>

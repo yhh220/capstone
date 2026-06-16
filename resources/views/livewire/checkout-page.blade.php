@@ -185,10 +185,6 @@
                     <span class="font-bold text-gray-800 dark:text-white">{{ $order->order_number }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-500">{{ __('Tracking Number') }}</span>
-                    <span class="font-bold text-gray-800 dark:text-white">{{ $order->tracking_number }}</span>
-                </div>
-                <div class="flex justify-between">
                     <span class="text-gray-500">{{ __('Total') }}</span>
                     <span class="font-black text-brand-red">RM {{ number_format($order->total_amount, 2) }}</span>
                 </div>

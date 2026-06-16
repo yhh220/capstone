@@ -22,7 +22,7 @@ class Order extends Model
     }
 
     protected $fillable = [
-        'user_id', 'order_number', 'tracking_number',
+        'user_id', 'order_number',
         'customer_name', 'customer_email', 'customer_phone',
         'shipping_address', 'subtotal', 'total_amount',
         'status', 'payment_status', 'payment_method', 'notes',
@@ -63,19 +63,6 @@ class Order extends Model
 
             return 'ORD-' . $year . '-' . str_pad((string) $count, 5, '0', STR_PAD_LEFT);
         });
-    }
-
-    /**
-     * Generate a unique tracking number like WNWN12345678
-     * Fixes: Adds a uniqueness check loop to avoid collisions
-     */
-    public static function generateTrackingNumber(): string
-    {
-        do {
-            $tracking = 'WNWN' . strtoupper(Str::random(8));
-        } while (static::where('tracking_number', $tracking)->exists());
-
-        return $tracking;
     }
 
     /**

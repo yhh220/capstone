@@ -11,66 +11,84 @@ class BookingTracker extends Component
 {
     use SetsSeo;
 
-    public string $phone    = '';
-    public string $token    = '';
-    public bool   $searched = false;
+    public string $reference = '';
+    public string $phone     = '';
+    public ?Booking $booking = null;
+    public bool   $searched  = false;
+    public string $errorMsg  = '';
 
     public function mount(): void
     {
         $this->setSeo(
             title: 'Track My Booking',
-            description: 'Check the status of your service booking at Win Win Car Audio. Enter your phone number or booking token to get updates.',
+            description: 'Check or cancel your service booking at Win Win Car Audio. Enter your booking reference and phone number.',
         );
     }
 
-    protected array $rules = [
-        'phone' => 'nullable|min:6|max:20',
-        'token' => 'nullable|min:8|max:100',
-    ];
-
+    /**
+     * Look up a single booking by reference + phone. Requiring BOTH (like the
+     * order tracker's order number + email) means a reference alone is useless
+     * and there's no way to enumerate bookings by phone number.
+     */
     public function search(): void
     {
-        $this->validate();
+        $this->validate([
+            'reference' => 'required|string|max:50',
+            'phone'     => 'required|string|min:6|max:20',
+        ]);
 
-        if (trim($this->phone) === '' && trim($this->token) === '') {
-            $this->addError('phone', __('Enter a phone number or booking token.'));
-            return;
-        }
+        $this->searched = true;
+        $this->errorMsg = '';
+        $this->booking  = null;
 
-        // Rate limit to stop brute-force phone-number enumeration / PII harvesting.
-        // (Token lookups are unguessable UUIDs; phone lookups are the risk.)
         $key = 'booking-track:' . request()->ip();
         if (RateLimiter::tooManyAttempts($key, 6)) {
             $seconds = RateLimiter::availableIn($key);
-            $this->addError('phone', __('Too many lookups. Please try again in :seconds seconds.', ['seconds' => $seconds]));
+            $this->errorMsg = __('Too many lookups. Please try again in :seconds seconds.', ['seconds' => $seconds]);
             return;
         }
         RateLimiter::hit($key, 120);
 
-        $this->searched = true;
+        $this->booking = $this->findBooking();
+
+        if (! $this->booking) {
+            $this->errorMsg = __('No booking found. Please check your reference and phone number.');
+        } else {
+            RateLimiter::clear($key);
+        }
     }
 
-    public function getBookingsProperty()
+    public function cancelBooking(): void
     {
-        if (!$this->searched) {
-            return collect();
+        // Re-verify reference + phone server-side before mutating anything.
+        $booking = $this->findBooking();
+
+        if (! $booking) {
+            $this->errorMsg = __('No booking found. Please check your reference and phone number.');
+            return;
         }
 
-        if (trim($this->token) !== '') {
-            return Booking::with('service')
-                ->where('confirm_token', trim($this->token))
-                ->get();
+        if (! in_array($booking->status, ['cancelled', 'completed'], true)) {
+            $booking->update(['status' => 'cancelled']);
         }
 
-        $digits = preg_replace('/\D+/', '', $this->phone);
-        if ($digits === '') {
-            return collect();
+        $this->booking = $booking->fresh('service');
+        session()->flash('success', __('Your booking has been cancelled.'));
+    }
+
+    private function findBooking(): ?Booking
+    {
+        $reference = trim($this->reference);
+        $digits    = preg_replace('/\D+/', '', $this->phone);
+
+        if ($reference === '' || $digits === '') {
+            return null;
         }
 
         return Booking::with('service')
+            ->where('reference', $reference)
             ->whereRaw("REPLACE(REPLACE(REPLACE(REPLACE(customer_phone, '-', ''), ' ', ''), '+', ''), '.', '') = ?", [$digits])
-            ->orderBy('preferred_date', 'desc')
-            ->get();
+            ->first();
     }
 
     public function render()

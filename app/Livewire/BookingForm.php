@@ -44,7 +44,7 @@ class BookingForm extends Component
 
     public bool $submitted = false;
 
-    public string $manageUrl = '';
+    public string $reference = '';
 
     protected function bookingService(): BookingService
     {
@@ -221,6 +221,7 @@ class BookingForm extends Component
                 }
 
                 return Booking::create([
+                    'reference' => Booking::generateReference(),
                     'customer_name' => strip_tags($this->customer_name),
                     'customer_phone' => strip_tags($this->customer_phone),
                     'customer_email' => $this->customer_email ?: null,
@@ -232,7 +233,6 @@ class BookingForm extends Component
                     'end_at' => $this->bookingService()->buildEndAt($startAt),
                     'notes' => strip_tags($this->notes),
                     'status' => 'pending',
-                    'confirm_token' => (string) str()->uuid(),
                 ]);
             });
         } catch (\RuntimeException $e) {
@@ -241,7 +241,7 @@ class BookingForm extends Component
             return;
         }
 
-        $this->manageUrl = $booking->manage_url;
+        $this->reference = $booking->reference;
         $this->submitted = true;
 
         $this->notifyOwner(

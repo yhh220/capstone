@@ -50,9 +50,6 @@
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
                 <div>
                     <h2 class="text-xl font-black text-gray-800 dark:text-white">{{ $order->order_number }}</h2>
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {{ __('Tracking') }}: <span class="font-mono font-bold text-gray-700 dark:text-gray-300">{{ $order->tracking_number }}</span>
-                    </div>
                     <div class="text-xs text-gray-400 mt-1">{{ __('Ordered on') }} {{ $order->created_at->format('d M Y, h:i A') }}</div>
                 </div>
                 <div class="px-4 py-1.5 rounded-full text-sm font-bold

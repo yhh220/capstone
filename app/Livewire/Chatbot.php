@@ -522,7 +522,6 @@ class Chatbot extends Component
             'services'          => ['en' => 'Services', 'ms' => 'Servis', 'zh' => '服务'],
             'booking'           => ['en' => 'Booking', 'ms' => 'Tempahan', 'zh' => '预约'],
             'booking.track'     => ['en' => 'Booking Tracker', 'ms' => 'Jejak Tempahan', 'zh' => '预约查询'],
-            'booking.manage'    => ['en' => 'Manage Booking', 'ms' => 'Urus Tempahan', 'zh' => '管理预约'],
             'gallery'           => ['en' => 'Gallery', 'ms' => 'Galeri', 'zh' => '作品集'],
             'track-order'       => ['en' => 'Order Tracking', 'ms' => 'Jejak Pesanan', 'zh' => '订单查询'],
             'about'             => ['en' => 'About Us', 'ms' => 'Tentang Kami', 'zh' => '关于我们'],

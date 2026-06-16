@@ -35,9 +35,10 @@ class BookingsTable
                 TextColumn::make('preferred_date')
                     ->date('D, d M Y')
                     ->sortable(),
-                TextColumn::make('confirm_token')
-                    ->label('Booking ID')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('reference')
+                    ->label('Reference')
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {

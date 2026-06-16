@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -21,9 +22,9 @@ class Booking extends Model
     }
 
     protected $fillable = [
-        'customer_name', 'customer_phone', 'customer_email',
+        'reference', 'customer_name', 'customer_phone', 'customer_email',
         'vehicle_model', 'vehicle_plate', 'service_id', 'preferred_date',
-        'start_at', 'end_at', 'notes', 'status', 'confirm_token',
+        'start_at', 'end_at', 'notes', 'status',
     ];
 
     protected $casts = [
@@ -49,8 +50,28 @@ class Booking extends Model
         };
     }
 
-    public function getManageUrlAttribute(): ?string
+    /**
+     * Human-friendly, sequential booking reference like BK-2026-00042.
+     * Mirrors Order::generateOrderNumber() — the customer quotes this together
+     * with their phone number to look up or cancel a booking (no opaque tokens).
+     * Uses withTrashed() + a row lock so soft-deleted rows can't cause the
+     * unique reference to be reused, and concurrent creates stay collision-free.
+     */
+    public static function generateReference(): string
     {
-        return $this->confirm_token ? route('booking.manage', $this->confirm_token) : null;
+        return DB::transaction(function () {
+            $year = date('Y');
+            $latest = static::withTrashed()
+                ->where('reference', 'like', "BK-{$year}-%")
+                ->lockForUpdate()
+                ->orderBy('id', 'desc')
+                ->first();
+
+            $count = $latest
+                ? ((int) substr($latest->reference, strrpos($latest->reference, '-') + 1)) + 1
+                : 1;
+
+            return 'BK-' . $year . '-' . str_pad((string) $count, 5, '0', STR_PAD_LEFT);
+        });
     }
 }

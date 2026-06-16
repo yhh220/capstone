@@ -15,11 +15,14 @@
                 <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
             </div>
             <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-2">{{ __('Booking Confirmed!') }}</h2>
-            <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('Thank you! Save the manage link below to review or cancel your booking later.') }}</p>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('Thank you! Save your booking reference below. To check or cancel your booking later, use it together with your phone number.') }}</p>
             <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6">
-                <p class="text-xs text-gray-400 uppercase tracking-wider mb-2 font-semibold">{{ __('Your Booking Link') }}</p>
-                <a href="{{ $manageUrl }}" class="text-brand-red font-semibold text-sm break-all hover:underline">{{ $manageUrl }}</a>
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-2 font-semibold">{{ __('Your Booking Reference') }}</p>
+                <p class="text-2xl font-black text-brand-red tracking-wider select-all">{{ $reference }}</p>
             </div>
+            <a href="{{ route('booking.track') }}" class="block text-brand-red font-semibold text-sm mb-6 hover:underline">
+                {{ __('Track or cancel this booking') }} <span aria-hidden="true">&rarr;</span>
+            </a>
             <button wire:click="$set('submitted', false)"
                     class="group relative inline-flex items-center gap-3 bg-brand-red text-white px-8 py-4 rounded-full font-black text-base transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-2 active:scale-95">
                 <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>

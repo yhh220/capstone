@@ -5,6 +5,9 @@ namespace App\Filament\Resources\Orders;
 use App\Models\Order;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\BadgeColumn;
@@ -33,7 +36,6 @@ class OrderResource extends Resource
         return $schema->components([
             Section::make('Order Information')->schema([
                 Forms\Components\TextInput::make('order_number')->disabled(),
-                Forms\Components\TextInput::make('tracking_number')->disabled(),
                 Forms\Components\Select::make('status')
                     ->options([
                         'pending'    => 'Pending',
@@ -74,21 +76,23 @@ class OrderResource extends Resource
                         $rows = $items->map(fn ($item) =>
                             "<tr class='border-b dark:border-gray-700'>
                                 <td class='py-2 pr-4 text-sm'>" . e($item->product_name) . "</td>
-                                <td class='py-2 pr-4 text-sm text-center'>{$item->quantity}</td>
-                                <td class='py-2 pr-4 text-sm text-right'>RM " . number_format($item->unit_price, 2) . "</td>
-                                <td class='py-2 text-sm text-right font-semibold'>RM " . number_format($item->subtotal, 2) . "</td>
+                                <td class='py-2 px-3 text-sm text-center whitespace-nowrap'>{$item->quantity}</td>
+                                <td class='py-2 px-3 text-sm text-right whitespace-nowrap'>RM " . number_format($item->unit_price, 2) . "</td>
+                                <td class='py-2 pl-3 text-sm text-right font-semibold whitespace-nowrap'>RM " . number_format($item->subtotal, 2) . "</td>
                             </tr>"
                         )->implode('');
                         return new \Illuminate\Support\HtmlString("
-                            <table class='w-full'>
+                            <div class='overflow-x-auto'>
+                            <table class='w-full min-w-[420px]'>
                                 <thead><tr class='text-xs text-gray-500 uppercase border-b dark:border-gray-700'>
-                                    <th class='pb-2 text-left'>Product</th>
-                                    <th class='pb-2 text-center'>Qty</th>
-                                    <th class='pb-2 text-right'>Unit Price</th>
-                                    <th class='pb-2 text-right'>Subtotal</th>
+                                    <th class='pb-2 pr-4 text-left'>Product</th>
+                                    <th class='pb-2 px-3 text-center whitespace-nowrap'>Qty</th>
+                                    <th class='pb-2 px-3 text-right whitespace-nowrap'>Unit Price</th>
+                                    <th class='pb-2 pl-3 text-right whitespace-nowrap'>Subtotal</th>
                                 </tr></thead>
                                 <tbody>{$rows}</tbody>
                             </table>
+                            </div>
                         ");
                     }),
             ])->visibleOn('edit'),
@@ -137,10 +141,6 @@ class OrderResource extends Resource
                         'warning' => 'pending',
                         'success' => 'paid',
                     ]),
-                TextColumn::make('tracking_number')
-                    ->label('Tracking')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
@@ -193,6 +193,12 @@ class OrderResource extends Resource
                             $record->update(['status' => $record->next_status]);
                         }
                     }),
+                DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 

@@ -52,8 +52,8 @@ class BookingForm
                     ->label('End Time')
                     ->native(false)
                     ->seconds(false),
-                TextInput::make('confirm_token')
-                    ->label('Booking Token (auto-generated)')
+                TextInput::make('reference')
+                    ->label('Booking Reference (auto-generated)')
                     ->disabled()
                     ->dehydrated(false)
                     ->visibleOn('edit')

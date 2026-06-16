@@ -34,10 +34,6 @@
                 <span class="info-value">{{ $order->order_number }}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">{{ __('Tracking Number') }}</span>
-                <span class="info-value">{{ $order->tracking_number }}</span>
-            </div>
-            <div class="info-row">
                 <span class="info-label">{{ __('Status') }}</span>
                 <span class="info-value">{{ ucfirst($order->status) }}</span>
             </div>
