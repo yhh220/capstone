@@ -37,7 +37,7 @@ class RevenueChart extends ChartWidget
         $start = Carbon::now()->startOfMonth()->subMonths($monthCount - 1);
 
         // One aggregated query instead of one query per month.
-        $totals = Order::where('status', 'completed')
+        $totals = Order::where('status', 'delivered')
             ->where('created_at', '>=', $start)
             ->get(['created_at', 'total_amount'])
             ->groupBy(fn (Order $o) => $o->created_at->format('Y-m'))

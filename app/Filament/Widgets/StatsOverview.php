@@ -34,7 +34,7 @@ class StatsOverview extends StatsOverviewWidget
             'registeredUsers' => User::where('role', 'client')->count(),
             'totalOrders'     => Order::count(),
             'pendingOrders'   => Order::where('status', 'pending')->count(),
-            'monthRevenue'    => (float) Order::where('status', 'completed')
+            'monthRevenue'    => (float) Order::where('status', 'delivered')
                 ->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
                 ->sum('total_amount'),
@@ -91,7 +91,7 @@ class StatsOverview extends StatsOverviewWidget
                 ->color($s['pendingOrders'] > 0 ? 'warning' : 'gray'),
 
             Stat::make('Revenue This Month', 'RM ' . number_format($s['monthRevenue'], 2))
-                ->description('Completed orders this month')
+                ->description('Delivered orders this month')
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),
         ];
