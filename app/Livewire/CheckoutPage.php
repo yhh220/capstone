@@ -36,8 +36,24 @@ class CheckoutPage extends Component
 
     public string $orderNotes = '';
 
-    // Step 2: Payment method
-    public string $paymentMethod = 'online_banking';
+    // Step 2: Payment method (display-only demo — no real gateway)
+    public string $paymentMethod = 'fpx';
+
+    public string $fpxBank = 'Maybank2u';
+
+    public string $ewallet = "Touch 'n Go eWallet";
+
+    /** FPX participating banks shown in the demo bank picker. */
+    public const FPX_BANKS = [
+        'Maybank2u', 'CIMB Clicks', 'Public Bank PBe', 'RHB Now', 'Hong Leong Connect',
+        'AmOnline', 'Bank Islam', 'Bank Rakyat', 'Affin Bank', 'Alliance Bank',
+        'BSN', 'OCBC', 'HSBC', 'Standard Chartered', 'UOB',
+    ];
+
+    /** E-wallet providers shown in the demo wallet picker. */
+    public const EWALLETS = [
+        "Touch 'n Go eWallet", 'GrabPay', 'ShopeePay', 'Boost',
+    ];
 
     // Step 3: Confirmation
     public ?Order $order = null;
@@ -125,12 +141,27 @@ class CheckoutPage extends Component
         }
 
         // Whitelist the payment method — never trust the client-supplied value.
-        if (! in_array($this->paymentMethod, ['online_banking', 'cod'], true)) {
-            $this->paymentMethod = 'online_banking';
+        if (! in_array($this->paymentMethod, ['fpx', 'ewallet', 'card', 'cod'], true)) {
+            $this->paymentMethod = 'fpx';
+        }
+        if (! in_array($this->fpxBank, self::FPX_BANKS, true)) {
+            $this->fpxBank = self::FPX_BANKS[0];
+        }
+        if (! in_array($this->ewallet, self::EWALLETS, true)) {
+            $this->ewallet = self::EWALLETS[0];
         }
 
+        // Human-readable provider label stored on the order (e.g. "FPX - Maybank2u").
+        $paymentLabel = match ($this->paymentMethod) {
+            'fpx' => 'FPX - ' . $this->fpxBank,
+            'ewallet' => $this->ewallet,
+            'card' => 'Credit / Debit Card',
+            'cod' => 'Cash on Delivery',
+            default => 'FPX',
+        };
+
         try {
-            $order = DB::transaction(function () {
+            $order = DB::transaction(function () use ($paymentLabel) {
                 $cartItems = CartItem::forCurrentOwner()
                     ->lockForUpdate()
                     ->get();
@@ -186,7 +217,7 @@ class CheckoutPage extends Component
                     'total_amount' => $subtotal,
                     'status' => 'pending',
                     'payment_status' => 'pending',
-                    'payment_method' => $this->paymentMethod,
+                    'payment_method' => $paymentLabel,
                     'notes' => $this->orderNotes ?: null,
                 ]);
 
@@ -234,6 +265,9 @@ class CheckoutPage extends Component
 
     public function render()
     {
-        return view('livewire.checkout-page')->layout('layouts.app');
+        return view('livewire.checkout-page', [
+            'fpxBanks' => self::FPX_BANKS,
+            'ewallets' => self::EWALLETS,
+        ])->layout('layouts.app');
     }
 }

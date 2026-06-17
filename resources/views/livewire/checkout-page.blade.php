@@ -114,34 +114,130 @@
             </div>
         </div>
 
-        {{-- Step 2: Mock Payment --}}
+        {{-- Step 2: Payment (display-only demo — methods are shown but no real charge occurs) --}}
         @elseif($step === 2)
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700" data-aos="fade-up">
-            <h2 class="text-xl font-black text-gray-800 dark:text-white mb-6">{{ __('Payment Method') }}</h2>
+            <h2 class="text-xl font-black text-gray-800 dark:text-white mb-1">{{ __('Payment Method') }}</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('Choose how you would like to pay') }}</p>
 
-            <div class="space-y-3">
-                <label class="flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors
-                    {{ $paymentMethod === 'online_banking' ? 'border-brand-red bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300' }}">
-                    <input type="radio" wire:model="paymentMethod" value="online_banking" class="accent-brand-red">
-                    <div>
-                        <div class="font-semibold text-gray-800 dark:text-white">🏦 {{ __('Online Banking') }}</div>
-                        <div class="text-xs text-gray-500">{{ __('FPX / Internet Banking') }}</div>
-                    </div>
-                </label>
-                <label class="flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors
-                    {{ $paymentMethod === 'cod' ? 'border-brand-red bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300' }}">
-                    <input type="radio" wire:model="paymentMethod" value="cod" class="accent-brand-red">
-                    <div>
-                        <div class="font-semibold text-gray-800 dark:text-white">💵 {{ __('Cash on Delivery') }}</div>
-                        <div class="text-xs text-gray-500">{{ __('Pay when you receive') }}</div>
-                    </div>
-                </label>
+            {{-- Demo notice --}}
+            <div class="mb-6 flex items-start gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 rounded-xl p-4">
+                <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                <div>
+                    <div class="text-amber-700 dark:text-amber-400 font-bold text-sm">{{ __('DEMO MODE') }}</div>
+                    <div class="text-amber-700/80 dark:text-amber-400/80 text-xs mt-0.5">{{ __('No actual payment will be processed. This is a prototype demonstration.') }}</div>
+                </div>
             </div>
 
-            {{-- Demo Notice --}}
-            <div class="mt-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4 text-center">
-                <div class="text-amber-600 dark:text-amber-400 font-bold text-sm mb-1">⚠️ {{ __('DEMO MODE') }}</div>
-                <div class="text-amber-600 dark:text-amber-400 text-xs">{{ __('No actual payment will be processed. This is a prototype demonstration.') }}</div>
+            <div class="space-y-3">
+                {{-- FPX Online Banking --}}
+                <div class="rounded-xl border-2 transition-colors {{ $paymentMethod === 'fpx' ? 'border-brand-red bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-600' }}">
+                    <label class="flex items-center gap-3 p-4 cursor-pointer">
+                        <input type="radio" wire:model.live="paymentMethod" value="fpx" class="accent-brand-red w-4 h-4 shrink-0">
+                        <span class="w-11 h-9 rounded-md bg-blue-600 text-white flex items-center justify-center font-black text-[11px] tracking-wide shrink-0">FPX</span>
+                        <span class="flex-1 min-w-0">
+                            <span class="block font-semibold text-gray-800 dark:text-white">{{ __('FPX Online Banking') }}</span>
+                            <span class="block text-xs text-gray-500">{{ __('Pay directly from your bank account') }}</span>
+                        </span>
+                    </label>
+                    @if($paymentMethod === 'fpx')
+                    <div class="px-4 pb-4 sm:pl-[4.25rem]">
+                        <label for="fpx-bank" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">{{ __('Select your bank') }}</label>
+                        <select wire:model="fpxBank" id="fpx-bank" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-red transition">
+                            @foreach($fpxBanks as $bank)
+                            <option value="{{ $bank }}">{{ $bank }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- E-Wallet --}}
+                <div class="rounded-xl border-2 transition-colors {{ $paymentMethod === 'ewallet' ? 'border-brand-red bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-600' }}">
+                    <label class="flex items-center gap-3 p-4 cursor-pointer">
+                        <input type="radio" wire:model.live="paymentMethod" value="ewallet" class="accent-brand-red w-4 h-4 shrink-0">
+                        <span class="w-11 h-9 rounded-md bg-gradient-to-br from-teal-500 to-emerald-600 text-white flex items-center justify-center shrink-0" aria-hidden="true">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M16 14h2"/></svg>
+                        </span>
+                        <span class="flex-1 min-w-0">
+                            <span class="block font-semibold text-gray-800 dark:text-white">{{ __('E-Wallet') }}</span>
+                            <span class="block text-xs text-gray-500 truncate">Touch 'n Go &middot; GrabPay &middot; ShopeePay &middot; Boost</span>
+                        </span>
+                    </label>
+                    @if($paymentMethod === 'ewallet')
+                    <div class="px-4 pb-4 sm:pl-[4.25rem] grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        @foreach($ewallets as $w)
+                        <label class="cursor-pointer">
+                            <input type="radio" wire:model.live="ewallet" value="{{ $w }}" class="sr-only peer">
+                            <span class="flex items-center justify-center text-center text-xs font-bold leading-tight px-2 py-2.5 rounded-lg border-2 transition-colors h-full
+                                        peer-checked:border-brand-red peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 peer-checked:text-brand-red
+                                        border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300">{{ $w }}</span>
+                        </label>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Credit / Debit Card --}}
+                <div class="rounded-xl border-2 transition-colors {{ $paymentMethod === 'card' ? 'border-brand-red bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-600' }}">
+                    <label class="flex items-center gap-3 p-4 cursor-pointer">
+                        <input type="radio" wire:model.live="paymentMethod" value="card" class="accent-brand-red w-4 h-4 shrink-0">
+                        <span class="flex gap-1 shrink-0" aria-hidden="true">
+                            <span class="w-7 h-9 rounded-md bg-[#1A1F71] text-white flex items-center justify-center font-black text-[8px] italic">VISA</span>
+                            <span class="w-7 h-9 rounded-md bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                <span class="flex"><span class="w-2.5 h-2.5 rounded-full bg-[#EB001B]"></span><span class="w-2.5 h-2.5 rounded-full bg-[#F79E1B] -ml-1 opacity-90"></span></span>
+                            </span>
+                        </span>
+                        <span class="flex-1 min-w-0">
+                            <span class="block font-semibold text-gray-800 dark:text-white">{{ __('Credit / Debit Card') }}</span>
+                            <span class="block text-xs text-gray-500">Visa &middot; Mastercard</span>
+                        </span>
+                    </label>
+                    @if($paymentMethod === 'card')
+                    <div class="px-4 pb-4 sm:pl-[4.25rem] space-y-3">
+                        <div>
+                            <label for="card-number" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">{{ __('Card Number') }}</label>
+                            <input id="card-number" type="text" inputmode="numeric" maxlength="19" autocomplete="cc-number" placeholder="1234 5678 9012 3456"
+                                   class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm tracking-wider focus:outline-none focus:border-brand-red transition">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="card-expiry" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">{{ __('Expiry') }}</label>
+                                <input id="card-expiry" type="text" inputmode="numeric" maxlength="5" autocomplete="cc-exp" placeholder="MM/YY"
+                                       class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-red transition">
+                            </div>
+                            <div>
+                                <label for="card-cvv" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">{{ __('CVV') }}</label>
+                                <input id="card-cvv" type="text" inputmode="numeric" maxlength="4" autocomplete="cc-csc" placeholder="123"
+                                       class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-red transition">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="card-name" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">{{ __('Name on Card') }}</label>
+                            <input id="card-name" type="text" autocomplete="cc-name" placeholder="{{ __('Full name') }}"
+                                   class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-red transition">
+                        </div>
+                        <p class="text-xs text-gray-400 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            {{ __('Demo only — card details are not collected or stored.') }}
+                        </p>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Cash on Delivery --}}
+                <div class="rounded-xl border-2 transition-colors {{ $paymentMethod === 'cod' ? 'border-brand-red bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-600' }}">
+                    <label class="flex items-center gap-3 p-4 cursor-pointer">
+                        <input type="radio" wire:model.live="paymentMethod" value="cod" class="accent-brand-red w-4 h-4 shrink-0">
+                        <span class="w-11 h-9 rounded-md bg-green-600 text-white flex items-center justify-center shrink-0" aria-hidden="true">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                        </span>
+                        <span class="flex-1 min-w-0">
+                            <span class="block font-semibold text-gray-800 dark:text-white">{{ __('Cash on Delivery') }}</span>
+                            <span class="block text-xs text-gray-500">{{ __('Pay when you receive') }}</span>
+                        </span>
+                    </label>
+                </div>
             </div>
 
             {{-- Total --}}
@@ -155,6 +251,7 @@
                     {{ __('← Back') }}
                 </button>
                 <button wire:click="placeOrder"
+                        wire:confirm="{{ __('Demo mode — no real payment will be charged. Place this test order?') }}"
                         wire:loading.attr="disabled"
                         wire:target="placeOrder"
                         class="group relative inline-flex justify-center items-center gap-2 flex-1 bg-brand-red text-white py-3 rounded-full font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-50">
