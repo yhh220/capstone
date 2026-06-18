@@ -1254,6 +1254,18 @@
         // Re-init after Livewire navigations keep animations fresh
         document.addEventListener('livewire:navigated', () => AOS.refresh());
 
+        // Restart autoplay videos after a soft navigation. `autoplay` is a
+        // one-shot attribute that only fires on the initial page parse, so the
+        // hero background video goes blank once a wire:navigate morph runs
+        // (e.g. switching language). Nudge each video back to life; reload only
+        // if the morph severed its media source.
+        document.addEventListener('livewire:navigated', () => {
+            document.querySelectorAll('video[autoplay]').forEach((v) => {
+                if (v.readyState === 0) v.load();
+                v.play().catch(() => {});
+            });
+        });
+
         // ── Animated counter ─────────────────────────────────
         // Usage: <span data-count="500" data-suffix="+">500+</span>
         function animateCounters(root) {
