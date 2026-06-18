@@ -22,7 +22,7 @@ class Booking extends Model
     }
 
     protected $fillable = [
-        'reference', 'customer_name', 'customer_phone', 'customer_email',
+        'user_id', 'reference', 'customer_name', 'customer_phone', 'customer_email',
         'vehicle_model', 'vehicle_plate', 'service_id', 'preferred_date',
         'start_at', 'end_at', 'notes', 'status',
     ];
@@ -38,6 +38,15 @@ class Booking extends Model
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
+    }
+
+    /**
+     * The account that placed this booking, when made while logged in.
+     * Null for guest (showroom-mode) bookings.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function getStatusColorAttribute(): string

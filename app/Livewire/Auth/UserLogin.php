@@ -4,8 +4,10 @@ namespace App\Livewire\Auth;
 
 use App\Models\CartItem;
 use App\Models\User;
+use App\Services\EmailOtpService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
@@ -30,6 +32,11 @@ class UserLogin extends Component
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
+
+    // Email-OTP verification step (shown after a valid register submission)
+    public bool   $awaitingOtp = false;
+    public string $otpEmail    = '';
+    public string $otpCode     = '';
 
     // Honeypot for Register form — powered by spatie/laravel-honeypot
     public HoneypotData $honeypotData;
@@ -181,6 +188,13 @@ class UserLogin extends Component
         return __('Too many failed attempts. Please wait :seconds seconds.', ['seconds' => $seconds]);
     }
 
+    /**
+     * Step 1 of registration: validate input, stash the pending account (password
+     * encrypted, NOT plaintext) in the cache, email a 6-digit OTP, and switch the
+     * UI to the verification step. The user row is only created once the code is
+     * confirmed, so abandoned sign-ups never leave an orphan account and the email
+     * stays free to register.
+     */
     public function register(): void
     {
         $this->protectAgainstSpam();
@@ -199,20 +213,118 @@ class UserLogin extends Component
             'name.min'     => __('Name must be at least 2 characters.'),
         ]);
 
-        // forceCreate so 'role' is set explicitly (it is not mass-assignable).
-        // Public registration is always a 'client' — never staff/admin.
-        $user = User::forceCreate([
+        Cache::put($this->pendingKey($validated['email']), [
             'name'     => $validated['name'],
             'email'    => $validated['email'],
-            'password' => $validated['password'],
-            'role'     => 'client',
+            'password' => Crypt::encryptString($validated['password']),
+        ], EmailOtpService::TTL);
+
+        app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_REGISTER, $validated['email']);
+
+        $this->otpEmail    = $validated['email'];
+        $this->awaitingOtp = true;
+        $this->otpCode     = '';
+        $this->resetErrorBag();
+    }
+
+    /**
+     * Step 2 of registration: confirm the OTP, then create the (verified) account.
+     */
+    public function verifyRegistrationOtp(): void
+    {
+        $this->validate(['otpCode' => ['required', 'digits:6']]);
+
+        $otp = app(EmailOtpService::class);
+
+        if (! $otp->verify(EmailOtpService::PURPOSE_REGISTER, $this->otpEmail, $this->otpCode)) {
+            $this->addError('otpCode', __('Invalid or expired code. Please try again.'));
+            return;
+        }
+
+        $pending = Cache::get($this->pendingKey($this->otpEmail));
+
+        if (! $pending) {
+            $this->awaitingOtp = false;
+            $this->isLoginTab  = false;
+            $this->addError('email', __('Your session expired. Please register again.'));
+            return;
+        }
+
+        // Guard against a race: someone may have registered this email meanwhile.
+        if (User::where('email', $pending['email'])->exists()) {
+            Cache::forget($this->pendingKey($this->otpEmail));
+            $this->awaitingOtp = false;
+            $this->isLoginTab  = true;
+            $this->addError('loginEmail', __('This account already exists. Please sign in.'));
+            return;
+        }
+
+        // forceCreate so 'role' is set explicitly (not mass-assignable). Public
+        // registration is always a 'client'. The 'hashed' cast hashes the
+        // (decrypted) plaintext password exactly once.
+        $user = User::forceCreate([
+            'name'              => $pending['name'],
+            'email'             => $pending['email'],
+            'password'          => Crypt::decryptString($pending['password']),
+            'role'              => 'client',
+            'email_verified_at' => now(),
         ]);
+
+        Cache::forget($this->pendingKey($this->otpEmail));
 
         Auth::login($user);
         CartItem::claimGuestCart(session()->getId(), Auth::id());
         session()->regenerate();
 
         $this->redirect(session()->pull('url.intended', '/'), navigate: false);
+    }
+
+    /**
+     * Resend the registration code (throttled to once per 60s by EmailOtpService).
+     */
+    public function resendRegistrationOtp(): void
+    {
+        if (! $this->awaitingOtp || $this->otpEmail === '') {
+            return;
+        }
+
+        $otp  = app(EmailOtpService::class);
+        $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_REGISTER, $this->otpEmail);
+
+        if ($wait > 0) {
+            $this->addError('otpCode', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+            return;
+        }
+
+        if (! Cache::has($this->pendingKey($this->otpEmail))) {
+            $this->awaitingOtp = false;
+            $this->isLoginTab  = false;
+            $this->addError('email', __('Your session expired. Please register again.'));
+            return;
+        }
+
+        $otp->send(EmailOtpService::PURPOSE_REGISTER, $this->otpEmail);
+        session()->flash('otp_resent', __('A new code has been sent to your email.'));
+    }
+
+    /**
+     * Abandon the OTP step and return to the register form.
+     */
+    public function cancelOtp(): void
+    {
+        if ($this->otpEmail !== '') {
+            app(EmailOtpService::class)->clear(EmailOtpService::PURPOSE_REGISTER, $this->otpEmail);
+            Cache::forget($this->pendingKey($this->otpEmail));
+        }
+
+        $this->awaitingOtp = false;
+        $this->otpCode     = '';
+        $this->resetErrorBag();
+    }
+
+    private function pendingKey(string $email): string
+    {
+        return 'pending_registration:' . strtolower(trim($email));
     }
 
     public function render()

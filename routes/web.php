@@ -17,8 +17,9 @@ use App\Livewire\OrderTracker;
 use App\Livewire\PrivacyPolicyPage;
 use App\Livewire\ProfilePage;
 use App\Livewire\TermsOfServicePage;
-use App\Livewire\MyOrdersPage;
+use App\Livewire\MyAccountPage;
 use App\Livewire\Auth\UserLogin;
+use App\Livewire\Auth\ForgotPassword;
 use App\Http\Middleware\ShoppingEnabled;
 
 // ─── Public Routes ─────────────────────────────────────────────
@@ -38,8 +39,10 @@ Route::get('/terms-of-service', TermsOfServicePage::class)->name('terms-of-servi
 // ─── Authenticated User Routes ────────────────────────────────
 Route::middleware('auth')->group(function () {
     Route::get('/profile', ProfilePage::class)->name('profile');
-    Route::get('/my-orders', MyOrdersPage::class)->name('my-orders');
+    Route::get('/account', MyAccountPage::class)->name('account');
 });
+// Legacy path → unified account page.
+Route::redirect('/my-orders', '/account');
 // ─── Shopping Routes (protected by ShoppingEnabled + auth middleware) ──
 Route::middleware(['auth', ShoppingEnabled::class])->group(function () {
     Route::get('/cart', CartPage::class)->name('cart');
@@ -61,6 +64,7 @@ Route::get('/lang/{locale}', function (string $locale, \Illuminate\Http\Request 
 
 // ─── Authentication Routes ─────────────────────────────────────
 Route::get('/login', UserLogin::class)->name('login');
+Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
 
 // Logout (POST only — CSRF protected)
 Route::post('/logout', function () {

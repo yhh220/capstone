@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
@@ -17,12 +18,12 @@ use Spatie\Activitylog\Support\LogOptions;
 // 'role' is intentionally NOT mass-assignable — it is set explicitly only in
 // trusted paths (registration → 'client', seeder/admin panel via forceFill) so
 // an untrusted request can never escalate privileges through mass assignment.
-#[Fillable(['name', 'email', 'password', 'phone', 'gender', 'address_line', 'city', 'postcode', 'state', 'preferred_courier'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'gender', 'address_line', 'city', 'postcode', 'state'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, LogsActivity;
+    use HasFactory, Notifiable, LogsActivity, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -95,5 +96,13 @@ class User extends Authenticatable implements FilamentUser
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get the user's service bookings (those made while logged in).
+     */
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
     }
 }

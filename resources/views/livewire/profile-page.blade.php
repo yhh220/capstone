@@ -6,7 +6,15 @@
         </div>
     </div>
 
-    <div class="max-w-3xl mx-auto px-4 py-10">
+    <div class="max-w-3xl mx-auto px-4 py-10 space-y-8">
+
+        @if(session('success'))
+        <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20">
+            <svg class="w-4 h-4 text-green-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <p class="text-sm text-green-700 dark:text-green-300">{{ session('success') }}</p>
+        </div>
+        @endif
+
         <form wire:submit="updateProfile" class="space-y-6">
             {{-- Account Info --}}
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
@@ -73,68 +81,6 @@
                 </div>
             </div>
 
-            {{-- Preferred Courier --}}
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
-                <h2 class="text-lg font-black text-gray-800 dark:text-white mb-5 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                    {{ __('Preferred Courier Service') }}
-                </h2>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {{-- Pos Laju --}}
-                    <label class="cursor-pointer">
-                        <input type="radio" wire:model="courier" value="poslaju" class="sr-only peer">
-                        <div class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all
-                                    peer-checked:border-brand-red peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 peer-checked:shadow-md
-                                    border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500">
-                            <div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white font-black text-xs shadow-sm">
-                                <svg viewBox="0 0 24 24" class="w-7 h-7" fill="currentColor"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-                            </div>
-                            <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Pos Laju</span>
-                        </div>
-                    </label>
-
-                    {{-- DHL --}}
-                    <label class="cursor-pointer">
-                        <input type="radio" wire:model="courier" value="dhl" class="sr-only peer">
-                        <div class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all
-                                    peer-checked:border-brand-red peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 peer-checked:shadow-md
-                                    border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500">
-                            <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center font-black text-red-600 text-sm shadow-sm">
-                                DHL
-                            </div>
-                            <span class="text-xs font-bold text-gray-700 dark:text-gray-300">DHL</span>
-                        </div>
-                    </label>
-
-                    {{-- Ninja Van --}}
-                    <label class="cursor-pointer">
-                        <input type="radio" wire:model="courier" value="ninjavan" class="sr-only peer">
-                        <div class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all
-                                    peer-checked:border-brand-red peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 peer-checked:shadow-md
-                                    border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500">
-                            <div class="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center text-white shadow-sm">
-                                <svg viewBox="0 0 24 24" class="w-7 h-7" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                            </div>
-                            <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Ninja Van</span>
-                        </div>
-                    </label>
-
-                    {{-- GDEX --}}
-                    <label class="cursor-pointer">
-                        <input type="radio" wire:model="courier" value="gdex" class="sr-only peer">
-                        <div class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all
-                                    peer-checked:border-brand-red peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 peer-checked:shadow-md
-                                    border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500">
-                            <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-xs shadow-sm">
-                                GDEX
-                            </div>
-                            <span class="text-xs font-bold text-gray-700 dark:text-gray-300">GDEX</span>
-                        </div>
-                    </label>
-                </div>
-                @error('courier') <span class="text-red-500 text-xs mt-2">{{ $message }}</span> @enderror
-            </div>
-
             {{-- Save --}}
             <div class="flex justify-end">
                 <button type="submit"
@@ -146,5 +92,80 @@
                 </button>
             </div>
         </form>
+
+        {{-- Change Password --}}
+        <form wire:submit="updatePassword" class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+            <h2 class="text-lg font-black text-gray-800 dark:text-white mb-5 flex items-center gap-2">
+                <svg class="w-5 h-5 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                {{ __('Change Password') }}
+            </h2>
+
+            @if(session('password_success'))
+            <div class="flex items-center gap-2 mb-5 px-4 py-3 rounded-xl bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20">
+                <svg class="w-4 h-4 text-green-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <p class="text-sm text-green-700 dark:text-green-300">{{ session('password_success') }}</p>
+            </div>
+            @endif
+
+            <div class="space-y-4">
+                <div>
+                    <label for="pf-current-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Current Password') }}</label>
+                    <input wire:model="current_password" id="pf-current-pass" type="password" autocomplete="current-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                    @error('current_password') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="pf-new-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('New Password') }}</label>
+                        <input wire:model="new_password" id="pf-new-pass" type="password" autocomplete="new-password" placeholder="{{ __('Min. 8 characters') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                        @error('new_password') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label for="pf-new-pass-confirm" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Confirm New Password') }}</label>
+                        <input wire:model="new_password_confirmation" id="pf-new-pass-confirm" type="password" autocomplete="new-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-5">
+                <button type="submit" wire:loading.attr="disabled" wire:target="updatePassword"
+                        class="bg-gray-800 dark:bg-white text-white dark:text-gray-900 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
+                    <span wire:loading.remove wire:target="updatePassword">{{ __('Update Password') }}</span>
+                    <span wire:loading wire:target="updatePassword">{{ __('Updating...') }}</span>
+                </button>
+            </div>
+        </form>
+
+        {{-- Danger Zone --}}
+        <div x-data="{ confirm: false }" class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border-2 border-red-200 dark:border-red-500/30">
+            <h2 class="text-lg font-black text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                {{ __('Delete Account') }}
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ __('Permanently close your account. Your order and booking history is retained for our records, but you will no longer be able to sign in.') }}</p>
+
+            <div x-show="!confirm">
+                <button type="button" @click="confirm = true"
+                        class="border-2 border-red-500 text-red-600 dark:text-red-400 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-500 hover:text-white active:scale-95">
+                    {{ __('Delete My Account') }}
+                </button>
+            </div>
+
+            <div x-show="confirm" x-cloak style="display:none;" class="space-y-4">
+                <div>
+                    <label for="pf-delete-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Enter your password to confirm') }}</label>
+                    <input wire:model="delete_password" id="pf-delete-pass" type="password" autocomplete="current-password" class="w-full border border-red-200 dark:border-red-500/40 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500 transition">
+                    @error('delete_password') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                </div>
+                <div class="flex items-center gap-3">
+                    <button type="button" wire:click="deleteAccount" wire:loading.attr="disabled" wire:target="deleteAccount"
+                            wire:confirm="{{ __('Are you sure? This will permanently close your account.') }}"
+                            class="bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-700 active:scale-95 disabled:opacity-50">
+                        <span wire:loading.remove wire:target="deleteAccount">{{ __('Permanently Delete') }}</span>
+                        <span wire:loading wire:target="deleteAccount">{{ __('Deleting...') }}</span>
+                    </button>
+                    <button type="button" @click="confirm = false" class="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('Cancel') }}</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

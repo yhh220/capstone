@@ -525,7 +525,7 @@ class Chatbot extends Component
             'terms-of-service'  => ['en' => 'Terms of Service', 'ms' => 'Terma Perkhidmatan', 'zh' => '服务条款'],
             'cart'              => ['en' => 'Cart', 'ms' => 'Troli', 'zh' => '购物车'],
             'checkout'          => ['en' => 'Checkout', 'ms' => 'Pembayaran', 'zh' => '结账'],
-            'my-orders'         => ['en' => 'My Orders', 'ms' => 'Pesanan Saya', 'zh' => '我的订单'],
+            'account'           => ['en' => 'My Account', 'ms' => 'Akaun Saya', 'zh' => '我的账户'],
             'profile'           => ['en' => 'My Profile', 'ms' => 'Profil Saya', 'zh' => '个人资料'],
             'login'             => ['en' => 'Login', 'ms' => 'Log Masuk', 'zh' => '登录'],
         ];

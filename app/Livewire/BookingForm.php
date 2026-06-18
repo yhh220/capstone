@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\Service;
 use App\Services\Booking\BookingService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
@@ -35,6 +36,12 @@ class BookingForm extends Component
     public string $preferred_date = '';
 
     public string $preferred_time = '';
+
+    // Inline calendar state for step 2 (YYYY-MM of the visible month).
+    public string $calendarMonth = '';
+
+    /** How far ahead bookings may be made. */
+    private const MAX_DAYS_AHEAD = 60;
 
     public string $notes = '';
 
@@ -112,6 +119,10 @@ class BookingForm extends Component
             $this->service_id = (string) $service;
         }
 
+        $this->calendarMonth = ($this->preferred_date !== ''
+            ? Carbon::parse($this->preferred_date)
+            : Carbon::today())->format('Y-m');
+
         $this->setSeo(
             title: 'Book an Appointment',
             description: 'Book a car audio installation, window tint, or modification service at Win Win Car Studio. Choose your date and time online.',
@@ -133,6 +144,96 @@ class BookingForm extends Component
             'preferred_time' => 'required|date_format:H:i',
             'notes' => 'nullable|max:1000',
         ];
+    }
+
+    public function prevMonth(): void
+    {
+        $current = Carbon::parse($this->calendarMonth . '-01');
+        if ($current->gt(Carbon::today()->startOfMonth())) {
+            $this->calendarMonth = $current->subMonth()->format('Y-m');
+        }
+    }
+
+    public function nextMonth(): void
+    {
+        $current = Carbon::parse($this->calendarMonth . '-01');
+        if ($current->lt(Carbon::today()->addDays(self::MAX_DAYS_AHEAD)->startOfMonth())) {
+            $this->calendarMonth = $current->addMonth()->format('Y-m');
+        }
+    }
+
+    /**
+     * Pick a day from the calendar. Re-validated server-side (past / closed /
+     * out-of-range days are rejected) so the calendar is purely a UI layer.
+     */
+    public function selectDate(string $date): void
+    {
+        try {
+            $day = Carbon::parse($date)->startOfDay();
+        } catch (\Throwable) {
+            return;
+        }
+
+        if (
+            $day->lt(Carbon::today())
+            || $day->gt(Carbon::today()->addDays(self::MAX_DAYS_AHEAD))
+            || $this->bookingService()->isClosedDate($day)
+        ) {
+            return;
+        }
+
+        $this->preferred_date = $day->toDateString();
+        $this->preferred_time = '';   // a new date invalidates the chosen slot
+    }
+
+    public function getCalendarLabelProperty(): string
+    {
+        return Carbon::parse($this->calendarMonth . '-01')->translatedFormat('F Y');
+    }
+
+    public function getCanGoPrevMonthProperty(): bool
+    {
+        return Carbon::parse($this->calendarMonth . '-01')->gt(Carbon::today()->startOfMonth());
+    }
+
+    public function getCanGoNextMonthProperty(): bool
+    {
+        return Carbon::parse($this->calendarMonth . '-01')->lt(Carbon::today()->addDays(self::MAX_DAYS_AHEAD)->startOfMonth());
+    }
+
+    /**
+     * The day cells for the visible month, Monday-first, padded to whole weeks.
+     * Each cell carries the flags the view needs to style + enable/disable it.
+     */
+    public function getCalendarDaysProperty(): array
+    {
+        $first     = Carbon::parse($this->calendarMonth . '-01')->startOfMonth();
+        $gridStart = $first->copy()->startOfWeek(Carbon::MONDAY);
+        $gridEnd   = $first->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY);
+
+        $today   = Carbon::today();
+        $maxDate = Carbon::today()->addDays(self::MAX_DAYS_AHEAD);
+        $closed  = $this->bookingService()->closedWeekdays();
+
+        $days = [];
+        for ($d = $gridStart->copy(); $d->lte($gridEnd); $d->addDay()) {
+            $inMonth    = $d->month === $first->month;
+            $isClosed   = in_array($d->dayOfWeek, $closed, true);
+            $unavailable = $d->lt($today) || $d->gt($maxDate);
+
+            $days[] = [
+                'date'       => $d->toDateString(),
+                'day'        => $d->day,
+                'inMonth'    => $inMonth,
+                'isToday'    => $d->isToday(),
+                'isClosed'   => $isClosed,
+                'isPast'     => $unavailable,
+                'selectable' => $inMonth && ! $unavailable && ! $isClosed,
+                'isSelected' => $this->preferred_date === $d->toDateString(),
+            ];
+        }
+
+        return $days;
     }
 
     public function getAvailableTimesProperty(): array
@@ -221,6 +322,9 @@ class BookingForm extends Component
                 }
 
                 return Booking::create([
+                    // Link to the account when booking while signed in; null for
+                    // guest (showroom-mode) bookings — login is never required here.
+                    'user_id' => Auth::id(),
                     'reference' => Booking::generateReference(),
                     'customer_name' => strip_tags($this->customer_name),
                     'customer_phone' => strip_tags($this->customer_phone),

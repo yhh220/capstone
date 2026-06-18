@@ -72,6 +72,64 @@
                 {{-- Glass card --}}
                 <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/5 dark:shadow-black/40 p-6 sm:p-8">
 
+                    {{-- ============ EMAIL OTP VERIFICATION ============ --}}
+                    @if($awaitingOtp)
+                    <div wire:key="otp-form">
+                        <button type="button" wire:click="cancelOtp"
+                                class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/40 hover:text-brand-red transition-colors mb-6">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                            {{ __('Back') }}
+                        </button>
+
+                        <h1 class="font-display font-black text-3xl uppercase text-gray-900 dark:text-white mb-1">{{ __('Verify your email') }}</h1>
+                        <p class="text-sm text-gray-500 dark:text-white/40 mb-7">
+                            {{ __('We sent a 6-digit code to') }}
+                            <span class="font-bold text-gray-700 dark:text-white/70 break-all">{{ $otpEmail }}</span>
+                        </p>
+
+                        @if(session('otp_resent'))
+                        <div class="flex items-center gap-2 mb-5 px-4 py-3 rounded-xl bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20">
+                            <svg class="w-4 h-4 text-green-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            <p class="text-sm text-green-700 dark:text-green-300">{{ session('otp_resent') }}</p>
+                        </div>
+                        @endif
+
+                        <form wire:submit="verifyRegistrationOtp" class="space-y-5">
+                            <div>
+                                <label for="otp-code" class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-white/40 mb-2">{{ __('Verification Code') }}</label>
+                                <input wire:model="otpCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" id="otp-code" placeholder="••••••"
+                                       class="w-full text-center font-mono text-2xl tracking-[0.6em] py-3.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-white/20 focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition">
+                                @error('otpCode')
+                                    <p class="flex items-start gap-1.5 text-xs text-red-500 mt-1.5">
+                                        <svg class="w-3.5 h-3.5 shrink-0 mt-px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
+
+                            <button type="submit" wire:loading.attr="disabled" wire:target="verifyRegistrationOtp"
+                                    class="btn btn-primary btn-shine w-full !py-3.5 !rounded-xl uppercase tracking-widest font-black text-sm">
+                                <span wire:loading.remove wire:target="verifyRegistrationOtp" class="inline-flex items-center gap-2">
+                                    {{ __('Verify & Continue') }}
+                                    <svg class="icon-sm icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                </span>
+                                <span wire:loading wire:target="verifyRegistrationOtp" class="inline-flex items-center gap-2">
+                                    <svg class="icon-sm icon-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                    {{ __('Verifying...') }}
+                                </span>
+                            </button>
+                        </form>
+
+                        <div class="text-center mt-6">
+                            <p class="text-sm text-gray-500 dark:text-white/40">
+                                {{ __("Didn't get the code?") }}
+                                <button type="button" wire:click="resendRegistrationOtp" wire:loading.attr="disabled" wire:target="resendRegistrationOtp"
+                                        class="font-semibold text-brand-red hover:underline disabled:opacity-50">{{ __('Resend code') }}</button>
+                            </p>
+                        </div>
+                    </div>
+                    @else
+
                     {{-- Segmented sliding tab --}}
                     <div class="relative grid grid-cols-2 p-1 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
                         <div class="absolute top-1 bottom-1 left-1 rounded-lg bg-brand-red transition-transform duration-300 ease-out"
@@ -138,11 +196,14 @@
                                 @enderror
                             </div>
 
-                            {{-- Remember me --}}
-                            <label for="remember" class="flex items-center gap-2.5 cursor-pointer select-none w-fit">
-                                <input wire:model="remember" type="checkbox" id="remember" class="w-4 h-4 rounded border-gray-300 dark:border-white/20 bg-transparent accent-brand-red">
-                                <span class="text-sm text-gray-500 dark:text-white/45">{{ __('Remember me') }}</span>
-                            </label>
+                            {{-- Remember me + forgot password --}}
+                            <div class="flex items-center justify-between gap-3">
+                                <label for="remember" class="flex items-center gap-2.5 cursor-pointer select-none w-fit">
+                                    <input wire:model="remember" type="checkbox" id="remember" class="w-4 h-4 rounded border-gray-300 dark:border-white/20 bg-transparent accent-brand-red">
+                                    <span class="text-sm text-gray-500 dark:text-white/45">{{ __('Remember me') }}</span>
+                                </label>
+                                <a href="{{ route('password.request') }}" wire:navigate class="text-sm font-semibold text-brand-red hover:underline">{{ __('Forgot password?') }}</a>
+                            </div>
 
                             {{-- Submit — site primary button --}}
                             <button type="submit" wire:loading.attr="disabled" wire:target="login"
@@ -293,6 +354,7 @@
                             </button>
                         </form>
                     </div>
+                    @endif
                     @endif
 
                     {{-- Security note --}}

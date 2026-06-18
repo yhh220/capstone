@@ -243,16 +243,57 @@
                         @elseif($currentStep === 2)
                         <div class="space-y-6">
                             <div>
-                                <label for="booking-date" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                                     {{ __('Preferred Date') }} <span class="text-brand-red">*</span>
                                 </label>
-                                <input wire:model.live="preferred_date"
-                                       id="booking-date"
-                                       type="date"
-                                       min="{{ date('Y-m-d') }}"
-                                       class="w-full sm:w-64 border-2 border-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-red transition-colors text-sm @error('preferred_date') border-red-400 @enderror">
+
+                                {{-- Inline month calendar (server-rendered, business-rule aware) --}}
+                                <div class="max-w-sm border-2 border-gray-100 dark:border-gray-600 rounded-2xl p-4 bg-white dark:bg-gray-800 @error('preferred_date') !border-red-400 @enderror">
+                                    {{-- Month nav --}}
+                                    <div class="flex items-center justify-between mb-3">
+                                        <button type="button" wire:click="prevMonth" @disabled(!$this->canGoPrevMonth)
+                                                class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                aria-label="{{ __('Previous month') }}">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                                        </button>
+                                        <div class="text-sm font-black text-gray-800 dark:text-white">{{ $this->calendarLabel }}</div>
+                                        <button type="button" wire:click="nextMonth" @disabled(!$this->canGoNextMonth)
+                                                class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                aria-label="{{ __('Next month') }}">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                                        </button>
+                                    </div>
+
+                                    {{-- Weekday headers (Mon-first) --}}
+                                    <div class="grid grid-cols-7 gap-1 mb-1">
+                                        @foreach(['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] as $wd)
+                                        <div class="text-center text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500 py-1">{{ __($wd) }}</div>
+                                        @endforeach
+                                    </div>
+
+                                    {{-- Day grid --}}
+                                    <div class="grid grid-cols-7 gap-1">
+                                        @foreach($this->calendarDays as $cell)
+                                            @if($cell['selectable'])
+                                            <button type="button" wire:click="selectDate('{{ $cell['date'] }}')"
+                                                    class="aspect-square flex items-center justify-center rounded-lg text-sm font-semibold transition-all active:scale-90
+                                                        {{ $cell['isSelected']
+                                                            ? 'bg-brand-red text-white shadow-[0_4px_12px_rgba(200,65,61,0.35)]'
+                                                            : 'text-gray-700 dark:text-gray-200 hover:bg-brand-red/10 hover:text-brand-red ' . ($cell['isToday'] ? 'ring-1 ring-brand-red/40' : '') }}">
+                                                {{ $cell['day'] }}
+                                            </button>
+                                            @else
+                                            <div class="aspect-square flex items-center justify-center rounded-lg text-sm {{ $cell['inMonth'] ? 'text-gray-300 dark:text-gray-600' : 'text-transparent' }}"
+                                                 @if($cell['inMonth'] && $cell['isClosed']) title="{{ __('Closed') }}" @endif>
+                                                {{ $cell['inMonth'] ? $cell['day'] : '' }}
+                                            </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+
                                 @if($closedDaysLabel)
-                                <p class="text-xs text-gray-400 mt-1.5">{{ __('Closed on :days.', ['days' => $closedDaysLabel]) }}</p>
+                                <p class="text-xs text-gray-400 mt-2">{{ __('Closed on :days.', ['days' => $closedDaysLabel]) }}</p>
                                 @endif
                                 @error('preferred_date')
                                 <p class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
@@ -264,8 +305,9 @@
 
                             @if($preferred_date)
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
                                     {{ __('Available Time Slots') }} <span class="text-brand-red">*</span>
+                                    <svg wire:loading wire:target="selectDate, prevMonth, nextMonth" class="w-4 h-4 text-brand-red animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                                 </label>
                                 @if(count($this->availableTimes) > 0)
                                 <div class="flex flex-wrap gap-2.5">
