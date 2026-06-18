@@ -47,13 +47,17 @@ class CheckoutPageTest extends TestCase
             ->set('postcode', '50000')
             ->set('state', 'Kuala Lumpur')
             ->call('placeOrder')
-            ->assertSet('step', 3);
+            ->assertHasNoErrors()
+            ->assertRedirect();
 
+        // Order is created awaiting payment, then the user is sent to the payment page.
         $this->assertDatabaseHas('orders', [
             'user_id' => $user->id,
             'customer_email' => 'checkout@example.test',
             'subtotal' => 600,
             'total_amount' => 600,
+            'payment_status' => 'pending',
+            'status' => 'pending',
         ]);
 
         $this->assertDatabaseHas('order_items', [
@@ -105,12 +109,13 @@ class CheckoutPageTest extends TestCase
             ->set('postcode', '40150')
             ->set('state', 'Selangor')
             ->call('placeOrder')
-            ->assertSet('step', 3)
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertRedirect();
 
         $this->assertDatabaseHas('orders', [
             'user_id' => $user->id,
             'total_amount' => 1000,
+            'payment_status' => 'pending',
         ]);
 
         // Stock goes negative to represent the two units now owed.

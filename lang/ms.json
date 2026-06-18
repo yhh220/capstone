@@ -965,5 +965,20 @@
     "Fri": "Jum",
     "Sat": "Sab",
     "Sun": "Ahd",
-    "Too many sign-up attempts. Please try again in :seconds seconds.": "Terlalu banyak percubaan pendaftaran. Sila cuba lagi dalam :seconds saat."
+    "Too many sign-up attempts. Please try again in :seconds seconds.": "Terlalu banyak percubaan pendaftaran. Sila cuba lagi dalam :seconds saat.",
+    "Back to Products": "Kembali ke Produk",
+    "Complete payment within": "Selesaikan pembayaran dalam",
+    "DEMO MODE — no real payment will be charged.": "MOD DEMO — tiada bayaran sebenar akan dikenakan.",
+    "Order": "Pesanan",
+    "Pay Now": "Bayar Sekarang",
+    "Pay later from My Account": "Bayar kemudian dari Akaun Saya",
+    "Payment Successful!": "Pembayaran Berjaya!",
+    "Payment Time Expired": "Masa Pembayaran Tamat",
+    "Payment successful! Your order is confirmed.": "Pembayaran berjaya! Pesanan anda telah disahkan.",
+    "Processing payment...": "Memproses pembayaran...",
+    "Subtotal": "Jumlah kecil",
+    "The order is held with your stock reserved. It auto-cancels when the timer runs out.": "Pesanan ditahan dengan stok dikhaskan untuk anda. Ia akan dibatalkan secara automatik apabila pemasa tamat.",
+    "This order was cancelled because payment was not completed in time. The items have been released back to stock — please order again.": "Pesanan ini dibatalkan kerana pembayaran tidak diselesaikan tepat pada masanya. Item telah dilepaskan semula ke stok — sila buat pesanan semula.",
+    "View My Orders": "Lihat Pesanan Saya",
+    "Your order is confirmed — a confirmation email is on its way.": "Pesanan anda telah disahkan — emel pengesahan dalam perjalanan."
 }

@@ -214,11 +214,14 @@ class CheckoutPage extends Component
                         'state' => $this->state,
                     ],
                     'subtotal' => $subtotal,
+                    'shipping_fee' => 0, // set by shipping rules (Phase 2)
                     'total_amount' => $subtotal,
                     'status' => 'pending',
                     'payment_status' => 'pending',
                     'payment_method' => $paymentLabel,
                     'notes' => $this->orderNotes ?: null,
+                    // 15-minute window to pay before the order auto-cancels.
+                    'expires_at' => now()->addMinutes(15),
                 ]);
 
                 foreach ($lineItems as $lineItem) {
@@ -252,15 +255,10 @@ class CheckoutPage extends Component
 
         $this->order = $order;
 
-        try {
-            $this->order->load('items');
-            Mail::to($this->customerEmail)->queue(new OrderConfirmationMail($this->order));
-        } catch (\Exception $e) {
-            // Don't block confirmation on email failure.
-            logger()->error('Order email failed: '.$e->getMessage());
-        }
-
-        $this->step = 3;
+        // Off to the demo payment page — the order is "pending payment" until the
+        // customer pays (or the 15-minute timer expires). The confirmation email
+        // is sent once payment succeeds, not at placement.
+        $this->redirect(route('payment', $order->order_number), navigate: false);
     }
 
     public function render()

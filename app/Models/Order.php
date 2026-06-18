@@ -22,17 +22,43 @@ class Order extends Model
     }
 
     protected $fillable = [
-        'user_id', 'order_number',
+        'user_id', 'order_number', 'tracking_number',
         'customer_name', 'customer_email', 'customer_phone',
-        'shipping_address', 'subtotal', 'total_amount',
-        'status', 'payment_status', 'payment_method', 'notes',
+        'shipping_address', 'subtotal', 'shipping_fee', 'total_amount',
+        'status', 'payment_status', 'payment_method', 'notes', 'expires_at',
     ];
 
     protected $casts = [
         'shipping_address' => 'array',
         'subtotal'         => 'decimal:2',
+        'shipping_fee'     => 'decimal:2',
         'total_amount'     => 'decimal:2',
+        'expires_at'       => 'datetime',
     ];
+
+    /** Order is placed but not yet paid (and not cancelled). */
+    public function isAwaitingPayment(): bool
+    {
+        return $this->payment_status === 'pending' && $this->status !== 'cancelled';
+    }
+
+    /** Awaiting payment but the 15-minute window has elapsed. */
+    public function isPaymentExpired(): bool
+    {
+        return $this->isAwaitingPayment()
+            && $this->expires_at !== null
+            && $this->expires_at->isPast();
+    }
+
+    /** Seconds left to pay (0 once expired); drives the countdown UI. */
+    public function secondsUntilExpiry(): int
+    {
+        if (! $this->expires_at) {
+            return 0;
+        }
+
+        return max(0, (int) now()->diffInSeconds($this->expires_at, false));
+    }
 
     public function items()
     {

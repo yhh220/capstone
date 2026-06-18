@@ -17,3 +17,6 @@ Schedule::command('model:prune', ['--model' => [\App\Models\ChatLog::class]])->d
 // Cap the activity log so it can never grow unbounded and bloat the admin panel —
 // keep the most recent 5,000 records, delete the rest. Adjust with --keep=N.
 Schedule::command('activitylog:trim')->daily();
+
+// Cancel unpaid orders past their 15-minute payment window and release stock.
+Schedule::command('orders:expire-unpaid')->everyMinute();

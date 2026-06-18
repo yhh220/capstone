@@ -18,6 +18,7 @@ use App\Livewire\PrivacyPolicyPage;
 use App\Livewire\ProfilePage;
 use App\Livewire\TermsOfServicePage;
 use App\Livewire\MyAccountPage;
+use App\Livewire\PaymentPage;
 use App\Livewire\Auth\UserLogin;
 use App\Livewire\Auth\ForgotPassword;
 use App\Http\Middleware\ShoppingEnabled;
@@ -47,6 +48,7 @@ Route::redirect('/my-orders', '/account');
 Route::middleware(['auth', ShoppingEnabled::class])->group(function () {
     Route::get('/cart', CartPage::class)->name('cart');
     Route::get('/checkout', CheckoutPage::class)->name('checkout');
+    Route::get('/pay/{orderNumber}', PaymentPage::class)->name('payment');
 });
 
 // ─── Language Switcher ─────────────────────────────────────────
