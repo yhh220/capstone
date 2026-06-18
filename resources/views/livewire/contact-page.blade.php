@@ -177,11 +177,11 @@
 
     <section class="py-16 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700" aria-labelledby="contact-location-heading">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-10">
-                <div class="inline-block bg-brand-red/10 dark:bg-brand-red/20 text-brand-red text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
-                    {{ __('Find Us') }}
-                </div>
-                <h2 id="contact-location-heading" class="text-3xl sm:text-4xl font-black text-brand-black dark:text-white">
+            <div class="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+                <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
+                    <span class="w-8 h-px bg-brand-red"></span>{{ __('Find Us') }}<span class="w-8 h-px bg-brand-red"></span>
+                </span>
+                <h2 id="contact-location-heading" class="text-3xl sm:text-5xl font-black text-brand-black dark:text-white uppercase tracking-tight">
                     {{ __('Visit Our Showroom') }}
                 </h2>
             </div>
