@@ -22,6 +22,12 @@ class UserLogin extends Component
     // Tab toggle: true = Sign In, false = Register
     public bool $isLoginTab = true;
 
+    // Keep the active tab in the URL (Register adds ?tab=false) so a refresh stays
+    // on the same tab instead of snapping back to Sign In.
+    protected $queryString = [
+        'isLoginTab' => ['except' => true, 'as' => 'tab'],
+    ];
+
     // Sign In fields
     public string $loginEmail = '';
     public string $loginPassword = '';

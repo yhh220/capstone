@@ -1090,12 +1090,34 @@
         function applyTheme(theme) {
             var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             var dark = theme === 'system' ? prefersDark : theme === 'dark';
+
+            // Suppress all transitions for the instant of the switch. Without this,
+            // elements with a `transition` (e.g. the sign in / sign up inputs, which
+            // start near-white as bg-gray-50) visibly FADE from light to dark — read
+            // as a white flash. We kill transitions, flip the theme, force a paint,
+            // then restore them so the change is instant and flash-free.
+            var killTransitions = document.createElement('style');
+            killTransitions.appendChild(document.createTextNode(
+                '*,*::before,*::after{transition:none !important;}'
+            ));
+            document.head.appendChild(killTransitions);
+
             document.documentElement.classList.toggle('dark', dark);
+            // Keep the root background in sync (same as the head script) so the
+            // light <html> can't flash through for a frame when toggling to dark.
+            document.documentElement.style.backgroundColor = dark ? '#121212' : '#F7F5F3';
             localStorage.setItem('site-theme', theme);
             // Mirror the resolved theme into a cookie so the server renders the
             // matching class and Livewire soft-navigations never flash light.
             document.cookie = 'app_theme=' + (dark ? 'dark' : 'light') + '; path=/; max-age=31536000; SameSite=Lax';
             updateThemeSegment(theme);
+
+            // Force a synchronous reflow so the new colors paint with transitions
+            // off, then restore transitions after the next frame.
+            void document.documentElement.offsetHeight;
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () { killTransitions.remove(); });
+            });
         }
         function syncTheme() { applyTheme(localStorage.getItem('site-theme') || 'system'); }
 
