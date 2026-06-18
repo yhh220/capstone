@@ -13,3 +13,7 @@ Schedule::command('sitemap:generate')->daily();
 
 // Prune chat logs older than 90 days so spam / nonsense can't bloat the table.
 Schedule::command('model:prune', ['--model' => [\App\Models\ChatLog::class]])->daily();
+
+// Cap the activity log so it can never grow unbounded and bloat the admin panel —
+// keep the most recent 5,000 records, delete the rest. Adjust with --keep=N.
+Schedule::command('activitylog:trim')->daily();

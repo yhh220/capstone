@@ -27,9 +27,21 @@ class UserForm
                             ->tel(),
                         TextInput::make('password')
                             ->password()
+                            ->revealable()
                             ->dehydrated(fn ($state) => filled($state))
                             ->required(fn (string $context): bool => $context === 'create')
-                            ->helperText('Leave blank to keep current password.')
+                            ->confirmed()
+                            // Only the edit form has a "current password" to keep.
+                            ->helperText(fn (string $context): ?string => $context === 'edit'
+                                ? 'Leave blank to keep the current password.'
+                                : null)
+                            ->hiddenOn('view'),
+                        TextInput::make('password_confirmation')
+                            ->label('Confirm Password')
+                            ->password()
+                            ->revealable()
+                            ->dehydrated(false)
+                            ->required(fn (string $context): bool => $context === 'create')
                             ->hiddenOn('view'),
                         Select::make('role')
                             ->options(function () {

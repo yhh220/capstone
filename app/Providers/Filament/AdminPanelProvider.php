@@ -81,10 +81,9 @@ class AdminPanelProvider extends PanelProvider
             ])
 
             // ── Render Hooks ──────────────────────────────────────────
-            ->renderHook(
-                PanelsRenderHook::TOPBAR_END,
-                fn () => view('filament.theme-toggle'),
-            )
+            // (No custom theme toggle — Filament's native theme switcher in the
+            // user menu is the single source of truth. A second copy in the topbar
+            // kept its own state and desynced from it.)
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn () => view('filament.scroll-to-top'),
