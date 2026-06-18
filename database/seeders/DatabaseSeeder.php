@@ -3,14 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Brand;
-use App\Models\Category;
-use App\Models\Feedback;
-use App\Models\Product;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
-
-use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
@@ -93,21 +88,6 @@ class DatabaseSeeder extends Seeder
                 ['name' => $service['name']],
                 array_merge($service, ['is_active' => true])
             );
-        }
-
-        foreach ([
-            ['name' => 'Ahmad Rizal', 'location' => 'KL', 'message' => "The staff explained the options clearly on WhatsApp before I came over. The showroom visit was smooth and helpful.", 'rating' => 5, 'sort_order' => 1],
-            ['name' => 'Siti Nurul', 'location' => 'Selangor', 'message' => 'Very helpful team and excellent product guidance. I could compare models in person before deciding.', 'rating' => 5, 'sort_order' => 2],
-            ['name' => 'Tan Wei Ming', 'location' => 'Penang', 'message' => 'I liked that the website showed the products first, then the store team helped me choose the right fit.', 'rating' => 5, 'sort_order' => 3],
-        ] as $feedback) {
-            Feedback::create([
-                'name' => $feedback['name'],
-                'location' => $feedback['location'],
-                'message' => $feedback['message'],
-                'rating' => $feedback['rating'],
-                'is_active' => true,
-                'sort_order' => $feedback['sort_order'],
-            ]);
         }
 
         \Illuminate\Support\Facades\DB::table('settings')->insertOrIgnore([
