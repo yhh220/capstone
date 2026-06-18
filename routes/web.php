@@ -21,6 +21,7 @@ use App\Livewire\MyAccountPage;
 use App\Livewire\PaymentPage;
 use App\Livewire\Auth\UserLogin;
 use App\Livewire\Auth\ForgotPassword;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Middleware\ShoppingEnabled;
 
 // ─── Public Routes ─────────────────────────────────────────────
@@ -41,6 +42,9 @@ Route::get('/terms-of-service', TermsOfServicePage::class)->name('terms-of-servi
 Route::middleware('auth')->group(function () {
     Route::get('/profile', ProfilePage::class)->name('profile');
     Route::get('/account', MyAccountPage::class)->name('account');
+    // Invoices — viewable by the order's owner or any admin/staff.
+    Route::get('/orders/{orderNumber}/invoice', [InvoiceController::class, 'show'])->name('invoice.show');
+    Route::get('/orders/{orderNumber}/invoice/pdf', [InvoiceController::class, 'download'])->name('invoice.pdf');
 });
 // Legacy path → unified account page.
 Route::redirect('/my-orders', '/account');

@@ -86,10 +86,21 @@
                     <div class="bg-gray-50 dark:bg-gray-700/30 px-5 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                         <div>
                             {{ __('Order Number') }}: <span class="font-mono font-bold text-gray-700 dark:text-gray-300">{{ $order->order_number }}</span>
+                            @if($order->payment_status === 'paid')
+                                · <span class="text-green-600 dark:text-green-400 font-bold">{{ __('Paid') }}</span>
+                            @elseif($order->isAwaitingPayment())
+                                · <span class="text-amber-600 dark:text-amber-400 font-bold">{{ __('Awaiting payment') }}</span>
+                            @endif
                         </div>
-                        <a href="{{ route('track-order') }}" class="text-brand-red font-bold hover:underline">
-                            {{ __('Track Order') }} <span aria-hidden="true">→</span>
-                        </a>
+                        <div class="flex items-center gap-4">
+                            @if($order->isAwaitingPayment())
+                            <a href="{{ route('payment', $order->order_number) }}" class="text-brand-red font-bold hover:underline">{{ __('Pay now') }} <span aria-hidden="true">→</span></a>
+                            @endif
+                            @if($order->payment_status === 'paid')
+                            <a href="{{ route('invoice.show', $order->order_number) }}" class="text-brand-red font-bold hover:underline">{{ __('Invoice') }}</a>
+                            @endif
+                            <a href="{{ route('track-order') }}" class="text-gray-500 dark:text-gray-400 hover:text-brand-red font-bold">{{ __('Track Order') }}</a>
+                        </div>
                     </div>
                 </div>
                 @endforeach
