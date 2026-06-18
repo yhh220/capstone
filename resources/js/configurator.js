@@ -434,6 +434,14 @@ function wireConfiguratorEvents() {
             requestRender();
         }
     });
+
+    // Free GPU memory if the user leaves the page (wire:navigate) or closes the
+    // tab without closing the configurator first. Uses 'livewire:navigating'
+    // (fires BEFORE the page is swapped) so it tears down on the way out and never
+    // races with the loader's auto-open, which runs on 'livewire:navigated'.
+    const teardownOnLeave = () => { if (isInitialized) disposeConfigurator(); };
+    document.addEventListener('livewire:navigating', teardownOnLeave);
+    window.addEventListener('pagehide', teardownOnLeave);
 }
 
 // This module is dynamic-imported on demand, usually long after
@@ -526,11 +534,93 @@ function closeConfigurator() {
         history.replaceState(null, '', window.location.pathname + window.location.search);
     }
 
-    // Pause animation render loop (暂停动画渲染循环)
+    // Release ALL GPU memory immediately. Three.js never frees WebGL resources on
+    // its own, so without this each open stacked another ~1GB that never cleared.
+    // Reopening re-runs initThree() (the GLB is HTTP-cached, the loader animation
+    // covers the brief re-upload), so only one renderer ever lives at a time.
+    disposeConfigurator();
+}
+
+/**
+ * Tear down the Three.js scene and free every GPU resource. Idempotent — safe to
+ * call when nothing is initialized. The garbage collector cannot reclaim WebGL
+ * memory, so geometries, materials, textures, render targets and the renderer
+ * itself must each be disposed by hand.
+ */
+function disposeConfigurator() {
     if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
     }
+    renderUntil = 0;
+
+    window.removeEventListener('resize', onWindowResize);
+
+    if (mixer) {
+        mixer.stopAllAction();
+        try { mixer.uncacheRoot(mixer.getRoot()); } catch { /* root already gone */ }
+        mixer = null;
+    }
+    doorActions.length = 0;
+
+    if (controls) {
+        controls.dispose();   // also detaches OrbitControls' DOM + 'change' listeners
+        controls = null;
+    }
+
+    const disposeMaterial = (material) => {
+        if (!material) return;
+        // Dispose any texture maps referenced by the material (map, normalMap, …).
+        for (const value of Object.values(material)) {
+            if (value && value.isTexture) value.dispose();
+        }
+        material.dispose();
+    };
+
+    if (scene) {
+        scene.traverse((obj) => {
+            if (!obj.isMesh) return;
+            obj.geometry?.dispose();
+            if (Array.isArray(obj.material)) obj.material.forEach(disposeMaterial);
+            else disposeMaterial(obj.material);
+        });
+        scene.environment?.dispose();   // PMREM render-target texture
+        scene.clear();
+        scene = null;
+    }
+
+    // The shared body/rim/brake/glass materials may be detached from any mesh
+    // (hidden parts), so dispose them explicitly too.
+    disposeMaterial(carBodyMaterial);
+    disposeMaterial(carRimMaterial);
+    disposeMaterial(carBrakeMaterial);
+    disposeMaterial(glassMaterial);
+    carBodyMaterial = carRimMaterial = carBrakeMaterial = glassMaterial = undefined;
+
+    if (renderer) {
+        renderer.dispose();          // frees programs + render targets (incl. shadow maps)
+        renderer.forceContextLoss(); // releases the WebGL context / GPU buffers
+        // A force-lost canvas can never produce a working context again, so swap
+        // in a fresh <canvas> (cloneNode keeps the same id/attributes) for the
+        // next initThree() to bind a clean context to — otherwise reopen is blank.
+        const oldCanvas = renderer.domElement;
+        if (oldCanvas?.parentNode) {
+            oldCanvas.parentNode.replaceChild(oldCanvas.cloneNode(false), oldCanvas);
+        }
+        renderer = null;
+    }
+
+    // Reset cached mesh references so a fresh load never appends to stale arrays.
+    carParts.rims = {};
+    carParts.spoilers = {};
+    carParts.bumpers = {};
+    carParts.dashcams = {};
+    carParts.body = [];
+    carParts.glass = [];
+
+    camera = null;
+    carModel = null;
+    isInitialized = false;
 }
 
 /**
@@ -593,6 +683,10 @@ function updateSummaryUI() {
  * 核心 Three.js 初始化设置
  */
 function initThree() {
+    // If a previous session somehow survived (e.g. re-init after a Livewire DOM
+    // morph), tear it down first so we never stack two WebGL contexts.
+    if (renderer) disposeConfigurator();
+
     isInitialized = true; // Set immediately to prevent race conditions from double-clicks or auto-open
 
     const canvasContainer = document.getElementById('configurator-viewport');
