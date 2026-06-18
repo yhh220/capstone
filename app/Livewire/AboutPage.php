@@ -12,7 +12,7 @@ class AboutPage extends Component
     public function mount(): void
     {
         $this->setSeo(
-            title: 'About Us',
+            title: 'About Me',
             description: 'Learn about Win Win Car Studio — a showroom-first brand focused on trust, expert advice, and hands-on product experience in Kuala Lumpur.',
         );
     }
