@@ -35,15 +35,45 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(asset('images/logo/logo-dark.svg'))    // light mode: dark logo (dark text on white)
             ->darkModeBrandLogo(asset('images/logo/logo-light.svg')) // dark mode: light logo (white text on dark)
             ->brandLogoHeight('2rem')
-            ->favicon(asset('winwin-favicon.svg') . '?v=20260613')
+            // Favicons/meta icons come from the shared `partials.favicons` injected
+            // into the admin <head> via PanelsRenderHook::HEAD_END (below), so the
+            // panel matches the public site exactly — one source of truth.
 
             // ── Theme ─────────────────────────────────────────────────
             ->defaultThemeMode(\Filament\Enums\ThemeMode::System)
             ->darkMode(true)
             ->font('DM Sans')
             ->colors([
-                'primary' => Color::Rose,
-                'danger'  => Color::Rose,
+                // Brand red ramp anchored so shade 600 = #C8413D (the shade Filament
+                // uses for filled primary buttons), matching the public site. Using an
+                // explicit palette because Color::hex() only keeps the hue and forces
+                // its own lightness ramp, which washes the brand red out to salmon.
+                'primary' => [
+                    50  => '#fdf3f2',
+                    100 => '#fbe4e3',
+                    200 => '#f7cdcb',
+                    300 => '#efa9a5',
+                    400 => '#e47b76',
+                    500 => '#d6534d',
+                    600 => '#c8413d',
+                    700 => '#a4302d',
+                    800 => '#882a28',
+                    900 => '#722827',
+                    950 => '#3e110f',
+                ],
+                'danger'  => [
+                    50  => '#fdf3f2',
+                    100 => '#fbe4e3',
+                    200 => '#f7cdcb',
+                    300 => '#efa9a5',
+                    400 => '#e47b76',
+                    500 => '#d6534d',
+                    600 => '#c8413d',
+                    700 => '#a4302d',
+                    800 => '#882a28',
+                    900 => '#722827',
+                    950 => '#3e110f',
+                ],
                 'info'    => Color::Sky,
                 'success' => Color::Emerald,
                 'warning' => Color::Amber,
@@ -58,6 +88,10 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn () => view('filament.scroll-to-top'),
+            )
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn () => view('partials.favicons'),
             )
 
             // ── Navigation ────────────────────────────────────────────
