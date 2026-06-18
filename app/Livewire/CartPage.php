@@ -45,6 +45,21 @@ class CartPage extends Component
         );
     }
 
+    public function getShippingProperty(): float
+    {
+        return app(\App\Services\ShippingCalculator::class)->fee($this->subtotal);
+    }
+
+    public function getTotalProperty(): float
+    {
+        return $this->subtotal + $this->shipping;
+    }
+
+    public function getAmountToFreeShippingProperty(): float
+    {
+        return app(\App\Services\ShippingCalculator::class)->amountToFreeShipping($this->subtotal);
+    }
+
     /**
      * Only a genuinely unavailable product (deleted or deactivated) blocks
      * checkout. Ordering more than on-hand stock is fine — it's a backorder.

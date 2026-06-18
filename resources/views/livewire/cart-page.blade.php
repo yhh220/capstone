@@ -116,11 +116,14 @@
                         </div>
                         <div class="flex justify-between text-gray-600 dark:text-gray-400">
                             <span>{{ __('Shipping') }}</span>
-                            <span class="text-green-600 font-semibold">{{ __('Free') }}</span>
+                            <span class="tabular-nums {{ $this->shipping > 0 ? '' : 'text-green-600 font-semibold' }}">{{ $this->shipping > 0 ? 'RM ' . number_format($this->shipping, 2) : __('Free') }}</span>
                         </div>
+                        @if($this->amountToFreeShipping > 0)
+                        <p class="text-xs text-brand-red">{{ __('Spend RM :amount more for free shipping', ['amount' => number_format($this->amountToFreeShipping, 2)]) }}</p>
+                        @endif
                         <div class="border-t border-gray-100 dark:border-gray-700 pt-3 flex justify-between">
                             <span class="font-bold text-gray-800 dark:text-white text-lg">{{ __('Total') }}</span>
-                            <span class="font-black text-brand-red text-lg tabular-nums">RM {{ number_format($this->subtotal, 2) }}</span>
+                            <span class="font-black text-brand-red text-lg tabular-nums">RM {{ number_format($this->total, 2) }}</span>
                         </div>
                     </div>
 

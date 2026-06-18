@@ -104,6 +104,16 @@ class CheckoutPage extends Component
         );
     }
 
+    public function getShippingProperty(): float
+    {
+        return app(\App\Services\ShippingCalculator::class)->fee($this->subtotal);
+    }
+
+    public function getTotalProperty(): float
+    {
+        return $this->subtotal + $this->shipping;
+    }
+
     public function goToStep2(): void
     {
         $this->validate();
@@ -200,6 +210,7 @@ class CheckoutPage extends Component
                 });
 
                 $subtotal = $lineItems->sum('subtotal');
+                $shippingFee = app(\App\Services\ShippingCalculator::class)->fee($subtotal);
 
                 $order = Order::create([
                     'user_id' => Auth::id(),
@@ -214,8 +225,8 @@ class CheckoutPage extends Component
                         'state' => $this->state,
                     ],
                     'subtotal' => $subtotal,
-                    'shipping_fee' => 0, // set by shipping rules (Phase 2)
-                    'total_amount' => $subtotal,
+                    'shipping_fee' => $shippingFee,
+                    'total_amount' => $subtotal + $shippingFee,
                     'status' => 'pending',
                     'payment_status' => 'pending',
                     'payment_method' => $paymentLabel,

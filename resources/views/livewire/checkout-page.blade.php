@@ -92,9 +92,19 @@
                     <span class="tabular-nums">RM {{ number_format(($item->product?->current_price ?? 0) * $item->quantity, 2) }}</span>
                 </div>
                 @endforeach
-                <div class="border-t border-gray-200 dark:border-gray-600 mt-2 pt-2 flex justify-between font-bold text-gray-800 dark:text-white">
-                    <span>{{ __('Total') }}</span>
-                    <span class="text-brand-red tabular-nums">RM {{ number_format($this->subtotal, 2) }}</span>
+                <div class="border-t border-gray-200 dark:border-gray-600 mt-2 pt-2 space-y-1">
+                    <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                        <span>{{ __('Subtotal') }}</span>
+                        <span class="tabular-nums">RM {{ number_format($this->subtotal, 2) }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                        <span>{{ __('Shipping') }}</span>
+                        <span class="tabular-nums">{{ $this->shipping > 0 ? 'RM ' . number_format($this->shipping, 2) : __('Free') }}</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-gray-800 dark:text-white pt-1">
+                        <span>{{ __('Total') }}</span>
+                        <span class="text-brand-red tabular-nums">RM {{ number_format($this->total, 2) }}</span>
+                    </div>
                 </div>
             </div>
 
@@ -241,9 +251,19 @@
             </div>
 
             {{-- Total --}}
-            <div class="mt-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 flex justify-between items-center">
-                <span class="font-bold text-gray-800 dark:text-white text-lg">{{ __('Total to pay') }}</span>
-                <span class="font-black text-brand-red text-2xl tabular-nums">RM {{ number_format($this->subtotal, 2) }}</span>
+            <div class="mt-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 space-y-2">
+                <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300">
+                    <span>{{ __('Subtotal') }}</span>
+                    <span class="tabular-nums">RM {{ number_format($this->subtotal, 2) }}</span>
+                </div>
+                <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300">
+                    <span>{{ __('Shipping') }}</span>
+                    <span class="tabular-nums">{{ $this->shipping > 0 ? 'RM ' . number_format($this->shipping, 2) : __('Free') }}</span>
+                </div>
+                <div class="flex justify-between items-center border-t border-gray-200 dark:border-gray-600 pt-2">
+                    <span class="font-bold text-gray-800 dark:text-white text-lg">{{ __('Total to pay') }}</span>
+                    <span class="font-black text-brand-red text-2xl tabular-nums">RM {{ number_format($this->total, 2) }}</span>
+                </div>
             </div>
 
             <div class="flex gap-3 mt-6">

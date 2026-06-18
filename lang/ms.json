@@ -980,5 +980,6 @@
     "The order is held with your stock reserved. It auto-cancels when the timer runs out.": "Pesanan ditahan dengan stok dikhaskan untuk anda. Ia akan dibatalkan secara automatik apabila pemasa tamat.",
     "This order was cancelled because payment was not completed in time. The items have been released back to stock — please order again.": "Pesanan ini dibatalkan kerana pembayaran tidak diselesaikan tepat pada masanya. Item telah dilepaskan semula ke stok — sila buat pesanan semula.",
     "View My Orders": "Lihat Pesanan Saya",
-    "Your order is confirmed — a confirmation email is on its way.": "Pesanan anda telah disahkan — emel pengesahan dalam perjalanan."
+    "Your order is confirmed — a confirmation email is on its way.": "Pesanan anda telah disahkan — emel pengesahan dalam perjalanan.",
+    "Spend RM :amount more for free shipping": "Belanja RM :amount lagi untuk penghantaran percuma"
 }

@@ -980,5 +980,6 @@
     "The order is held with your stock reserved. It auto-cancels when the timer runs out.": "订单已为您保留库存。计时结束后将自动取消。",
     "This order was cancelled because payment was not completed in time. The items have been released back to stock — please order again.": "此订单因未在限定时间内完成付款而被取消。商品已释放回库存 —— 请重新下单。",
     "View My Orders": "查看我的订单",
-    "Your order is confirmed — a confirmation email is on its way.": "您的订单已确认 —— 确认邮件即将送达。"
+    "Your order is confirmed — a confirmation email is on its way.": "您的订单已确认 —— 确认邮件即将送达。",
+    "Spend RM :amount more for free shipping": "再消费 RM :amount 即可免运费"
 }
