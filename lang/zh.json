@@ -985,5 +985,7 @@
     "Awaiting payment": "待付款",
     "Invoice": "发票",
     "Paid": "已付款",
-    "Pay now": "立即付款"
+    "Pay now": "立即付款",
+    "FOR DEMO / TESTING ONLY": "仅供演示 / 测试用途",
+    "This is a prototype — no real payment is charged and no goods are shipped.": "这是一个原型 — 不会收取任何实际款项，也不会发货。"
 }

@@ -985,5 +985,7 @@
     "Awaiting payment": "Menunggu pembayaran",
     "Invoice": "Invois",
     "Paid": "Dibayar",
-    "Pay now": "Bayar sekarang"
+    "Pay now": "Bayar sekarang",
+    "FOR DEMO / TESTING ONLY": "UNTUK DEMO / UJIAN SAHAJA",
+    "This is a prototype — no real payment is charged and no goods are shipped.": "Ini prototaip — tiada bayaran sebenar dikenakan dan tiada barang dihantar."
 }
