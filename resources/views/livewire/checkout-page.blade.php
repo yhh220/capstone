@@ -175,13 +175,22 @@
                         </span>
                     </label>
                     @if($paymentMethod === 'ewallet')
+                    @php $ewalletLogos = ['GrabPay' => 'grabpay.svg', 'ShopeePay' => 'shopeepay.svg', 'Boost' => 'boost.svg']; @endphp
                     <div class="px-4 pb-4 sm:pl-[4.25rem] grid grid-cols-2 sm:grid-cols-4 gap-2">
                         @foreach($ewallets as $w)
                         <label class="cursor-pointer">
                             <input type="radio" wire:model.live="ewallet" value="{{ $w }}" class="sr-only peer">
-                            <span class="flex items-center justify-center text-center text-xs font-bold leading-tight px-2 py-2.5 rounded-lg border-2 transition-colors h-full
-                                        peer-checked:border-brand-red peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 peer-checked:text-brand-red
-                                        border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300">{{ $w }}</span>
+                            <span class="flex flex-col items-center justify-center gap-1.5 text-center px-2 py-3 rounded-lg border-2 transition-colors h-full
+                                        peer-checked:border-brand-red peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20
+                                        border-gray-200 dark:border-gray-600">
+                                @if(isset($ewalletLogos[$w]))
+                                    <img src="{{ asset('images/payment/' . $ewalletLogos[$w]) }}" alt="{{ $w }}" class="h-6 w-auto object-contain">
+                                @else
+                                    {{-- Touch 'n Go — no open-licensed logo available; styled mark in its brand blue --}}
+                                    <span class="inline-flex items-center justify-center h-6 px-2 rounded bg-[#0064B7] text-white text-[10px] font-black tracking-tight">TNG</span>
+                                @endif
+                                <span class="text-[11px] font-bold leading-tight text-gray-700 dark:text-gray-300 peer-checked:text-brand-red">{{ $w }}</span>
+                            </span>
                         </label>
                         @endforeach
                     </div>
@@ -192,11 +201,9 @@
                 <div class="rounded-xl border-2 transition-colors {{ $paymentMethod === 'card' ? 'border-brand-red bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-600' }}">
                     <label class="flex items-center gap-3 p-4 cursor-pointer">
                         <input type="radio" wire:model.live="paymentMethod" value="card" class="accent-brand-red w-4 h-4 shrink-0">
-                        <span class="flex gap-1 shrink-0" aria-hidden="true">
-                            <span class="w-7 h-9 rounded-md bg-[#1A1F71] text-white flex items-center justify-center font-black text-[8px] italic">VISA</span>
-                            <span class="w-7 h-9 rounded-md bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                <span class="flex"><span class="w-2.5 h-2.5 rounded-full bg-[#EB001B]"></span><span class="w-2.5 h-2.5 rounded-full bg-[#F79E1B] -ml-1 opacity-90"></span></span>
-                            </span>
+                        <span class="flex gap-1.5 shrink-0" aria-hidden="true">
+                            <img src="{{ asset('images/payment/visa.svg') }}" alt="Visa" class="w-11 h-9 rounded-md bg-white border border-gray-200 object-contain p-1">
+                            <img src="{{ asset('images/payment/mastercard.svg') }}" alt="Mastercard" class="w-11 h-9 rounded-md bg-white border border-gray-200 object-contain p-1">
                         </span>
                         <span class="flex-1 min-w-0">
                             <span class="block font-semibold text-gray-800 dark:text-white">{{ __('Credit / Debit Card') }}</span>
