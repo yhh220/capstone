@@ -29,7 +29,8 @@ class InvoiceController extends Controller
      */
     private function authorizedOrder(string $orderNumber): Order
     {
-        $user = Auth::user();
+        // Resolve from either guard — customers sign in on 'web', admins on 'admin'.
+        $user = Auth::guard('web')->user() ?? Auth::guard('admin')->user();
         abort_unless($user, 403);
 
         $order = Order::where('order_number', $orderNumber)->with('items')->firstOrFail();

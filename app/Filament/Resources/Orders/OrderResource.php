@@ -73,29 +73,34 @@ class OrderResource extends Resource
                         if ($items->isEmpty()) {
                             return new \Illuminate\Support\HtmlString('<p class="text-sm text-gray-400">No items found.</p>');
                         }
+                        // Inline styles (not Tailwind classes) — the Filament admin
+                        // CSS bundle doesn't ship the app's utility classes, so class
+                        // names here render unstyled (columns collapse together).
+                        $cell = 'padding:8px 12px;font-size:13px;border-bottom:1px solid rgba(128,128,128,0.15);white-space:nowrap;';
                         $rows = $items->map(fn ($item) =>
-                            "<tr class='border-b dark:border-gray-700'>
-                                <td class='py-2 pr-4 text-sm'>" . e($item->product_name) . "</td>
-                                <td class='py-2 px-3 text-sm text-center whitespace-nowrap'>{$item->quantity}</td>
-                                <td class='py-2 px-3 text-sm text-right whitespace-nowrap'>RM " . number_format($item->unit_price, 2) . "</td>
-                                <td class='py-2 pl-3 text-sm text-right font-semibold whitespace-nowrap'>RM " . number_format($item->subtotal, 2) . "</td>
+                            "<tr>
+                                <td style='padding:8px 16px 8px 0;font-size:13px;border-bottom:1px solid rgba(128,128,128,0.15);white-space:normal;'>" . e($item->product_name) . "</td>
+                                <td style='{$cell}text-align:center;'>{$item->quantity}</td>
+                                <td style='{$cell}text-align:right;'>RM " . number_format($item->unit_price, 2) . "</td>
+                                <td style='{$cell}padding-right:0;text-align:right;font-weight:600;'>RM " . number_format($item->subtotal, 2) . "</td>
                             </tr>"
                         )->implode('');
+                        $th = 'padding:0 12px 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#9ca3af;border-bottom:2px solid rgba(128,128,128,0.25);';
                         return new \Illuminate\Support\HtmlString("
-                            <div class='overflow-x-auto'>
-                            <table class='w-full min-w-[420px]'>
-                                <thead><tr class='text-xs text-gray-500 uppercase border-b dark:border-gray-700'>
-                                    <th class='pb-2 pr-4 text-left'>Product</th>
-                                    <th class='pb-2 px-3 text-center whitespace-nowrap'>Qty</th>
-                                    <th class='pb-2 px-3 text-right whitespace-nowrap'>Unit Price</th>
-                                    <th class='pb-2 pl-3 text-right whitespace-nowrap'>Subtotal</th>
+                            <div style='overflow-x:auto;'>
+                            <table style='width:100%;border-collapse:collapse;min-width:420px;'>
+                                <thead><tr>
+                                    <th style='{$th}padding-left:0;text-align:left;'>Product</th>
+                                    <th style='{$th}text-align:center;'>Qty</th>
+                                    <th style='{$th}text-align:right;'>Unit Price</th>
+                                    <th style='{$th}padding-right:0;text-align:right;'>Subtotal</th>
                                 </tr></thead>
                                 <tbody>{$rows}</tbody>
                             </table>
                             </div>
                         ");
                     }),
-            ])->visibleOn('edit'),
+            ])->columnSpanFull()->visibleOn('edit'),
 
             Section::make('Order Notes')->schema([
                 Forms\Components\Textarea::make('notes')
@@ -193,6 +198,24 @@ class OrderResource extends Resource
                             $record->update(['status' => $record->next_status]);
                         }
                     }),
+                Action::make('markPaid')
+                    ->label('Mark Paid')
+                    ->icon(Heroicon::OutlinedCheckCircle)
+                    ->color('success')
+                    ->visible(fn (Order $record) => $record->payment_status === 'pending' && $record->status !== 'cancelled')
+                    ->requiresConfirmation()
+                    ->modalHeading('Mark this order as paid?')
+                    ->action(fn (Order $record) => $record->update([
+                        'payment_status' => 'paid',
+                        'status'         => $record->status === 'pending' ? 'processing' : $record->status,
+                        'expires_at'     => null,
+                    ])),
+                Action::make('invoice')
+                    ->label('Invoice')
+                    ->icon(Heroicon::OutlinedDocumentText)
+                    ->color('gray')
+                    ->url(fn (Order $record) => route('invoice.show', $record->order_number))
+                    ->openUrlInNewTab(),
                 DeleteAction::make(),
             ])
             ->toolbarActions([

@@ -42,7 +42,9 @@ Route::get('/terms-of-service', TermsOfServicePage::class)->name('terms-of-servi
 Route::middleware('auth')->group(function () {
     Route::get('/profile', ProfilePage::class)->name('profile');
     Route::get('/account', MyAccountPage::class)->name('account');
-    // Invoices — viewable by the order's owner or any admin/staff.
+});
+// Invoices — owner (web guard) or admin/staff (admin guard) may view.
+Route::middleware('auth:web,admin')->group(function () {
     Route::get('/orders/{orderNumber}/invoice', [InvoiceController::class, 'show'])->name('invoice.show');
     Route::get('/orders/{orderNumber}/invoice/pdf', [InvoiceController::class, 'download'])->name('invoice.pdf');
 });
