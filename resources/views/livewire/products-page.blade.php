@@ -13,6 +13,26 @@
         </div>
     </div>
 
+    {{-- 3D configurator promo — opens the configurator modal (see .js-open-configurator) --}}
+    <button type="button" class="js-open-configurator group block w-full text-left bg-gradient-to-r from-brand-black via-gray-900 to-gray-800 text-white">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
+            <span class="shrink-0 w-12 h-12 rounded-xl bg-brand-red/20 text-brand-red flex items-center justify-center" aria-hidden="true">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5 12 3 3 7.5m18 0L12 12m9-4.5V16.5L12 21m0-9L3 7.5m9 4.5v9M3 7.5V16.5"/></svg>
+            </span>
+            <span class="flex-1 min-w-0">
+                <span class="flex items-center gap-2 font-black text-sm sm:text-base">
+                    {{ __('Try Our 3D Configurator') }}
+                    <span class="text-[9px] font-bold uppercase tracking-wider bg-brand-red px-1.5 py-0.5 rounded">{{ __('Beta') }}</span>
+                </span>
+                <span class="block text-xs sm:text-sm text-gray-300 truncate">{{ __('Customise your build and preview it in 3D before you buy.') }}</span>
+            </span>
+            <span class="shrink-0 inline-flex items-center gap-1.5 text-sm font-bold text-brand-red group-hover:gap-2.5 transition-all">
+                <span class="hidden sm:inline">{{ __('Launch') }}</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </span>
+        </div>
+    </button>
+
     <div class="max-w-7xl mx-auto px-4 py-10">
 
         {{-- Mobile filter toggle --}}

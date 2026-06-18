@@ -40,7 +40,9 @@ function loadConfigurator(btn) {
 }
 
 document.addEventListener('click', (e) => {
-    const btn = e.target.closest('#open-configurator-btn');
+    // The hero trigger, plus any promo CTA tagged .js-open-configurator
+    // (e.g. the Products-page banner) — both lazy-load and open the modal.
+    const btn = e.target.closest('#open-configurator-btn, .js-open-configurator');
     if (btn) loadConfigurator(btn);
     // Once loaded, configurator.js's own delegated listener handles clicks.
 });

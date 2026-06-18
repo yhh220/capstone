@@ -244,9 +244,10 @@ function isMeshBodyPaint(child, partInfo) {
  * 初始化事件代理：确保Livewire重新渲染后，点击事件依然生效（处理配置面板的点击）
  */
 function wireConfiguratorEvents() {
-    // Open Configurator (打开配置器)
+    // Open Configurator (打开配置器) — the hero trigger, plus any promo CTA
+    // tagged with .js-open-configurator (e.g. the Products-page banner).
     document.addEventListener('click', (e) => {
-        if (e.target.closest('#open-configurator-btn')) {
+        if (e.target.closest('#open-configurator-btn, .js-open-configurator')) {
             openConfigurator();
         }
     });
