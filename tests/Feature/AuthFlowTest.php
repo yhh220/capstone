@@ -101,6 +101,7 @@ class AuthFlowTest extends TestCase
     {
         $u = $this->makeUser();
         Notification::fake();
+        config(['honeypot.enabled' => false]); // honeypot rejects instant submits; a real user passes
 
         $fp = Livewire::test(ForgotPassword::class)
             ->set('email', $this->email)

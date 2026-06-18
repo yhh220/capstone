@@ -30,6 +30,7 @@
                     <p class="text-sm text-gray-500 dark:text-white/40 mb-7">{{ __('Enter your email and we will send you a code to reset it.') }}</p>
 
                     <form wire:submit="sendCode" class="space-y-5">
+                        <x-honeypot livewire-model="honeypotData" />
                         <div>
                             <label for="reset-email" class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-white/40 mb-2">{{ __('Email') }}</label>
                             <div class="relative">

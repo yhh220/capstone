@@ -6,12 +6,17 @@ use App\Livewire\Concerns\SetsSeo;
 use App\Models\User;
 use App\Services\EmailOtpService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
+use Spatie\Honeypot\Http\Livewire\Concerns\HoneypotData;
+use Spatie\Honeypot\Http\Livewire\Concerns\UsesSpamProtection;
 
 class ForgotPassword extends Component
 {
-    use SetsSeo;
+    use SetsSeo, UsesSpamProtection;
+
+    public HoneypotData $honeypotData;
 
     /** 1 = request code · 2 = enter code + new password · 3 = done */
     public int $step = 1;
@@ -24,6 +29,8 @@ class ForgotPassword extends Component
 
     public function mount(): void
     {
+        $this->honeypotData = new HoneypotData();
+
         if (Auth::check()) {
             $this->redirect(route('home'), navigate: false);
             return;
@@ -42,7 +49,30 @@ class ForgotPassword extends Component
      */
     public function sendCode(): void
     {
+        // Honeypot (hidden field + submission time gate) — silently blocks bots.
+        $this->protectAgainstSpam();
+
         $this->validate(['email' => ['required', 'email']]);
+
+        // Per-IP throttle so the form can't be looped over many emails to blast
+        // OTP mail / burn the SMTP quota. Applied to every attempt (whether or
+        // not the email exists) so it never reveals which emails have accounts.
+        $ip       = request()->ip();
+        $key      = 'pwreset:' . $ip;
+        $dailyKey = 'pwreset-daily:' . $ip;
+
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+            $this->addError('email', __('Too many submissions. Please wait :seconds seconds before trying again.', ['seconds' => $seconds]));
+            return;
+        }
+        if (RateLimiter::tooManyAttempts($dailyKey, 15)) {
+            $this->addError('email', __('You have reached today’s message limit. Please WhatsApp us directly instead.'));
+            return;
+        }
+
+        RateLimiter::hit($key, 600);        // 10-minute burst window
+        RateLimiter::hit($dailyKey, 86400); // 24-hour daily window
 
         $otp = app(EmailOtpService::class);
 
@@ -63,6 +93,15 @@ class ForgotPassword extends Component
      */
     public function resendCode(): void
     {
+        // Resends count toward the same per-IP burst cap as the initial request.
+        $ip  = request()->ip();
+        $key = 'pwreset:' . $ip;
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+            $this->addError('otpCode', __('Too many submissions. Please wait :seconds seconds before trying again.', ['seconds' => $seconds]));
+            return;
+        }
+
         $otp  = app(EmailOtpService::class);
         $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_RESET, $this->email);
 
@@ -70,6 +109,8 @@ class ForgotPassword extends Component
             $this->addError('otpCode', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
             return;
         }
+
+        RateLimiter::hit($key, 600);
 
         if (User::where('email', $this->email)->exists()) {
             $otp->send(EmailOtpService::PURPOSE_RESET, $this->email);
