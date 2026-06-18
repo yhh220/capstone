@@ -964,5 +964,6 @@
     "Thu": "Kha",
     "Fri": "Jum",
     "Sat": "Sab",
-    "Sun": "Ahd"
+    "Sun": "Ahd",
+    "Too many sign-up attempts. Please try again in :seconds seconds.": "Terlalu banyak percubaan pendaftaran. Sila cuba lagi dalam :seconds saat."
 }

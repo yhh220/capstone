@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,6 +17,17 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Single source of truth for password strength, applied everywhere via
+        // Password::defaults() (registration, password reset, profile change):
+        // 8+ chars with mixed case, a number and a symbol, and rejected if found
+        // in a known breach (HaveIBeenPwned, k-anonymity). The breach check is
+        // skipped under testing to avoid external HTTP calls + flakiness.
+        Password::defaults(function () {
+            $rule = Password::min(8)->mixedCase()->numbers()->symbols();
+
+            return app()->environment('testing') ? $rule : $rule->uncompromised();
+        });
+
         \Filament\Support\Facades\FilamentView::registerRenderHook(
             \Filament\View\PanelsRenderHook::GLOBAL_SEARCH_AFTER,
             fn (): string => \Illuminate\Support\Facades\Blade::render('

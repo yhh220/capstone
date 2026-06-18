@@ -29,6 +29,13 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->authGuard('admin')
             ->login(\App\Filament\Pages\Auth\Login::class)
+            // Profile page lets admins manage their account + set up 2FA.
+            ->profile()
+            // Optional app (TOTP) two-factor auth with recovery codes. Admins
+            // opt in from their profile; not forced, so no one gets locked out.
+            ->multiFactorAuthentication([
+                \Filament\Auth\MultiFactor\App\AppAuthentication::make()->recoverable(),
+            ])
 
             // ── Branding ──────────────────────────────────────────────
             ->brandName('Win Win Car Audio')

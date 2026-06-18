@@ -85,7 +85,7 @@ class ForgotPassword extends Component
     {
         $this->validate([
             'otpCode'               => ['required', 'digits:6'],
-            'password'              => ['required', 'confirmed', Password::min(8)->letters()->numbers()->symbols()],
+            'password'              => ['required', 'confirmed', Password::defaults()],
             'password_confirmation' => ['required'],
         ], [
             'password.min' => __('Password must be at least 8 characters.'),

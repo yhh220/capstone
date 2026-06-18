@@ -211,13 +211,23 @@ class UserLogin extends Component
             'password'              => [
                 'required',
                 'confirmed',
-                Password::min(8)->letters()->numbers()->symbols(),
+                Password::defaults(),
             ],
             'password_confirmation' => ['required'],
         ], [
             'password.min' => __('Password must be at least 8 characters.'),
             'name.min'     => __('Name must be at least 2 characters.'),
         ]);
+
+        // Throttle by IP so registration can't be abused to mass-send OTP emails
+        // (each valid submission dispatches a verification email).
+        $rlKey = 'register:' . request()->ip();
+        if (RateLimiter::tooManyAttempts($rlKey, 5)) {
+            $seconds = RateLimiter::availableIn($rlKey);
+            $this->addError('email', __('Too many sign-up attempts. Please try again in :seconds seconds.', ['seconds' => $seconds]));
+            return;
+        }
+        RateLimiter::hit($rlKey, 600); // max 5 per 10 minutes per IP
 
         Cache::put($this->pendingKey($validated['email']), [
             'name'     => $validated['name'],

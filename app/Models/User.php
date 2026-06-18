@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthentication;
+use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthenticationRecovery;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -20,10 +24,11 @@ use Spatie\Activitylog\Support\LogOptions;
 // an untrusted request can never escalate privileges through mass assignment.
 #[Fillable(['name', 'email', 'password', 'phone', 'gender', 'address_line', 'city', 'postcode', 'state'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, LogsActivity, SoftDeletes;
+    use HasFactory, Notifiable, LogsActivity, SoftDeletes,
+        InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery;
 
     public function getActivitylogOptions(): LogOptions
     {

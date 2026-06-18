@@ -964,5 +964,6 @@
     "Thu": "四",
     "Fri": "五",
     "Sat": "六",
-    "Sun": "日"
+    "Sun": "日",
+    "Too many sign-up attempts. Please try again in :seconds seconds.": "注册尝试次数过多。请在 :seconds 秒后再试。"
 }

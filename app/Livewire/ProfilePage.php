@@ -88,7 +88,7 @@ class ProfilePage extends Component
     {
         $this->validate([
             'current_password'          => ['required', 'current_password'],
-            'new_password'              => ['required', 'confirmed', Password::min(8)->letters()->numbers()->symbols()],
+            'new_password'              => ['required', 'confirmed', Password::defaults()],
             'new_password_confirmation' => ['required'],
         ], [
             'current_password.current_password' => __('Your current password is incorrect.'),
