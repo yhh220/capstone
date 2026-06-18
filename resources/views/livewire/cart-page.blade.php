@@ -17,8 +17,8 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 {{ $compact ? '' : 'sm:p-6' }} shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4 items-center" wire:key="cart-{{ $item->id }}">
                     {{-- Product Image --}}
                     <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden flex-shrink-0">
-                        @if($item->product?->image)
-                            <img src="{{ Storage::url($item->product->image) }}" alt="{{ $item->product->name }}" loading="lazy" class="w-full h-full object-cover">
+                        @if($item->product?->getImageUrl('thumb'))
+                            <img src="{{ $item->product->getImageUrl('thumb') }}" alt="{{ $item->product->name }}" loading="lazy" class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600" aria-hidden="true">
                                 <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path></svg>
@@ -82,8 +82,8 @@
                         <div class="font-black text-brand-red text-lg tabular-nums">
                             RM {{ number_format(($item->product->current_price ?? 0) * $item->quantity, 2) }}
                         </div>
-                        <button wire:click="removeItem({{ $item->id }})"
-                                wire:confirm="{{ __('Remove this item?') }}"
+                        <button type="button"
+                                @click="$store.confirm.ask(@js(__('Remove this item?')), () => $wire.removeItem({{ $item->id }}))"
                                 wire:loading.attr="disabled"
                                 wire:target="removeItem({{ $item->id }})"
                                 class="text-xs text-gray-400 hover:text-red-500 transition-colors mt-2 underline"
@@ -95,7 +95,7 @@
                 @endforeach
 
                 <div class="text-right">
-                    <button wire:click="clearCart" wire:confirm="{{ __('Clear all items from your cart?') }}"
+                    <button type="button" @click="$store.confirm.ask(@js(__('Clear all items from your cart?')), () => $wire.clearCart())"
                             wire:loading.attr="disabled"
                             wire:target="clearCart"
                             class="text-sm text-gray-500 hover:text-red-500 transition-colors underline disabled:opacity-60">

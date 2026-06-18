@@ -250,8 +250,8 @@
                 <button wire:click="goBack" class="group flex items-center px-6 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-full font-semibold text-gray-600 dark:text-gray-300 hover:border-brand-red hover:text-brand-red hover:bg-red-50 dark:hover:bg-red-900/10 transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
                     {{ __('← Back') }}
                 </button>
-                <button wire:click="placeOrder"
-                        wire:confirm="{{ __('Demo mode — no real payment will be charged. Place this test order?') }}"
+                <button type="button"
+                        @click="$store.confirm.ask(@js(__('Demo mode — no real payment will be charged. Place this test order?')), () => $wire.placeOrder())"
                         wire:loading.attr="disabled"
                         wire:target="placeOrder"
                         class="group relative inline-flex justify-center items-center gap-2 flex-1 bg-brand-red text-white py-3 rounded-full font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-50">

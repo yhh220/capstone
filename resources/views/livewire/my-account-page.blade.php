@@ -155,8 +155,8 @@
                             {{ __('Reference') }}: <span class="font-mono font-bold text-gray-700 dark:text-gray-300">{{ $booking->reference }}</span>
                         </div>
                         @if(in_array($booking->status, ['pending', 'confirmed'], true))
-                        <button wire:click="cancelBooking({{ $booking->id }})"
-                                wire:confirm="{{ __('Cancel this booking?') }}"
+                        <button type="button"
+                                @click="$store.confirm.ask(@js(__('Cancel this booking?')), () => $wire.cancelBooking({{ $booking->id }}))"
                                 class="text-red-600 dark:text-red-400 font-bold hover:underline">
                             {{ __('Cancel Booking') }}
                         </button>

@@ -1250,6 +1250,55 @@
         });
     </script>
 
+    {{-- ── Themed confirmation modal (replaces native browser confirm) ───── --}}
+    <div x-data x-show="$store.confirm.show" x-cloak style="display:none;"
+         class="fixed inset-0 z-[120] flex items-center justify-center p-4"
+         @keydown.escape.window="$store.confirm.cancel()"
+         role="dialog" aria-modal="true" aria-labelledby="confirm-modal-message">
+        <div x-show="$store.confirm.show" x-transition.opacity.duration.200ms
+             class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="$store.confirm.cancel()"></div>
+        <div x-show="$store.confirm.show"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             class="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 p-6">
+            <div class="flex items-start gap-3 mb-6">
+                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-brand-red/10 text-brand-red shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+                </span>
+                <p id="confirm-modal-message" class="text-sm leading-relaxed text-gray-700 dark:text-gray-200 pt-1.5" x-text="$store.confirm.message"></p>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="$store.confirm.cancel()"
+                        class="px-4 py-2 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    {{ __('Cancel') }}
+                </button>
+                <button type="button" @click="$store.confirm.accept()"
+                        class="px-5 py-2 rounded-xl text-sm font-black text-white bg-brand-red hover:shadow-[0_4px_15px_rgb(var(--brand-red-rgb)_/_0.4)] transition-all active:scale-95"
+                        x-text="$store.confirm.confirmText"></button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('confirm', {
+                show: false,
+                message: '',
+                confirmText: @js(__('Confirm')),
+                _cb: null,
+                // ask(message, onConfirm, confirmText?) — themed replacement for wire:confirm
+                ask(message, onConfirm, confirmText) {
+                    this.message = message;
+                    this._cb = onConfirm;
+                    this.confirmText = confirmText || @js(__('Confirm'));
+                    this.show = true;
+                },
+                accept() { const cb = this._cb; this.show = false; this._cb = null; if (cb) cb(); },
+                cancel() { this.show = false; this._cb = null; },
+            });
+        });
+    </script>
+
     @stack('scripts')
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>

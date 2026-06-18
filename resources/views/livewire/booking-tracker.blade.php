@@ -114,8 +114,8 @@
                 @endif
 
                 @if(!in_array($booking->status, ['cancelled', 'completed'], true))
-                <button wire:click="cancelBooking"
-                        wire:confirm="{{ __('Are you sure you want to cancel this booking?') }}"
+                <button type="button"
+                        @click="$store.confirm.ask(@js(__('Are you sure you want to cancel this booking?')), () => $wire.cancelBooking())"
                         wire:loading.attr="disabled"
                         wire:target="cancelBooking"
                         class="group relative overflow-hidden w-full mt-5 bg-red-600 text-white py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-[0_4px_15px_rgba(220,38,38,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-60">

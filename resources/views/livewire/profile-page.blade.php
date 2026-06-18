@@ -157,8 +157,9 @@
                     @error('delete_password') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div class="flex items-center gap-3">
-                    <button type="button" wire:click="deleteAccount" wire:loading.attr="disabled" wire:target="deleteAccount"
-                            wire:confirm="{{ __('Are you sure? This will permanently close your account.') }}"
+                    <button type="button"
+                            @click="$store.confirm.ask(@js(__('Are you sure? This will permanently close your account.')), () => $wire.deleteAccount())"
+                            wire:loading.attr="disabled" wire:target="deleteAccount"
                             class="bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-700 active:scale-95 disabled:opacity-50">
                         <span wire:loading.remove wire:target="deleteAccount">{{ __('Permanently Delete') }}</span>
                         <span wire:loading wire:target="deleteAccount">{{ __('Deleting...') }}</span>
