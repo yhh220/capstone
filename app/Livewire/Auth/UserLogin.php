@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
 use Spatie\Honeypot\Http\Livewire\Concerns\HoneypotData;
@@ -207,7 +208,9 @@ class UserLogin extends Component
 
         $validated = $this->validate([
             'name'                  => ['required', 'string', 'min:2', 'max:255'],
-            'email'                 => ['required', 'email', 'max:255', 'unique:users,email'],
+            // Only ACTIVE accounts block the email; a soft-deleted one is treated as
+            // available and gets reactivated on OTP confirmation (returning customer).
+            'email'                 => ['required', 'email', 'max:255', Rule::unique('users', 'email')->whereNull('deleted_at')],
             'password'              => [
                 'required',
                 'confirmed',
@@ -275,16 +278,29 @@ class UserLogin extends Component
             return;
         }
 
-        // forceCreate so 'role' is set explicitly (not mass-assignable). Public
-        // registration is always a 'client'. The 'hashed' cast hashes the
-        // (decrypted) plaintext password exactly once.
-        $user = User::forceCreate([
-            'name'              => $pending['name'],
-            'email'             => $pending['email'],
-            'password'          => Crypt::decryptString($pending['password']),
-            'role'              => 'client',
-            'email_verified_at' => now(),
-        ]);
+        // A returning customer whose account was soft-deleted → reactivate it with
+        // the freshly-entered details (no active account exists past the check above,
+        // so any match here is soft-deleted). Otherwise create a fresh 'client'.
+        // forceCreate/forceFill set 'role' explicitly (not mass-assignable); the
+        // 'hashed' cast hashes the decrypted plaintext password exactly once.
+        $user = User::onlyTrashed()->where('email', $pending['email'])->first();
+
+        if ($user) {
+            $user->restore();
+            $user->forceFill([
+                'name'              => $pending['name'],
+                'password'          => Crypt::decryptString($pending['password']),
+                'email_verified_at' => now(),
+            ])->save();
+        } else {
+            $user = User::forceCreate([
+                'name'              => $pending['name'],
+                'email'             => $pending['email'],
+                'password'          => Crypt::decryptString($pending['password']),
+                'role'              => 'client',
+                'email_verified_at' => now(),
+            ]);
+        }
 
         Cache::forget($this->pendingKey($this->otpEmail));
 

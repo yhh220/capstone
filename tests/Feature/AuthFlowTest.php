@@ -65,6 +65,40 @@ class AuthFlowTest extends TestCase
         $this->assertTrue(Auth::check());
     }
 
+    public function test_registration_reactivates_a_soft_deleted_account(): void
+    {
+        config(['honeypot.enabled' => false]);
+        Notification::fake();
+
+        // A previous account with this email was deleted.
+        $old = User::forceCreate([
+            'name' => 'Old Name', 'email' => $this->email,
+            'password' => 'OldPass1!@#', 'role' => 'client', 'email_verified_at' => now(),
+        ]);
+        $old->delete();
+        $this->assertSoftDeleted($old);
+
+        $c = Livewire::test(UserLogin::class)
+            ->set('isLoginTab', false)
+            ->set('name', 'New Name')
+            ->set('email', $this->email)
+            ->set('password', $this->pass)
+            ->set('password_confirmation', $this->pass)
+            ->call('register')
+            ->assertHasNoErrors()              // a soft-deleted email is NOT "taken"
+            ->assertSet('awaitingOtp', true);
+
+        $c->set('otpCode', $this->captureOtp())->call('verifyRegistrationOtp');
+
+        // The same row is reactivated with the new details — no duplicate insert.
+        $this->assertSame(1, User::withTrashed()->where('email', $this->email)->count());
+        $fresh = $old->fresh();
+        $this->assertNull($fresh->deleted_at);
+        $this->assertSame('New Name', $fresh->name);
+        $this->assertTrue(Hash::check($this->pass, $fresh->password));
+        $this->assertTrue(Auth::check());
+    }
+
     public function test_sign_in_and_sign_out(): void
     {
         $u = $this->makeUser();
