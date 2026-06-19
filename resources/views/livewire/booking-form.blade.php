@@ -243,9 +243,13 @@
                         @elseif($currentStep === 2)
                         <div class="space-y-6">
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                                     {{ __('Preferred Date') }} <span class="text-brand-red">*</span>
                                 </label>
+                                <p class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-2">
+                                    <svg class="w-3.5 h-3.5 shrink-0 text-brand-red" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                    {{ __('You can book any date within the next :months months.', ['months' => $this->maxMonthsAhead]) }}
+                                </p>
 
                                 {{-- Inline month calendar (server-rendered, business-rule aware) --}}
                                 <div class="max-w-sm border-2 border-gray-100 dark:border-gray-600 rounded-2xl p-4 bg-white dark:bg-gray-800 @error('preferred_date') !border-red-400 @enderror">

@@ -186,6 +186,12 @@ class BookingForm extends Component
         $this->preferred_time = '';   // a new date invalidates the chosen slot
     }
 
+    /** How many months ahead bookings are open — surfaced as a UI hint. */
+    public function getMaxMonthsAheadProperty(): int
+    {
+        return self::MAX_MONTHS_AHEAD;
+    }
+
     public function getCalendarLabelProperty(): string
     {
         return Carbon::parse($this->calendarMonth . '-01')->translatedFormat('F Y');
