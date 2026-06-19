@@ -40,8 +40,8 @@ class BookingForm extends Component
     // Inline calendar state for step 2 (YYYY-MM of the visible month).
     public string $calendarMonth = '';
 
-    /** How far ahead bookings may be made. */
-    private const MAX_DAYS_AHEAD = 60;
+    /** How far ahead bookings may be made (half a year). */
+    private const MAX_MONTHS_AHEAD = 6;
 
     public string $notes = '';
 
@@ -89,7 +89,7 @@ class BookingForm extends Component
             // Service is optional — a booking is just a visit. The customer can
             // tell us what it's about, or leave it as a general visit.
             1 => ['service_id' => 'nullable|exists:services,id'],
-            2 => ['preferred_date' => 'required|date|after_or_equal:today', 'preferred_time' => 'required|date_format:H:i'],
+            2 => ['preferred_date' => 'required|date|after_or_equal:today|before_or_equal:' . Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD)->toDateString(), 'preferred_time' => 'required|date_format:H:i'],
             // Vehicle model only matters when a specific service is chosen (so we
             // know what we're working on). For a general visit it's optional.
             3 => [
@@ -140,7 +140,7 @@ class BookingForm extends Component
             'vehicle_model' => $this->service_id !== '' ? 'required|min:2|max:120' : 'nullable|max:120',
             'vehicle_plate' => 'nullable|max:30',
             'service_id' => 'nullable|exists:services,id',
-            'preferred_date' => 'required|date|after_or_equal:today',
+            'preferred_date' => 'required|date|after_or_equal:today|before_or_equal:' . Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD)->toDateString(),
             'preferred_time' => 'required|date_format:H:i',
             'notes' => 'nullable|max:1000',
         ];
@@ -157,7 +157,7 @@ class BookingForm extends Component
     public function nextMonth(): void
     {
         $current = Carbon::parse($this->calendarMonth . '-01');
-        if ($current->lt(Carbon::today()->addDays(self::MAX_DAYS_AHEAD)->startOfMonth())) {
+        if ($current->lt(Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD)->startOfMonth())) {
             $this->calendarMonth = $current->addMonth()->format('Y-m');
         }
     }
@@ -176,7 +176,7 @@ class BookingForm extends Component
 
         if (
             $day->lt(Carbon::today())
-            || $day->gt(Carbon::today()->addDays(self::MAX_DAYS_AHEAD))
+            || $day->gt(Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD))
             || $this->bookingService()->isClosedDate($day)
         ) {
             return;
@@ -198,7 +198,7 @@ class BookingForm extends Component
 
     public function getCanGoNextMonthProperty(): bool
     {
-        return Carbon::parse($this->calendarMonth . '-01')->lt(Carbon::today()->addDays(self::MAX_DAYS_AHEAD)->startOfMonth());
+        return Carbon::parse($this->calendarMonth . '-01')->lt(Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD)->startOfMonth());
     }
 
     /**
@@ -212,7 +212,7 @@ class BookingForm extends Component
         $gridEnd   = $first->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY);
 
         $today   = Carbon::today();
-        $maxDate = Carbon::today()->addDays(self::MAX_DAYS_AHEAD);
+        $maxDate = Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD);
         $closed  = $this->bookingService()->closedWeekdays();
 
         $days = [];
