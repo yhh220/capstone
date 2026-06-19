@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\CartItem;
+use App\Services\EmailOtpService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -22,10 +23,16 @@ class ProfilePage extends Component
     public string $postcode     = '';
     public string $state        = '';
 
-    // Change-password fields
+    // Change-password fields (accounts that already have a password)
     public string $current_password          = '';
     public string $new_password              = '';
     public string $new_password_confirmation = '';
+
+    // Set-password fields (social-login accounts with no password yet) — OTP-gated
+    public bool   $settingPassword               = false;
+    public string $set_otp                        = '';
+    public string $set_new_password               = '';
+    public string $set_new_password_confirmation  = '';
 
     // Delete-account confirmation
     public string $delete_password = '';
@@ -101,6 +108,61 @@ class ProfilePage extends Component
         $this->reset('current_password', 'new_password', 'new_password_confirmation');
 
         session()->flash('password_success', __('Password changed successfully!'));
+    }
+
+    /**
+     * Step 1 of setting a password (social-login accounts with none): email a code.
+     */
+    public function sendSetPasswordCode(): void
+    {
+        $user = Auth::user();
+        if ($user->hasPassword()) {
+            return; // already has one — the Change Password form applies instead
+        }
+
+        $otp  = app(EmailOtpService::class);
+        $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_SET_PASSWORD, $user->email);
+        if ($wait > 0) {
+            $this->addError('set_otp', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+            return;
+        }
+
+        $otp->send(EmailOtpService::PURPOSE_SET_PASSWORD, $user->email);
+        $this->settingPassword = true;
+        $this->set_otp = '';
+        session()->flash('password_success', __('We sent a 6-digit code to :email.', ['email' => $user->email]));
+    }
+
+    /**
+     * Step 2: confirm the code and set the password. The account can then sign in
+     * with email + password as well as socially.
+     */
+    public function confirmSetPassword(): void
+    {
+        $user = Auth::user();
+        if ($user->hasPassword()) {
+            return;
+        }
+
+        $this->validate([
+            'set_otp'                      => ['required', 'digits:6'],
+            'set_new_password'             => ['required', 'confirmed', Password::defaults()],
+            'set_new_password_confirmation' => ['required'],
+        ], [
+            'set_new_password.min' => __('Password must be at least 8 characters.'),
+        ]);
+
+        $otp = app(EmailOtpService::class);
+        if (! $otp->verify(EmailOtpService::PURPOSE_SET_PASSWORD, $user->email, $this->set_otp)) {
+            $this->addError('set_otp', __('Invalid or expired code. Please try again.'));
+            return;
+        }
+
+        $user->forceFill(['password' => $this->set_new_password])->save();
+        $otp->clear(EmailOtpService::PURPOSE_SET_PASSWORD, $user->email);
+
+        $this->reset('settingPassword', 'set_otp', 'set_new_password', 'set_new_password_confirmation');
+        session()->flash('password_success', __('Password set! You can now also log in with your email and password.'));
     }
 
     /**

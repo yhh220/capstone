@@ -120,6 +120,14 @@ class UserLogin extends Component
             return;
         }
 
+        // A social-login-only account has no password — guide them to Google /
+        // setting a password, rather than failing with "wrong password".
+        $emailUser = User::where('email', $this->loginEmail)->first();
+        if ($emailUser && ! $emailUser->hasPassword()) {
+            $this->addError('loginEmail', __('This account uses Google sign-in. Please use the Google button, or set a password from your account page after signing in.'));
+            return;
+        }
+
         // Attempt authentication
         if (!Auth::attempt([
             'email'    => $this->loginEmail,

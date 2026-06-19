@@ -93,11 +93,11 @@
             </div>
         </form>
 
-        {{-- Change Password --}}
-        <form wire:submit="updatePassword" class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+        {{-- Password — "Set" for social-login accounts with none, else "Change" --}}
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
             <h2 class="text-lg font-black text-gray-800 dark:text-white mb-5 flex items-center gap-2">
                 <svg class="w-5 h-5 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                {{ __('Change Password') }}
+                {{ auth()->user()->hasPassword() ? __('Change Password') : __('Set Password') }}
             </h2>
 
             @if(session('password_success'))
@@ -107,7 +107,9 @@
             </div>
             @endif
 
-            <div class="space-y-4">
+            @if(auth()->user()->hasPassword())
+            {{-- Account already has a password → change it (needs the current one). --}}
+            <form wire:submit="updatePassword" class="space-y-4">
                 <div>
                     <label for="pf-current-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Current Password') }}</label>
                     <input wire:model="current_password" id="pf-current-pass" type="password" autocomplete="current-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
@@ -124,16 +126,57 @@
                         <input wire:model="new_password_confirmation" id="pf-new-pass-confirm" type="password" autocomplete="new-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                     </div>
                 </div>
-            </div>
+                <div class="flex justify-end pt-1">
+                    <button type="submit" wire:loading.attr="disabled" wire:target="updatePassword"
+                            class="bg-gray-800 dark:bg-white text-white dark:text-gray-900 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
+                        <span wire:loading.remove wire:target="updatePassword">{{ __('Update Password') }}</span>
+                        <span wire:loading wire:target="updatePassword">{{ __('Updating...') }}</span>
+                    </button>
+                </div>
+            </form>
+            @else
+            {{-- Social-login account with no password → set one (email-code gated). --}}
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ __('You signed in with Google, so your account has no password yet. Set one to also log in with your email and password.') }}</p>
 
-            <div class="flex justify-end mt-5">
-                <button type="submit" wire:loading.attr="disabled" wire:target="updatePassword"
-                        class="bg-gray-800 dark:bg-white text-white dark:text-gray-900 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
-                    <span wire:loading.remove wire:target="updatePassword">{{ __('Update Password') }}</span>
-                    <span wire:loading wire:target="updatePassword">{{ __('Updating...') }}</span>
+            @if(! $settingPassword)
+                <button type="button" wire:click="sendSetPasswordCode" wire:loading.attr="disabled" wire:target="sendSetPasswordCode"
+                        class="bg-brand-red text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
+                    <span wire:loading.remove wire:target="sendSetPasswordCode">{{ __('Send verification code') }}</span>
+                    <span wire:loading wire:target="sendSetPasswordCode">{{ __('Sending...') }}</span>
                 </button>
-            </div>
-        </form>
+                @error('set_otp') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
+            @else
+                <form wire:submit="confirmSetPassword" class="space-y-4">
+                    <div>
+                        <label for="pf-set-otp" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Verification code') }}</label>
+                        <input wire:model="set_otp" id="pf-set-otp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"
+                               x-on:input="$el.value = $el.value.replace(/\D/g, '')"
+                               class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm tracking-[0.4em] focus:outline-none focus:border-brand-red transition">
+                        @error('set_otp') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="pf-set-new" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('New Password') }}</label>
+                            <input wire:model="set_new_password" id="pf-set-new" type="password" autocomplete="new-password" placeholder="{{ __('Min. 8 characters') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                            @error('set_new_password') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label for="pf-set-confirm" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Confirm New Password') }}</label>
+                            <input wire:model="set_new_password_confirmation" id="pf-set-confirm" type="password" autocomplete="new-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-1">
+                        <button type="button" wire:click="sendSetPasswordCode" class="text-sm text-gray-500 dark:text-gray-400 hover:text-brand-red font-semibold">{{ __('Resend code') }}</button>
+                        <button type="submit" wire:loading.attr="disabled" wire:target="confirmSetPassword"
+                                class="bg-gray-800 dark:bg-white text-white dark:text-gray-900 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
+                            <span wire:loading.remove wire:target="confirmSetPassword">{{ __('Set Password') }}</span>
+                            <span wire:loading wire:target="confirmSetPassword">{{ __('Saving...') }}</span>
+                        </button>
+                    </div>
+                </form>
+            @endif
+            @endif
+        </div>
 
         {{-- Danger Zone --}}
         <div x-data="{ confirm: false }" class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border-2 border-red-200 dark:border-red-500/30">

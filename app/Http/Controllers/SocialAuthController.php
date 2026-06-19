@@ -6,7 +6,6 @@ use App\Models\SocialAccount;
 use App\Models\User;
 use App\Support\SocialLogin;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -75,13 +74,12 @@ class SocialAuthController extends Controller
             $user->restore();
         }
 
-        // 3. Brand-new customer. Password is a random throwaway (the 'hashed' cast
-        //    hashes it) — they sign in socially, or set one via "forgot password".
+        // 3. Brand-new customer. No password is set (NULL) — they sign in socially
+        //    until they choose to add one from their account page.
         if (! $user) {
             $user = User::create([
-                'name'     => $socialUser->getName() ?: ($socialUser->getNickname() ?: 'Customer'),
-                'email'    => $email ?: "{$provider}_{$socialUser->getId()}@social.invalid",
-                'password' => Str::random(40),
+                'name'  => $socialUser->getName() ?: ($socialUser->getNickname() ?: 'Customer'),
+                'email' => $email ?: "{$provider}_{$socialUser->getId()}@social.invalid",
             ]);
             $user->forceFill(['email_verified_at' => now()])->save();
         }

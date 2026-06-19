@@ -88,6 +88,15 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
+     * Whether this account has a usable password. Social-login-only accounts have
+     * a NULL password until the customer sets one, so they can't use email login.
+     */
+    public function hasPassword(): bool
+    {
+        return filled($this->password);
+    }
+
+    /**
      * Check if the user is a client.
      */
     public function isClient(): bool

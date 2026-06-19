@@ -997,5 +997,13 @@
     "We could not sign you in with :provider. Please try again.": "Kami tidak dapat log masuk anda dengan :provider. Sila cuba lagi.",
     "A new submission just came in from your website.": "Penyerahan baharu baru sahaja diterima dari laman web anda.",
     "Open in Admin": "Buka dalam Admin",
-    "Order :number — thank you for your purchase.": "Pesanan :number — terima kasih atas pembelian anda."
+    "Order :number — thank you for your purchase.": "Pesanan :number — terima kasih atas pembelian anda.",
+    "Password set! You can now also log in with your email and password.": "Kata laluan ditetapkan! Anda kini juga boleh log masuk dengan e-mel dan kata laluan anda.",
+    "Please set a password on your account before checking out.": "Sila tetapkan kata laluan untuk akaun anda sebelum membuat pembayaran.",
+    "Send verification code": "Hantar kod pengesahan",
+    "Set Password": "Tetapkan Kata Laluan",
+    "This account uses Google sign-in. Please use the Google button, or set a password from your account page after signing in.": "Akaun ini menggunakan log masuk Google. Sila gunakan butang Google, atau tetapkan kata laluan dari halaman akaun anda selepas log masuk.",
+    "Verification code": "Kod pengesahan",
+    "We sent a 6-digit code to :email.": "Kami menghantar kod 6 digit ke :email.",
+    "You signed in with Google, so your account has no password yet. Set one to also log in with your email and password.": "Anda log masuk dengan Google, jadi akaun anda belum mempunyai kata laluan. Tetapkan satu untuk turut log masuk dengan e-mel dan kata laluan anda."
 }

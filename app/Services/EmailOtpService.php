@@ -26,8 +26,9 @@ class EmailOtpService
     /** Minimum seconds between resends for the same purpose+email. */
     public const RESEND_COOLDOWN = 60;
 
-    public const PURPOSE_REGISTER = 'register';
-    public const PURPOSE_RESET    = 'pwreset';
+    public const PURPOSE_REGISTER     = 'register';
+    public const PURPOSE_RESET        = 'pwreset';
+    public const PURPOSE_SET_PASSWORD = 'setpw';
 
     /**
      * Generate a fresh 6-digit code, store it hashed, and email it. Returns the

@@ -997,5 +997,13 @@
     "We could not sign you in with :provider. Please try again.": "我们无法通过 :provider 登录您的账户。请重试。",
     "A new submission just came in from your website.": "您的网站刚收到一条新的提交。",
     "Open in Admin": "在后台打开",
-    "Order :number — thank you for your purchase.": "订单 :number — 感谢您的购买。"
+    "Order :number — thank you for your purchase.": "订单 :number — 感谢您的购买。",
+    "Password set! You can now also log in with your email and password.": "密码已设置！现在您也可以用邮箱和密码登录了。",
+    "Please set a password on your account before checking out.": "结账前请先为您的账户设置密码。",
+    "Send verification code": "发送验证码",
+    "Set Password": "设置密码",
+    "This account uses Google sign-in. Please use the Google button, or set a password from your account page after signing in.": "此账户使用 Google 登录。请使用 Google 按钮，或登录后在账户页面设置密码。",
+    "Verification code": "验证码",
+    "We sent a 6-digit code to :email.": "我们已向 :email 发送了一个 6 位验证码。",
+    "You signed in with Google, so your account has no password yet. Set one to also log in with your email and password.": "您是用 Google 登录的，所以账户还没有密码。设置一个后，也能用邮箱和密码登录。"
 }

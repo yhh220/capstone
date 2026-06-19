@@ -78,6 +78,14 @@ class CheckoutPage extends Component
             return;
         }
 
+        // Social-login accounts must set a password before they can check out.
+        if (! Auth::user()->hasPassword()) {
+            session()->flash('success', __('Please set a password on your account before checking out.'));
+            $this->redirect(route('profile'), navigate: false);
+
+            return;
+        }
+
         // Pre-fill from user profile
         $user = Auth::user();
         $this->customerName = $user->name ?? '';
