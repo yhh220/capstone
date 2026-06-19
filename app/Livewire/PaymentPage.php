@@ -88,6 +88,7 @@ class PaymentPage extends Component
                         'payment_status' => 'paid',
                         'status'         => 'processing',
                         'expires_at'     => null,
+                        'paid_at'        => now(),
                     ]);
 
                 return $affected === 1 ? 'paid' : 'noop';
@@ -129,13 +130,8 @@ class PaymentPage extends Component
                 return;
             }
 
-            foreach ($order->items as $item) {
-                if ($item->product_id) {
-                    Product::where('id', $item->product_id)->increment('stock', $item->quantity);
-                }
-            }
-
-            $order->update(['status' => 'cancelled']);
+            $order->restockItems();
+            $order->update(['status' => 'cancelled']); // event stamps cancelled_at
         });
 
         $this->order->refresh();

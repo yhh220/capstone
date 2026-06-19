@@ -1019,5 +1019,6 @@
     "Booking Reminder": "预约提醒",
     "Hi :name, this is a friendly reminder that your booking is tomorrow.": ":name 您好，温馨提醒您的预约就在明天。",
     "Need to reschedule or cancel? Use the link below or WhatsApp us — no problem at all.": "需要改期或取消？用下方链接或 WhatsApp 联系我们 — 完全没问题。",
-    "Your booking :ref is tomorrow.": "您的预约 :ref 就在明天。"
+    "Your booking :ref is tomorrow.": "您的预约 :ref 就在明天。",
+    "Please order between 1 and :max of each item.": "每件商品请订购 1 到 :max 件之间。"
 }

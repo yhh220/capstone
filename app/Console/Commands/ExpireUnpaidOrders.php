@@ -33,13 +33,8 @@ class ExpireUnpaidOrders extends Command
                     return;
                 }
 
-                foreach ($order->items as $item) {
-                    if ($item->product_id) {
-                        Product::where('id', $item->product_id)->increment('stock', $item->quantity);
-                    }
-                }
-
-                $order->update(['status' => 'cancelled']);
+                $order->restockItems();
+                $order->update(['status' => 'cancelled']); // event stamps cancelled_at
                 $count++;
             });
         }

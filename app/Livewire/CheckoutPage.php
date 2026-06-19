@@ -55,6 +55,9 @@ class CheckoutPage extends Component
         "Touch 'n Go eWallet", 'GrabPay', 'ShopeePay', 'Boost',
     ];
 
+    /** Max units of any single product per order (backorder sanity cap). */
+    public const MAX_QTY_PER_ITEM = 99;
+
     // Step 3: Confirmation
     public ?Order $order = null;
 
@@ -201,11 +204,14 @@ class CheckoutPage extends Component
 
                 // A product that vanished or was deactivated can't be ordered.
                 // Insufficient stock is fine — it's a backorder (stock may go
-                // negative, representing units owed).
+                // negative, representing units owed) — but the quantity must be sane.
                 foreach ($cartItems as $cartItem) {
                     $product = $products->get($cartItem->product_id);
                     if (! $product || ! $product->is_active) {
                         throw new \RuntimeException(__('A product in your cart is no longer available.'));
+                    }
+                    if ($cartItem->quantity < 1 || $cartItem->quantity > self::MAX_QTY_PER_ITEM) {
+                        throw new \RuntimeException(__('Please order between 1 and :max of each item.', ['max' => self::MAX_QTY_PER_ITEM]));
                     }
                 }
 
@@ -217,11 +223,12 @@ class CheckoutPage extends Component
                         'cart_item' => $cartItem,
                         'product' => $product,
                         'unit_price' => $unitPrice,
-                        'subtotal' => $unitPrice * $cartItem->quantity,
+                        // Round each line so float math can't drift before storage.
+                        'subtotal' => round($unitPrice * $cartItem->quantity, 2),
                     ];
                 });
 
-                $subtotal = $lineItems->sum('subtotal');
+                $subtotal = round($lineItems->sum('subtotal'), 2);
                 $shippingFee = app(\App\Services\ShippingCalculator::class)->fee($subtotal);
 
                 $order = Order::create([
@@ -238,7 +245,7 @@ class CheckoutPage extends Component
                     ],
                     'subtotal' => $subtotal,
                     'shipping_fee' => $shippingFee,
-                    'total_amount' => $subtotal + $shippingFee,
+                    'total_amount' => round($subtotal + $shippingFee, 2),
                     'status' => $isCod ? 'processing' : 'pending',
                     'payment_status' => 'pending',
                     'payment_method' => $paymentLabel,

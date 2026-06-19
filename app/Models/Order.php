@@ -26,6 +26,7 @@ class Order extends Model
         'customer_name', 'customer_email', 'customer_phone',
         'shipping_address', 'subtotal', 'shipping_fee', 'total_amount',
         'status', 'payment_status', 'payment_method', 'notes', 'expires_at',
+        'paid_at', 'shipped_at', 'cancelled_at',
     ];
 
     protected $casts = [
@@ -34,7 +35,43 @@ class Order extends Model
         'shipping_fee'     => 'decimal:2',
         'total_amount'     => 'decimal:2',
         'expires_at'       => 'datetime',
+        'paid_at'          => 'datetime',
+        'shipped_at'       => 'datetime',
+        'cancelled_at'     => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        // Auto-stamp lifecycle timestamps on any model update, so every code path
+        // (admin actions, COD, the advance action, expiry…) records when it happened
+        // exactly once. (The pay() flow uses a raw query update, so it stamps paid_at
+        // itself — that's the one path this event can't see.)
+        static::updating(function (Order $order): void {
+            if ($order->isDirty('payment_status') && $order->payment_status === 'paid' && $order->paid_at === null) {
+                $order->paid_at = now();
+            }
+            if ($order->isDirty('status') && $order->status === 'shipped' && $order->shipped_at === null) {
+                $order->shipped_at = now();
+            }
+            if ($order->isDirty('status') && $order->status === 'cancelled' && $order->cancelled_at === null) {
+                $order->cancelled_at = now();
+            }
+        });
+    }
+
+    /**
+     * Return this order's reserved stock to inventory (idempotent at the row level
+     * via the caller's lock). Centralised so expiry, the timer and admin cancel all
+     * release stock the same way.
+     */
+    public function restockItems(): void
+    {
+        foreach ($this->items as $item) {
+            if ($item->product_id) {
+                Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+            }
+        }
+    }
 
     /** Cash-on-delivery orders are settled in person, not via the online flow. */
     public function isCod(): bool
@@ -89,7 +126,12 @@ class Order extends Model
     {
         return DB::transaction(function () {
             $year = date('Y');
-            $latestOrder = static::where('order_number', 'like', "ORD-{$year}-%")
+
+            // withTrashed(): a soft-deleted order still owns its order_number in the
+            // unique index, so it must count toward the next number (otherwise the
+            // new order collides with the deleted one).
+            $latestOrder = static::withTrashed()
+                ->where('order_number', 'like', "ORD-{$year}-%")
                 ->lockForUpdate()
                 ->orderBy('id', 'desc')
                 ->first();
@@ -98,7 +140,14 @@ class Order extends Model
                 ? ((int) substr($latestOrder->order_number, strrpos($latestOrder->order_number, '-') + 1)) + 1
                 : 1;
 
-            return 'ORD-' . $year . '-' . str_pad((string) $count, 5, '0', STR_PAD_LEFT);
+            // Belt-and-suspenders: skip any number already taken (gaps / rare races)
+            // so we never hand back a colliding order_number.
+            do {
+                $number = 'ORD-' . $year . '-' . str_pad((string) $count, 5, '0', STR_PAD_LEFT);
+                $count++;
+            } while (static::withTrashed()->where('order_number', $number)->exists());
+
+            return $number;
         });
     }
 

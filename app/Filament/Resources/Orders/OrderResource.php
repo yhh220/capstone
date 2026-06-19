@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Orders;
 
+use App\Mail\OrderConfirmationMail;
 use App\Mail\OrderShippedMail;
 use App\Models\Order;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -259,6 +261,43 @@ class OrderResource extends Resource
                     ->color('gray')
                     ->url(fn (Order $record) => route('invoice.show', $record->order_number))
                     ->openUrlInNewTab(),
+                Action::make('resendConfirmation')
+                    ->label('Resend confirmation')
+                    ->icon(Heroicon::OutlinedEnvelope)
+                    ->color('gray')
+                    ->visible(fn (Order $record) => filled($record->customer_email) && $record->status !== 'cancelled')
+                    ->requiresConfirmation()
+                    ->modalHeading('Resend the order confirmation email?')
+                    ->action(function (Order $record): void {
+                        try {
+                            Mail::to($record->customer_email)->send(new OrderConfirmationMail($record->fresh('items')));
+                            Notification::make()->title('Confirmation email resent')->success()->send();
+                        } catch (\Throwable $e) {
+                            logger()->error('Resend confirmation failed: ' . $e->getMessage());
+                            Notification::make()->title('Failed to resend the email')->danger()->send();
+                        }
+                    }),
+                Action::make('cancelOrder')
+                    ->label('Cancel & restock')
+                    ->icon(Heroicon::OutlinedXCircle)
+                    ->color('danger')
+                    // Only before the goods leave the warehouse — shipped/delivered
+                    // orders return stock through a manual returns process instead.
+                    ->visible(fn (Order $record) => in_array($record->status, ['pending', 'processing'], true))
+                    ->requiresConfirmation()
+                    ->modalHeading('Cancel this order and return its stock?')
+                    ->modalDescription('The items go back into inventory and the order is marked cancelled.')
+                    ->action(function (Order $record): void {
+                        DB::transaction(function () use ($record): void {
+                            $order = Order::where('id', $record->id)->lockForUpdate()->with('items')->first();
+                            if (! $order || $order->status === 'cancelled') {
+                                return;
+                            }
+                            $order->restockItems();
+                            $order->update(['status' => 'cancelled']); // event stamps cancelled_at
+                        });
+                        Notification::make()->title('Order cancelled & stock returned')->success()->send();
+                    }),
                 DeleteAction::make(),
             ])
             ->toolbarActions([
