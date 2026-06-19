@@ -61,10 +61,10 @@ class CheckoutPage extends Component
     protected $rules = [
         'customerName' => 'required|string|max:255',
         'customerEmail' => 'required|email|max:255',
-        'customerPhone' => 'required|string|max:20',
+        'customerPhone' => 'required|string|regex:/^[0-9]{8,15}$/',
         'street' => 'required|string|max:500',
         'city' => 'required|string|max:255',
-        'postcode' => 'required|string|max:10',
+        'postcode' => 'required|digits:5',
         'state' => 'required|string|max:100',
     ];
 
@@ -170,8 +170,12 @@ class CheckoutPage extends Component
             default => 'FPX',
         };
 
+        // COD is confirmed on placement (paid in person on delivery) — no online
+        // payment page, no 15-minute auto-cancel timer.
+        $isCod = $this->paymentMethod === 'cod';
+
         try {
-            $order = DB::transaction(function () use ($paymentLabel) {
+            $order = DB::transaction(function () use ($paymentLabel, $isCod) {
                 $cartItems = CartItem::forCurrentOwner()
                     ->lockForUpdate()
                     ->get();
@@ -227,12 +231,13 @@ class CheckoutPage extends Component
                     'subtotal' => $subtotal,
                     'shipping_fee' => $shippingFee,
                     'total_amount' => $subtotal + $shippingFee,
-                    'status' => 'pending',
+                    'status' => $isCod ? 'processing' : 'pending',
                     'payment_status' => 'pending',
                     'payment_method' => $paymentLabel,
                     'notes' => $this->orderNotes ?: null,
-                    // 15-minute window to pay before the order auto-cancels.
-                    'expires_at' => now()->addMinutes(15),
+                    // Online orders get a 15-minute window to pay before auto-cancel;
+                    // COD has no timer (settled on delivery).
+                    'expires_at' => $isCod ? null : now()->addMinutes(15),
                 ]);
 
                 foreach ($lineItems as $lineItem) {
@@ -266,9 +271,24 @@ class CheckoutPage extends Component
 
         $this->order = $order;
 
-        // Off to the demo payment page — the order is "pending payment" until the
-        // customer pays (or the 15-minute timer expires). The confirmation email
-        // is sent once payment succeeds, not at placement.
+        // COD: order is confirmed now (cash collected on delivery) — send the
+        // confirmation email at placement and skip the online payment page.
+        if ($isCod) {
+            try {
+                Mail::to($order->customer_email)->queue(new OrderConfirmationMail($order->fresh('items')));
+            } catch (\Throwable $e) {
+                logger()->error('COD order confirmation email failed: ' . $e->getMessage());
+            }
+
+            session()->flash('success', __('Order placed! Please have cash ready when your order is delivered.'));
+            $this->redirect(route('account'), navigate: false);
+
+            return;
+        }
+
+        // Online methods → demo payment page. The order stays "pending payment"
+        // until the customer pays (or the 15-minute timer expires); the
+        // confirmation email is sent once payment succeeds, not at placement.
         $this->redirect(route('payment', $order->order_number), navigate: false);
     }
 

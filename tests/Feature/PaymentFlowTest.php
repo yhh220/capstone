@@ -15,7 +15,7 @@ class PaymentFlowTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeOrder(User $user, Product $product, \DateTimeInterface $expiresAt): Order
+    private function makeOrder(User $user, Product $product, ?\DateTimeInterface $expiresAt = null): Order
     {
         $order = Order::create([
             'user_id'        => $user->id,
@@ -75,6 +75,22 @@ class PaymentFlowTest extends TestCase
         $this->assertSame('cancelled', $order->status);
         $this->assertSame('pending', $order->payment_status);
         $this->assertSame(3, $product->fresh()->stock); // 1 + 2 released back
+    }
+
+    public function test_cod_order_is_not_awaiting_online_payment_and_skips_the_pay_page(): void
+    {
+        $user = User::create(['name' => 'Buyer', 'email' => 'cod@example.test', 'password' => 'password', 'role' => 'client']);
+        $product = Product::create(['name' => 'Speaker', 'slug' => 'spk', 'price' => 300, 'stock' => 5, 'is_active' => true]);
+        $order = $this->makeOrder($user, $product, null);
+        $order->update(['payment_method' => 'Cash on Delivery', 'status' => 'processing']);
+
+        $this->assertTrue($order->isCod());
+        $this->assertFalse($order->isAwaitingPayment()); // unpaid, but not via the website
+
+        // The payment page must bounce a COD order to the account page.
+        Livewire::actingAs($user)
+            ->test(PaymentPage::class, ['orderNumber' => $order->order_number])
+            ->assertRedirect(route('account'));
     }
 
     public function test_cannot_pay_an_expired_order(): void

@@ -7,6 +7,7 @@ use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
@@ -32,6 +33,12 @@ class PaymentPage extends Component
 
         abort_unless($found, 404);
 
+        // COD is settled on delivery — there's no online payment page for it.
+        if ($found->isCod()) {
+            $this->redirect(route('account'), navigate: false);
+            return;
+        }
+
         $this->order = $found;
 
         // Cancel + restock immediately if the window already lapsed.
@@ -51,22 +58,54 @@ class PaymentPage extends Component
      */
     public function pay(): void
     {
-        $this->order->refresh();
+        // Layer 1 — atomic lock (works on the database cache store; Redis if set).
+        // If another in-flight request already holds it, this duplicate bails out.
+        $lock = Cache::lock('pay-order:' . $this->order->id, 10);
 
-        if ($this->order->isPaymentExpired()) {
+        if (! $lock->get()) {
+            return;
+        }
+
+        try {
+            // Layer 2 — pessimistic row lock inside a transaction, and Layer 3 —
+            // an atomic conditional flip whose affected-row count is the single-
+            // winner / "unique-index" bottom guard: only the request that finds the
+            // order still 'pending' transitions it, so the email can fire only once.
+            $result = DB::transaction(function () {
+                $order = Order::where('id', $this->order->id)->lockForUpdate()->first();
+
+                if (! $order || ! $order->isAwaitingPayment()) {
+                    return 'noop'; // already paid / cancelled
+                }
+                if ($order->isPaymentExpired()) {
+                    return 'expired';
+                }
+
+                $affected = Order::where('id', $order->id)
+                    ->where('payment_status', 'pending')
+                    ->where('status', '!=', 'cancelled')
+                    ->update([
+                        'payment_status' => 'paid',
+                        'status'         => 'processing',
+                        'expires_at'     => null,
+                    ]);
+
+                return $affected === 1 ? 'paid' : 'noop';
+            });
+        } finally {
+            $lock->release();
+        }
+
+        if ($result === 'expired') {
             $this->expireOrder();
             return;
         }
 
-        if (! $this->order->isAwaitingPayment()) {
-            return; // already paid or cancelled
-        }
+        $this->order->refresh();
 
-        $this->order->update([
-            'payment_status' => 'paid',
-            'status'         => 'processing',
-            'expires_at'     => null,
-        ]);
+        if ($result !== 'paid') {
+            return; // a concurrent request already settled this order
+        }
 
         try {
             Mail::to($this->order->customer_email)->queue(new OrderConfirmationMail($this->order->fresh('items')));
@@ -74,7 +113,6 @@ class PaymentPage extends Component
             logger()->error('Order confirmation email failed: ' . $e->getMessage());
         }
 
-        $this->order->refresh();
         session()->flash('payment_success', __('Payment successful! Your order is confirmed.'));
     }
 

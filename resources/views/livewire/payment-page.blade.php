@@ -64,18 +64,26 @@
             <div class="mt-1 text-xs text-amber-700/80 dark:text-amber-300/80">{{ __('This is a prototype — no real payment is charged and no goods are shipped.') }}</div>
         </div>
 
-        {{-- Pay --}}
+        {{-- Pay — instant client-side submit lock (x-bind:disabled) on top of the
+             wire:loading disable, so a double-click can't fire pay() twice even
+             before the network round-trip starts. --}}
         <button wire:click="pay" wire:loading.attr="disabled" wire:target="pay"
-                class="btn btn-primary btn-shine w-full !py-4 !rounded-xl uppercase tracking-widest font-black">
-            <span wire:loading.remove wire:target="pay">{{ __('Pay Now') }} · RM {{ number_format($order->total_amount, 2) }}</span>
-            <span wire:loading wire:target="pay">{{ __('Processing payment...') }}</span>
+                x-data="{ paying: false }" x-on:click="paying = true" x-bind:disabled="paying"
+                class="btn btn-primary btn-shine w-full !py-4 !rounded-xl uppercase tracking-widest font-black disabled:opacity-80 disabled:cursor-not-allowed">
+            <span x-show="!paying">{{ __('Pay Now') }} · RM {{ number_format($order->total_amount, 2) }}</span>
+            <span x-show="paying">{{ __('Processing payment...') }}</span>
         </button>
         <a href="{{ route('account') }}" wire:navigate class="block text-center text-sm text-gray-500 dark:text-gray-400 hover:text-brand-red transition-colors">{{ __('Pay later from My Account') }}</a>
     </div>
 
+    {{-- Register the countdown as a proper Alpine component via @assets (loaded
+         once, before Alpine boots) instead of a fragile inline <script> inside the
+         Livewire view — which could leave x-data un-initialised until an interaction
+         (the "have to scroll before the UI appears" glitch). --}}
+    @assets
     <script>
-        window.paymentTimer = function (seconds) {
-            return {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('paymentTimer', (seconds) => ({
                 left: seconds,
                 display: '',
                 timer: null,
@@ -96,8 +104,9 @@
                     const m = Math.floor(this.left / 60), s = this.left % 60;
                     this.display = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
                 },
-            };
-        };
+            }));
+        });
     </script>
+    @endassets
     @endif
 </div>

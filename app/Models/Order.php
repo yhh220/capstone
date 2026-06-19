@@ -36,10 +36,21 @@ class Order extends Model
         'expires_at'       => 'datetime',
     ];
 
-    /** Order is placed but not yet paid (and not cancelled). */
+    /** Cash-on-delivery orders are settled in person, not via the online flow. */
+    public function isCod(): bool
+    {
+        return $this->payment_method === 'Cash on Delivery';
+    }
+
+    /**
+     * Order is awaiting ONLINE payment (drives the pay page, timer and "Pay now").
+     * COD is excluded — it's unpaid until delivery but never paid on the website.
+     */
     public function isAwaitingPayment(): bool
     {
-        return $this->payment_status === 'pending' && $this->status !== 'cancelled';
+        return $this->payment_status === 'pending'
+            && $this->status !== 'cancelled'
+            && ! $this->isCod();
     }
 
     /** Awaiting payment but the 15-minute window has elapsed. */

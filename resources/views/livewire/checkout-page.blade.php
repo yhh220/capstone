@@ -51,7 +51,7 @@
                 </div>
                 <div class="sm:col-span-2">
                     <label for="co-phone" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Phone') }} *</label>
-                    <input wire:model.blur="customerPhone" id="co-phone" type="tel" autocomplete="tel" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
+                    <input wire:model.blur="customerPhone" id="co-phone" type="tel" inputmode="numeric" maxlength="15" x-on:input="$el.value = $el.value.replace(/\D/g, '')" autocomplete="tel" placeholder="0123456789" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
                     @error('customerPhone') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div class="sm:col-span-2">
@@ -66,7 +66,7 @@
                 </div>
                 <div>
                     <label for="co-postcode" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Postcode') }} *</label>
-                    <input wire:model.blur="postcode" id="co-postcode" type="text" autocomplete="postal-code" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
+                    <input wire:model.blur="postcode" id="co-postcode" type="text" inputmode="numeric" maxlength="5" x-on:input="$el.value = $el.value.replace(/\D/g, '')" autocomplete="postal-code" placeholder="40150" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
                     @error('postcode') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div>
@@ -215,17 +215,20 @@
                         <div>
                             <label for="card-number" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">{{ __('Card Number') }}</label>
                             <input id="card-number" type="text" inputmode="numeric" maxlength="19" autocomplete="cc-number" placeholder="1234 5678 9012 3456"
+                                   x-on:input="$el.value = $el.value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ').slice(0, 19)"
                                    class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm tracking-wider focus:outline-none focus:border-brand-red transition">
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label for="card-expiry" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">{{ __('Expiry') }}</label>
                                 <input id="card-expiry" type="text" inputmode="numeric" maxlength="5" autocomplete="cc-exp" placeholder="MM/YY"
+                                       x-on:input="$el.value = $el.value.replace(/\D/g, '').replace(/(\d{2})(?=\d)/, '$1/').slice(0, 5)"
                                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-red transition">
                             </div>
                             <div>
                                 <label for="card-cvv" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">{{ __('CVV') }}</label>
                                 <input id="card-cvv" type="text" inputmode="numeric" maxlength="4" autocomplete="cc-csc" placeholder="123"
+                                       x-on:input="$el.value = $el.value.replace(/\D/g, '').slice(0, 4)"
                                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-red transition">
                             </div>
                         </div>
