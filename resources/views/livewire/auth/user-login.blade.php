@@ -180,7 +180,7 @@
                                     <input wire:model="loginPassword" type="{{ $showPassword ? 'text' : 'password' }}" id="login-password" placeholder="••••••••" autocomplete="current-password"
                                            class="w-full pl-11 pr-12 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-white/25 focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition">
                                     <button type="button" wire:click="$toggle('showPassword')" aria-label="{{ $showPassword ? __('Hide password') : __('Show password') }}"
-                                            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/30 hover:text-brand-red transition-colors">
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-500 dark:text-white/60 hover:text-brand-red transition-colors">
                                         @if($showPassword)
                                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
                                         @else
@@ -275,7 +275,7 @@
                                     <input wire:model.live="password" type="{{ $showPassword ? 'text' : 'password' }}" id="reg-password" placeholder="{{ __('Min. 8 characters') }}" autocomplete="new-password"
                                            class="w-full pl-11 pr-12 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-white/25 focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition">
                                     <button type="button" wire:click="$toggle('showPassword')" aria-label="{{ $showPassword ? __('Hide password') : __('Show password') }}"
-                                            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/30 hover:text-brand-red transition-colors">
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-500 dark:text-white/60 hover:text-brand-red transition-colors">
                                         @if($showPassword)
                                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
                                         @else
