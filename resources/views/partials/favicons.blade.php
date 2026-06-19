@@ -15,7 +15,9 @@
 <meta name="theme-color" content="#0C0C0E" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v={{ $iconV }}" type="image/svg+xml">
 <link rel="icon" href="{{ asset('winwin-favicon.svg') }}?v={{ $iconV }}" sizes="any">
-<link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v={{ $iconV }}">
+{{-- PNG (not .ico) — Herd/Valet's nginx 404s /favicon.ico even when it exists,
+     and modern browsers happily use a PNG; avoids the dev-tools 404. --}}
+<link rel="shortcut icon" href="{{ asset('winwin-favicon-32x32.png') }}?v={{ $iconV }}">
 <link rel="apple-touch-icon" href="{{ asset('winwin-apple-touch-icon.png') }}?v={{ $iconV }}">
 <link rel="mask-icon" href="{{ asset('winwin-favicon.svg') }}?v={{ $iconV }}" color="#C8413D">
 <link rel="manifest" href="{{ asset('site.webmanifest') }}?v={{ $iconV }}">

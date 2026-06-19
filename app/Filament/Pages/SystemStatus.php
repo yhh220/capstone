@@ -31,7 +31,17 @@ class SystemStatus extends Page
     public function getChecks(): array
     {
         return [
-            $this->check('Database', fn () => DB::select('select 1') ? ['ok', 'Connected'] : ['fail', 'No response']),
+            $this->check('Database', function () {
+                DB::select('select 1');
+                // Show the actual DB size (sqlite file) so it's never confused with disk space.
+                $size = '';
+                $db = config('database.connections.' . config('database.default') . '.database');
+                if (is_string($db) && is_file($db)) {
+                    $size = ' · ' . $this->humanSize((int) filesize($db));
+                }
+
+                return ['ok', 'Connected' . $size];
+            }),
             $this->check('Cache', function () {
                 $key = 'status:ping:' . uniqid();
                 Cache::put($key, '1', 5);
@@ -62,11 +72,12 @@ class SystemStatus extends Page
             $this->check('Mail', fn () => filled(config('mail.mailers.smtp.username'))
                 ? ['ok', 'Configured · ' . config('mail.from.address')]
                 : ['warn', 'Not configured']),
-            $this->check('Storage', function () {
+            $this->check('Disk space', function () {
                 $writable = is_writable(storage_path('logs'));
                 $freeGb = round((disk_free_space(base_path()) ?: 0) / 1_000_000_000, 1);
 
-                return [$writable ? 'ok' : 'fail', ($writable ? 'Writable' : 'NOT writable') . ' · ' . $freeGb . ' GB free'];
+                // This is FREE DISK on the server — not the database size.
+                return [$writable ? 'ok' : 'fail', $freeGb . ' GB free' . ($writable ? '' : ' · logs NOT writable')];
             }),
             $this->check('Errors (24h)', function () {
                 $n = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
@@ -95,6 +106,18 @@ class SystemStatus extends Page
     {
         return AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
             ->latest('id')->limit(8)->get();
+    }
+
+    private function humanSize(int $bytes): string
+    {
+        foreach (['B', 'KB', 'MB', 'GB'] as $unit) {
+            if ($bytes < 1024 || $unit === 'GB') {
+                return round($bytes, $unit === 'B' ? 0 : 1) . ' ' . $unit;
+            }
+            $bytes /= 1024;
+        }
+
+        return $bytes . ' B';
     }
 
     private function check(string $name, \Closure $probe): array
