@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\Orders;
 
+use App\Mail\OrderShippedMail;
 use App\Models\Order;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Mail;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -221,6 +224,35 @@ class OrderResource extends Resource
                         'status'         => $record->status === 'pending' ? 'processing' : $record->status,
                         'expires_at'     => null,
                     ])),
+                Action::make('markShipped')
+                    ->label('Mark Shipped')
+                    ->icon(Heroicon::OutlinedTruck)
+                    ->color('primary')
+                    ->visible(fn (Order $record) => in_array($record->status, ['processing'], true))
+                    ->schema([
+                        Forms\Components\TextInput::make('tracking_number')
+                            ->label('Tracking number')
+                            ->required()
+                            ->maxLength(100)
+                            ->default(fn (Order $record) => $record->tracking_number)
+                            ->helperText('Shown to the customer in the "shipped" email.'),
+                    ])
+                    ->modalHeading('Mark as shipped & notify customer')
+                    ->modalSubmitActionLabel('Mark shipped & send email')
+                    ->action(function (Order $record, array $data): void {
+                        $record->update([
+                            'status'          => 'shipped',
+                            'tracking_number' => $data['tracking_number'],
+                        ]);
+
+                        try {
+                            Mail::to($record->customer_email)->send(new OrderShippedMail($record->fresh()));
+                            Notification::make()->title('Marked shipped — customer notified')->success()->send();
+                        } catch (\Throwable $e) {
+                            logger()->error('Shipped email failed: ' . $e->getMessage());
+                            Notification::make()->title('Marked shipped, but the email failed to send')->warning()->send();
+                        }
+                    }),
                 Action::make('invoice')
                     ->label('Invoice')
                     ->icon(Heroicon::OutlinedDocumentText)

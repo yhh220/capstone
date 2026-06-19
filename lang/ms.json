@@ -1007,5 +1007,13 @@
     "We sent a 6-digit code to :email.": "Kami menghantar kod 6 digit ke :email.",
     "You signed in with Google, so your account has no password yet. Set one to also log in with your email and password.": "Anda log masuk dengan Google, jadi akaun anda belum mempunyai kata laluan. Tetapkan satu untuk turut log masuk dengan e-mel dan kata laluan anda.",
     "Set a password to enable shopping & checkout.": "Tetapkan kata laluan untuk mengaktifkan pembelian & pembayaran.",
-    "Set it now": "Tetapkan sekarang"
+    "Set it now": "Tetapkan sekarang",
+    "Booking :ref — we will confirm shortly.": "Tempahan :ref — kami akan sahkan sebentar lagi.",
+    "Booking Received": "Tempahan Diterima",
+    "Good news, :name — your order is on its way!": "Berita baik, :name — pesanan anda sedang dalam perjalanan!",
+    "Order :number is on its way.": "Pesanan :number sedang dalam perjalanan.",
+    "Track / Manage Booking": "Jejak / Urus Tempahan",
+    "Your order has shipped!": "Pesanan anda telah dihantar!",
+    "Hi :name, we have received your booking request. Our team will confirm it shortly.": "Hai :name, kami telah menerima permintaan tempahan anda. Pasukan kami akan mengesahkannya sebentar lagi.",
+    "This is a request — your slot is confirmed once our team reviews it. We will be in touch via WhatsApp/phone.": "Ini adalah permintaan — slot anda disahkan setelah pasukan kami menyemaknya. Kami akan menghubungi anda melalui WhatsApp/telefon."
 }

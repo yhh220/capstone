@@ -1007,5 +1007,13 @@
     "We sent a 6-digit code to :email.": "我们已向 :email 发送了一个 6 位验证码。",
     "You signed in with Google, so your account has no password yet. Set one to also log in with your email and password.": "您是用 Google 登录的，所以账户还没有密码。设置一个后，也能用邮箱和密码登录。",
     "Set a password to enable shopping & checkout.": "请先设置密码以启用购物和结账功能。",
-    "Set it now": "立即设置"
+    "Set it now": "立即设置",
+    "Booking :ref — we will confirm shortly.": "预约 :ref — 我们将尽快确认。",
+    "Booking Received": "已收到预约",
+    "Good news, :name — your order is on its way!": ":name，好消息 — 您的订单已在配送途中！",
+    "Order :number is on its way.": "订单 :number 正在配送途中。",
+    "Track / Manage Booking": "追踪 / 管理预约",
+    "Your order has shipped!": "您的订单已发货！",
+    "Hi :name, we have received your booking request. Our team will confirm it shortly.": ":name 您好，我们已收到您的预约申请。我们的团队会尽快确认。",
+    "This is a request — your slot is confirmed once our team reviews it. We will be in touch via WhatsApp/phone.": "这是一个申请 — 经我们团队审核后即确认您的时段。我们会通过 WhatsApp/电话与您联系。"
 }

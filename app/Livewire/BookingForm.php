@@ -4,12 +4,14 @@ namespace App\Livewire;
 
 use App\Livewire\Concerns\NotifiesOwner;
 use App\Livewire\Concerns\SetsSeo;
+use App\Mail\BookingConfirmationMail;
 use App\Models\Booking;
 use App\Models\Service;
 use App\Services\Booking\BookingService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 use Spatie\Honeypot\Http\Livewire\Concerns\HoneypotData;
@@ -367,6 +369,16 @@ class BookingForm extends Component
             url('/admin/bookings/' . $booking->getKey() . '/edit'),
             'View booking',
         );
+
+        // Confirmation to the customer (only if they left an email — guest bookings
+        // may not). Failures must never block a successful booking.
+        if ($booking->customer_email) {
+            try {
+                Mail::to($booking->customer_email)->send(new BookingConfirmationMail($booking->fresh('service')));
+            } catch (\Throwable $e) {
+                logger()->error('Booking confirmation email failed: ' . $e->getMessage());
+            }
+        }
 
         $this->reset([
             'customer_name',
