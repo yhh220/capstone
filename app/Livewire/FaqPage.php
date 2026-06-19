@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\SetsSeo;
+use App\Models\Faq;
 use Livewire\Component;
 
 class FaqPage extends Component
@@ -19,6 +20,9 @@ class FaqPage extends Component
 
     public function render()
     {
-        return view('livewire.faq-page')->layout('layouts.app');
+        // Active FAQs grouped by category in display order (uncategorised grouped under '').
+        $faqGroups = Faq::published()->groupBy(fn (Faq $faq) => $faq->category ?: '');
+
+        return view('livewire.faq-page', ['faqGroups' => $faqGroups])->layout('layouts.app');
     }
 }

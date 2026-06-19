@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(CarModelSeeder::class);
         $this->call(ChatbotFaqSeeder::class);
+        $this->call(FaqSeeder::class);
         $this->call(FeedbackSeeder::class);
 
         $services = [
