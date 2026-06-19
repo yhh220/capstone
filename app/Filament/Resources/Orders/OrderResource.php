@@ -26,6 +26,17 @@ class OrderResource extends Resource
     protected static \UnitEnum|string|null $navigationGroup = 'Shop';
     protected static ?int $navigationSort = 1;
 
+    /** Badge = paid/confirmed orders still awaiting fulfilment (same idea as Bookings). */
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) Order::where('status', 'processing')->count() ?: null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
     public static function canCreate(): bool
     {
         return false;
