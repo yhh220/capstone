@@ -20,3 +20,6 @@ Schedule::command('activitylog:trim')->daily();
 
 // Cancel unpaid orders past their 15-minute payment window and release stock.
 Schedule::command('orders:expire-unpaid')->everyMinute();
+
+// Email a day-before reminder for tomorrow's bookings (skips cancelled/completed).
+Schedule::command('bookings:send-reminders')->dailyAt('09:00');

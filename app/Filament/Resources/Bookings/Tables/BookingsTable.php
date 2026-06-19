@@ -48,6 +48,13 @@ class BookingsTable
                         default     => 'warning',
                     })
                     ->sortable(),
+                TextColumn::make('reminder_sent_at')
+                    ->label('Reminder')
+                    ->badge()
+                    ->state(fn ($record) => $record->reminder_sent_at ? 'Sent' : 'Not sent')
+                    ->color(fn ($record) => $record->reminder_sent_at ? 'success' : 'gray')
+                    ->tooltip(fn ($record) => $record->reminder_sent_at?->format('d M Y, H:i'))
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -74,6 +81,24 @@ class BookingsTable
             ->persistFiltersInSession()
             ->recordActions([
                 EditAction::make(),
+                \Filament\Actions\Action::make('sendReminder')
+                    ->label('Send reminder')
+                    ->icon(\Filament\Support\Icons\Heroicon::OutlinedBell)
+                    ->color('warning')
+                    ->visible(fn ($record) => in_array($record->status, ['pending', 'confirmed'], true) && filled($record->customer_email))
+                    ->requiresConfirmation()
+                    ->modalHeading('Send a reminder email now?')
+                    ->action(function ($record): void {
+                        try {
+                            \Illuminate\Support\Facades\Mail::to($record->customer_email)
+                                ->send(new \App\Mail\BookingReminderMail($record->load('service')));
+                            $record->forceFill(['reminder_sent_at' => now()])->save();
+                            \Filament\Notifications\Notification::make()->title('Reminder sent')->success()->send();
+                        } catch (\Throwable $e) {
+                            logger()->error('Manual booking reminder failed: ' . $e->getMessage());
+                            \Filament\Notifications\Notification::make()->title('Reminder failed to send')->danger()->send();
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

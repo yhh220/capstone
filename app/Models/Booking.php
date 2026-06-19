@@ -31,6 +31,7 @@ class Booking extends Model
         'preferred_date' => 'date',
         'start_at' => 'datetime',
         'end_at' => 'datetime',
+        'reminder_sent_at' => 'datetime',
     ];
 
     public const STATUSES = ['pending', 'confirmed', 'cancelled', 'completed'];

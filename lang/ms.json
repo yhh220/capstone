@@ -1015,5 +1015,9 @@
     "Track / Manage Booking": "Jejak / Urus Tempahan",
     "Your order has shipped!": "Pesanan anda telah dihantar!",
     "Hi :name, we have received your booking request. Our team will confirm it shortly.": "Hai :name, kami telah menerima permintaan tempahan anda. Pasukan kami akan mengesahkannya sebentar lagi.",
-    "This is a request — your slot is confirmed once our team reviews it. We will be in touch via WhatsApp/phone.": "Ini adalah permintaan — slot anda disahkan setelah pasukan kami menyemaknya. Kami akan menghubungi anda melalui WhatsApp/telefon."
+    "This is a request — your slot is confirmed once our team reviews it. We will be in touch via WhatsApp/phone.": "Ini adalah permintaan — slot anda disahkan setelah pasukan kami menyemaknya. Kami akan menghubungi anda melalui WhatsApp/telefon.",
+    "Booking Reminder": "Peringatan Tempahan",
+    "Hi :name, this is a friendly reminder that your booking is tomorrow.": "Hai :name, ini peringatan mesra bahawa tempahan anda adalah esok.",
+    "Need to reschedule or cancel? Use the link below or WhatsApp us — no problem at all.": "Perlu menjadual semula atau membatalkan? Gunakan pautan di bawah atau WhatsApp kami — tiada masalah.",
+    "Your booking :ref is tomorrow.": "Tempahan :ref anda adalah esok."
 }

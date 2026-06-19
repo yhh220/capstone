@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Mail;
+
+use App\Models\Booking;
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+
+// Sent by the daily scheduler the day before an upcoming booking.
+class BookingReminderMail extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    public function __construct(public Booking $booking)
+    {
+    }
+
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: 'Reminder: your booking tomorrow – ' . $this->booking->reference . ' | Win Win Car Audio',
+        );
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            view: 'mail.booking-reminder',
+        );
+    }
+}

@@ -1015,5 +1015,9 @@
     "Track / Manage Booking": "追踪 / 管理预约",
     "Your order has shipped!": "您的订单已发货！",
     "Hi :name, we have received your booking request. Our team will confirm it shortly.": ":name 您好，我们已收到您的预约申请。我们的团队会尽快确认。",
-    "This is a request — your slot is confirmed once our team reviews it. We will be in touch via WhatsApp/phone.": "这是一个申请 — 经我们团队审核后即确认您的时段。我们会通过 WhatsApp/电话与您联系。"
+    "This is a request — your slot is confirmed once our team reviews it. We will be in touch via WhatsApp/phone.": "这是一个申请 — 经我们团队审核后即确认您的时段。我们会通过 WhatsApp/电话与您联系。",
+    "Booking Reminder": "预约提醒",
+    "Hi :name, this is a friendly reminder that your booking is tomorrow.": ":name 您好，温馨提醒您的预约就在明天。",
+    "Need to reschedule or cancel? Use the link below or WhatsApp us — no problem at all.": "需要改期或取消？用下方链接或 WhatsApp 联系我们 — 完全没问题。",
+    "Your booking :ref is tomorrow.": "您的预约 :ref 就在明天。"
 }
