@@ -987,6 +987,21 @@
     </div>
     @endif
 
+    {{-- Social-login accounts have no password yet — prompt them to set one before
+         they can shop. Disappears automatically once a password is set. --}}
+    @auth
+        @if(! auth()->user()->hasPassword())
+        <a href="{{ route('profile') }}"
+           class="block bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800/40 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
+            <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-center gap-2 text-sm text-amber-800 dark:text-amber-300 text-center">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span>{{ __('Set a password to enable shopping & checkout.') }}</span>
+                <span class="font-bold underline whitespace-nowrap">{{ __('Set it now') }} →</span>
+            </div>
+        </a>
+        @endif
+    @endauth
+
     <main id="main-content" tabindex="-1">
         {{ $slot }}
     </main>
