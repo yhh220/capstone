@@ -35,6 +35,17 @@
 
     <div class="max-w-7xl mx-auto px-4 py-10">
 
+        {{-- Search is always visible on mobile; the rest of the filters (category,
+             price) stay behind the toggle below. On desktop the sidebar handles search. --}}
+        <div class="lg:hidden mb-3">
+            <label for="product-search-mobile" class="sr-only">{{ __('Search') }}</label>
+            <input wire:model.live.debounce.300ms="search"
+                   id="product-search-mobile"
+                   type="search"
+                   placeholder="{{ __('Search products...') }}"
+                   class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-red transition placeholder-gray-400 dark:placeholder-gray-500">
+        </div>
+
         {{-- Mobile filter toggle --}}
         <div class="lg:hidden mb-4">
             <button id="filter-toggle"
@@ -54,7 +65,8 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 lg:sticky lg:top-20">
                     <h3 class="font-bold text-gray-800 dark:text-gray-200 text-lg mb-4">{{ __('Find products') }}</h3>
 
-                    <div class="mb-5">
+                    {{-- Desktop-only: on mobile the always-visible search above is used instead. --}}
+                    <div class="mb-5 hidden lg:block">
                         <label for="product-search" class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2 block">
                             {{ __('Search') }}
                         </label>
