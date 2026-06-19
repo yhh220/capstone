@@ -65,8 +65,15 @@ class SocialAuthController extends Controller
 
         // 2. Same (provider-verified) email as an existing account → link them, so
         //    the customer can use either password or social login interchangeably.
+        //    withTrashed() so a soft-deleted account still resolves (its email keeps
+        //    the unique slot) instead of crashing on a duplicate insert.
         $email = $socialUser->getEmail();
-        $user  = $email ? User::where('email', $email)->first() : null;
+        $user  = $email ? User::withTrashed()->where('email', $email)->first() : null;
+
+        // A previously-deleted customer signing back in → reactivate the account.
+        if ($user && $user->trashed()) {
+            $user->restore();
+        }
 
         // 3. Brand-new customer. Password is a random throwaway (the 'hashed' cast
         //    hashes it) — they sign in socially, or set one via "forgot password".
