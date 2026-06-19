@@ -11,8 +11,14 @@ Artisan::command('inspire', function () {
 // Auto-regenerate sitemap daily at midnight
 Schedule::command('sitemap:generate')->daily();
 
-// Prune chat logs older than 90 days so spam / nonsense can't bloat the table.
-Schedule::command('model:prune', ['--model' => [\App\Models\ChatLog::class]])->daily();
+// Prune chat logs (90d) and structured app logs (LOG_DB_RETENTION_DAYS) so the
+// tables can't grow unbounded.
+Schedule::command('model:prune', ['--model' => [\App\Models\ChatLog::class, \App\Models\AppLog::class]])->daily();
+
+// Heartbeat: the System Status page reads this to tell whether cron is alive.
+Schedule::call(fn () => cache()->forever('scheduler:last_run', now()->toIso8601String()))
+    ->everyMinute()
+    ->name('scheduler-heartbeat');
 
 // Cap the activity log so it can never grow unbounded and bloat the admin panel —
 // keep the most recent 5,000 records, delete the rest. Adjust with --keep=N.

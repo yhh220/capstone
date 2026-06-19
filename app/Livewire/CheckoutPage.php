@@ -185,6 +185,8 @@ class CheckoutPage extends Component
         // payment page, no 15-minute auto-cancel timer.
         $isCod = $this->paymentMethod === 'cod';
 
+        \App\Support\Breadcrumbs::push('checkout', 'Placing order', ['method' => $this->paymentMethod]);
+
         try {
             $order = DB::transaction(function () use ($paymentLabel, $isCod) {
                 $cartItems = CartItem::forCurrentOwner()

@@ -14,7 +14,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Request-scoped breadcrumb trail (attached to error logs by the
+        // ObservabilityProcessor).
+        $this->app->singleton(\App\Support\Breadcrumbs::class);
     }
 
     public function boot(): void

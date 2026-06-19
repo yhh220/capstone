@@ -40,6 +40,8 @@ class SocialAuthController extends Controller
 
         $user = $this->findOrCreateUser($provider, $socialUser);
 
+        \App\Support\Breadcrumbs::push('auth', 'Social login', ['provider' => $provider, 'user' => $user->id]);
+
         Auth::login($user, remember: true);
         request()->session()->regenerate();
 

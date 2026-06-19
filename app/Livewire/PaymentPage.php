@@ -108,7 +108,10 @@ class PaymentPage extends Component
             return; // a concurrent request already settled this order
         }
 
+        \App\Support\Breadcrumbs::push('payment', 'Order paid', ['order' => $this->order->order_number]);
+
         try {
+            \App\Support\Breadcrumbs::push('mail', 'Sending order confirmation');
             Mail::to($this->order->customer_email)->send(new OrderConfirmationMail($this->order->fresh('items')));
         } catch (\Throwable $e) {
             logger()->error('Order confirmation email failed: ' . $e->getMessage());

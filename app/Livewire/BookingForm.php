@@ -372,8 +372,11 @@ class BookingForm extends Component
 
         // Confirmation to the customer (only if they left an email — guest bookings
         // may not). Failures must never block a successful booking.
+        \App\Support\Breadcrumbs::push('booking', 'Booking created', ['ref' => $booking->reference]);
+
         if ($booking->customer_email) {
             try {
+                \App\Support\Breadcrumbs::push('mail', 'Sending booking confirmation');
                 Mail::to($booking->customer_email)->send(new BookingConfirmationMail($booking->fresh('service')));
             } catch (\Throwable $e) {
                 logger()->error('Booking confirmation email failed: ' . $e->getMessage());

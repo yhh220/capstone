@@ -54,7 +54,8 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            // Human-readable file + structured JSON file + the in-admin DB table.
+            'channels' => explode(',', (string) env('LOG_STACK', 'single,structured,database')),
             'ignore_exceptions' => false,
         ],
 
@@ -62,6 +63,24 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        // Structured logs written to the app_logs DB table (admin "Logs" viewer).
+        'database' => [
+            'driver' => 'custom',
+            'via' => \App\Logging\CreateDatabaseLogger::class,
+            'level' => env('LOG_DB_LEVEL', 'info'),
+        ],
+
+        // Durable JSON backup of every log line (one JSON object per line).
+        'structured' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/structured.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'formatter' => \Monolog\Formatter\JsonFormatter::class,
+            'tap' => [\App\Logging\AddObservabilityProcessor::class],
             'replace_placeholders' => true,
         ],
 
