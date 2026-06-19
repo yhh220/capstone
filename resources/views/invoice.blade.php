@@ -40,7 +40,7 @@
 <body>
     @unless($isPdf)
     <div class="toolbar">
-        <a href="{{ route('invoice.pdf', $order->order_number) }}" class="btn btn-red">Download PDF</a>
+        <a href="{{ route('invoice.pdf', $order->order_number) }}" download="invoice-{{ $order->order_number }}.pdf" class="btn btn-red">Download PDF</a>
         <a href="javascript:window.print()" class="btn btn-grey">Print</a>
     </div>
     @endunless
