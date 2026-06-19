@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +28,11 @@ class AppServiceProvider extends ServiceProvider
             $rule = Password::min(8)->mixedCase()->numbers()->symbols();
 
             return app()->environment('testing') ? $rule : $rule->uncompromised();
+        });
+
+        // Register the Microsoft Socialite driver (Google ships with Socialite).
+        Event::listen(function (SocialiteWasCalled $event) {
+            $event->extendSocialite('microsoft', \SocialiteProviders\Microsoft\Provider::class);
         });
 
         \Filament\Support\Facades\FilamentView::registerRenderHook(

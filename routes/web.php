@@ -22,6 +22,7 @@ use App\Livewire\PaymentPage;
 use App\Livewire\Auth\UserLogin;
 use App\Livewire\Auth\ForgotPassword;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\SocialAuthController;
 use App\Http\Middleware\ShoppingEnabled;
 
 // ─── Public Routes ─────────────────────────────────────────────
@@ -73,6 +74,14 @@ Route::get('/lang/{locale}', function (string $locale, \Illuminate\Http\Request 
 // ─── Authentication Routes ─────────────────────────────────────
 Route::get('/login', UserLogin::class)->name('login');
 Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
+
+// Social login (OAuth). The controller 404s any provider that isn't configured.
+Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])
+    ->whereIn('provider', ['google', 'microsoft'])
+    ->name('social.redirect');
+Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])
+    ->whereIn('provider', ['google', 'microsoft'])
+    ->name('social.callback');
 
 // Logout (POST only — CSRF protected)
 Route::post('/logout', function () {

@@ -45,11 +45,28 @@ class CustomersTable
                     ->sortable()
                     ->badge()
                     ->color('primary'),
+                TextColumn::make('sign_in_method')
+                    ->label('Sign-in')
+                    ->badge()
+                    ->getStateUsing(function (User $record): array {
+                        $providers = $record->socialAccounts
+                            ->pluck('provider')
+                            ->map(fn (string $p) => \App\Support\SocialLogin::PROVIDERS[$p] ?? ucfirst($p))
+                            ->all();
+
+                        return $providers ?: ['Email / Password'];
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'Google'    => 'danger',
+                        'Microsoft' => 'info',
+                        default     => 'gray',
+                    }),
                 TextColumn::make('created_at')
                     ->label('Registered')
                     ->dateTime('d M Y')
                     ->sortable(),
             ])
+            ->modifyQueryUsing(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->with('socialAccounts'))
             ->recordActions([
                 EditAction::make()
                     ->visible(fn () => Filament::auth()->user()?->isAdmin() ?? false),

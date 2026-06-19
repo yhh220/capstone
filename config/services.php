@@ -53,4 +53,22 @@ return [
         'hours' => env('STORE_HOURS'),
     ],
 
+    // ── Social login (OAuth) ──────────────────────────────────────────────
+    // A provider is "enabled" only when both its id and secret are set, so the
+    // login buttons appear automatically once you add the keys. The redirect URI
+    // is set per-request in SocialAuthController via route(), so it always matches
+    // the current host (register that exact URL in the provider's console).
+    'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('GOOGLE_REDIRECT_URI'),
+    ],
+
+    'microsoft' => [
+        'client_id'     => env('MICROSOFT_CLIENT_ID'),
+        'client_secret' => env('MICROSOFT_CLIENT_SECRET'),
+        'redirect'      => env('MICROSOFT_REDIRECT_URI'),
+        'tenant'        => env('MICROSOFT_TENANT', 'common'),
+    ],
+
 ];

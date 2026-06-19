@@ -110,4 +110,12 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     {
         return $this->hasMany(Booking::class);
     }
+
+    /**
+     * Linked social-login accounts (Google, Microsoft, …).
+     */
+    public function socialAccounts()
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
 }

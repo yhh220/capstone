@@ -218,6 +218,8 @@
                                 </span>
                             </button>
                         </form>
+
+                        @include('partials.social-login')
                     </div>
 
                     {{-- ============ REGISTER ============ --}}
@@ -353,6 +355,8 @@
                                 </span>
                             </button>
                         </form>
+
+                        @include('partials.social-login')
                     </div>
                     @endif
                     @endif

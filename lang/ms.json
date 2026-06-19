@@ -992,5 +992,7 @@
     "Launch": "Lancar",
     "Order placed! Please have cash ready when your order is delivered.": "Pesanan dibuat! Sila sediakan tunai semasa pesanan anda dihantar.",
     "No questions have been added yet.": "Tiada soalan ditambah lagi.",
-    "You can book any date within the next :months months.": "Anda boleh menempah mana-mana tarikh dalam tempoh :months bulan akan datang."
+    "You can book any date within the next :months months.": "Anda boleh menempah mana-mana tarikh dalam tempoh :months bulan akan datang.",
+    "or continue with": "atau teruskan dengan",
+    "We could not sign you in with :provider. Please try again.": "Kami tidak dapat log masuk anda dengan :provider. Sila cuba lagi."
 }
