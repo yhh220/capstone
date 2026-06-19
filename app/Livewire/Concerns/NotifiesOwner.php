@@ -29,7 +29,7 @@ trait NotifiesOwner
             'owner-alert-email',
             maxAttempts: 10,
             callback: function () use ($email, $heading, $rows, $actionUrl, $actionLabel) {
-                Mail::to($email)->queue(new OwnerAlertMail($heading, $rows, $actionUrl, $actionLabel));
+                Mail::to($email)->send(new OwnerAlertMail($heading, $rows, $actionUrl, $actionLabel));
             },
             decaySeconds: 3600,
         );

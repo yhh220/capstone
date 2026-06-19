@@ -994,5 +994,8 @@
     "No questions have been added yet.": "目前还没有添加任何问题。",
     "You can book any date within the next :months months.": "您可以预约未来 :months 个月内的任何日期。",
     "or continue with": "或使用以下方式继续",
-    "We could not sign you in with :provider. Please try again.": "我们无法通过 :provider 登录您的账户。请重试。"
+    "We could not sign you in with :provider. Please try again.": "我们无法通过 :provider 登录您的账户。请重试。",
+    "A new submission just came in from your website.": "您的网站刚收到一条新的提交。",
+    "Open in Admin": "在后台打开",
+    "Order :number — thank you for your purchase.": "订单 :number — 感谢您的购买。"
 }

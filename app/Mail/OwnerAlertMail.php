@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -11,9 +10,10 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * A lightweight internal alert to the shop owner (new booking / new enquiry).
- * Kept generic so one queued mailable + one view covers every alert type.
+ * Kept generic so one mailable + one view covers every alert type. Sent
+ * synchronously (no ShouldQueue) so it goes out without a queue worker.
  */
-class OwnerAlertMail extends Mailable implements ShouldQueue
+class OwnerAlertMail extends Mailable
 {
     use Queueable, SerializesModels;
 

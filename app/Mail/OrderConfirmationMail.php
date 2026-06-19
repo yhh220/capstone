@@ -7,10 +7,10 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\SerializesModels;
 
-class OrderConfirmationMail extends Mailable implements ShouldQueue
+// Sent synchronously (no ShouldQueue) so confirmations go out without a worker.
+class OrderConfirmationMail extends Mailable
 {
     use Queueable, SerializesModels;
 

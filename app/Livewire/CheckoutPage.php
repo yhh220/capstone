@@ -275,7 +275,7 @@ class CheckoutPage extends Component
         // confirmation email at placement and skip the online payment page.
         if ($isCod) {
             try {
-                Mail::to($order->customer_email)->queue(new OrderConfirmationMail($order->fresh('items')));
+                Mail::to($order->customer_email)->send(new OrderConfirmationMail($order->fresh('items')));
             } catch (\Throwable $e) {
                 logger()->error('COD order confirmation email failed: ' . $e->getMessage());
             }

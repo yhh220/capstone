@@ -108,7 +108,7 @@ class PaymentPage extends Component
         }
 
         try {
-            Mail::to($this->order->customer_email)->queue(new OrderConfirmationMail($this->order->fresh('items')));
+            Mail::to($this->order->customer_email)->send(new OrderConfirmationMail($this->order->fresh('items')));
         } catch (\Throwable $e) {
             logger()->error('Order confirmation email failed: ' . $e->getMessage());
         }
