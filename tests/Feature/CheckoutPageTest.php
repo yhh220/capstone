@@ -75,7 +75,7 @@ class CheckoutPageTest extends TestCase
         $this->assertSame(1, $product->fresh()->stock);
     }
 
-    public function test_out_of_stock_product_can_be_backordered(): void
+    public function test_out_of_stock_product_blocks_checkout(): void
     {
         $user = User::create([
             'name' => 'Backorder Buyer',
@@ -84,7 +84,7 @@ class CheckoutPageTest extends TestCase
             'role' => 'client',
         ]);
 
-        // Zero on-hand stock — should still be orderable as a backorder.
+        // Zero on-hand stock — checkout must refuse, not silently backorder.
         $product = Product::create([
             'name' => 'Backorder Subwoofer',
             'slug' => 'backorder-subwoofer',
@@ -109,6 +109,49 @@ class CheckoutPageTest extends TestCase
             ->set('postcode', '40150')
             ->set('state', 'Selangor')
             ->call('placeOrder')
+            ->assertHasErrors('stock');
+
+        $this->assertDatabaseMissing('orders', [
+            'user_id' => $user->id,
+        ]);
+
+        // Stock is untouched — nothing was reserved for a rejected checkout.
+        $this->assertSame(0, $product->fresh()->stock);
+    }
+
+    public function test_sufficient_stock_allows_checkout(): void
+    {
+        $user = User::create([
+            'name' => 'In-Stock Buyer',
+            'email' => 'instock@example.test',
+            'password' => 'password',
+            'role' => 'client',
+        ]);
+
+        $product = Product::create([
+            'name' => 'In-Stock Subwoofer',
+            'slug' => 'in-stock-subwoofer',
+            'price' => 500,
+            'stock' => 5,
+            'is_active' => true,
+        ]);
+
+        CartItem::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'quantity' => 2,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(CheckoutPage::class)
+            ->set('customerName', 'In-Stock Buyer')
+            ->set('customerEmail', 'instock@example.test')
+            ->set('customerPhone', '0123456789')
+            ->set('street', '1 Jalan Test')
+            ->set('city', 'Shah Alam')
+            ->set('postcode', '40150')
+            ->set('state', 'Selangor')
+            ->call('placeOrder')
             ->assertHasNoErrors()
             ->assertRedirect();
 
@@ -118,8 +161,7 @@ class CheckoutPageTest extends TestCase
             'payment_status' => 'pending',
         ]);
 
-        // Stock goes negative to represent the two units now owed.
-        $this->assertSame(-2, $product->fresh()->stock);
+        $this->assertSame(3, $product->fresh()->stock);
     }
 
     public function test_unavailable_product_shows_a_visible_error_instead_of_failing_silently(): void
