@@ -113,12 +113,16 @@ class BookingForm extends Component
         return Service::where('is_active', true)->find($this->service_id);
     }
 
-    public function mount(?int $service = null): void
+    public function mount(): void
     {
         $this->honeypotData = new HoneypotData();
 
-        if ($service && Service::where('is_active', true)->whereKey($service)->exists()) {
-            $this->service_id = (string) $service;
+        // Read ?service=ID from the query string (Livewire 4 mount() only receives route params,
+        // not query strings — so we read it manually here).
+        $serviceId = request()->query('service');
+        if ($serviceId && Service::where('is_active', true)->whereKey($serviceId)->exists()) {
+            $this->service_id = (string) $serviceId;
+            $this->currentStep = 2; // skip the service-selection step
         }
 
         $this->calendarMonth = ($this->preferred_date !== ''
