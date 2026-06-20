@@ -110,14 +110,14 @@ class BookingForm extends Component
             return null;
         }
 
-        return Service::find($this->service_id);
+        return Service::where('is_active', true)->find($this->service_id);
     }
 
     public function mount(?int $service = null): void
     {
         $this->honeypotData = new HoneypotData();
 
-        if ($service) {
+        if ($service && Service::where('is_active', true)->whereKey($service)->exists()) {
             $this->service_id = (string) $service;
         }
 
@@ -286,7 +286,7 @@ class BookingForm extends Component
         $this->validate();
 
         // Service is optional now; a null id is a general "just visiting" booking.
-        if ($this->service_id !== '' && ! Service::whereKey($this->service_id)->exists()) {
+        if ($this->service_id !== '' && ! Service::where('is_active', true)->whereKey($this->service_id)->exists()) {
             $this->addError('service_id', __('That service is no longer available. Please pick another or leave it blank.'));
 
             return;
