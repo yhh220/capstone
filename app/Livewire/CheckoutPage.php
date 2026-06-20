@@ -84,10 +84,24 @@ class CheckoutPage extends Component
             return;
         }
 
-        // Pre-fill from user profile
+        // Pre-fill from user profile + last order's delivery address
         $user = Auth::user();
-        $this->customerName = $user->name ?? '';
+        $this->customerName  = $user->name ?? '';
         $this->customerEmail = $user->email ?? '';
+
+        $lastOrder = \App\Models\Order::where('user_id', $user->id)
+            ->whereNotNull('shipping_address')
+            ->latest()
+            ->first();
+
+        if ($lastOrder) {
+            $addr = $lastOrder->shipping_address;
+            $this->customerPhone = $lastOrder->customer_phone ?? '';
+            $this->street        = $addr['street']   ?? '';
+            $this->city          = $addr['city']     ?? '';
+            $this->postcode      = $addr['postcode'] ?? '';
+            $this->state         = $addr['state']    ?? '';
+        }
 
         // Redirect to cart if cart is empty
         if (CartItem::forCurrentOwner()->count() === 0) {

@@ -110,24 +110,34 @@
             @if(auth()->user()->hasPassword())
             {{-- Account already has a password → change it (needs the current one).
                  Passwords stay in Alpine state only — never enter the Livewire snapshot. --}}
-            <form x-data="{ cp: '', np: '', npc: '' }"
+            <form x-data="{ cp: '', np: '', npc: '', show: false }"
                   @submit.prevent="$wire.updatePassword(cp, np, npc)"
                   x-on:password-changed.window="cp = np = npc = ''"
                   class="space-y-4">
                 <div>
                     <label for="pf-current-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Current Password') }}</label>
-                    <input x-model="cp" id="pf-current-pass" type="password" autocomplete="current-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                    <div class="relative">
+                        <input x-model="cp" id="pf-current-pass" :type="show ? 'text' : 'password'" autocomplete="current-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:border-brand-red transition">
+                        <button type="button" @click="show = !show" class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-brand-red transition-colors" :aria-label="show ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'">
+                            <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                        </button>
+                    </div>
                     @error('current_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="pf-new-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('New Password') }}</label>
-                        <input x-model="np" id="pf-new-pass" type="password" autocomplete="new-password" placeholder="{{ __('Min. 8 characters') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                        <div class="relative">
+                            <input x-model="np" id="pf-new-pass" :type="show ? 'text' : 'password'" autocomplete="new-password" placeholder="{{ __('Min. 8 characters') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:border-brand-red transition">
+                        </div>
                         @error('new_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label for="pf-new-pass-confirm" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Confirm New Password') }}</label>
-                        <input x-model="npc" id="pf-new-pass-confirm" type="password" autocomplete="new-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                        <div class="relative">
+                            <input x-model="npc" id="pf-new-pass-confirm" :type="show ? 'text' : 'password'" autocomplete="new-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:border-brand-red transition">
+                        </div>
                     </div>
                 </div>
                 <div class="flex justify-end pt-1">
@@ -150,7 +160,7 @@
                 </button>
                 @error('set_otp') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
             @else
-                <form x-data="{ otp: '', np: '', npc: '' }"
+                <form x-data="{ otp: '', np: '', npc: '', show: false }"
                       @submit.prevent="$wire.confirmSetPassword(otp, np, npc)"
                       class="space-y-4">
                     <div>
@@ -163,12 +173,20 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label for="pf-set-new" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('New Password') }}</label>
-                            <input x-model="np" id="pf-set-new" type="password" autocomplete="new-password" placeholder="{{ __('Min. 8 characters') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                            <div class="relative">
+                                <input x-model="np" id="pf-set-new" :type="show ? 'text' : 'password'" autocomplete="new-password" placeholder="{{ __('Min. 8 characters') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:border-brand-red transition">
+                                <button type="button" @click="show = !show" class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-brand-red transition-colors" :aria-label="show ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'">
+                                    <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                                </button>
+                            </div>
                             @error('set_new_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label for="pf-set-confirm" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Confirm New Password') }}</label>
-                            <input x-model="npc" id="pf-set-confirm" type="password" autocomplete="new-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                            <div class="relative">
+                                <input x-model="npc" id="pf-set-confirm" :type="show ? 'text' : 'password'" autocomplete="new-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:border-brand-red transition">
+                            </div>
                         </div>
                     </div>
                     <div class="flex items-center justify-between pt-1">

@@ -236,7 +236,7 @@ class OrderResource extends Resource
                     ->state(function (Order $record): string {
                         if ($record->status === 'cancelled') {
                             if ($record->refund_amount === null) {
-                                return 'Nothing to refund';
+                                return 'Not eligible for refund';
                             }
                             return $record->refunded_at !== null
                                 ? 'Sent RM ' . number_format($record->refund_amount, 2)
@@ -286,19 +286,6 @@ class OrderResource extends Resource
             ->recordActions([
                 EditAction::make()
                     ->tooltip('View/edit order details'),
-                Action::make('advance')
-                    ->label('Advance')
-                    ->icon(Heroicon::OutlinedArrowRightCircle)
-                    ->color('success')
-                    ->tooltip(fn (Order $record): string => "Advance status to " . ucfirst($record->next_status ?? ''))
-                    ->visible(fn(Order $record) => $record->next_status !== null)
-                    ->requiresConfirmation()
-                    ->modalHeading(fn(Order $record) => "Advance to " . ucfirst($record->next_status ?? '') . "?")
-                    ->action(function (Order $record) {
-                        if ($record->next_status) {
-                            $record->update(['status' => $record->next_status]);
-                        }
-                    }),
                 Action::make('markPaid')
                     ->label('Mark Paid')
                     ->icon(Heroicon::OutlinedCheckCircle)
@@ -355,6 +342,19 @@ class OrderResource extends Resource
                             logger()->error('Shipped email failed: ' . $e->getMessage());
                             Notification::make()->title('Marked shipped, but the email failed to send')->warning()->send();
                         }
+                    }),
+                Action::make('markDelivered')
+                    ->label('Mark Delivered')
+                    ->icon(Heroicon::OutlinedCheckCircle)
+                    ->color('success')
+                    ->tooltip('Mark order as delivered')
+                    ->visible(fn (Order $record) => $record->status === 'shipped')
+                    ->requiresConfirmation()
+                    ->modalHeading('Mark as delivered?')
+                    ->modalDescription('Confirms the customer has received the order.')
+                    ->action(function (Order $record): void {
+                        $record->update(['status' => 'delivered']);
+                        Notification::make()->title('Order marked as delivered')->success()->send();
                     }),
                 Action::make('invoice')
                     ->label('Invoice')

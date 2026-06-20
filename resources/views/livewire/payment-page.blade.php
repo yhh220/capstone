@@ -70,8 +70,14 @@
         <button wire:click="pay" wire:loading.attr="disabled" wire:target="pay"
                 x-data="{ paying: false }" x-on:click="paying = true" x-bind:disabled="paying"
                 class="btn btn-primary btn-shine w-full !py-4 !rounded-xl uppercase tracking-widest font-black disabled:opacity-80 disabled:cursor-not-allowed">
-            <span x-show="!paying">{{ __('Pay Now') }} · RM {{ number_format($order->total_amount, 2) }}</span>
-            <span x-show="paying">{{ __('Processing payment...') }}</span>
+            <span x-show="!paying" class="flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                {{ __('Pay Now') }} · RM {{ number_format($order->total_amount, 2) }}
+            </span>
+            <span x-show="paying" class="flex items-center justify-center gap-2">
+                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                {{ __('Processing payment...') }}
+            </span>
         </button>
         <a href="{{ route('account') }}" wire:navigate class="block text-center text-sm text-gray-500 dark:text-gray-400 hover:text-brand-red transition-colors">{{ __('Pay later from My Account') }}</a>
 
