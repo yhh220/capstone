@@ -515,7 +515,7 @@
             // Kill any loop left over from a previous page before starting one.
             if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
 
-            const BASE_SPEED = 0.22; // px per frame (~13px/s at 60fps) — slow, calm scroll
+            const BASE_SPEED = 0.35; // px per frame (~21px/s at 60fps)
             let pos = 0, speed = BASE_SPEED, target = BASE_SPEED, halfW = 0;
             // Measure the width of one copy and (re)start one copy to the left so
             // the rightward scroll always has content to reveal. Logos are images
