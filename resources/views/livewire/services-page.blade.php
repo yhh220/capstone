@@ -99,6 +99,11 @@
                                     <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base font-medium leading-relaxed max-w-sm {{ $odd ? 'md:ml-auto' : '' }}">
                                         {{ __($service->description) }}
                                     </p>
+                                    <a href="{{ route('booking', ['service' => $service->id]) }}"
+                                       class="inline-flex items-center gap-1.5 mt-4 text-sm font-bold text-brand-red hover:underline underline-offset-2">
+                                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                        {{ __('Book this service') }} <span aria-hidden="true">→</span>
+                                    </a>
                                 </div>
 
                                 {{-- Node on the line (no number) --}}
