@@ -111,7 +111,10 @@
                         <span class="text-gray-700 dark:text-gray-300 break-words leading-tight flex-1">{{ \Illuminate\Support\Str::limit($err->message, 70) }}</span>
                     </div>
                 @empty
-                    <div class="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">No errors recorded 🎉</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 py-4 text-center flex items-center justify-center gap-1.5">
+                        <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        No errors recorded
+                    </div>
                 @endforelse
             </div>
         </x-filament::section>

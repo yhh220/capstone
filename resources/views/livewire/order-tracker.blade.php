@@ -105,7 +105,7 @@
 
                     @foreach($this->statusSteps as $i => $step)
                     <div class="relative z-10 flex flex-col items-center" style="width: 25%;">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg shadow-sm
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center shadow-sm [&_svg]:w-5 [&_svg]:h-5
                             @if($order->status === 'cancelled' && $step['key'] === 'cancelled')
                                 bg-red-500 text-white
                             @elseif($order->status === 'cancelled' && $step['key'] !== 'cancelled')
@@ -116,7 +116,7 @@
                                 bg-gray-200 dark:bg-gray-700 text-gray-400
                             @endif
                         ">
-                            {{ $step['icon'] }}
+                            {!! $step['icon'] !!}
                         </div>
                         <div class="text-xs font-semibold mt-2 text-center
                             {{ $i <= $currentIdx ? 'text-green-600 dark:text-green-400' : 'text-gray-400' }}">
