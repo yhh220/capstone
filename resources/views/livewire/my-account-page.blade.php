@@ -88,8 +88,6 @@
                             {{ __('Order Number') }}: <span class="font-mono font-bold text-gray-700 dark:text-gray-300">{{ $order->order_number }}</span>
                             @if($order->payment_status === 'paid')
                                 · <span class="text-green-600 dark:text-green-400 font-bold">{{ __('Paid') }}</span>
-                            @elseif($order->isCod() && $order->status !== 'cancelled')
-                                · <span class="text-blue-600 dark:text-blue-400 font-bold">{{ __('Cash on Delivery') }}</span>
                             @elseif($order->isAwaitingPayment())
                                 · <span class="text-amber-600 dark:text-amber-400 font-bold">{{ __('Awaiting payment') }}</span>
                             @endif

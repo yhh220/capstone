@@ -33,12 +33,6 @@ class PaymentPage extends Component
 
         abort_unless($found, 404);
 
-        // COD is settled on delivery — there's no online payment page for it.
-        if ($found->isCod()) {
-            $this->redirect(route('account'), navigate: false);
-            return;
-        }
-
         $this->order = $found;
 
         // Cancel + restock immediately if the window already lapsed.

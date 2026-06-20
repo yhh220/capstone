@@ -45,18 +45,25 @@ class BookingService
      * Showroom-wide: one appointment per slot, regardless of service, since a
      * booking is a meeting time at the store.
      */
-    public function isSlotAvailable(Carbon $startAt, ?int $ignoreBookingId = null): bool
+    public function isSlotAvailable(Carbon $startAt, ?int $ignoreBookingId = null, bool $lock = false): bool
     {
         $endAt = $startAt->copy()->addMinutes($this->visitMinutes());
 
-        return ! Booking::query()
-            ->when($ignoreBookingId, fn ($query) => $query->whereKeyNot($ignoreBookingId))
+        $query = Booking::query()
+            ->when($ignoreBookingId, fn ($q) => $q->whereKeyNot($ignoreBookingId))
             ->where('status', '!=', 'cancelled')
             ->whereNotNull('start_at')
             ->whereNotNull('end_at')
             ->where('start_at', '<', $endAt)
-            ->where('end_at', '>', $startAt)
-            ->exists();
+            ->where('end_at', '>', $startAt);
+
+        // Inside a DB transaction, lock matching rows so a concurrent request
+        // can't slip through between this check and the Booking::create() call.
+        if ($lock) {
+            $query->lockForUpdate();
+        }
+
+        return ! $query->exists();
     }
 
     public function buildStartAt(string $date, string $time): Carbon

@@ -43,7 +43,7 @@ class Order extends Model
     protected static function booted(): void
     {
         // Auto-stamp lifecycle timestamps on any model update, so every code path
-        // (admin actions, COD, the advance action, expiry…) records when it happened
+        // (admin actions, the advance action, expiry…) records when it happened
         // exactly once. (The pay() flow uses a raw query update, so it stamps paid_at
         // itself — that's the one path this event can't see.)
         static::updating(function (Order $order): void {
@@ -73,21 +73,11 @@ class Order extends Model
         }
     }
 
-    /** Cash-on-delivery orders are settled in person, not via the online flow. */
-    public function isCod(): bool
-    {
-        return $this->payment_method === 'Cash on Delivery';
-    }
-
-    /**
-     * Order is awaiting ONLINE payment (drives the pay page, timer and "Pay now").
-     * COD is excluded — it's unpaid until delivery but never paid on the website.
-     */
+    /** Order is awaiting online payment (drives the pay page, timer and "Pay now"). */
     public function isAwaitingPayment(): bool
     {
         return $this->payment_status === 'pending'
-            && $this->status !== 'cancelled'
-            && ! $this->isCod();
+            && $this->status !== 'cancelled';
     }
 
     /** Awaiting payment but the 15-minute window has elapsed. */

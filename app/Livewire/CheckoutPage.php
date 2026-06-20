@@ -3,14 +3,12 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\SetsSeo;
-use App\Mail\OrderConfirmationMail;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
 class CheckoutPage extends Component
@@ -162,7 +160,7 @@ class CheckoutPage extends Component
         }
 
         // Whitelist the payment method — never trust the client-supplied value.
-        if (! in_array($this->paymentMethod, ['fpx', 'ewallet', 'card', 'cod'], true)) {
+        if (! in_array($this->paymentMethod, ['fpx', 'ewallet', 'card'], true)) {
             $this->paymentMethod = 'fpx';
         }
         if (! in_array($this->fpxBank, self::FPX_BANKS, true)) {
@@ -177,18 +175,13 @@ class CheckoutPage extends Component
             'fpx' => 'FPX - ' . $this->fpxBank,
             'ewallet' => $this->ewallet,
             'card' => 'Credit / Debit Card',
-            'cod' => 'Cash on Delivery',
             default => 'FPX',
         };
-
-        // COD is confirmed on placement (paid in person on delivery) — no online
-        // payment page, no 15-minute auto-cancel timer.
-        $isCod = $this->paymentMethod === 'cod';
 
         \App\Support\Breadcrumbs::push('checkout', 'Placing order', ['method' => $this->paymentMethod]);
 
         try {
-            $order = DB::transaction(function () use ($paymentLabel, $isCod) {
+            $order = DB::transaction(function () use ($paymentLabel) {
                 $cartItems = CartItem::forCurrentOwner()
                     ->lockForUpdate()
                     ->get();
@@ -248,13 +241,11 @@ class CheckoutPage extends Component
                     'subtotal' => $subtotal,
                     'shipping_fee' => $shippingFee,
                     'total_amount' => round($subtotal + $shippingFee, 2),
-                    'status' => $isCod ? 'processing' : 'pending',
+                    'status' => 'pending',
                     'payment_status' => 'pending',
                     'payment_method' => $paymentLabel,
                     'notes' => $this->orderNotes ?: null,
-                    // Online orders get a 15-minute window to pay before auto-cancel;
-                    // COD has no timer (settled on delivery).
-                    'expires_at' => $isCod ? null : now()->addMinutes(15),
+                    'expires_at' => now()->addMinutes(15),
                 ]);
 
                 foreach ($lineItems as $lineItem) {
@@ -288,24 +279,7 @@ class CheckoutPage extends Component
 
         $this->order = $order;
 
-        // COD: order is confirmed now (cash collected on delivery) — send the
-        // confirmation email at placement and skip the online payment page.
-        if ($isCod) {
-            try {
-                Mail::to($order->customer_email)->send(new OrderConfirmationMail($order->fresh('items')));
-            } catch (\Throwable $e) {
-                logger()->error('COD order confirmation email failed: ' . $e->getMessage());
-            }
-
-            session()->flash('success', __('Order placed! Please have cash ready when your order is delivered.'));
-            $this->redirect(route('account'), navigate: false);
-
-            return;
-        }
-
-        // Online methods → demo payment page. The order stays "pending payment"
-        // until the customer pays (or the 15-minute timer expires); the
-        // confirmation email is sent once payment succeeds, not at placement.
+        // Redirect to the payment page; confirmation email is sent once payment succeeds.
         $this->redirect(route('payment', $order->order_number), navigate: false);
     }
 

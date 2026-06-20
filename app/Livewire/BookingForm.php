@@ -325,7 +325,7 @@ class BookingForm extends Component
 
         try {
             $booking = DB::transaction(function () use ($startAt) {
-                if (! $this->bookingService()->isSlotAvailable($startAt)) {
+                if (! $this->bookingService()->isSlotAvailable($startAt, lock: true)) {
                     throw new \RuntimeException(__('This slot is already booked. Please pick another time.'));
                 }
 

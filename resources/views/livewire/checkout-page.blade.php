@@ -245,19 +245,6 @@
                     @endif
                 </div>
 
-                {{-- Cash on Delivery --}}
-                <div class="rounded-xl border-2 transition-colors {{ $paymentMethod === 'cod' ? 'border-brand-red bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-600' }}">
-                    <label class="flex items-center gap-3 p-4 cursor-pointer">
-                        <input type="radio" wire:model.live="paymentMethod" value="cod" class="accent-brand-red w-4 h-4 shrink-0">
-                        <span class="w-11 h-9 rounded-md bg-green-600 text-white flex items-center justify-center shrink-0" aria-hidden="true">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
-                        </span>
-                        <span class="flex-1 min-w-0">
-                            <span class="block font-semibold text-gray-800 dark:text-white">{{ __('Cash on Delivery') }}</span>
-                            <span class="block text-xs text-gray-500">{{ __('Pay when you receive') }}</span>
-                        </span>
-                    </label>
-                </div>
             </div>
 
             {{-- Total --}}
