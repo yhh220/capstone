@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Mail\BookingReminderMail;
 use App\Models\Booking;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class SendBookingReminders extends Command
@@ -30,9 +31,29 @@ class SendBookingReminders extends Command
         $sent = 0;
 
         foreach ($bookings as $booking) {
+            // Re-fetch under a row lock and re-check reminder_sent_at so two
+            // overlapping command runs can't both send the same reminder.
+            $claimed = DB::transaction(function () use ($booking) {
+                $fresh = Booking::where('id', $booking->id)
+                    ->whereNull('reminder_sent_at')
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $fresh) {
+                    return false;
+                }
+
+                $fresh->forceFill(['reminder_sent_at' => now()])->save();
+
+                return true;
+            });
+
+            if (! $claimed) {
+                continue;
+            }
+
             try {
                 Mail::to($booking->customer_email)->send(new BookingReminderMail($booking));
-                $booking->forceFill(['reminder_sent_at' => now()])->save();
                 $sent++;
             } catch (\Throwable $e) {
                 logger()->error("Booking reminder failed for {$booking->reference}: " . $e->getMessage());

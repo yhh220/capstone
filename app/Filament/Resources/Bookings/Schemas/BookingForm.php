@@ -35,7 +35,13 @@ class BookingForm
                     ->maxLength(30),
                 Select::make('service_id')
                     ->label('About (service)')
-                    ->options(Service::where('is_active', true)->orderBy('name')->pluck('name', 'id'))
+                    ->options(function ($record) {
+                        $query = Service::where('is_active', true);
+                        if ($record?->service_id) {
+                            $query->orWhere('id', $record->service_id);
+                        }
+                        return $query->orderBy('name')->pluck('name', 'id');
+                    })
                     ->searchable()
                     ->placeholder('General visit')
                     ->helperText('Leave blank for a general showroom visit.'),

@@ -90,6 +90,28 @@ class BookingsTable
             ->recordActions([
                 EditAction::make()
                     ->tooltip('Edit booking details'),
+                \Filament\Actions\Action::make('confirmBooking')
+                    ->label('Confirm')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->tooltip('Confirm this booking and email the customer')
+                    ->visible(fn ($record) => $record->status === 'pending')
+                    ->requiresConfirmation()
+                    ->modalHeading('Confirm this booking?')
+                    ->modalDescription('The customer will receive a confirmation email.')
+                    ->action(function ($record): void {
+                        $record->update(['status' => 'confirmed']);
+                        try {
+                            if ($record->customer_email) {
+                                \Illuminate\Support\Facades\Mail::to($record->customer_email)
+                                    ->send(new \App\Mail\BookingConfirmedMail($record->fresh('service')));
+                            }
+                            \Filament\Notifications\Notification::make()->title('Booking confirmed')->success()->send();
+                        } catch (\Throwable $e) {
+                            logger()->error('BookingConfirmedMail failed: ' . $e->getMessage());
+                            \Filament\Notifications\Notification::make()->title('Confirmed, but the email failed to send')->warning()->send();
+                        }
+                    }),
                 \Filament\Actions\Action::make('sendReminder')
                     ->label('Send reminder')
                     ->icon(\Filament\Support\Icons\Heroicon::OutlinedBell)
@@ -116,10 +138,25 @@ class BookingsTable
                         ->label('Confirm selected')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
-                        ->tooltip('Confirm all selected pending bookings')
+                        ->tooltip('Confirm all selected pending bookings and email each customer')
                         ->requiresConfirmation()
-                        ->action(fn (\Illuminate\Database\Eloquent\Collection $records) => $records
-                            ->each(fn ($b) => $b->status === 'pending' && $b->update(['status' => 'confirmed'])))
+                        ->modalDescription('Each confirmed customer will receive a confirmation email.')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
+                            $records->each(function ($b) {
+                                if ($b->status !== 'pending') {
+                                    return;
+                                }
+                                $b->update(['status' => 'confirmed']);
+                                try {
+                                    if ($b->customer_email) {
+                                        \Illuminate\Support\Facades\Mail::to($b->customer_email)
+                                            ->send(new \App\Mail\BookingConfirmedMail($b->fresh('service')));
+                                    }
+                                } catch (\Throwable $e) {
+                                    logger()->error('Bulk BookingConfirmedMail failed: ' . $e->getMessage());
+                                }
+                            });
+                        })
                         ->deselectRecordsAfterCompletion(),
                     DeleteBulkAction::make(),
                 ]),

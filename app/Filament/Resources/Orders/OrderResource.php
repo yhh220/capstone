@@ -315,17 +315,35 @@ class OrderResource extends Resource
                     ->modalHeading('Mark this order as paid?')
                     ->modalDescription('The customer will get the same confirmation email as the online payment flow.')
                     ->action(function (Order $record): void {
-                        $record->update([
-                            'payment_status' => 'paid',
-                            'status'         => $record->status === 'pending' ? 'processing' : $record->status,
-                            'expires_at'     => null,
-                        ]);
+                        $claimed = DB::transaction(function () use ($record) {
+                            $fresh = Order::where('id', $record->id)
+                                ->where('payment_status', 'pending')
+                                ->lockForUpdate()
+                                ->first();
+
+                            if (! $fresh) {
+                                return null;
+                            }
+
+                            $fresh->update([
+                                'payment_status' => 'paid',
+                                'status'         => $fresh->status === 'pending' ? 'processing' : $fresh->status,
+                                'expires_at'     => null,
+                            ]);
+
+                            return $fresh;
+                        });
+
+                        if (! $claimed) {
+                            Notification::make()->title('Order was already marked paid')->warning()->send();
+                            return;
+                        }
 
                         // Online payment (PaymentPage::pay()) emails the customer on
                         // success; this manual path (e.g. reconciling a bank transfer)
                         // skipped that entirely, so the customer never heard back.
                         try {
-                            Mail::to($record->customer_email)->send(new OrderConfirmationMail($record->fresh('items')));
+                            Mail::to($claimed->customer_email)->send(new OrderConfirmationMail($claimed->fresh('items')));
                             Notification::make()->title('Marked paid — customer notified')->success()->send();
                         } catch (\Throwable $e) {
                             logger()->error('Mark-paid confirmation email failed: ' . $e->getMessage());
@@ -349,13 +367,31 @@ class OrderResource extends Resource
                     ->modalHeading('Mark as shipped & notify customer')
                     ->modalSubmitActionLabel('Mark shipped & send email')
                     ->action(function (Order $record, array $data): void {
-                        $record->update([
-                            'status'          => 'shipped',
-                            'tracking_number' => $data['tracking_number'],
-                        ]);
+                        $claimed = DB::transaction(function () use ($record, $data) {
+                            $fresh = Order::where('id', $record->id)
+                                ->where('status', 'processing')
+                                ->lockForUpdate()
+                                ->first();
+
+                            if (! $fresh) {
+                                return null;
+                            }
+
+                            $fresh->update([
+                                'status'          => 'shipped',
+                                'tracking_number' => $data['tracking_number'],
+                            ]);
+
+                            return $fresh;
+                        });
+
+                        if (! $claimed) {
+                            Notification::make()->title('Order was already marked shipped')->warning()->send();
+                            return;
+                        }
 
                         try {
-                            Mail::to($record->customer_email)->send(new OrderShippedMail($record->fresh()));
+                            Mail::to($claimed->customer_email)->send(new OrderShippedMail($claimed->fresh()));
                             Notification::make()->title('Marked shipped — customer notified')->success()->send();
                         } catch (\Throwable $e) {
                             logger()->error('Shipped email failed: ' . $e->getMessage());
@@ -372,10 +408,29 @@ class OrderResource extends Resource
                     ->modalHeading('Mark as delivered?')
                     ->modalDescription('Confirms the customer has received the order.')
                     ->action(function (Order $record): void {
-                        $record->update(['status' => 'delivered']);
+                        $claimed = DB::transaction(function () use ($record) {
+                            $fresh = Order::where('id', $record->id)
+                                ->where('status', 'shipped')
+                                ->lockForUpdate()
+                                ->first();
+
+                            if (! $fresh) {
+                                return null;
+                            }
+
+                            $fresh->update(['status' => 'delivered']);
+
+                            return $fresh;
+                        });
+
+                        if (! $claimed) {
+                            Notification::make()->title('Order was already marked delivered')->warning()->send();
+                            return;
+                        }
+
                         try {
-                            \Illuminate\Support\Facades\Mail::to($record->customer_email)
-                                ->send(new \App\Mail\OrderDeliveredMail($record));
+                            \Illuminate\Support\Facades\Mail::to($claimed->customer_email)
+                                ->send(new \App\Mail\OrderDeliveredMail($claimed));
                             Notification::make()->title('Order marked as delivered — confirmation email sent')->success()->send();
                         } catch (\Throwable $e) {
                             logger()->error('OrderDeliveredMail failed: ' . $e->getMessage());
@@ -478,10 +533,29 @@ class OrderResource extends Resource
                     ->modalHeading('Mark this refund as sent?')
                     ->modalDescription(fn (Order $record) => 'Confirms RM ' . number_format($record->refund_amount, 2) . ' has actually been transferred to the customer (e.g. bank transfer/e-wallet outside this system) and emails them that confirmation.')
                     ->action(function (Order $record): void {
-                        $record->update(['refunded_at' => now()]);
+                        $claimed = DB::transaction(function () use ($record) {
+                            $fresh = Order::where('id', $record->id)
+                                ->whereNotNull('refund_amount')
+                                ->whereNull('refunded_at')
+                                ->lockForUpdate()
+                                ->first();
+
+                            if (! $fresh) {
+                                return null;
+                            }
+
+                            $fresh->update(['refunded_at' => now()]);
+
+                            return $fresh;
+                        });
+
+                        if (! $claimed) {
+                            Notification::make()->title('Refund was already marked as sent')->warning()->send();
+                            return;
+                        }
 
                         try {
-                            Mail::to($record->customer_email)->send(new OrderRefundProcessedMail($record->fresh()));
+                            Mail::to($claimed->customer_email)->send(new OrderRefundProcessedMail($claimed->fresh()));
                             Notification::make()->title('Refund marked as sent — customer notified')->success()->send();
                         } catch (\Throwable $e) {
                             logger()->error('Refund-sent email failed: ' . $e->getMessage());
