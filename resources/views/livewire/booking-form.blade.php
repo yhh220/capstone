@@ -420,7 +420,7 @@
 
                         {{-- ══ STEP 4: CONTACT & CONFIRM ══ --}}
                         @elseif($currentStep === 4)
-                        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
                             {{-- Contact fields --}}
                             <div class="lg:col-span-3 space-y-5">
                                 <div>

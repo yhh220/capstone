@@ -132,7 +132,7 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 @foreach($featuredProducts as $i => $product)
                 <a href="{{ route('product.show', $product->slug) }}"
                    data-aos="fade-up" data-aos-delay="{{ $i % 4 * 60 }}"
@@ -265,7 +265,7 @@
                                 touch-action="pan-y"
                                 shadow-intensity="1"
                                 exposure="0.8"
-                                style="width:100%; height:440px; background:transparent;"
+                                class="w-full h-64 sm:h-80 md:h-[440px]" style="background:transparent;"
                                 loading="lazy">
                                 <div slot="progress-bar" style="display:none;"></div>
                                 <div slot="poster"

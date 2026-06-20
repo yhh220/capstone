@@ -95,7 +95,8 @@
             {{-- Status Timeline --}}
             <div class="mb-8">
                 <h3 class="font-bold text-gray-800 dark:text-white mb-4">{{ __('Order Progress') }}</h3>
-                <div class="flex items-center justify-between relative">
+                <div class="overflow-x-auto -mx-2 px-2">
+                <div class="flex items-start justify-between relative min-w-[280px]">
                     {{-- Connecting line --}}
                     <div class="absolute top-5 left-0 right-0 h-0.5 bg-gray-200 dark:bg-gray-700 z-0"></div>
 
@@ -106,7 +107,7 @@
                     @endphp
 
                     @foreach($this->statusSteps as $i => $step)
-                    <div class="relative z-10 flex flex-col items-center" style="width: 25%;">
+                    <div class="relative z-10 flex flex-col items-center w-1/4 min-w-[60px]">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center shadow-sm [&_svg]:w-5 [&_svg]:h-5
                             @if($order->status === 'cancelled' && $step['key'] === 'cancelled')
                                 bg-red-500 text-white
@@ -120,12 +121,13 @@
                         ">
                             {!! $step['icon'] !!}
                         </div>
-                        <div class="text-xs font-semibold mt-2 text-center
+                        <div class="text-xs font-semibold mt-2 text-center leading-tight
                             {{ $i <= $currentIdx ? 'text-green-600 dark:text-green-400' : 'text-gray-400' }}">
                             {{ $step['label'] }}
                         </div>
                     </div>
                     @endforeach
+                </div>
                 </div>
             </div>
 

@@ -233,7 +233,7 @@
             <h2 id="related-heading" class="text-2xl sm:text-3xl font-black text-brand-black dark:text-white mb-8" data-aos="fade-up">
                 {{ __('More Products to Explore') }}
             </h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-4 gap-4">
                 @foreach($related as $i => $item)
                 <a href="{{ route('product.show', $item->slug) }}"
                    class="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700"

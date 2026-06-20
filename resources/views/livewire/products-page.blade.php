@@ -145,7 +145,7 @@
 
                 {{-- Skeleton cards shown only during filter/search/pagination loading --}}
                 <div wire:loading.grid wire:target="search,category,minPrice,maxPrice,nextPage,previousPage,gotoPage"
-                     class="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" style="display: none;" aria-hidden="true">
+                     class="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" style="display: none;" aria-hidden="true">
                     @for($i = 0; $i < 6; $i++)
                     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col">
                         <div class="block flex-1">
@@ -175,7 +175,7 @@
 
                 <div wire:loading.remove wire:target="search,category,minPrice,maxPrice,nextPage,previousPage,gotoPage">
                 @if($products->count() > 0)
-                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($products as $product)
                     @php
                         $productWaUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hi Win Win Car Studio! I\'m interested in ' . $product->name . '. Can you provide more details?');

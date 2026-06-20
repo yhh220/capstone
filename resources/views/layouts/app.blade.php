@@ -1079,13 +1079,13 @@
 
             <div class="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-3">
                 <p>&copy; {{ $storeName }} {{ date('Y') }}. <span>{{ __('All rights reserved.') }}</span></p>
-                <div class="flex items-center gap-4">
+                <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
                     <a href="{{ route('privacy-policy') }}" class="hover:text-brand-yellow transition-colors">{{ __('Privacy Policy') }}</a>
-                    <span aria-hidden="true">·</span>
+                    <span aria-hidden="true" class="hidden sm:inline">·</span>
                     <a href="{{ route('terms-of-service') }}" class="hover:text-brand-yellow transition-colors">{{ __('Terms of Service') }}</a>
-                    <span aria-hidden="true">·</span>
+                    <span aria-hidden="true" class="hidden sm:inline">·</span>
                     <a href="{{ route('cancellation-refund-policy') }}" class="hover:text-brand-yellow transition-colors">{{ __('Cancellation & Refund Policy') }}</a>
-                    <span aria-hidden="true">·</span>
+                    <span aria-hidden="true" class="hidden sm:inline">·</span>
                     <a href="{{ route('faq') }}" class="hover:text-brand-yellow transition-colors">{{ __('FAQ') }}</a>
                 </div>
             </div>

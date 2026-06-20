@@ -91,7 +91,7 @@
                             <div class="relative flex flex-col md:flex-row items-center">
 
                                 {{-- Content --}}
-                                <div class="w-full md:w-1/2 pl-20 md:pl-0 text-left {{ $odd ? 'md:order-1 md:pr-14 md:text-right' : 'md:order-2 md:pl-14' }}"
+                                <div class="w-full md:w-1/2 pl-14 md:pl-0 text-left {{ $odd ? 'md:order-1 md:pr-14 md:text-right' : 'md:order-2 md:pl-14' }}"
                                      data-aos="{{ $odd ? 'fade-right' : 'fade-left' }}">
                                     <h3 class="text-2xl sm:text-3xl font-black text-brand-black dark:text-white uppercase tracking-tight leading-tight mb-4">
                                         {{ __($service->name) }}
