@@ -16,6 +16,7 @@ class BookingReminderMail extends Mailable
 
     public function __construct(public Booking $booking)
     {
+        $this->locale('en');
     }
 
     public function envelope(): Envelope

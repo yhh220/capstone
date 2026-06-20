@@ -2,14 +2,17 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesOwner;
 use App\Livewire\Concerns\SetsSeo;
+use App\Mail\BookingCancelledMail;
 use App\Models\Booking;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 class BookingTracker extends Component
 {
-    use SetsSeo;
+    use NotifiesOwner, SetsSeo;
 
     public string  $reference = '';
     public string  $email     = '';
@@ -61,6 +64,14 @@ class BookingTracker extends Component
 
     public function cancelBooking(): void
     {
+        $cancelKey = 'booking-cancel:' . request()->ip();
+        if (RateLimiter::tooManyAttempts($cancelKey, 3)) {
+            $seconds = RateLimiter::availableIn($cancelKey);
+            $this->errorMsg = __('Too many attempts. Please try again in :seconds seconds.', ['seconds' => $seconds]);
+            return;
+        }
+        RateLimiter::hit($cancelKey, 120);
+
         $booking = $this->findBookingByReference();
 
         if (! $booking) {
@@ -73,12 +84,37 @@ class BookingTracker extends Component
             return;
         }
 
-        if (! in_array($booking->status, ['cancelled', 'completed'], true)) {
-            $booking->update(['status' => 'cancelled']);
+        if (in_array($booking->status, ['cancelled', 'completed'], true)) {
+            session()->flash('success', __('This booking has already been cancelled or completed.'));
+            $this->booking = $booking->fresh('service');
+            return;
         }
 
+        $booking->update(['status' => 'cancelled']);
         $this->booking = $booking->fresh('service');
         session()->flash('success', __('Your booking has been cancelled.'));
+
+        // Notify the customer (if email given)
+        try {
+            if ($booking->customer_email) {
+                Mail::to($booking->customer_email)->send(new BookingCancelledMail($this->booking));
+            }
+        } catch (\Throwable $e) {
+            logger()->error('BookingCancelledMail failed: ' . $e->getMessage());
+        }
+
+        // Notify the shop owner
+        $this->notifyOwner(
+            'Booking cancelled by customer',
+            [
+                'Reference' => $booking->reference,
+                'Customer'  => $booking->customer_name,
+                'Phone'     => $booking->customer_phone,
+                'When'      => $booking->start_at?->format('D, d M Y · g:i A'),
+            ],
+            url('/admin/bookings/' . $booking->getKey() . '/edit'),
+            'View booking',
+        );
     }
 
     private function findBookingByReference(): ?Booking

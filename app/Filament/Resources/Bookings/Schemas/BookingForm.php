@@ -30,7 +30,6 @@ class BookingForm
                     ->email()
                     ->maxLength(100),
                 TextInput::make('vehicle_model')
-                    ->required()
                     ->maxLength(120),
                 TextInput::make('vehicle_plate')
                     ->maxLength(30),
@@ -46,10 +45,12 @@ class BookingForm
                     ->native(false),
                 DateTimePicker::make('start_at')
                     ->label('Start Time')
+                    ->required()
                     ->native(false)
                     ->seconds(false),
                 DateTimePicker::make('end_at')
                     ->label('End Time')
+                    ->required()
                     ->native(false)
                     ->seconds(false),
                 TextInput::make('reference')

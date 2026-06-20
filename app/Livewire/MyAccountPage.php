@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Livewire\Concerns\NotifiesOwner;
 use App\Livewire\Concerns\SetsSeo;
+use App\Mail\BookingCancelledMail;
 use App\Mail\OrderCancelledMail;
 use App\Models\Booking;
 use App\Models\Order;
@@ -59,10 +60,35 @@ class MyAccountPage extends Component
             return;
         }
 
-        if (! in_array($booking->status, ['cancelled', 'completed'], true)) {
-            $booking->update(['status' => 'cancelled']);
-            session()->flash('booking_success', __('Your booking has been cancelled.'));
+        if (in_array($booking->status, ['cancelled', 'completed'], true)) {
+            session()->flash('booking_success', __('This booking has already been cancelled or completed.'));
+            return;
         }
+
+        $booking->update(['status' => 'cancelled']);
+        session()->flash('booking_success', __('Your booking has been cancelled.'));
+
+        // Notify the customer
+        try {
+            if ($booking->customer_email) {
+                Mail::to($booking->customer_email)->send(new BookingCancelledMail($booking->fresh('service')));
+            }
+        } catch (\Throwable $e) {
+            logger()->error('BookingCancelledMail failed: ' . $e->getMessage());
+        }
+
+        // Notify the shop owner
+        $this->notifyOwner(
+            'Booking cancelled by customer',
+            [
+                'Reference' => $booking->reference,
+                'Customer'  => $booking->customer_name,
+                'Phone'     => $booking->customer_phone,
+                'When'      => $booking->start_at?->format('D, d M Y · g:i A'),
+            ],
+            url('/admin/bookings/' . $booking->getKey() . '/edit'),
+            'View booking',
+        );
     }
 
     /**

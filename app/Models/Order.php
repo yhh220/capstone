@@ -26,7 +26,7 @@ class Order extends Model
         'customer_name', 'customer_email', 'customer_phone',
         'shipping_address', 'subtotal', 'shipping_fee', 'total_amount',
         'status', 'payment_status', 'payment_method', 'notes', 'expires_at',
-        'paid_at', 'shipped_at', 'cancelled_at',
+        'paid_at', 'shipped_at', 'delivered_at', 'cancelled_at',
         'cancellation_reason', 'refund_amount', 'refund_percentage', 'cancelled_by', 'refunded_at',
     ];
 
@@ -38,6 +38,7 @@ class Order extends Model
         'expires_at'       => 'datetime',
         'paid_at'          => 'datetime',
         'shipped_at'       => 'datetime',
+        'delivered_at'     => 'datetime',
         'cancelled_at'     => 'datetime',
         'refund_amount'    => 'decimal:2',
         'refund_percentage'=> 'decimal:2',
@@ -56,6 +57,9 @@ class Order extends Model
             }
             if ($order->isDirty('status') && $order->status === 'shipped' && $order->shipped_at === null) {
                 $order->shipped_at = now();
+            }
+            if ($order->isDirty('status') && $order->status === 'delivered' && $order->delivered_at === null) {
+                $order->delivered_at = now();
             }
             if ($order->isDirty('status') && $order->status === 'cancelled' && $order->cancelled_at === null) {
                 $order->cancelled_at = now();

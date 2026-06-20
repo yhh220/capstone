@@ -2,7 +2,9 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesOwner;
 use App\Livewire\Concerns\SetsSeo;
+use App\Mail\OrderCancelledMail;
 use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use App\Models\Product;
@@ -14,7 +16,7 @@ use Livewire\Component;
 
 class PaymentPage extends Component
 {
-    use SetsSeo;
+    use NotifiesOwner, SetsSeo;
 
     public Order $order;
 
@@ -134,17 +136,39 @@ class PaymentPage extends Component
             }
 
             $order->restockItems();
-            $order->update(['status' => 'cancelled']); // event stamps cancelled_at
+            $order->update([
+                'status'             => 'cancelled',
+                'cancelled_by'       => 'system',
+                'cancellation_reason'=> 'Order expired — payment not completed within 15 minutes',
+            ]);
 
-            return true;
+            return $order;
         });
 
         $this->order->refresh();
 
-        // Same tall-countdown-view → short-cancelled-card shrink as pay(); keep
-        // the result visible instead of leaving the scroll position in the footer.
         if ($expired) {
             $this->dispatch('scroll-top');
+
+            try {
+                if ($expired->customer_email) {
+                    Mail::to($expired->customer_email)->send(new OrderCancelledMail($expired));
+                }
+            } catch (\Throwable $e) {
+                logger()->error('Order expiry email failed: ' . $e->getMessage());
+            }
+
+            $this->notifyOwner(
+                'Order auto-expired (not paid)',
+                [
+                    'Order'    => $expired->order_number,
+                    'Customer' => $expired->customer_name,
+                    'Total'    => 'RM ' . number_format($expired->total_amount, 2),
+                    'Reason'   => 'Payment timer ran out',
+                ],
+                url('/admin/orders/' . $expired->getKey() . '/edit'),
+                'View order',
+            );
         }
     }
 

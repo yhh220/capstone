@@ -14,7 +14,6 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\RateLimiter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -66,26 +65,23 @@ class OrderResource extends Resource
             return;
         }
 
-        RateLimiter::attempt(
-            'owner-alert-email',
-            maxAttempts: 10,
-            callback: function () use ($email, $order, $cancelledBy) {
-                Mail::to($email)->send(new OwnerAlertMail(
-                    'Order cancelled',
-                    [
-                        'Order Number' => $order->order_number,
-                        'Customer'     => $order->customer_name,
-                        'Cancelled By' => $cancelledBy,
-                        'Reason'       => $order->cancellation_reason,
-                        'Refund'       => $order->refund_amount !== null
-                            ? 'RM ' . number_format($order->refund_amount, 2) . ' (' . $order->refund_percentage . '%)'
-                            : null,
-                    ],
-                    url('/admin/orders/' . $order->getKey() . '/edit'),
-                ));
-            },
-            decaySeconds: 3600,
-        );
+        try {
+            Mail::to($email)->send(new OwnerAlertMail(
+                'Order cancelled',
+                [
+                    'Order Number' => $order->order_number,
+                    'Customer'     => $order->customer_name,
+                    'Cancelled By' => $cancelledBy,
+                    'Reason'       => $order->cancellation_reason,
+                    'Refund'       => $order->refund_amount !== null
+                        ? 'RM ' . number_format($order->refund_amount, 2) . ' (' . $order->refund_percentage . '%)'
+                        : null,
+                ],
+                url('/admin/orders/' . $order->getKey() . '/edit'),
+            ));
+        } catch (\Throwable $e) {
+            logger()->error('Owner cancellation alert failed: ' . $e->getMessage());
+        }
     }
 
     public static function form(Schema $schema): Schema
@@ -145,6 +141,42 @@ class OrderResource extends Resource
                         ");
                     }),
             ])->columnSpanFull()->visibleOn('edit'),
+
+            Section::make('Shipping & Payment')->schema([
+                Forms\Components\TextInput::make('payment_method')->label('Payment Method')->disabled(),
+                Forms\Components\TextInput::make('tracking_number')->label('Tracking Number')->disabled(),
+                Forms\Components\Placeholder::make('shipping_address_display')
+                    ->label('Shipping Address')
+                    ->columnSpanFull()
+                    ->content(function ($record): string {
+                        if (! $record || ! $record->shipping_address) {
+                            return '—';
+                        }
+                        $a = $record->shipping_address;
+                        return implode(', ', array_filter([
+                            $a['street']   ?? null,
+                            $a['city']     ?? null,
+                            $a['postcode'] ?? null,
+                            $a['state']    ?? null,
+                        ]));
+                    }),
+            ])->columns(['default' => 1, 'sm' => 2])->visibleOn('edit'),
+
+            Section::make('Lifecycle Timestamps')->schema([
+                Forms\Components\TextInput::make('paid_at')->label('Paid At')
+                    ->formatStateUsing(fn ($state) => $state ? \Illuminate\Support\Carbon::parse($state)->format('d M Y, h:i A') : '—')
+                    ->disabled(),
+                Forms\Components\TextInput::make('shipped_at')->label('Shipped At')
+                    ->formatStateUsing(fn ($state) => $state ? \Illuminate\Support\Carbon::parse($state)->format('d M Y, h:i A') : '—')
+                    ->disabled(),
+                Forms\Components\TextInput::make('delivered_at')->label('Delivered At')
+                    ->formatStateUsing(fn ($state) => $state ? \Illuminate\Support\Carbon::parse($state)->format('d M Y, h:i A') : '—')
+                    ->disabled(),
+                Forms\Components\TextInput::make('cancelled_at')->label('Cancelled At')
+                    ->formatStateUsing(fn ($state) => $state ? \Illuminate\Support\Carbon::parse($state)->format('d M Y, h:i A') : '—')
+                    ->disabled(),
+            ])->columns(['default' => 1, 'sm' => 2])->visibleOn('edit')
+              ->collapsed(fn ($record) => $record?->paid_at === null),
 
             Section::make('Order Notes')->schema([
                 Forms\Components\Textarea::make('notes')
@@ -362,7 +394,7 @@ class OrderResource extends Resource
                     ->icon(Heroicon::OutlinedEnvelope)
                     ->color('gray')
                     ->tooltip('Resend the order confirmation email to the customer')
-                    ->visible(fn (Order $record) => filled($record->customer_email) && $record->status !== 'cancelled')
+                    ->visible(fn (Order $record) => filled($record->customer_email) && $record->payment_status === 'paid' && $record->status !== 'cancelled')
                     ->requiresConfirmation()
                     ->modalHeading('Resend the order confirmation email?')
                     ->action(function (Order $record): void {

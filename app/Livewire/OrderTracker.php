@@ -54,7 +54,7 @@ class OrderTracker extends Component
             return;
         }
 
-        if (strtolower(trim($order->customer_email)) !== strtolower(trim($this->email))) {
+        if (strtolower(trim($order->customer_email ?? '')) !== strtolower(trim($this->email))) {
             $this->errorMsg = __('Email does not match. Please check your email address.');
             return;
         }

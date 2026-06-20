@@ -9,8 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-// Sent synchronously to the customer when a booking is made.
-class BookingConfirmationMail extends Mailable
+class BookingCancelledMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -22,14 +21,14 @@ class BookingConfirmationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Booking Received – ' . $this->booking->reference . ' | Win Win Car Audio',
+            subject: 'Booking Cancelled – ' . $this->booking->reference . ' | Win Win Car Audio',
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'mail.booking-confirmation',
+            view: 'mail.booking-cancelled',
         );
     }
 }
