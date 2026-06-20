@@ -61,6 +61,23 @@ class SocialLoginTest extends TestCase
         ]);
     }
 
+    public function test_google_login_restores_an_already_linked_but_soft_deleted_account(): void
+    {
+        $user = User::create(['name' => 'Linked', 'email' => 'linked@example.test', 'password' => 'secret']);
+        $user->socialAccounts()->create([
+            'provider' => 'google', 'provider_id' => 'g-linked-1', 'provider_email' => 'linked@example.test',
+        ]);
+        $user->delete();
+        $this->assertSoftDeleted($user);
+
+        $this->fakeGoogle('g-linked-1', 'linked@example.test');
+
+        $this->get(route('social.callback', 'google'))->assertRedirect(route('account'));
+
+        $this->assertNull($user->fresh()->deleted_at);
+        $this->assertAuthenticatedAs($user);
+    }
+
     protected function tearDown(): void
     {
         Mockery::close();

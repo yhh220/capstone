@@ -61,7 +61,17 @@ class SocialAuthController extends Controller
                 'avatar'         => $socialUser->getAvatar(),
             ]);
 
-            return $account->user;
+            // withTrashed(): $account->user is a plain belongsTo, which is hidden by
+            // the User SoftDeletes scope. Without this, a customer who deleted their
+            // account and signs back in with the same provider hits a null-return
+            // TypeError instead of being reactivated.
+            $user = User::withTrashed()->findOrFail($account->user_id);
+
+            if ($user->trashed()) {
+                $user->restore();
+            }
+
+            return $user;
         }
 
         // 2. Same (provider-verified) email as an existing account → link them, so
