@@ -89,7 +89,6 @@ class ProductForm
                     ->visible(fn ($get) => (bool) $get('has_3d')),
                 SpatieMediaLibraryFileUpload::make('images')
                     ->collection('images')
-                    ->multiple()
                     ->image()
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                     ->maxSize(4096)

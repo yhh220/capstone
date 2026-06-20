@@ -36,12 +36,21 @@ class RevenueChart extends ChartWidget
         $monthCount = (int) ($this->filter ?? 12);
         $start = Carbon::now()->startOfMonth()->subMonths($monthCount - 1);
 
-        // One aggregated query instead of one query per month.
+        // One aggregated query, grouped in SQL rather than pulling every row into
+        // PHP. Month-bucketing syntax differs by driver (MySQL vs SQLite, the
+        // latter used in tests/local dev), so branch on the connection.
+        $ymExpr = match (Order::query()->getConnection()->getDriverName()) {
+            'sqlite' => "strftime('%Y-%m', created_at)",
+            default  => "DATE_FORMAT(created_at, '%Y-%m')",
+        };
+
         $totals = Order::where('status', 'delivered')
+            ->whereNull('refunded_at') // defense-in-depth: never count a refunded order as revenue
             ->where('created_at', '>=', $start)
-            ->get(['created_at', 'total_amount'])
-            ->groupBy(fn (Order $o) => $o->created_at->format('Y-m'))
-            ->map(fn ($orders) => (float) $orders->sum('total_amount'));
+            ->selectRaw("{$ymExpr} as ym, SUM(total_amount) as total")
+            ->groupBy('ym')
+            ->pluck('total', 'ym')
+            ->map(fn ($v) => (float) $v);
 
         $months  = [];
         $revenue = [];

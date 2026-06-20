@@ -292,9 +292,11 @@ class UserLogin extends Component
         // forceCreate/forceFill set 'role' explicitly (not mass-assignable); the
         // 'hashed' cast hashes the decrypted plaintext password exactly once.
         $user = User::onlyTrashed()->where('email', $pending['email'])->first();
+        $wasTrashed = false;
 
         if ($user) {
             $user->restore();
+            $wasTrashed = true;
             $user->forceFill([
                 'name'              => $pending['name'],
                 'password'          => Crypt::decryptString($pending['password']),
@@ -315,6 +317,10 @@ class UserLogin extends Component
         Auth::login($user);
         CartItem::claimGuestCart(session()->getId(), Auth::id());
         session()->regenerate();
+
+        if ($wasTrashed) {
+            session()->flash('success', __('Welcome back — your previously closed account has been reactivated.'));
+        }
 
         $this->redirect(session()->pull('url.intended', '/'), navigate: false);
     }

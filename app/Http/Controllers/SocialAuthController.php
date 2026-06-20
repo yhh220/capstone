@@ -38,17 +38,22 @@ class SocialAuthController extends Controller
             ]);
         }
 
-        $user = $this->findOrCreateUser($provider, $socialUser);
+        $wasTrashed = false;
+        $user = $this->findOrCreateUser($provider, $socialUser, $wasTrashed);
 
         \App\Support\Breadcrumbs::push('auth', 'Social login', ['provider' => $provider, 'user' => $user->id]);
 
         Auth::login($user, remember: true);
         request()->session()->regenerate();
 
+        if ($wasTrashed) {
+            session()->flash('success', __('Welcome back — your previously closed account has been reactivated.'));
+        }
+
         return redirect()->intended(route('account'));
     }
 
-    private function findOrCreateUser(string $provider, SocialiteUser $socialUser): User
+    private function findOrCreateUser(string $provider, SocialiteUser $socialUser, bool &$wasTrashed = false): User
     {
         // 1. Already linked → that user, refreshing the cached email/avatar.
         $account = SocialAccount::where('provider', $provider)
@@ -69,6 +74,7 @@ class SocialAuthController extends Controller
 
             if ($user->trashed()) {
                 $user->restore();
+                $wasTrashed = true;
             }
 
             return $user;
@@ -78,12 +84,18 @@ class SocialAuthController extends Controller
         //    the customer can use either password or social login interchangeably.
         //    withTrashed() so a soft-deleted account still resolves (its email keeps
         //    the unique slot) instead of crashing on a duplicate insert.
+        //    The `email` column's unique index doesn't exclude soft-deleted rows, so
+        //    a brand-new account can never reuse this address anyway — reactivating
+        //    is the only functional option. Surfaced to the user via $wasTrashed
+        //    rather than left silent (the account-deletion page promises sign-in
+        //    is permanently disabled).
         $email = $socialUser->getEmail();
         $user  = $email ? User::withTrashed()->where('email', $email)->first() : null;
 
         // A previously-deleted customer signing back in → reactivate the account.
         if ($user && $user->trashed()) {
             $user->restore();
+            $wasTrashed = true;
         }
 
         // 3. Brand-new customer. No password is set (NULL) — they sign in socially

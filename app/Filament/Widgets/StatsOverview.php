@@ -40,6 +40,7 @@ class StatsOverview extends StatsOverviewWidget
             'totalOrders'     => Order::count(),
             'pendingOrders'   => Order::where('status', 'pending')->count(),
             'monthRevenue'    => (float) Order::where('status', 'delivered')
+                ->whereNull('refunded_at') // defense-in-depth: never count a refunded order as revenue
                 ->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
                 ->sum('total_amount'),
