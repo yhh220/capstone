@@ -11,16 +11,17 @@ class BookingTracker extends Component
 {
     use SetsSeo;
 
-    public string $reference = '';
-    public ?Booking $booking = null;
-    public bool   $searched  = false;
-    public string $errorMsg  = '';
+    public string  $reference = '';
+    public string  $email     = '';
+    public ?Booking $booking  = null;
+    public bool    $searched  = false;
+    public string  $errorMsg  = '';
 
     public function mount(): void
     {
         $this->setSeo(
             title: 'Track My Booking',
-            description: 'Check or cancel your service booking at Win Win Car Audio. Enter your booking reference.',
+            description: 'Check or cancel your service booking at Win Win Car Audio. Enter your booking reference and email.',
         );
     }
 
@@ -28,6 +29,7 @@ class BookingTracker extends Component
     {
         $this->validate([
             'reference' => 'required|string|max:50',
+            'email'     => 'required|email|max:100',
         ]);
 
         $this->searched = true;
@@ -42,21 +44,32 @@ class BookingTracker extends Component
         }
         RateLimiter::hit($key, 120);
 
-        $this->booking = $this->findBooking();
+        $booking = $this->findBookingByReference();
 
-        if (! $this->booking) {
+        if (! $booking) {
             $this->errorMsg = __('No booking found. Please check your booking reference.');
-        } else {
-            RateLimiter::clear($key);
+            return;
         }
+
+        if (strtolower(trim($booking->customer_email ?? '')) !== strtolower(trim($this->email))) {
+            $this->errorMsg = __('Email does not match. Please check your email address.');
+            return;
+        }
+
+        $this->booking = $booking;
     }
 
     public function cancelBooking(): void
     {
-        $booking = $this->findBooking();
+        $booking = $this->findBookingByReference();
 
         if (! $booking) {
             $this->errorMsg = __('No booking found. Please check your booking reference.');
+            return;
+        }
+
+        if (strtolower(trim($booking->customer_email ?? '')) !== strtolower(trim($this->email))) {
+            $this->errorMsg = __('Email does not match. Please check your email address.');
             return;
         }
 
@@ -68,7 +81,7 @@ class BookingTracker extends Component
         session()->flash('success', __('Your booking has been cancelled.'));
     }
 
-    private function findBooking(): ?Booking
+    private function findBookingByReference(): ?Booking
     {
         $reference = trim($this->reference);
 

@@ -12,6 +12,7 @@ class OrderTracker extends Component
     use SetsSeo;
 
     public string $orderNumber = '';
+    public string $email       = '';
     public ?Order $order       = null;
     public bool $searched      = false;
     public string $errorMsg    = '';
@@ -20,7 +21,7 @@ class OrderTracker extends Component
     {
         $this->setSeo(
             title: 'Track Your Order',
-            description: 'Enter your order number to check the status of your order.',
+            description: 'Enter your order number and email to check your order status.',
         );
     }
 
@@ -28,6 +29,7 @@ class OrderTracker extends Component
     {
         $this->validate([
             'orderNumber' => 'required|string',
+            'email'       => 'required|email',
         ]);
 
         $this->searched = true;
@@ -43,15 +45,21 @@ class OrderTracker extends Component
 
         RateLimiter::hit($throttleKey, 60);
 
-        $this->order = Order::where('order_number', $this->orderNumber)
+        $order = Order::where('order_number', $this->orderNumber)
             ->with('items')
             ->first();
 
-        if (!$this->order) {
+        if (! $order) {
             $this->errorMsg = __('No order found. Please check your order number.');
-        } else {
-            RateLimiter::clear($throttleKey);
+            return;
         }
+
+        if (strtolower(trim($order->customer_email)) !== strtolower(trim($this->email))) {
+            $this->errorMsg = __('Email does not match. Please check your email address.');
+            return;
+        }
+
+        $this->order = $order;
     }
 
     /** Lucide icon markup (lucide.dev, MIT) keyed by status — keeps the timeline's icons SVG, not emoji. */

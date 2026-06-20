@@ -2,7 +2,7 @@
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
         <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Track Your Booking') }}</h1>
-            <p class="text-gray-400">{{ __('Enter your booking reference to view or cancel your appointment.') }}</p>
+            <p class="text-gray-400">{{ __('Enter your booking reference and email to view or cancel your appointment.') }}</p>
         </div>
     </div>
 
@@ -15,15 +15,27 @@
             </div>
             @endif
 
-            <div class="mb-6">
-                <label for="bt-reference" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Booking Reference') }}</label>
-                <input wire:model="reference"
-                       id="bt-reference"
-                       wire:keydown.enter="search"
-                       type="text"
-                       placeholder="BK-{{ date('Y') }}-00001"
-                       class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('reference') border-red-400 @enderror">
-                @error('reference') <span role="alert" class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label for="bt-reference" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Booking Reference') }}</label>
+                    <input wire:model="reference"
+                           id="bt-reference"
+                           wire:keydown.enter="search"
+                           type="text"
+                           placeholder="BK-{{ date('Y') }}-00001"
+                           class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('reference') border-red-400 @enderror">
+                    @error('reference') <span role="alert" class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label for="bt-email" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Email Address') }}</label>
+                    <input wire:model="email"
+                           id="bt-email"
+                           wire:keydown.enter="search"
+                           type="email"
+                           placeholder="{{ __('your@email.com') }}"
+                           class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-brand-red transition @error('email') border-red-400 @enderror">
+                    @error('email') <span role="alert" class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
             </div>
 
             <button wire:click="search"

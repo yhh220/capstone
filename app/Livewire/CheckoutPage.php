@@ -208,9 +208,7 @@ class CheckoutPage extends Component
                     ->get()
                     ->keyBy('id');
 
-                // A product that vanished or was deactivated can't be ordered.
-                // Insufficient stock is fine — it's a backorder (stock may go
-                // negative, representing units owed) — but the quantity must be sane.
+                // A product that vanished, was deactivated, or is out of stock can't be ordered.
                 foreach ($cartItems as $cartItem) {
                     $product = $products->get($cartItem->product_id);
                     if (! $product || ! $product->is_active) {
@@ -218,6 +216,12 @@ class CheckoutPage extends Component
                     }
                     if ($cartItem->quantity < 1 || $cartItem->quantity > self::MAX_QTY_PER_ITEM) {
                         throw new \RuntimeException(__('Please order between 1 and :max of each item.', ['max' => self::MAX_QTY_PER_ITEM]));
+                    }
+                    if ($product->stock < $cartItem->quantity) {
+                        throw new \RuntimeException(__(':product is out of stock. Only :stock unit(s) remaining.', [
+                            'product' => $product->name,
+                            'stock'   => max(0, $product->stock),
+                        ]));
                     }
                 }
 

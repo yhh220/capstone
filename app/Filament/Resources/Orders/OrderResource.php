@@ -93,21 +93,8 @@ class OrderResource extends Resource
         return $schema->components([
             Section::make('Order Information')->schema([
                 Forms\Components\TextInput::make('order_number')->disabled(),
-                Forms\Components\Select::make('status')
-                    ->options([
-                        'pending'    => 'Pending',
-                        'processing' => 'Processing',
-                        'shipped'    => 'Shipped',
-                        'delivered'  => 'Delivered',
-                        'cancelled'  => 'Cancelled',
-                    ])
-                    ->required(),
-                Forms\Components\Select::make('payment_status')
-                    ->options([
-                        'pending' => 'Pending',
-                        'paid'    => 'Paid',
-                    ])
-                    ->required(),
+                Forms\Components\TextInput::make('status')->disabled(),
+                Forms\Components\TextInput::make('payment_status')->label('Payment Status')->disabled(),
             ])->columns(['default' => 1, 'sm' => 2]),
 
             Section::make('Customer Details')->schema([
@@ -354,7 +341,14 @@ class OrderResource extends Resource
                     ->modalDescription('Confirms the customer has received the order.')
                     ->action(function (Order $record): void {
                         $record->update(['status' => 'delivered']);
-                        Notification::make()->title('Order marked as delivered')->success()->send();
+                        try {
+                            \Illuminate\Support\Facades\Mail::to($record->customer_email)
+                                ->send(new \App\Mail\OrderDeliveredMail($record));
+                            Notification::make()->title('Order marked as delivered — confirmation email sent')->success()->send();
+                        } catch (\Throwable $e) {
+                            logger()->error('OrderDeliveredMail failed: ' . $e->getMessage());
+                            Notification::make()->title('Marked delivered, but the email failed to send')->warning()->send();
+                        }
                     }),
                 Action::make('invoice')
                     ->label('Invoice')

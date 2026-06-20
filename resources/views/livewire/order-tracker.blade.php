@@ -2,19 +2,28 @@
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
         <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Track Your Order') }}</h1>
-            <p class="text-gray-400">{{ __('Enter your order number to check the status') }}</p>
+            <p class="text-gray-400">{{ __('Enter your order number and email to check the status') }}</p>
         </div>
     </div>
 
     <div class="max-w-2xl mx-auto px-4 py-10">
         {{-- Search Form --}}
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700 mb-8">
-            <div>
-                <label for="ot-order-number" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Order Number') }}</label>
-                <input wire:model="orderNumber" id="ot-order-number" type="text" placeholder="ORD-2026-00001"
-                       wire:keydown.enter="trackOrder"
-                       class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
-                @error('orderNumber') <span role="alert" class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="ot-order-number" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Order Number') }}</label>
+                    <input wire:model="orderNumber" id="ot-order-number" type="text" placeholder="ORD-2026-00001"
+                           wire:keydown.enter="trackOrder"
+                           class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                    @error('orderNumber') <span role="alert" class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label for="ot-email" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Email Address') }}</label>
+                    <input wire:model="email" id="ot-email" type="email" placeholder="{{ __('your@email.com') }}"
+                           wire:keydown.enter="trackOrder"
+                           class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                    @error('email') <span role="alert" class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
             </div>
             <button wire:click="trackOrder"
                     wire:loading.attr="disabled"
