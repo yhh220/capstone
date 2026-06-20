@@ -40,12 +40,12 @@
 <div>
     {{-- ① Backdrop (mobile only) --}}
     @if($isOpen)
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[48] md:hidden" wire:click="close"></div>
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998] md:hidden" wire:click="close"></div>
     @endif
 
     {{-- ② Chat Window --}}
     @if($isOpen)
-    <div class="chatbot-window fixed z-[49] flex flex-col overflow-hidden
+    <div class="chatbot-window fixed z-[9999] flex flex-col overflow-hidden
                 inset-x-0 bottom-0 h-[90vh] rounded-t-[1.75rem]
                 md:inset-auto md:bottom-24 md:right-6 md:h-[620px] md:max-h-[85vh] md:w-[400px] md:rounded-[1.75rem]
                 bg-white dark:bg-gray-900
@@ -264,7 +264,7 @@
 
     {{-- ③ Floating toggle button (itshover: shine sweep; the online dot does the glowing) --}}
     {{-- Hidden on mobile while open (the in-window header handles closing there) --}}
-    <div class="fixed bottom-6 right-6 z-[50] md:bottom-8 md:right-8 {{ $isOpen ? 'hidden md:block' : '' }}">
+    <div class="fixed bottom-6 right-6 z-[9998] md:bottom-8 md:right-8 {{ $isOpen ? 'hidden md:block' : '' }}">
         <div class="relative group">
             <button wire:click="{{ $isOpen ? 'close' : 'open' }}"
                     class="relative w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center overflow-hidden

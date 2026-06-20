@@ -58,6 +58,14 @@
 
     {{-- ── MULTI-STEP BOOKING WIZARD ── --}}
     @else {{-- !$submitted --}}
+    @php
+        $steps = [
+            1 => ['label' => __('About'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/>'],
+            2 => ['label' => __('Date & Time'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z"/>'],
+            3 => ['label' => __('Vehicle'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>'],
+            4 => ['label' => __('Confirm'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>'],
+        ];
+    @endphp
     <x-honeypot livewire-model="honeypotData" />
     <div class="max-w-7xl mx-auto px-4 py-10 sm:py-14 scroll-mt-24"
          x-data
@@ -66,23 +74,13 @@
 
             {{-- ── LEFT: PROGRESS SIDEBAR ── --}}
             <div class="w-full lg:w-72 flex-shrink-0">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 lg:sticky lg:top-6">
-
-                    {{-- Step tracker --}}
+                {{-- Desktop Vertical Tracker --}}
+                <div class="hidden lg:block bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 lg:sticky lg:top-6">
                     <p class="text-xs font-black uppercase tracking-[0.15em] text-gray-400 mb-5">
                         {{ __('Step :current of :total', ['current' => $currentStep, 'total' => $totalSteps]) }}
                     </p>
 
                     <div class="space-y-1">
-                        @php
-                            $steps = [
-                                1 => ['label' => __('About'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/>'],
-                                2 => ['label' => __('Date & Time'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z"/>'],
-                                3 => ['label' => __('Vehicle'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>'],
-                                4 => ['label' => __('Confirm'), 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>'],
-                            ];
-                        @endphp
-
                         @foreach($steps as $num => $step)
                         <button wire:click="goToStep({{ $num }})"
                                 @if($num >= $currentStep) disabled @endif
@@ -124,7 +122,7 @@
                         </div>
                     </div>
 
-                    {{-- Summary card (visible once a service or slot is chosen) --}}
+                    {{-- Summary card --}}
                     @if($selectedService || $preferred_date || $preferred_time)
                     <div class="mt-5 bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                         <p class="text-xs font-black uppercase tracking-wider text-gray-400 mb-3">{{ __('Summary') }}</p>
@@ -155,6 +153,18 @@
                             {{ __('Existing booking?') }}
                             <a href="{{ route('booking.track') }}" class="text-brand-red font-semibold hover:underline ml-1">{{ __('Track it') }}</a>
                         </p>
+                    </div>
+                </div>
+
+                {{-- Mobile/Tablet Compact Tracker --}}
+                <div class="lg:hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 w-full">
+                    <div class="flex items-center justify-between text-xs font-black uppercase tracking-wider text-gray-800 dark:text-gray-200 mb-2">
+                        <span>{{ __('Step :current of :total', ['current' => $currentStep, 'total' => $totalSteps]) }}: {{ $steps[$currentStep]['label'] }}</span>
+                        <span class="text-brand-red">{{ round((($currentStep - 1) / $totalSteps) * 100) }}%</span>
+                    </div>
+                    <div class="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-brand-red rounded-full transition-all duration-500 ease-out"
+                             style="width: {{ round((($currentStep - 1) / $totalSteps) * 100) }}%"></div>
                     </div>
                 </div>
             </div>

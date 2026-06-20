@@ -344,7 +344,7 @@
         /* Chat window sits above the sticky nav and never taller than the space
            between the nav and its bottom offset, so its header is never hidden
            behind the header on short (laptop) viewports. */
-        .chatbot-window { z-index: 55 !important; }
+        .chatbot-window { z-index: 9999 !important; }
         @media (min-width: 768px) {
             .chatbot-window { max-height: calc(100vh - 12rem) !important; }
         }
@@ -641,8 +641,8 @@
                         </div>
                     </div>
 
-                    <!-- Theme switcher (segmented control) — hidden on xs, visible sm+ -->
-                    <div id="theme-wrapper" class="hidden sm:flex items-center h-9 p-0.5 rounded-lg bg-gray-100 dark:bg-gray-900 gap-0.5">
+                    <!-- Theme switcher (segmented control) — hidden on xs, visible lg+ -->
+                    <div id="theme-wrapper" class="hidden lg:flex items-center h-9 p-0.5 rounded-lg bg-gray-100 dark:bg-gray-900 gap-0.5">
                         <button class="theme-option w-8 h-full flex items-center justify-center rounded-md transition-colors duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="light" title="{{ __('Light mode') }}" aria-label="{{ __('Light mode') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
@@ -662,13 +662,13 @@
                     </div>
 
                     @if($shoppingEnabled || auth()->check())
-                    <div class="hidden sm:block h-7 w-px bg-gray-200 dark:bg-gray-700" aria-hidden="true"></div>
+                    <div class="hidden lg:block h-7 w-px bg-gray-200 dark:bg-gray-700" aria-hidden="true"></div>
                     @endif
 
                     <div class="flex items-center gap-1 sm:gap-1.5">
                     <!-- User dropdown (desktop) -->
                     @if($shoppingEnabled || auth()->check())
-                    <div class="hidden md:block relative" x-data="{ open: false }">
+                    <div class="hidden lg:block relative" x-data="{ open: false }">
                         <x-tooltip text="{{ auth()->check() ? Auth::user()->name : __('Account') }}" position="bottom">
                         <button @click="open = !open"
                                 @click.outside="open = false"
@@ -791,8 +791,8 @@
                  class="hidden lg:hidden pb-4 space-y-1 border-t border-gray-100 dark:border-gray-700 pt-3"
                  role="menu">
 
-                <!-- Theme toggle inside mobile menu (xs screens) -->
-                <div class="sm:hidden flex items-center gap-2 px-3 py-2 mb-1">
+                <!-- Theme toggle inside mobile menu (xs/sm/md screens) -->
+                <div class="lg:hidden flex items-center gap-2 px-3 py-2 mb-1">
                     <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 mr-1">{{ __('Theme') }}:</span>
                     <div class="flex items-center h-9 p-0.5 rounded-lg bg-gray-100 dark:bg-gray-900 gap-0.5">
                         <button class="theme-option w-8 h-full flex items-center justify-center rounded-md transition-colors duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="light" title="{{ __('Light mode') }}" aria-label="{{ __('Light mode') }}">

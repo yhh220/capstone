@@ -28,11 +28,13 @@ class ServicesTable
                 TextColumn::make('price')
                     ->money('MYR', locale: 'ms_MY')
                     ->sortable()
-                    ->placeholder('Contact for pricing'),
+                    ->placeholder('Contact for pricing')
+                    ->tooltip(fn ($record) => $record->price ? 'Base service fee' : 'No set price; contact details will be shown to user'),
                 ToggleColumn::make('is_active')
                     ->label('Active')
                     ->sortable()
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->tooltip('Toggle service availability for customer booking'),
                 TextColumn::make('duration')
                     ->placeholder('-')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -49,7 +51,8 @@ class ServicesTable
                 TextColumn::make('sort_order')
                     ->label('Rank')
                     ->alignCenter()
-                    ->sortable(),
+                    ->sortable()
+                    ->tooltip('Rank order determining display position on public website list'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -57,7 +60,8 @@ class ServicesTable
             ])
             ->filters([])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->tooltip('Edit service details'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

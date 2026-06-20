@@ -33,7 +33,8 @@ class ProductsTable
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
-                    ->description(fn (Product $record): ?string => $record->sku ? "SKU: {$record->sku}" : null),
+                    ->description(fn (Product $record): ?string => $record->sku ? "SKU: {$record->sku}" : null)
+                    ->tooltip(fn (Product $record): string => $record->name),
                 TextColumn::make('category.name')
                     ->label('Category')
                     ->sortable()
@@ -53,18 +54,22 @@ class ProductsTable
                     ->money('MYR', locale: 'ms_MY')
                     ->sortable()
                     ->color('danger')
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->tooltip(fn (Product $record) => $record->sale_price ? 'Promotional discount price is active' : null),
                 TextColumn::make('stock')
                     ->numeric()
                     ->sortable()
                     ->color(fn (Product $record): string => $record->stock <= 0 ? 'danger' : ($record->stock < 5 ? 'warning' : 'gray'))
-                    ->weight(fn (Product $record): string => $record->stock < 5 ? 'bold' : 'normal'),
+                    ->weight(fn (Product $record): string => $record->stock < 5 ? 'bold' : 'normal')
+                    ->tooltip(fn (Product $record): string => $record->stock <= 0 ? 'Out of stock!' : ($record->stock < 5 ? 'Low stock warning!' : 'Stock count in inventory')),
                 ToggleColumn::make('is_active')
                     ->label('Active')
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->tooltip('Toggle product visibility in the store catalog'),
                 ToggleColumn::make('is_featured')
                     ->label('Show on Homepage')
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->tooltip('Toggle showing this product in the homepage featured section'),
                 TextColumn::make('slug')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -106,7 +111,8 @@ class ProductsTable
                     ->query(fn ($query) => $query->where('stock', '<', 5)),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->tooltip('Edit product details'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -114,24 +120,28 @@ class ProductsTable
                         ->label('Activate')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
+                        ->tooltip('Activate all selected products')
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => true]))
                         ->deselectRecordsAfterCompletion(),
                     BulkAction::make('deactivate')
                         ->label('Deactivate')
                         ->icon('heroicon-o-x-circle')
                         ->color('warning')
+                        ->tooltip('Deactivate all selected products')
                         ->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => false]))
                         ->deselectRecordsAfterCompletion(),
                     BulkAction::make('feature')
                         ->label('Show on homepage')
                         ->icon('heroicon-o-star')
+                        ->tooltip('Feature all selected products on homepage')
                         ->action(fn (Collection $records) => $records->each->update(['is_featured' => true]))
                         ->deselectRecordsAfterCompletion(),
                     BulkAction::make('unfeature')
                         ->label('Remove from homepage')
                         ->icon('heroicon-o-star')
                         ->color('gray')
+                        ->tooltip('Remove all selected products from homepage featured section')
                         ->action(fn (Collection $records) => $records->each->update(['is_featured' => false]))
                         ->deselectRecordsAfterCompletion(),
                     DeleteBulkAction::make(),

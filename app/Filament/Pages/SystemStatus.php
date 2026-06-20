@@ -144,6 +144,37 @@ class SystemStatus extends Page
         return $bytes . ' B';
     }
 
+    public function clearCache(): void
+    {
+        try {
+            // Flush all Laravel cache entries
+            Cache::flush();
+
+            // Clear configuration cache, route cache, view cache, and system cache using Artisan
+            \Illuminate\Support\Facades\Artisan::call('cache:clear');
+            \Illuminate\Support\Facades\Artisan::call('config:clear');
+            \Illuminate\Support\Facades\Artisan::call('view:clear');
+            \Illuminate\Support\Facades\Artisan::call('route:clear');
+
+            \Filament\Notifications\Notification::make()
+                ->title('System Cache Cleared')
+                ->body('All application settings, chatbot FAQs, dashboard aggregated stats, and view caches have been cleared successfully.')
+                ->success()
+                ->send();
+
+            // Clear private memory caches
+            $this->checksCache = null;
+        } catch (\Throwable $e) {
+            logger()->error('Failed to clear cache: ' . $e->getMessage());
+
+            \Filament\Notifications\Notification::make()
+                ->title('Failed to clear cache')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
     private function check(string $name, \Closure $probe): array
     {
         try {

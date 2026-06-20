@@ -66,7 +66,7 @@ class ObservabilityTest extends TestCase
     {
         $checks = collect(app(SystemStatus::class)->getChecks())->keyBy('name');
 
-        $this->assertSame('ok', $checks['Database']['status']);
-        $this->assertSame('ok', $checks['Cache']['status']);
+        $this->assertSame('ok', $checks['Your data']['status']);
+        $this->assertSame('ok', $checks['Website speed']['status']);
     }
 }

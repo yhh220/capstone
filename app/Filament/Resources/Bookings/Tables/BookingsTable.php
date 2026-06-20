@@ -24,13 +24,15 @@ class BookingsTable
                     ->searchable(),
                 TextColumn::make('vehicle_model')
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->tooltip('Vehicle model specified by the customer'),
                 TextColumn::make('service.name')
                     ->label('About')
                     ->placeholder('General visit')
                     ->badge()
                     ->color(fn ($state) => $state ? 'gray' : 'warning')
                     ->formatStateUsing(fn ($state) => $state ?: 'General visit')
+                    ->tooltip(fn ($record) => $record->service ? "Service: {$record->service->name}" : "General visit (unspecified service)")
                     ->sortable(),
                 TextColumn::make('preferred_date')
                     ->date('D, d M Y')
@@ -47,13 +49,19 @@ class BookingsTable
                         'completed' => 'info',
                         default     => 'warning',
                     })
+                    ->tooltip(fn (string $state): string => match ($state) {
+                        'confirmed' => 'Booking has been confirmed',
+                        'cancelled' => 'Booking was cancelled',
+                        'completed' => 'Service has been completed',
+                        default     => 'Awaiting action/confirmation',
+                    })
                     ->sortable(),
                 TextColumn::make('reminder_sent_at')
                     ->label('Reminder')
                     ->badge()
                     ->state(fn ($record) => $record->reminder_sent_at ? 'Sent' : 'Not sent')
                     ->color(fn ($record) => $record->reminder_sent_at ? 'success' : 'gray')
-                    ->tooltip(fn ($record) => $record->reminder_sent_at?->format('d M Y, H:i'))
+                    ->tooltip(fn ($record) => $record->reminder_sent_at ? 'Sent at: ' . $record->reminder_sent_at->format('d M Y, H:i') : 'No reminder sent yet')
                     ->toggleable(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -80,11 +88,13 @@ class BookingsTable
             ])
             ->persistFiltersInSession()
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->tooltip('Edit booking details'),
                 \Filament\Actions\Action::make('sendReminder')
                     ->label('Send reminder')
                     ->icon(\Filament\Support\Icons\Heroicon::OutlinedBell)
                     ->color('warning')
+                    ->tooltip('Send a reminder email to customer now')
                     ->visible(fn ($record) => in_array($record->status, ['pending', 'confirmed'], true) && filled($record->customer_email))
                     ->requiresConfirmation()
                     ->modalHeading('Send a reminder email now?')
@@ -106,6 +116,7 @@ class BookingsTable
                         ->label('Confirm selected')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
+                        ->tooltip('Confirm all selected pending bookings')
                         ->requiresConfirmation()
                         ->action(fn (\Illuminate\Database\Eloquent\Collection $records) => $records
                             ->each(fn ($b) => $b->status === 'pending' && $b->update(['status' => 'confirmed'])))

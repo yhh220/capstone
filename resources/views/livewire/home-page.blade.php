@@ -47,7 +47,7 @@
                     <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-gray-400 dark:text-white/35 mb-6 sm:mb-8">
                         {{ __('Shah Alam, Selangor') }} &nbsp;·&nbsp; {{ __('Malaysia') }}
                     </p>
-                    <h1 class="font-display text-[clamp(2.8rem,9vw,6.8rem)] leading-[0.93] uppercase text-gray-900 dark:text-white mb-6 sm:mb-8">
+                    <h1 class="font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.93] uppercase text-gray-900 dark:text-white mb-6 sm:mb-8">
                         {{ __("Shah Alam's") }}<br>
                         <span class="text-[#C8413D]">{{ __('Car Audio') }}</span><br>
                         {{ __('Specialist.') }}
@@ -62,7 +62,7 @@
                             <i data-lucide="arrow-right" class="icon-sm icon-arrow relative z-10"></i>
                         </a>
                         @endif
-                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-lg w-full sm:w-auto">
+                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg w-full sm:w-auto">
                             <i data-lucide="map-pin" class="icon-sm btn-ico"></i>
                             {{ __('Visit Showroom') }}
                         </a>
@@ -443,16 +443,16 @@
                 <div class="absolute -top-24 -right-24 w-96 h-96 bg-brand-red/25 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
                 <div class="absolute -bottom-32 -left-16 w-80 h-80 bg-brand-red/10 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
 
-                <div class="relative grid lg:grid-cols-[1.2fr_auto] gap-10 items-center">
+                <div class="relative grid lg:grid-cols-[1.2fr_auto] gap-10 items-center text-center lg:text-left">
                     <div>
                         <h2 id="cta-heading" class="text-3xl sm:text-5xl text-white mb-4 leading-tight">
                             {{ __('Ready to upgrade your car?') }}
                         </h2>
-                        <p class="text-white/70 text-base sm:text-lg max-w-xl">
+                        <p class="text-white/70 text-base sm:text-lg max-w-xl mx-auto lg:mx-0">
                             {{ __('Use the website to explore our products, then visit our showroom in Shah Alam for expert installation.') }}
                         </p>
                     </div>
-                    <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 shrink-0">
+                    <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 shrink-0 justify-center lg:justify-start items-center lg:items-stretch">
                         <x-btn.whatsapp :href="$whatsAppUrl" size="btn-lg">{{ __('WhatsApp Support') }}</x-btn.whatsapp>
                         <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-lg">
                             {!! $icon('map-pin', 'icon-md btn-ico') !!}

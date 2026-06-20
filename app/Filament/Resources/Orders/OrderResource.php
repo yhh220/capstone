@@ -137,7 +137,8 @@ class OrderResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
-                    ->color('primary'),
+                    ->color('primary')
+                    ->tooltip('Unique order reference number'),
                 TextColumn::make('customer_name')
                     ->searchable()
                     ->sortable(),
@@ -155,13 +156,15 @@ class OrderResource extends Resource
                         'primary'   => 'shipped',
                         'success'   => 'delivered',
                         'danger'    => 'cancelled',
-                    ]),
+                    ])
+                    ->tooltip(fn (string $state): string => 'Order status is ' . $state),
                 BadgeColumn::make('payment_status')
                     ->label('Payment')
                     ->colors([
                         'warning' => 'pending',
                         'success' => 'paid',
-                    ]),
+                    ])
+                    ->tooltip(fn (string $state): string => 'Payment is ' . $state),
                 TextColumn::make('created_at')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
@@ -201,11 +204,13 @@ class OrderResource extends Resource
             ])
             ->persistFiltersInSession()
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->tooltip('View/edit order details'),
                 Action::make('advance')
                     ->label('Advance')
                     ->icon(Heroicon::OutlinedArrowRightCircle)
                     ->color('success')
+                    ->tooltip(fn (Order $record): string => "Advance status to " . ucfirst($record->next_status ?? ''))
                     ->visible(fn(Order $record) => $record->next_status !== null)
                     ->requiresConfirmation()
                     ->modalHeading(fn(Order $record) => "Advance to " . ucfirst($record->next_status ?? '') . "?")
@@ -218,6 +223,7 @@ class OrderResource extends Resource
                     ->label('Mark Paid')
                     ->icon(Heroicon::OutlinedCheckCircle)
                     ->color('success')
+                    ->tooltip('Mark order as fully paid')
                     ->visible(fn (Order $record) => $record->payment_status === 'pending' && $record->status !== 'cancelled')
                     ->requiresConfirmation()
                     ->modalHeading('Mark this order as paid?')
@@ -230,6 +236,7 @@ class OrderResource extends Resource
                     ->label('Mark Shipped')
                     ->icon(Heroicon::OutlinedTruck)
                     ->color('primary')
+                    ->tooltip('Mark order as shipped and enter tracking number')
                     ->visible(fn (Order $record) => in_array($record->status, ['processing'], true))
                     ->schema([
                         Forms\Components\TextInput::make('tracking_number')
@@ -259,12 +266,14 @@ class OrderResource extends Resource
                     ->label('Invoice')
                     ->icon(Heroicon::OutlinedDocumentText)
                     ->color('gray')
+                    ->tooltip('View or print invoice')
                     ->url(fn (Order $record) => route('invoice.show', $record->order_number))
                     ->openUrlInNewTab(),
                 Action::make('resendConfirmation')
                     ->label('Resend confirmation')
                     ->icon(Heroicon::OutlinedEnvelope)
                     ->color('gray')
+                    ->tooltip('Resend the order confirmation email to the customer')
                     ->visible(fn (Order $record) => filled($record->customer_email) && $record->status !== 'cancelled')
                     ->requiresConfirmation()
                     ->modalHeading('Resend the order confirmation email?')
@@ -281,6 +290,7 @@ class OrderResource extends Resource
                     ->label('Cancel & restock')
                     ->icon(Heroicon::OutlinedXCircle)
                     ->color('danger')
+                    ->tooltip('Cancel this order and restock its items')
                     // Only before the goods leave the warehouse — shipped/delivered
                     // orders return stock through a manual returns process instead.
                     ->visible(fn (Order $record) => in_array($record->status, ['pending', 'processing'], true))
@@ -298,7 +308,8 @@ class OrderResource extends Resource
                         });
                         Notification::make()->title('Order cancelled & stock returned')->success()->send();
                     }),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->tooltip('Delete order record'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

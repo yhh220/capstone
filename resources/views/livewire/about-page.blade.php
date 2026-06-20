@@ -132,16 +132,16 @@
                 <div class="absolute -top-24 -right-24 w-96 h-96 bg-brand-red/25 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
                 <div class="absolute -bottom-32 -left-16 w-80 h-80 bg-brand-red/10 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
 
-                <div class="relative grid lg:grid-cols-[1.2fr_auto] gap-10 items-center">
+                <div class="relative grid lg:grid-cols-[1.2fr_auto] gap-10 items-center text-center lg:text-left">
                     <div>
                         <h2 id="about-cta-heading" class="text-3xl sm:text-5xl text-white mb-4 leading-tight">
                             {{ __('Ready to visit or enquire?') }}
                         </h2>
-                        <p class="text-white/70 text-base sm:text-lg max-w-xl">
+                        <p class="text-white/70 text-base sm:text-lg max-w-xl mx-auto lg:mx-0">
                             {{ __('See the products online first, then continue the conversation in store or on WhatsApp.') }}
                         </p>
                     </div>
-                    <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 shrink-0">
+                    <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 shrink-0 justify-center lg:justify-start items-center lg:items-stretch">
                         <x-btn.whatsapp :href="$whatsAppUrl" size="btn-lg">{{ __('WhatsApp us') }}</x-btn.whatsapp>
                         <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-lg">
                             <svg class="icon-md btn-ico" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>

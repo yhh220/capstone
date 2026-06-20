@@ -77,11 +77,13 @@ class ChatbotFaqResource extends Resource
                 TextColumn::make('topic')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->tooltip('Internal topic category for the chatbot FAQ'),
                 TextColumn::make('keywords')
                     ->badge()
                     ->limitList(4)
-                    ->separator(','),
+                    ->separator(',')
+                    ->tooltip(fn ($record) => 'Triggers on: ' . (is_array($record->keywords) ? implode(', ', $record->keywords) : $record->keywords)),
                 TextColumn::make('priority')
                     ->label('Priority')
                     ->sortable()
@@ -97,18 +99,22 @@ class ChatbotFaqResource extends Resource
                         $state >= 75  => 'warning',
                         $state >= 40  => 'gray',
                         default       => 'gray',
-                    }),
+                    })
+                    ->tooltip('Determines priority order when multiple triggering keywords match'),
                 IconColumn::make('is_active')
                     ->boolean()
-                    ->label('Active'),
+                    ->label('Active')
+                    ->tooltip('Active status of this FAQ response'),
                 TextColumn::make('updated_at')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
             ])
             ->defaultSort('priority', 'desc')
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->tooltip('Edit FAQ entry'),
+                DeleteAction::make()
+                    ->tooltip('Delete FAQ entry'),
             ]);
     }
 

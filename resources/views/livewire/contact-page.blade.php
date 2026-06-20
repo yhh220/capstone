@@ -79,7 +79,7 @@
                 </div>
             </div>
 
-            <div class="lg:col-span-2">
+            <div class="md:col-span-2">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 sm:p-8">
                     <h2 class="text-2xl font-black text-brand-black dark:text-white mb-6">{{ __('Leave us a message') }}</h2>
 
