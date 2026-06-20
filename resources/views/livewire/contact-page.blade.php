@@ -104,7 +104,7 @@
                                        placeholder="{{ __('Your name') }}"
                                        autocomplete="name"
                                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red/30 focus:border-brand-red transition placeholder-gray-400 dark:placeholder-gray-500">
-                                @error('name') <span class="text-red-500 text-xs mt-1 block" role="alert">{{ $message }}</span> @enderror
+                                @error('name') <span role="alert" class="text-red-500 text-xs mt-1 block" role="alert">{{ $message }}</span> @enderror
                             </div>
                             <div>
                                 <label for="contact-email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
@@ -116,7 +116,7 @@
                                        placeholder="{{ __('your@email.com') }}"
                                        autocomplete="email"
                                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red/30 focus:border-brand-red transition placeholder-gray-400 dark:placeholder-gray-500">
-                                @error('email') <span class="text-red-500 text-xs mt-1 block" role="alert">{{ $message }}</span> @enderror
+                                @error('email') <span role="alert" class="text-red-500 text-xs mt-1 block" role="alert">{{ $message }}</span> @enderror
                             </div>
                         </div>
 
@@ -131,7 +131,7 @@
                                        placeholder="{{ $storePhoneDisplay }}"
                                        autocomplete="tel"
                                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red/30 focus:border-brand-red transition placeholder-gray-400 dark:placeholder-gray-500">
-                                @error('phone') <span class="text-red-500 text-xs mt-1 block" role="alert">{{ $message }}</span> @enderror
+                                @error('phone') <span role="alert" class="text-red-500 text-xs mt-1 block" role="alert">{{ $message }}</span> @enderror
                             </div>
                             <div>
                                 <label for="contact-subject" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
@@ -142,7 +142,7 @@
                                        type="text"
                                        placeholder="{{ __('How can we help?') }}"
                                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red/30 focus:border-brand-red transition placeholder-gray-400 dark:placeholder-gray-500">
-                                @error('subject') <span class="text-red-500 text-xs mt-1 block" role="alert">{{ $message }}</span> @enderror
+                                @error('subject') <span role="alert" class="text-red-500 text-xs mt-1 block" role="alert">{{ $message }}</span> @enderror
                             </div>
                         </div>
 
@@ -155,7 +155,7 @@
                                       rows="5"
                                       placeholder="{{ __('Write your message here...') }}"
                                       class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red/30 focus:border-brand-red transition resize-none placeholder-gray-400 dark:placeholder-gray-500"></textarea>
-                            @error('message') <span class="text-red-500 text-xs mt-1 block" role="alert">{{ $message }}</span> @enderror
+                            @error('message') <span role="alert" class="text-red-500 text-xs mt-1 block" role="alert">{{ $message }}</span> @enderror
                         </div>
 
                         <button type="submit"

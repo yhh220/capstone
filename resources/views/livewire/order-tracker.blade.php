@@ -14,13 +14,13 @@
                     <label for="ot-order-number" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Order Number') }}</label>
                     <input wire:model="orderNumber" id="ot-order-number" type="text" placeholder="ORD-2026-00001"
                            class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
-                    @error('orderNumber') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    @error('orderNumber') <span role="alert" class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label for="ot-email" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Email Address') }}</label>
                     <input wire:model="email" id="ot-email" type="email" placeholder="{{ __('your@email.com') }}"
                            class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
-                    @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    @error('email') <span role="alert" class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
             </div>
             <button wire:click="trackOrder"

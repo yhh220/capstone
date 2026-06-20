@@ -26,7 +26,7 @@
                     <div>
                         <label for="pf-name" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Name') }} *</label>
                         <input wire:model="name" id="pf-name" autocomplete="name" type="text" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
-                        @error('name') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        @error('name') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label for="pf-email" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Email') }}</label>
@@ -36,7 +36,7 @@
                     <div>
                         <label for="pf-phone" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Phone Number') }}</label>
                         <input wire:model="phone" id="pf-phone" autocomplete="tel" type="tel" placeholder="016-XXX XXXX" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
-                        @error('phone') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        @error('phone') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label for="pf-gender" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Gender') }}</label>
@@ -113,13 +113,13 @@
                 <div>
                     <label for="pf-current-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Current Password') }}</label>
                     <input wire:model="current_password" id="pf-current-pass" type="password" autocomplete="current-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
-                    @error('current_password') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    @error('current_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="pf-new-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('New Password') }}</label>
                         <input wire:model="new_password" id="pf-new-pass" type="password" autocomplete="new-password" placeholder="{{ __('Min. 8 characters') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
-                        @error('new_password') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        @error('new_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label for="pf-new-pass-confirm" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Confirm New Password') }}</label>
@@ -152,13 +152,13 @@
                         <input wire:model="set_otp" id="pf-set-otp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"
                                x-on:input="$el.value = $el.value.replace(/\D/g, '')"
                                class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm tracking-[0.4em] focus:outline-none focus:border-brand-red transition">
-                        @error('set_otp') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        @error('set_otp') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label for="pf-set-new" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('New Password') }}</label>
                             <input wire:model="set_new_password" id="pf-set-new" type="password" autocomplete="new-password" placeholder="{{ __('Min. 8 characters') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
-                            @error('set_new_password') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                            @error('set_new_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label for="pf-set-confirm" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Confirm New Password') }}</label>
@@ -197,7 +197,7 @@
                 <div>
                     <label for="pf-delete-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Enter your password to confirm') }}</label>
                     <input wire:model="delete_password" id="pf-delete-pass" type="password" autocomplete="current-password" class="w-full border border-red-200 dark:border-red-500/40 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500 transition">
-                    @error('delete_password') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    @error('delete_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div class="flex items-center gap-3">
                     <button type="button"

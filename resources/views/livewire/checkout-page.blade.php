@@ -42,32 +42,32 @@
                 <div>
                     <label for="co-name" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Full Name') }} *</label>
                     <input wire:model.blur="customerName" id="co-name" type="text" autocomplete="name" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
-                    @error('customerName') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    @error('customerName') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label for="co-email" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Email') }} *</label>
                     <input wire:model.blur="customerEmail" id="co-email" type="email" autocomplete="email" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
-                    @error('customerEmail') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    @error('customerEmail') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div class="sm:col-span-2">
                     <label for="co-phone" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Phone') }} *</label>
                     <input wire:model.blur="customerPhone" id="co-phone" type="tel" inputmode="numeric" maxlength="15" x-on:input="$el.value = $el.value.replace(/\D/g, '')" autocomplete="tel" placeholder="0123456789" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
-                    @error('customerPhone') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    @error('customerPhone') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div class="sm:col-span-2">
                     <label for="co-street" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Street Address') }} *</label>
                     <input wire:model.blur="street" id="co-street" type="text" autocomplete="street-address" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
-                    @error('street') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    @error('street') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label for="co-city" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('City') }} *</label>
                     <input wire:model.blur="city" id="co-city" type="text" autocomplete="address-level2" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
-                    @error('city') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    @error('city') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label for="co-postcode" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Postcode') }} *</label>
                     <input wire:model.blur="postcode" id="co-postcode" type="text" inputmode="numeric" maxlength="5" x-on:input="$el.value = $el.value.replace(/\D/g, '')" autocomplete="postal-code" placeholder="40150" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
-                    @error('postcode') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    @error('postcode') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label for="co-state" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('State') }} *</label>
