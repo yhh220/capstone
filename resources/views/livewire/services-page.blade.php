@@ -42,7 +42,7 @@
     </div>
 
     <section class="py-16 sm:py-24 overflow-hidden" aria-labelledby="services-list-heading">
-        <div class="max-w-5xl mx-auto px-6">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6">
             <div class="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
                 <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-brand-red mb-3">
                     <span class="w-8 h-px bg-brand-red"></span>{{ __('Service Menu') }}<span class="w-8 h-px bg-brand-red"></span>
@@ -178,7 +178,7 @@
                             {{ __('Send us your car model, current setup, and goal. We will recommend the right service before you book.') }}
                         </p>
                     </div>
-                    <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 shrink-0 justify-center lg:justify-start items-center lg:items-stretch">
+                    <div class="flex flex-col sm:flex-row gap-3 shrink-0 justify-center lg:justify-start items-center lg:items-stretch">
                         <x-btn.whatsapp :href="$generalWhatsAppUrl" size="btn-lg">{{ __('Chat on WhatsApp') }}</x-btn.whatsapp>
                         <a href="{{ route('booking') }}" class="btn btn-outline-light btn-lg">
                             <svg class="icon-md btn-ico" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>

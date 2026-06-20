@@ -46,8 +46,8 @@
                    class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-red transition placeholder-gray-400 dark:placeholder-gray-500">
         </div>
 
-        {{-- Mobile filter toggle --}}
-        <div class="lg:hidden mb-4">
+        {{-- Mobile filter toggle (hidden once sidebar appears at md) --}}
+        <div class="md:hidden mb-4">
             <button id="filter-toggle"
                     class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-200 shadow-sm w-full justify-between"
                     aria-expanded="false"
@@ -60,8 +60,8 @@
             </button>
         </div>
 
-        <div class="flex flex-col lg:flex-row gap-8">
-            <aside id="filter-sidebar" class="hidden lg:block w-full lg:w-64 flex-shrink-0" aria-label="{{ __('Product filters') }}">
+        <div class="flex flex-col md:flex-row gap-8">
+            <aside id="filter-sidebar" class="hidden md:block w-full md:w-52 lg:w-64 flex-shrink-0" aria-label="{{ __('Product filters') }}">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 lg:sticky lg:top-20">
                     <h3 class="font-bold text-gray-800 dark:text-gray-200 text-lg mb-4">{{ __('Find products') }}</h3>
 

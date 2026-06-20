@@ -70,10 +70,10 @@
     <div class="max-w-7xl mx-auto px-4 py-10 sm:py-14 scroll-mt-24"
          x-data
          x-on:booking-step.window="$el.scrollIntoView({ behavior: 'smooth', block: 'start' })">
-        <div class="flex flex-col lg:flex-row gap-6 items-start">
+        <div class="flex flex-col md:flex-row gap-6 items-start">
 
             {{-- ── LEFT: PROGRESS SIDEBAR ── --}}
-            <div class="w-full lg:w-72 flex-shrink-0">
+            <div class="w-full md:w-56 lg:w-72 flex-shrink-0">
                 {{-- Desktop Vertical Tracker --}}
                 <div class="hidden lg:block bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 lg:sticky lg:top-6">
                     <p class="text-xs font-black uppercase tracking-[0.15em] text-gray-400 mb-5">
@@ -422,7 +422,7 @@
                         @elseif($currentStep === 4)
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
                             {{-- Contact fields --}}
-                            <div class="lg:col-span-3 space-y-5">
+                            <div class="md:col-span-3 space-y-5">
                                 <div>
                                     <label for="booking-name" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                                         {{ __('Your Name') }} <span class="text-brand-red">*</span>
@@ -477,7 +477,7 @@
                             </div>
 
                             {{-- Booking summary panel --}}
-                            <div class="lg:col-span-2">
+                            <div class="md:col-span-2">
                                 <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5">
                                     <p class="text-xs font-black uppercase tracking-[0.15em] text-gray-400 mb-4">{{ __('Booking Summary') }}</p>
 

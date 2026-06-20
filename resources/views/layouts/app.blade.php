@@ -1011,7 +1011,7 @@
     @unless(request()->routeIs('login', 'password.request'))
     <footer class="bg-brand-black text-gray-300 mt-16" role="contentinfo">
         <div class="max-w-7xl mx-auto px-4 py-12">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class="sm:col-span-2">
                     <div class="mb-4">
                         <div class="h-14 w-44 flex items-center justify-start flex-shrink-0 mb-2" aria-hidden="true">

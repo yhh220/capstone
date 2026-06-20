@@ -265,7 +265,7 @@
                                 touch-action="pan-y"
                                 shadow-intensity="1"
                                 exposure="0.8"
-                                class="w-full h-64 sm:h-80 md:h-[440px]" style="background:transparent;"
+                                class="w-full h-64 sm:h-72 lg:h-[440px]" style="background:transparent;"
                                 loading="lazy">
                                 <div slot="progress-bar" style="display:none;"></div>
                                 <div slot="poster"
@@ -452,7 +452,7 @@
                             {{ __('Use the website to explore our products, then visit our showroom in Shah Alam for expert installation.') }}
                         </p>
                     </div>
-                    <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 shrink-0 justify-center lg:justify-start items-center lg:items-stretch">
+                    <div class="flex flex-col sm:flex-row gap-3 shrink-0 justify-center lg:justify-start items-center lg:items-stretch">
                         <x-btn.whatsapp :href="$whatsAppUrl" size="btn-lg">{{ __('WhatsApp Support') }}</x-btn.whatsapp>
                         <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-lg">
                             {!! $icon('map-pin', 'icon-md btn-ico') !!}
