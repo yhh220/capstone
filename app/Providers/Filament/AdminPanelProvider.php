@@ -42,6 +42,8 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(asset('images/logo/logo-dark.svg'))    // light mode: dark logo (dark text on white)
             ->darkModeBrandLogo(asset('images/logo/logo-light.svg')) // dark mode: light logo (white text on dark)
             ->brandLogoHeight('2rem')
+            // Responsive admin panel CSS overrides (charts, tables, forms, modals).
+            ->viteTheme('resources/css/admin.css')
             // Favicons/meta icons come from the shared `partials.favicons` injected
             // into the admin <head> via PanelsRenderHook::HEAD_END (below), so the
             // panel matches the public site exactly — one source of truth.

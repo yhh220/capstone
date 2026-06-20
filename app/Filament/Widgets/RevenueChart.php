@@ -12,8 +12,8 @@ class RevenueChart extends ChartWidget
     protected static ?int $sort = 2;
 
     protected int|string|array $columnSpan = [
-        'md' => 1,
-        'xl' => 7,
+        'default' => 'full',
+        'xl'      => 7,
     ];
 
     protected ?string $heading = 'Revenue';
@@ -60,8 +60,8 @@ class RevenueChart extends ChartWidget
                     'backgroundColor'  => 'rgba(200, 65, 61, 0.12)',
                     'fill'             => true,
                     'tension'          => 0.4,
-                    'pointRadius'      => 4,
-                    'pointHoverRadius' => 6,
+                    'pointRadius'      => 3,
+                    'pointHoverRadius' => 5,
                 ],
             ],
             'labels' => $months,
@@ -88,6 +88,14 @@ class RevenueChart extends ChartWidget
                     },
                 },
                 scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 6,
+                        },
+                    },
                     y: {
                         beginAtZero: true,
                         ticks: {

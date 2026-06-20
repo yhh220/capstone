@@ -35,11 +35,6 @@ class ChatbotFaqResource extends Resource
                 ->maxLength(120)
                 ->label('Topic')
                 ->helperText('Internal label so you can find this entry later, e.g. "Trade-in policy".'),
-            Forms\Components\TagsInput::make('keywords')
-                ->required()
-                ->label('Trigger keywords')
-                ->placeholder('Add a keyword and press Enter')
-                ->helperText('The bot answers when a customer message contains any of these words or phrases. Add keywords in English, Malay, and Chinese for full coverage. Typos within 1–2 letters still match.'),
             Forms\Components\Select::make('priority')
                 ->label('Answer priority')
                 ->options([
@@ -51,23 +46,34 @@ class ChatbotFaqResource extends Resource
                 ->default(50)
                 ->selectablePlaceholder(false)
                 ->native(false)
-                ->helperText('If a customer message could match several topics, the higher priority is answered first. Leave most on “Normal”.'),
+                ->helperText('If a customer message could match several topics, the higher priority is answered first. Leave most on "Normal".'),
+            Forms\Components\TagsInput::make('keywords')
+                ->required()
+                ->label('Trigger keywords')
+                ->placeholder('Add a keyword and press Enter')
+                ->helperText('The bot answers when a customer message contains any of these words or phrases. Add keywords in English, Malay, and Chinese for full coverage. Typos within 1–2 letters still match.')
+                ->columnSpanFull(),
+            Forms\Components\Toggle::make('is_active')
+                ->default(true)
+                ->label('Active')
+                ->columnSpanFull(),
             Forms\Components\Textarea::make('reply_en')
                 ->required()
                 ->rows(4)
-                ->label('Reply (English)'),
+                ->label('Reply (English)')
+                ->columnSpanFull(),
             Forms\Components\Textarea::make('reply_ms')
                 ->rows(4)
                 ->label('Reply (Bahasa Malaysia)')
-                ->helperText('Optional — falls back to the English reply when empty.'),
+                ->helperText('Optional — falls back to the English reply when empty.')
+                ->columnSpanFull(),
             Forms\Components\Textarea::make('reply_zh')
                 ->rows(4)
                 ->label('Reply (Chinese)')
-                ->helperText('Optional — falls back to the English reply when empty.'),
-            Forms\Components\Toggle::make('is_active')
-                ->default(true)
-                ->label('Active'),
-        ]);
+                ->helperText('Optional — falls back to the English reply when empty.')
+                ->columnSpanFull(),
+        ])
+        ->columns(['default' => 1, 'sm' => 2]);
     }
 
     public static function table(Table $table): Table

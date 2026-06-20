@@ -62,6 +62,14 @@ class TopProductsChart extends ChartWidget
                 'legend' => ['display' => false],
             ],
             'scales' => [
+                'x' => [
+                    'ticks' => [
+                        'maxRotation' => 45,
+                        'minRotation' => 0,
+                        'autoSkip'    => true,
+                        'font'        => ['size' => 11],
+                    ],
+                ],
                 'y' => [
                     'beginAtZero' => true,
                     'title' => [

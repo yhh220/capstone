@@ -16,9 +16,14 @@ class StatsOverview extends StatsOverviewWidget
 {
     protected static ?int $sort = 1;
 
-    protected function getColumns(): int
+    protected function getColumns(): int | array
     {
-        return 4;
+        return [
+            'default' => 1,
+            'sm'      => 2,
+            'md'      => 2,
+            'xl'      => 4,
+        ];
     }
 
     protected function getStats(): array

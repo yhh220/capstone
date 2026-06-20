@@ -10,8 +10,8 @@ class CategoryDistributionChart extends ChartWidget
     protected static ?int $sort = 2;
 
     protected int|string|array $columnSpan = [
-        'md' => 1,
-        'xl' => 5,
+        'default' => 'full',
+        'xl'      => 5,
     ];
 
     protected ?string $heading = 'Products by Category';

@@ -9,7 +9,8 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/css/configurator.css',
-                'resources/js/configurator-loader.js'
+                'resources/js/configurator-loader.js',
+                'resources/css/admin.css',
             ],
             refresh: true,
         }),
