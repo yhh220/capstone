@@ -100,6 +100,8 @@ class DatabaseSeeder extends Seeder
             ['key' => 'BACKORDER_DAYS',          'value' => '7',     'created_at' => now(), 'updated_at' => now()],
             ['key' => 'SHIPPING_FLAT_RATE',      'value' => '10',    'created_at' => now(), 'updated_at' => now()],
             ['key' => 'SHIPPING_FREE_THRESHOLD', 'value' => '300',   'created_at' => now(), 'updated_at' => now()],
+            ['key' => 'CANCELLATION_FULL_REFUND_HOURS', 'value' => '24', 'created_at' => now(), 'updated_at' => now()],
+            ['key' => 'CANCELLATION_FEE_PERCENT',       'value' => '10', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // Logo files live (committed) in storage/app/public/brand-logos/ — the

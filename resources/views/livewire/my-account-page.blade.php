@@ -25,7 +25,7 @@
         </div>
 
         {{-- Skeleton while switching tabs / paginating --}}
-        <div wire:loading.flex wire:target="setTab, nextPage, previousPage, gotoPage, cancelBooking" class="flex-col space-y-4" aria-hidden="true">
+        <div wire:loading.flex wire:target="setTab, nextPage, previousPage, gotoPage, cancelBooking, cancelOrder" class="flex-col space-y-4" aria-hidden="true">
             @for($i = 0; $i < 3; $i++)
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-5 border-b border-gray-100 dark:border-gray-700">
@@ -46,10 +46,22 @@
             @endfor
         </div>
 
-        <div wire:loading.remove wire:target="setTab, nextPage, previousPage, gotoPage, cancelBooking">
+        <div wire:loading.remove wire:target="setTab, nextPage, previousPage, gotoPage, cancelBooking, cancelOrder">
 
         {{-- ════════ ORDERS ════════ --}}
         @if($tab === 'orders' && $orders !== null)
+            @if(session('order_cancel_success'))
+            <div class="flex items-center gap-2 mb-5 px-4 py-3 rounded-xl bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20">
+                <svg class="w-4 h-4 text-green-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <p class="text-sm text-green-700 dark:text-green-300">{{ session('order_cancel_success') }}</p>
+            </div>
+            @endif
+            @if(session('order_cancel_error'))
+            <div class="flex items-center gap-2 mb-5 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+                <svg class="w-4 h-4 text-red-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <p class="text-sm text-red-700 dark:text-red-300">{{ session('order_cancel_error') }}</p>
+            </div>
+            @endif
             @if($orders->count() > 0)
             <div class="space-y-4">
                 @foreach($orders as $order)
@@ -102,6 +114,49 @@
                             <a href="{{ route('track-order') }}" class="text-gray-500 dark:text-gray-400 hover:text-brand-red font-bold">{{ __('Track Order') }}</a>
                         </div>
                     </div>
+
+                    {{-- Standing refund-eligibility status — visible before anyone opens a
+                         cancel action, not just math hidden inside a confirm dialog. --}}
+                    @php
+                        $cancelCalculator = null;
+                        $refundPreview = null;
+                        if ($order->status !== 'cancelled' && ($order->isAwaitingPayment() || $order->payment_status === 'paid')) {
+                            $cancelCalculator = app(\App\Services\RefundCalculator::class);
+                            $refundPreview = $order->payment_status === 'paid' ? $cancelCalculator->calculate($order) : null;
+                        }
+                    @endphp
+                    @if($order->status === 'cancelled')
+                    <div class="px-5 py-3 border-t border-gray-100 dark:border-gray-700 flex flex-wrap items-center justify-between gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold {{ $order->refunded_at !== null ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ($order->refund_amount !== null ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400') }}">
+                            @if($order->refund_amount === null)
+                                {{ __('Cancelled — nothing to refund.') }}
+                            @elseif($order->refunded_at !== null)
+                                {{ __('Refund of RM :amount sent on :date.', ['amount' => number_format($order->refund_amount, 2), 'date' => $order->refunded_at->format('d M Y')]) }}
+                            @else
+                                {{ __('Refund of RM :amount (:pct%) recorded — pending.', ['amount' => number_format($order->refund_amount, 2), 'pct' => number_format((float) $order->refund_percentage, 0)]) }}
+                            @endif
+                        </span>
+                    </div>
+                    @elseif($cancelCalculator !== null)
+                    <div class="px-5 py-3 border-t border-gray-100 dark:border-gray-700 flex flex-wrap items-center justify-between gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold {{ $order->isAwaitingPayment() ? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400' : ($refundPreview && $refundPreview['tier'] === 'full' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400') }}">
+                            {{ $order->isAwaitingPayment() ? __('Not yet paid — cancelling now is free.') : $cancelCalculator->eligibilityLabel($order) }}
+                        </span>
+                        @if($order->isAwaitingPayment())
+                        <button type="button"
+                                @click="$store.confirm.ask(@js(__('Cancel this unpaid order? No payment has been made.')), () => $wire.cancelOrder({{ $order->id }}))"
+                                class="text-red-600 dark:text-red-400 font-bold hover:underline">
+                            {{ __('Cancel Order') }}
+                        </button>
+                        @elseif($refundPreview !== null)
+                        <button type="button"
+                                @click="$store.confirm.ask(@js(__('Cancel this order? You will receive a refund of RM :amount (:pct%).', ['amount' => number_format($refundPreview['amount'], 2), 'pct' => number_format($refundPreview['percentage'], 0)])), () => $wire.cancelOrder({{ $order->id }}))"
+                                class="text-red-600 dark:text-red-400 font-bold hover:underline">
+                            {{ __('Cancel Order') }}
+                        </button>
+                        @endif
+                    </div>
+                    @endif
                 </div>
                 @endforeach
             </div>

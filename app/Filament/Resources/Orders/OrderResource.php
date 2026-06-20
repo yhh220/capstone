@@ -2,14 +2,19 @@
 
 namespace App\Filament\Resources\Orders;
 
+use App\Mail\OrderCancelledMail;
 use App\Mail\OrderConfirmationMail;
+use App\Mail\OrderRefundProcessedMail;
 use App\Mail\OrderShippedMail;
+use App\Mail\OwnerAlertMail;
 use App\Models\Order;
+use App\Services\RefundCalculator;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -45,6 +50,42 @@ class OrderResource extends Resource
     public static function canCreate(): bool
     {
         return false;
+    }
+
+    /**
+     * Mirrors NotifiesOwner's notifyOwner() (used by the customer-facing Livewire
+     * forms) — duplicated here rather than traited in, since this is a static
+     * Filament Resource action closure, not a Livewire component instance. Shares
+     * the same rate-limiter key/budget as booking/enquiry/customer-cancel alerts.
+     */
+    private static function notifyOwnerOfCancellation(Order $order, string $cancelledBy): void
+    {
+        $email = config('services.store.email');
+
+        if (! $email) {
+            return;
+        }
+
+        RateLimiter::attempt(
+            'owner-alert-email',
+            maxAttempts: 10,
+            callback: function () use ($email, $order, $cancelledBy) {
+                Mail::to($email)->send(new OwnerAlertMail(
+                    'Order cancelled',
+                    [
+                        'Order Number' => $order->order_number,
+                        'Customer'     => $order->customer_name,
+                        'Cancelled By' => $cancelledBy,
+                        'Reason'       => $order->cancellation_reason,
+                        'Refund'       => $order->refund_amount !== null
+                            ? 'RM ' . number_format($order->refund_amount, 2) . ' (' . $order->refund_percentage . '%)'
+                            : null,
+                    ],
+                    url('/admin/orders/' . $order->getKey() . '/edit'),
+                ));
+            },
+            decaySeconds: 3600,
+        );
     }
 
     public static function form(Schema $schema): Schema
@@ -125,6 +166,30 @@ class OrderResource extends Resource
                     ->disabled()
                     ->columnSpanFull(),
             ])->visibleOn('edit')->collapsed(fn ($record) => blank($record?->notes)),
+
+            Section::make('Cancellation Details')->schema([
+                Forms\Components\TextInput::make('cancelled_by')
+                    ->label('Cancelled by')
+                    ->formatStateUsing(fn (?string $state): string => ucfirst($state ?? 'unknown'))
+                    ->disabled(),
+                Forms\Components\TextInput::make('cancellation_reason')
+                    ->label('Reason')
+                    ->disabled(),
+                Forms\Components\TextInput::make('refund_percentage')
+                    ->label('Refund %')
+                    ->suffix('%')
+                    ->disabled(),
+                Forms\Components\TextInput::make('refund_amount')
+                    ->label('Refund amount')
+                    ->prefix('RM')
+                    ->disabled(),
+                Forms\Components\TextInput::make('refunded_at')
+                    ->label('Refund sent on')
+                    ->formatStateUsing(fn (?string $state): string => $state ? \Illuminate\Support\Carbon::parse($state)->format('d M Y, h:i A') : 'Not yet sent')
+                    ->disabled(),
+            ])->columns(['default' => 1, 'sm' => 2])
+              ->visible(fn (?Order $record) => $record?->status === 'cancelled')
+              ->visibleOn('edit'),
         ]);
     }
 
@@ -165,6 +230,21 @@ class OrderResource extends Resource
                         'success' => 'paid',
                     ])
                     ->tooltip(fn (string $state): string => 'Payment is ' . $state),
+                TextColumn::make('refund_status')
+                    ->label('Refund if cancelled')
+                    ->toggleable()
+                    ->state(function (Order $record): string {
+                        if ($record->status === 'cancelled') {
+                            if ($record->refund_amount === null) {
+                                return 'Nothing to refund';
+                            }
+                            return $record->refunded_at !== null
+                                ? 'Sent RM ' . number_format($record->refund_amount, 2)
+                                : 'Pending RM ' . number_format($record->refund_amount, 2);
+                        }
+                        return (new RefundCalculator())->eligibilityLabel($record);
+                    })
+                    ->wrap(),
                 TextColumn::make('created_at')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
@@ -310,17 +390,77 @@ class OrderResource extends Resource
                     ->visible(fn (Order $record) => in_array($record->status, ['pending', 'processing'], true))
                     ->requiresConfirmation()
                     ->modalHeading('Cancel this order and return its stock?')
-                    ->modalDescription('The items go back into inventory and the order is marked cancelled.')
+                    ->modalDescription(function (Order $record): string {
+                        if ($record->payment_status !== 'paid') {
+                            return 'The items go back into inventory and the order is marked cancelled. No payment was taken, so no refund applies.';
+                        }
+                        $refund = (new RefundCalculator())->calculate($record);
+                        return $refund
+                            ? 'The items go back into inventory and the order is marked cancelled. Recorded refund: RM ' . number_format($refund['amount'], 2) . ' (' . $refund['percentage'] . '%).'
+                            : 'The items go back into inventory and the order is marked cancelled.';
+                    })
                     ->action(function (Order $record): void {
-                        DB::transaction(function () use ($record): void {
+                        $calculator = new RefundCalculator();
+
+                        $order = DB::transaction(function () use ($record, $calculator) {
                             $order = Order::where('id', $record->id)->lockForUpdate()->with('items')->first();
                             if (! $order || $order->status === 'cancelled') {
-                                return;
+                                return null;
                             }
+
+                            $refund = $order->payment_status === 'paid' ? $calculator->calculate($order) : null;
+
                             $order->restockItems();
-                            $order->update(['status' => 'cancelled']); // event stamps cancelled_at
+                            $order->update([
+                                'status'              => 'cancelled', // event stamps cancelled_at
+                                'cancelled_by'        => 'admin',
+                                'cancellation_reason' => 'Cancelled by admin',
+                                'refund_amount'       => $refund['amount'] ?? null,
+                                'refund_percentage'   => $refund['percentage'] ?? null,
+                            ]);
+
+                            return $order;
                         });
+
+                        if ($order === null) {
+                            Notification::make()->title('Order was already cancelled')->warning()->send();
+                            return;
+                        }
+
+                        $order = $order->fresh('items');
+
+                        try {
+                            Mail::to($order->customer_email)->send(new OrderCancelledMail($order));
+                        } catch (\Throwable $e) {
+                            logger()->error('Order cancellation email failed: ' . $e->getMessage());
+                        }
+
+                        // Both sides get an email on every cancellation, regardless of who
+                        // triggered it — keeps the shop inbox a complete audit trail and
+                        // avoids a separate "only notify if customer-initiated" branch.
+                        static::notifyOwnerOfCancellation($order, 'Admin');
+
                         Notification::make()->title('Order cancelled & stock returned')->success()->send();
+                    }),
+                Action::make('markRefunded')
+                    ->label('Mark refund as sent')
+                    ->icon(Heroicon::OutlinedBanknotes)
+                    ->color('success')
+                    ->tooltip('Confirm the recorded refund has actually been sent to the customer')
+                    ->visible(fn (Order $record) => $record->status === 'cancelled' && $record->refund_amount !== null && $record->refunded_at === null)
+                    ->requiresConfirmation()
+                    ->modalHeading('Mark this refund as sent?')
+                    ->modalDescription(fn (Order $record) => 'Confirms RM ' . number_format($record->refund_amount, 2) . ' has actually been transferred to the customer (e.g. bank transfer/e-wallet outside this system) and emails them that confirmation.')
+                    ->action(function (Order $record): void {
+                        $record->update(['refunded_at' => now()]);
+
+                        try {
+                            Mail::to($record->customer_email)->send(new OrderRefundProcessedMail($record->fresh()));
+                            Notification::make()->title('Refund marked as sent — customer notified')->success()->send();
+                        } catch (\Throwable $e) {
+                            logger()->error('Refund-sent email failed: ' . $e->getMessage());
+                            Notification::make()->title('Marked as sent, but the email failed to send')->warning()->send();
+                        }
                     }),
                 DeleteAction::make()
                     ->tooltip('Delete order record')

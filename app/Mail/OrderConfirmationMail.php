@@ -18,6 +18,7 @@ class OrderConfirmationMail extends Mailable
 
     public function __construct(public Order $order)
     {
+        $this->locale('en');
     }
 
     public function envelope(): Envelope

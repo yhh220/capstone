@@ -50,6 +50,9 @@ class MockDriver implements ChatServiceInterface
     public function builtinKnowledge(): array
     {
         $p = $this->phone;
+        $calculator = new \App\Services\RefundCalculator();
+        $hours = $calculator->fullRefundHours();
+        $fee = $calculator->feePercent();
 
         return [
             // Greetings (low priority — a real topic should win)
@@ -335,6 +338,19 @@ class MockDriver implements ChatServiceInterface
                     'en' => "🎉 We often run promotions on selected items and installation packages!\n\nPrices vary by brand and market rate, so for the latest deals and the best price for your budget, WhatsApp us at {$p}. We'll sort you out! 💪",
                     'ms' => "🎉 Kami kerap ada promosi untuk item terpilih dan pakej pemasangan!\n\nHarga berbeza ikut jenama dan pasaran. Untuk tawaran terkini dan harga terbaik, WhatsApp kami di {$p}. 💪",
                     'zh' => "🎉 我们经常有精选商品和安装套餐的优惠活动！\n\n价格依品牌和市场行情而定，想了解最新优惠和最划算的价格，请 WhatsApp 我们：{$p}。💪",
+                ],
+            ],
+
+            // Order cancellation & refund policy — more specific than the generic
+            // "Returns / refunds / exchange" rule below, so it must outrank it (80 > 65).
+            // Numbers are read live from RefundCalculator/settings, never hardcoded.
+            [
+                'priority' => 80,
+                'keywords' => ['cancel order', 'cancel my order', 'cancel paid order', 'cancellation policy', 'refund policy', 'how much refund', 'get my money back', 'batal pesanan', 'polisi pembatalan', 'polisi bayaran balik', '取消订单', '取消我的订单', '取消政策', '退款政策', '退款多少'],
+                'reply' => [
+                    'en' => "📦 You can cancel a paid order yourself before it ships, from My Account:\n\n• Within {$hours} hours of payment: 100% refund\n• After {$hours} hours but before shipping: refund minus a {$fee}% processing fee\n• Once shipped/delivered: self-cancel isn't available — our returns/exchange team handles that instead\n\nFull details on our Cancellation & Refund Policy page (footer link).\nNeed help? WhatsApp {$p}. 😊",
+                    'ms' => "📦 Anda boleh batalkan pesanan yang telah dibayar sendiri sebelum penghantaran, melalui Akaun Saya:\n\n• Dalam {$hours} jam selepas bayaran: bayaran balik 100%\n• Selepas {$hours} jam tetapi sebelum penghantaran: bayaran balik tolak yuran proses {$fee}%\n• Selepas dihantar/diterima: pembatalan sendiri tidak tersedia — pasukan pemulangan/pertukaran kami akan uruskannya\n\nButiran penuh di halaman Polisi Pembatalan & Bayaran Balik kami (pautan di bawah laman).\nPerlu bantuan? WhatsApp {$p}. 😊",
+                    'zh' => "📦 在订单发货前，您可以在「我的账户」自行取消已付款订单：\n\n• 付款后 {$hours} 小时内：100% 退款\n• 超过 {$hours} 小时但尚未发货：退款扣除 {$fee}% 手续费\n• 已发货/已送达：无法自行取消——由我们的退货/换货团队处理\n\n完整详情请见网站底部的「取消与退款政策」页面。\n需要协助？WhatsApp {$p}。😊",
                 ],
             ],
 

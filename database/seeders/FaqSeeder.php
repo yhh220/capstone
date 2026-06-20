@@ -118,6 +118,29 @@ class FaqSeeder extends Seeder
                 'answer_ms' => 'Sudah tentu. Kami menawarkan pemasangan audio dan aksesori tersuai yang disesuaikan dengan kenderaan anda. Hubungi kami melalui WhatsApp atau lawati bilik pameran untuk membincangkan keperluan anda dengan pasukan kami.',
                 'answer_zh' => '当然可以。我们提供针对您车辆量身定制的音响和配件安装。请通过 WhatsApp 联系我们或到访展厅，与我们的团队讨论您的需求。',
             ],
+            // NOTE: the hours/fee % below are today's CANCELLATION_FULL_REFUND_HOURS /
+            // CANCELLATION_FEE_PERCENT setting defaults, written as plain text — this
+            // FAQ answer does not auto-update if those settings change later. Keep it
+            // in sync manually, or point customers to /cancellation-refund-policy,
+            // which always shows the live numbers.
+            [
+                'category' => 'Orders & Payment',
+                'question_en' => 'Can I cancel a paid order?',
+                'question_ms' => 'Bolehkah saya membatalkan pesanan yang telah dibayar?',
+                'question_zh' => '我可以取消已付款的订单吗？',
+                'answer_en' => 'Yes, before it ships. Cancel within 24 hours of payment for a full refund. After that but before shipping, a 10% processing fee applies to the refund. Once an order has shipped, it can no longer be self-cancelled — see our Cancellation & Refund Policy page for full details, or use the Cancel Order button in My Account.',
+                'answer_ms' => 'Boleh, sebelum ia dihantar. Batalkan dalam 24 jam selepas bayaran untuk bayaran balik penuh. Selepas itu tetapi sebelum penghantaran, yuran proses 10% akan ditolak daripada bayaran balik. Setelah pesanan dihantar, ia tidak lagi boleh dibatalkan sendiri — lihat halaman Polisi Pembatalan & Bayaran Balik kami untuk butiran penuh, atau guna butang Batal Pesanan di Akaun Saya.',
+                'answer_zh' => '可以，但须在发货前取消。付款后 24 小时内取消可全额退款。超过此时限但尚未发货取消，将从退款中扣除 10% 的手续费。订单一旦发货，便无法再自行取消 — 完整详情请见我们的取消与退款政策页面，或在「我的账户」中使用取消订单按钮。',
+            ],
+            [
+                'category' => 'Orders & Payment',
+                'question_en' => 'What happens to an unpaid order if I don\'t pay?',
+                'question_ms' => 'Apa yang berlaku kepada pesanan yang belum dibayar jika saya tidak membayar?',
+                'question_zh' => '如果我不付款，未付款的订单会怎样？',
+                'answer_en' => 'You can cancel it yourself any time from My Account at no cost, since nothing was ever charged. If you simply leave it, unpaid orders are automatically cancelled and the stock released after 15 minutes.',
+                'answer_ms' => 'Anda boleh membatalkannya sendiri pada bila-bila masa melalui Akaun Saya tanpa kos, kerana tidak ada caj yang dikenakan. Jika anda hanya membiarkannya, pesanan yang belum dibayar akan dibatalkan secara automatik dan stok dilepaskan selepas 15 minit.',
+                'answer_zh' => '由于从未产生任何费用，您可以随时在「我的账户」中免费自行取消该订单。如果您不作处理，未付款的订单将在 15 分钟后自动取消并释放库存。',
+            ],
         ];
 
         foreach ($faqs as $i => $faq) {

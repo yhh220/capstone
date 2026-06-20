@@ -17,6 +17,7 @@ use App\Livewire\OrderTracker;
 use App\Livewire\PrivacyPolicyPage;
 use App\Livewire\ProfilePage;
 use App\Livewire\TermsOfServicePage;
+use App\Livewire\CancellationRefundPolicyPage;
 use App\Livewire\MyAccountPage;
 use App\Livewire\PaymentPage;
 use App\Livewire\Auth\UserLogin;
@@ -38,6 +39,7 @@ Route::get('/track-order', OrderTracker::class)->name('track-order');
 Route::get('/faq', FaqPage::class)->name('faq');
 Route::get('/privacy-policy', PrivacyPolicyPage::class)->name('privacy-policy');
 Route::get('/terms-of-service', TermsOfServicePage::class)->name('terms-of-service');
+Route::get('/cancellation-refund-policy', CancellationRefundPolicyPage::class)->name('cancellation-refund-policy');
 
 // ─── Authenticated User Routes ────────────────────────────────
 Route::middleware('auth')->group(function () {

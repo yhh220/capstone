@@ -9,8 +9,9 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-// Sent synchronously when staff mark an order shipped from the admin panel.
-class OrderShippedMail extends Mailable
+// Sent synchronously whenever an order is cancelled — by the customer (My Account) or
+// by an admin (Filament). Always English (see OrderConfirmationMail's locale note).
+class OrderCancelledMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -22,14 +23,14 @@ class OrderShippedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your order has shipped – ' . $this->order->order_number . ' | Win Win Car Audio',
+            subject: 'Order Cancelled – ' . $this->order->order_number . ' | Win Win Car Audio',
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'mail.order-shipped',
+            view: 'mail.order-cancelled',
         );
     }
 }

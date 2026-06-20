@@ -27,6 +27,7 @@ class Order extends Model
         'shipping_address', 'subtotal', 'shipping_fee', 'total_amount',
         'status', 'payment_status', 'payment_method', 'notes', 'expires_at',
         'paid_at', 'shipped_at', 'cancelled_at',
+        'cancellation_reason', 'refund_amount', 'refund_percentage', 'cancelled_by', 'refunded_at',
     ];
 
     protected $casts = [
@@ -38,6 +39,9 @@ class Order extends Model
         'paid_at'          => 'datetime',
         'shipped_at'       => 'datetime',
         'cancelled_at'     => 'datetime',
+        'refund_amount'    => 'decimal:2',
+        'refund_percentage'=> 'decimal:2',
+        'refunded_at'      => 'datetime',
     ];
 
     protected static function booted(): void

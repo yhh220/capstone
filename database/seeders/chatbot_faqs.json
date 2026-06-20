@@ -110,7 +110,7 @@
         "priority": 50,
         "reply_en": "💰 Pricing varies by product brand and market rate — it is not fixed.\n\nFor the most accurate pricing:\n• Browse our Products page for listed prices\n• WhatsApp us at 016-915 0917 for installation quotes\n\nWe'll find the best option for your budget! 🙌",
         "reply_ms": "💰 Harga bergantung kepada jenama produk dan harga pasaran — ia tidak tetap.\n\nUntuk harga terkini:\n• Layari halaman Produk kami\n• WhatsApp kami di 016-915 0917 untuk sebut harga pemasangan\n\nKami akan carikan pilihan terbaik untuk bajet anda! 🙌",
-        "reply_zh": "💰 价格因品牌和市场行情而异，并非固定价格。\n\n如需了解最新价格：\n• 浏览我们的产品页面\n• WhatsApp 我们：016-915 0917 获取安装报价\n\n我们会为您找到最合适的选择！🙌",       
+        "reply_zh": "💰 价格因品牌和市场行情而异，并非固定价格。\n\n如需了解最新价格：\n• 浏览我们的产品页面\n• WhatsApp 我们：016-915 0917 获取安装报价\n\n我们会为您找到最合适的选择！🙌",
         "is_active": true
     },
     {
@@ -171,7 +171,7 @@
         "priority": 50,
         "reply_en": "🛍️ Yes, we offer a pickup (takeaway) service!\n\nYou can order your products and collect them from our Shah Alam showroom at your convenience.\n\nTo arrange a pickup order, WhatsApp us at 016-915 0917 and we'll prepare everything for you! 😊",
         "reply_ms": "🛍️ Ya, kami menyediakan perkhidmatan ambil sendiri (takeaway)!\n\nAnda boleh pesan produk dan ambil sendiri di kedai kami di Shah Alam mengikut masa yang sesuai.\n\nUntuk membuat pesanan ambil sendiri, WhatsApp kami di 016-915 0917! 😊",
-        "reply_zh": "🛍️ 是的，我们提供自取（外带）服务！\n\n您可以先下单，然后到我们莎阿南门店自行取货，时间灵活方便。\n\n如需安排自取订单，请 WhatsApp 我们：016-915 0917，我们提前为您备好！😊",    
+        "reply_zh": "🛍️ 是的，我们提供自取（外带）服务！\n\n您可以先下单，然后到我们莎阿南门店自行取货，时间灵活方便。\n\n如需安排自取订单，请 WhatsApp 我们：016-915 0917，我们提前为您备好！😊",
         "is_active": true
     },
     {
@@ -214,7 +214,7 @@
         "priority": 75,
         "reply_en": "🌟 We offer a range of window tinting options:\n\n• Solar / UV-rejection film\n• Privacy tint\n• Various shades and brands\n\nPricing depends on brand and market rate. WhatsApp us at 016-915 0917 for options! 😊",
         "reply_ms": "🌟 Kami menawarkan pelbagai pilihan tinted tingkap:\n\n• Filem solar / penolak UV\n• Tinted privasi\n• Pelbagai ton dan jenama\n\nHarga bergantung kepada jenama dan kadar pasaran. WhatsApp kami di 016-915 0917! 😊",
-        "reply_zh": "🌟 我们提供多种车窗隔热膜选择：\n\n• 太阳能 / 隔紫外线膜\n• 私密型深色膜\n• 多种颜色深度与品牌\n\n价格依品牌和市场行情而定。WhatsApp 我们：016-915 0917 了解详情！😊",       
+        "reply_zh": "🌟 我们提供多种车窗隔热膜选择：\n\n• 太阳能 / 隔紫外线膜\n• 私密型深色膜\n• 多种颜色深度与品牌\n\n价格依品牌和市场行情而定。WhatsApp 我们：016-915 0917 了解详情！😊",
         "is_active": true
     },
     {
@@ -574,6 +574,31 @@
         "is_active": true
     },
     {
+        "topic": "Order cancellation & refund policy",
+        "keywords": [
+            "cancel order",
+            "cancel my order",
+            "cancel paid order",
+            "cancellation policy",
+            "refund policy",
+            "how much refund",
+            "get my money back",
+            "batal pesanan",
+            "polisi pembatalan",
+            "polisi bayaran balik",
+            "取消订单",
+            "取消我的订单",
+            "取消政策",
+            "退款政策",
+            "退款多少"
+        ],
+        "priority": 80,
+        "reply_en": "📦 You can cancel a paid order yourself before it ships, from My Account:\n\n• Within 24 hours of payment: 100% refund\n• After 24 hours but before shipping: refund minus a 10% processing fee\n• Once shipped/delivered: self-cancel isn't available — our returns/exchange team handles that instead\n\nFull details on our Cancellation & Refund Policy page (footer link).\nNeed help? WhatsApp 016-915 0917. 😊",
+        "reply_ms": "📦 Anda boleh batalkan pesanan yang telah dibayar sendiri sebelum penghantaran, melalui Akaun Saya:\n\n• Dalam 24 jam selepas bayaran: bayaran balik 100%\n• Selepas 24 jam tetapi sebelum penghantaran: bayaran balik tolak yuran proses 10%\n• Selepas dihantar/diterima: pembatalan sendiri tidak tersedia — pasukan pemulangan/pertukaran kami akan uruskannya\n\nButiran penuh di halaman Polisi Pembatalan & Bayaran Balik kami (pautan di bawah laman).\nPerlu bantuan? WhatsApp 016-915 0917. 😊",
+        "reply_zh": "📦 在订单发货前，您可以在「我的账户」自行取消已付款订单：\n\n• 付款后 24 小时内：100% 退款\n• 超过 24 小时但尚未发货：退款扣除 10% 手续费\n• 已发货/已送达：无法自行取消——由我们的退货/换货团队处理\n\n完整详情请见网站底部的「取消与退款政策」页面。\n需要协助？WhatsApp 016-915 0917。😊",
+        "is_active": true
+    },
+    {
         "topic": "Returns & refunds",
         "keywords": [
             "refund",
@@ -716,7 +741,7 @@
         "priority": 15,
         "reply_en": "You're welcome! 😊 If you have more questions, feel free to ask. Hope to see you at Win Win Car Studio! 🚗✨",
         "reply_ms": "Sama-sama! 😊 Jika ada soalan lain, jangan segan untuk bertanya. Jumpa di Win Win Car Studio! 🚗✨",
-        "reply_zh": "不客气！😊 如有其他问题随时来问。期待在 Win Win Car Studio 见到您！🚗✨",      
+        "reply_zh": "不客气！😊 如有其他问题随时来问。期待在 Win Win Car Studio 见到您！🚗✨",
         "is_active": true
     },
     {

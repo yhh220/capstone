@@ -2,16 +2,21 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesOwner;
 use App\Livewire\Concerns\SetsSeo;
+use App\Mail\OrderCancelledMail;
 use App\Models\Booking;
 use App\Models\Order;
+use App\Services\RefundCalculator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class MyAccountPage extends Component
 {
-    use SetsSeo, WithPagination;
+    use NotifiesOwner, SetsSeo, WithPagination;
 
     /** 'orders' | 'bookings' */
     public string $tab = 'orders';
@@ -58,6 +63,100 @@ class MyAccountPage extends Component
             $booking->update(['status' => 'cancelled']);
             session()->flash('booking_success', __('Your booking has been cancelled.'));
         }
+    }
+
+    /**
+     * Cancel one of the signed-in user's own orders. Ownership is enforced in the
+     * locked query itself (not a separate check after fetching). Two paths:
+     * unpaid orders cancel instantly with no refund math (nothing was charged);
+     * paid orders run the same RefundCalculator the admin-side cancel action uses,
+     * so the recorded refund never depends on who triggered the cancellation.
+     */
+    public function cancelOrder(int $orderId): void
+    {
+        $calculator = new RefundCalculator();
+
+        $order = DB::transaction(function () use ($orderId, $calculator) {
+            $order = Order::where('id', $orderId)
+                ->where('user_id', Auth::id())
+                ->lockForUpdate()
+                ->with('items')
+                ->first();
+
+            if (! $order) {
+                return null;
+            }
+
+            if ($order->payment_status === 'pending' && $order->isAwaitingPayment()) {
+                $order->restockItems();
+                $order->update([
+                    'status'              => 'cancelled',
+                    'cancelled_by'        => 'customer',
+                    'cancellation_reason' => 'Cancelled by customer before payment',
+                ]);
+
+                return $order;
+            }
+
+            if ($order->payment_status === 'paid' && $calculator->isCancellable($order)) {
+                $refund = $calculator->calculate($order);
+
+                if ($refund === null) {
+                    return null;
+                }
+
+                $order->restockItems();
+                $order->update([
+                    'status'              => 'cancelled',
+                    'cancelled_by'        => 'customer',
+                    'cancellation_reason' => 'Cancelled by customer via My Account',
+                    'refund_amount'       => $refund['amount'],
+                    'refund_percentage'   => $refund['percentage'],
+                ]);
+
+                return $order;
+            }
+
+            return null;
+        });
+
+        if ($order === null) {
+            session()->flash('order_cancel_error', __('This order can no longer be cancelled.'));
+
+            return;
+        }
+
+        $order = $order->fresh('items');
+
+        try {
+            Mail::to($order->customer_email)->send(new OrderCancelledMail($order));
+        } catch (\Throwable $e) {
+            logger()->error('Order cancellation email failed: ' . $e->getMessage());
+        }
+
+        $this->notifyOwner(
+            'Order cancelled',
+            [
+                'Order Number' => $order->order_number,
+                'Customer'     => $order->customer_name,
+                'Cancelled By' => 'Customer (My Account)',
+                'Reason'       => $order->cancellation_reason,
+                'Refund'       => $order->refund_amount !== null
+                    ? 'RM ' . number_format($order->refund_amount, 2) . ' (' . $order->refund_percentage . '%)'
+                    : null,
+            ],
+            url('/admin/orders/' . $order->getKey() . '/edit'),
+        );
+
+        session()->flash(
+            'order_cancel_success',
+            $order->refund_amount !== null
+                ? __('Order cancelled. A refund of RM :amount (:pct%) has been recorded.', [
+                    'amount' => number_format($order->refund_amount, 2),
+                    'pct'    => number_format((float) $order->refund_percentage, 0),
+                ])
+                : __('Order cancelled.')
+        );
     }
 
     public function render()

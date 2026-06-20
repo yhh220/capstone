@@ -282,7 +282,13 @@
                 </div>
             </div>
 
-            <div class="flex gap-3 mt-6">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 flex items-start gap-1.5">
+                <svg class="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+                {{ __('Paid orders can be cancelled before shipping under our') }}
+                <a href="{{ route('cancellation-refund-policy') }}" target="_blank" class="text-brand-red font-semibold hover:underline">{{ __('Cancellation & Refund Policy') }}</a>.
+            </p>
+
+            <div class="flex gap-3 mt-3">
                 <button wire:click="goBack" class="group flex items-center px-6 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-full font-semibold text-gray-600 dark:text-gray-300 hover:border-brand-red hover:text-brand-red hover:bg-red-50 dark:hover:bg-red-900/10 transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
                     {{ __('← Back') }}
                 </button>

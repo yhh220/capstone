@@ -42,6 +42,8 @@ class SettingResource extends Resource
                     'BACKORDER_DAYS'          => 'Backorder Lead Time (days)',
                     'SHIPPING_FLAT_RATE'      => 'Shipping Flat Rate (RM)',
                     'SHIPPING_FREE_THRESHOLD' => 'Free Shipping Threshold (RM)',
+                    'CANCELLATION_FULL_REFUND_HOURS' => 'Full Refund Window (hours)',
+                    'CANCELLATION_FEE_PERCENT'       => 'Cancellation Fee (%)',
                     default                   => $state,
                 }),
             Forms\Components\TextInput::make('value')
@@ -55,6 +57,8 @@ class SettingResource extends Resource
                     'BACKORDER_DAYS' => 'e.g. 7',
                     'SHIPPING_FLAT_RATE' => 'e.g. 10',
                     'SHIPPING_FREE_THRESHOLD' => 'e.g. 300 (0 to disable free shipping)',
+                    'CANCELLATION_FULL_REFUND_HOURS' => 'e.g. 24',
+                    'CANCELLATION_FEE_PERCENT' => 'e.g. 10',
                     default => '',
                 })
                 ->helperText(fn (Setting $record): ?string => match ($record->key) {
@@ -66,6 +70,8 @@ class SettingResource extends Resource
                     'BACKORDER_DAYS'          => 'How many days to tell customers an out-of-stock (backordered) item takes to arrive.',
                     'SHIPPING_FLAT_RATE'      => 'Flat delivery fee (RM) charged when the subtotal is below the free-shipping threshold. Set to 0 for always-free shipping.',
                     'SHIPPING_FREE_THRESHOLD' => 'Spend this much (RM) or more and shipping is free. Set to 0 to always charge the flat rate.',
+                    'CANCELLATION_FULL_REFUND_HOURS' => 'Hours after payment during which a customer-cancelled order gets a 100% refund. After this window (but before shipping), the cancellation fee below applies instead.',
+                    'CANCELLATION_FEE_PERCENT'       => 'Processing fee (%) deducted from the refund when a paid order is cancelled after the full-refund window has passed, but before it ships.',
                     default                   => 'Enter the value for this setting.',
                 }),
         ]);
@@ -87,6 +93,10 @@ class SettingResource extends Resource
                         'BUSINESS_CLOSED_WEEKDAYS'=> 'Closed Weekdays',
                         'BOOKING_SLOT_MINUTES'    => 'Appointment Slot Length',
                         'BACKORDER_DAYS'          => 'Backorder Lead Time (days)',
+                        'SHIPPING_FLAT_RATE'      => 'Shipping Flat Rate (RM)',
+                        'SHIPPING_FREE_THRESHOLD' => 'Free Shipping Threshold (RM)',
+                        'CANCELLATION_FULL_REFUND_HOURS' => 'Full Refund Window (hours)',
+                        'CANCELLATION_FEE_PERCENT'       => 'Cancellation Fee (%)',
                         default                   => $state,
                     })
                     ->description(fn (Setting $record): string => match ($record->key) {
@@ -96,6 +106,10 @@ class SettingResource extends Resource
                         'BUSINESS_CLOSED_WEEKDAYS'=> 'Weekdays where bookings are unavailable.',
                         'BOOKING_SLOT_MINUTES'    => 'Length of each appointment slot, in minutes.',
                         'BACKORDER_DAYS'          => 'Days quoted for out-of-stock (backordered) items to arrive.',
+                        'SHIPPING_FLAT_RATE'      => 'Flat delivery fee charged below the free-shipping threshold.',
+                        'SHIPPING_FREE_THRESHOLD' => 'Spend this much (RM) or more and shipping is free.',
+                        'CANCELLATION_FULL_REFUND_HOURS' => 'Hours after payment a cancelled order still gets a 100% refund.',
+                        'CANCELLATION_FEE_PERCENT'       => 'Fee deducted from the refund after the full-refund window passes.',
                         default                   => 'System configuration setting.',
                     }),
                 TextColumn::make('value')

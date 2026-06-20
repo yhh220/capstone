@@ -74,6 +74,12 @@
             <span x-show="paying">{{ __('Processing payment...') }}</span>
         </button>
         <a href="{{ route('account') }}" wire:navigate class="block text-center text-sm text-gray-500 dark:text-gray-400 hover:text-brand-red transition-colors">{{ __('Pay later from My Account') }}</a>
+
+        <p class="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-1.5">
+            <svg class="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+            {{ __('Paid orders can be cancelled before shipping under our') }}
+            <a href="{{ route('cancellation-refund-policy') }}" target="_blank" class="text-brand-red font-semibold hover:underline">{{ __('Cancellation & Refund Policy') }}</a>.
+        </p>
     </div>
 
     {{-- Register the countdown as a proper Alpine component via @assets (loaded

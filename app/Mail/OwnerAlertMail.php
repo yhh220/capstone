@@ -26,6 +26,7 @@ class OwnerAlertMail extends Mailable
         public ?string $actionUrl = null,
         public ?string $actionLabel = null,
     ) {
+        $this->locale('en');
     }
 
     public function envelope(): Envelope

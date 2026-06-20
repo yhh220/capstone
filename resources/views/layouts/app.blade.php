@@ -1084,6 +1084,8 @@
                     <span aria-hidden="true">·</span>
                     <a href="{{ route('terms-of-service') }}" class="hover:text-brand-yellow transition-colors">{{ __('Terms of Service') }}</a>
                     <span aria-hidden="true">·</span>
+                    <a href="{{ route('cancellation-refund-policy') }}" class="hover:text-brand-yellow transition-colors">{{ __('Cancellation & Refund Policy') }}</a>
+                    <span aria-hidden="true">·</span>
                     <a href="{{ route('faq') }}" class="hover:text-brand-yellow transition-colors">{{ __('FAQ') }}</a>
                 </div>
             </div>

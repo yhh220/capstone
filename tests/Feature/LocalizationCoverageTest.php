@@ -105,6 +105,7 @@ class LocalizationCoverageTest extends TestCase
             '/faq',
             '/privacy-policy',
             '/terms-of-service',
+            '/cancellation-refund-policy',
             '/login',
             '/unauthorized',
         ];
