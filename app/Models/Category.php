@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\HasSortableOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -35,7 +36,11 @@ class Category extends Model
                 $category->slug = Str::slug($category->name);
             }
         });
-        // Cache for active categories removed due to unserialize issues
+        static::deleting(function (self $model) {
+            if ($model->image) {
+                Storage::disk('public')->delete($model->image);
+            }
+        });
     }
 
     public function products()

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\HasSortableOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class Brand extends Model
 {
@@ -28,6 +29,11 @@ class Brand extends Model
     protected static function booted(): void
     {
         static::saved(fn () => Cache::forget('chatbot_brands'));
+        static::deleting(function (self $model) {
+            if ($model->logo) {
+                Storage::disk('public')->delete($model->logo);
+            }
+        });
         static::deleted(fn () => Cache::forget('chatbot_brands'));
     }
 }
