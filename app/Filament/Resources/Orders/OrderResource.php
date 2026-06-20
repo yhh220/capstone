@@ -227,11 +227,25 @@ class OrderResource extends Resource
                     ->visible(fn (Order $record) => $record->payment_status === 'pending' && $record->status !== 'cancelled')
                     ->requiresConfirmation()
                     ->modalHeading('Mark this order as paid?')
-                    ->action(fn (Order $record) => $record->update([
-                        'payment_status' => 'paid',
-                        'status'         => $record->status === 'pending' ? 'processing' : $record->status,
-                        'expires_at'     => null,
-                    ])),
+                    ->modalDescription('The customer will get the same confirmation email as the online payment flow.')
+                    ->action(function (Order $record): void {
+                        $record->update([
+                            'payment_status' => 'paid',
+                            'status'         => $record->status === 'pending' ? 'processing' : $record->status,
+                            'expires_at'     => null,
+                        ]);
+
+                        // Online payment (PaymentPage::pay()) emails the customer on
+                        // success; this manual path (e.g. reconciling a bank transfer)
+                        // skipped that entirely, so the customer never heard back.
+                        try {
+                            Mail::to($record->customer_email)->send(new OrderConfirmationMail($record->fresh('items')));
+                            Notification::make()->title('Marked paid — customer notified')->success()->send();
+                        } catch (\Throwable $e) {
+                            logger()->error('Mark-paid confirmation email failed: ' . $e->getMessage());
+                            Notification::make()->title('Marked paid, but the email failed to send')->warning()->send();
+                        }
+                    }),
                 Action::make('markShipped')
                     ->label('Mark Shipped')
                     ->icon(Heroicon::OutlinedTruck)
@@ -309,11 +323,33 @@ class OrderResource extends Resource
                         Notification::make()->title('Order cancelled & stock returned')->success()->send();
                     }),
                 DeleteAction::make()
-                    ->tooltip('Delete order record'),
+                    ->tooltip('Delete order record')
+                    // pending/processing still hold reserved stock (decremented at
+                    // checkout, not yet returned). Deleting straight past "Cancel &
+                    // restock" would silently leak that stock with no way back.
+                    ->visible(fn (Order $record) => ! in_array($record->status, ['pending', 'processing'], true)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
+                            [$protected, $deletable] = $records->partition(
+                                fn (Order $order) => in_array($order->status, ['pending', 'processing'], true)
+                            );
+
+                            $deletable->each(fn (Order $order) => $order->delete());
+
+                            if ($protected->isEmpty()) {
+                                Notification::make()->title('Deleted ' . $deletable->count() . ' order(s)')->success()->send();
+                                return;
+                            }
+
+                            Notification::make()
+                                ->title('Deleted ' . $deletable->count() . ' order(s)')
+                                ->body($protected->count() . ' order(s) skipped — "Cancel & restock" first, their stock is still reserved.')
+                                ->warning()
+                                ->send();
+                        }),
                 ]),
             ]);
     }

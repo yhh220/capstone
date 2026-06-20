@@ -112,6 +112,12 @@ class PaymentPage extends Component
         }
 
         session()->flash('payment_success', __('Payment successful! Your order is confirmed.'));
+
+        // The awaiting-payment view (countdown + items + notice + button) is much
+        // taller than the success card it's replaced by; without this the page
+        // stays at its old scroll offset and the success card ends up off-screen
+        // above the fold, looking like it landed in the footer.
+        $this->dispatch('scroll-top');
     }
 
     /**
@@ -120,18 +126,26 @@ class PaymentPage extends Component
      */
     public function expireOrder(): void
     {
-        DB::transaction(function () {
+        $expired = DB::transaction(function () {
             $order = Order::where('id', $this->order->id)->lockForUpdate()->with('items')->first();
 
             if (! $order || ! $order->isAwaitingPayment()) {
-                return;
+                return false;
             }
 
             $order->restockItems();
             $order->update(['status' => 'cancelled']); // event stamps cancelled_at
+
+            return true;
         });
 
         $this->order->refresh();
+
+        // Same tall-countdown-view → short-cancelled-card shrink as pay(); keep
+        // the result visible instead of leaving the scroll position in the footer.
+        if ($expired) {
+            $this->dispatch('scroll-top');
+        }
     }
 
     public function render()

@@ -56,9 +56,6 @@ class CheckoutPage extends Component
     /** Max units of any single product per order (backorder sanity cap). */
     public const MAX_QTY_PER_ITEM = 99;
 
-    // Step 3: Confirmation
-    public ?Order $order = null;
-
     protected $rules = [
         'customerName' => 'required|string|max:255',
         'customerEmail' => 'required|email|max:255',
@@ -270,14 +267,24 @@ class CheckoutPage extends Component
 
                 return $order;
             });
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Order::generateOrderNumber() can't take a row lock on a number that
+            // doesn't exist yet, so two checkouts racing for the year's very first
+            // order number could both pass its collision check. The unique index
+            // on order_number is the real guard — it rejects the duplicate insert,
+            // but its raw SQL message (with column/table names) isn't fit to show
+            // a customer, so it's logged and swapped for a friendly retry prompt.
+            logger()->error('Checkout order_number collision: ' . $e->getMessage());
+            $this->addError('stock', __('Something went wrong placing your order. Please try again.'));
+            $this->step = 1;
+
+            return;
         } catch (\RuntimeException $e) {
             $this->addError('stock', $e->getMessage());
             $this->step = 1;
 
             return;
         }
-
-        $this->order = $order;
 
         // Redirect to the payment page; confirmation email is sent once payment succeeds.
         $this->redirect(route('payment', $order->order_number), navigate: false);

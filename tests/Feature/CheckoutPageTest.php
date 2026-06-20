@@ -121,4 +121,46 @@ class CheckoutPageTest extends TestCase
         // Stock goes negative to represent the two units now owed.
         $this->assertSame(-2, $product->fresh()->stock);
     }
+
+    public function test_unavailable_product_shows_a_visible_error_instead_of_failing_silently(): void
+    {
+        $user = User::create([
+            'name' => 'Customer',
+            'email' => 'silent-fail@example.test',
+            'password' => 'password',
+            'role' => 'client',
+        ]);
+
+        $product = Product::create([
+            'name' => 'Discontinued Amp',
+            'slug' => 'discontinued-amp',
+            'price' => 300,
+            'stock' => 3,
+            'is_active' => true,
+        ]);
+
+        CartItem::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+        ]);
+
+        // Deactivated after being added to the cart but before checkout.
+        $product->update(['is_active' => false]);
+
+        Livewire::actingAs($user)
+            ->test(CheckoutPage::class)
+            ->set('customerName', 'Customer')
+            ->set('customerEmail', 'silent-fail@example.test')
+            ->set('customerPhone', '0123456789')
+            ->set('street', '1 Jalan Test')
+            ->set('city', 'Kuala Lumpur')
+            ->set('postcode', '50000')
+            ->set('state', 'Kuala Lumpur')
+            ->call('placeOrder')
+            ->assertHasErrors('stock')
+            ->assertSee('A product in your cart is no longer available.');
+
+        $this->assertDatabaseMissing('orders', ['user_id' => $user->id]);
+    }
 }

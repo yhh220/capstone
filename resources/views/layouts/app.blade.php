@@ -1069,7 +1069,7 @@
                         @endif
                         @if($storeHours)
                         <div class="flex items-center gap-2">
-                            <span class="text-brand-yellow flex-shrink-0" aria-hidden="true">🕐</span>
+                            <svg class="w-4 h-4 text-brand-yellow flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
                             <span>{{ $storeHours }}</span>
                         </div>
                         @endif
@@ -1266,6 +1266,13 @@
                 }
             });
             Livewire.on('cart-added', () => window.dispatchEvent(new CustomEvent('cart-toast')));
+
+            // A wire:click action can swap a tall block of content (e.g. an order
+            // summary) for a short success card without resetting the browser's
+            // scroll offset, leaving the user stranded below the new (shorter)
+            // content — visually "in the footer". Scroll back up so the result is
+            // actually visible.
+            Livewire.on('scroll-top', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
         });
     </script>
 

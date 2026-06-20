@@ -4,8 +4,7 @@
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Checkout') }}</h1>
             <p class="text-gray-400">
                 @if($step === 1) {{ __('Step 1: Your Details') }}
-                @elseif($step === 2) {{ __('Step 2: Payment') }}
-                @else {{ __('Order Confirmed!') }}
+                @else {{ __('Step 2: Payment') }}
                 @endif
             </p>
         </div>
@@ -15,15 +14,19 @@
     <div class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
         <div class="max-w-3xl mx-auto px-4 py-4">
             <div class="flex items-center justify-between">
-                @foreach([1 => __('Details'), 2 => __('Payment'), 3 => __('Confirmed')] as $num => $label)
+                @foreach([1 => __('Details'), 2 => __('Payment')] as $num => $label)
                 <div class="flex items-center gap-2 {{ $step >= $num ? 'text-brand-red' : 'text-gray-400' }}">
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-black
                                 {{ $step >= $num ? 'bg-brand-red text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500' }}">
-                        @if($step > $num) ✓ @else {{ $num }} @endif
+                        @if($step > $num)
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                        @else
+                            {{ $num }}
+                        @endif
                     </div>
                     <span class="text-sm font-semibold hidden sm:inline">{{ $label }}</span>
                 </div>
-                @if($num < 3)
+                @if($num < 2)
                 <div class="flex-1 h-0.5 mx-2 {{ $step > $num ? 'bg-brand-red' : 'bg-gray-200 dark:bg-gray-700' }}"></div>
                 @endif
                 @endforeach
@@ -33,9 +36,25 @@
 
     <div class="max-w-3xl mx-auto px-4 py-10">
 
-        {{-- Step 1: Customer Info --}}
+        {{-- placeOrder() reports rate-limit / empty-cart / stock-gone failures on
+             this key. It can bounce the user back to step 1 OR leave them on step
+             2 (the rate-limit check returns before changing $step), so the banner
+             lives here, above both steps, instead of inside just one of them. --}}
+        @error('stock')
+        <div role="alert" class="mb-6 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 px-4 py-3 text-sm font-semibold text-red-700 dark:text-red-300 flex items-center gap-2">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ $message }}
+        </div>
+        @enderror
+
+        {{-- Step 1: Customer Info
+             No data-aos here: this block is shown/hidden by a Livewire property
+             change (wire:click), not by scrolling into view. AOS only re-scans
+             on scroll/resize/livewire:navigated — a same-page wire:click morph
+             never fires those, so the element stayed at its pre-animation
+             (invisible) state until the user happened to scroll. --}}
         @if($step === 1)
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700" data-aos="fade-up">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
             <h2 class="text-xl font-black text-gray-800 dark:text-white mb-6">{{ __('Delivery Information') }}</h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -126,7 +145,7 @@
 
         {{-- Step 2: Payment (display-only demo — methods are shown but no real charge occurs) --}}
         @elseif($step === 2)
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700" data-aos="fade-up">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
             <h2 class="text-xl font-black text-gray-800 dark:text-white mb-1">{{ __('Payment Method') }}</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('Choose how you would like to pay') }}</p>
 
@@ -283,46 +302,6 @@
             </div>
         </div>
 
-        {{-- Step 3: Confirmation --}}
-        @else
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700 text-center" data-aos="zoom-in">
-            <div class="flex justify-center mb-6" aria-hidden="true">
-                <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="m9 11 3 3L22 4"></path></svg>
-            </div>
-            <h2 class="text-2xl font-black text-gray-800 dark:text-white mb-2">{{ __('Order Confirmed!') }}</h2>
-            <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('Thank you for your purchase. A confirmation email has been sent.') }}</p>
-
-            @if($order)
-            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 text-left max-w-md mx-auto space-y-3 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-gray-500">{{ __('Order Number') }}</span>
-                    <span class="font-bold text-gray-800 dark:text-white">{{ $order->order_number }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-500">{{ __('Total') }}</span>
-                    <span class="font-black text-brand-red">RM {{ number_format($order->total_amount, 2) }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-500">{{ __('Status') }}</span>
-                    <span class="font-bold text-green-600">{{ ucfirst($order->status) }}</span>
-                </div>
-            </div>
-            @endif
-
-            <div class="flex flex-col sm:flex-row gap-6 justify-center mt-8">
-                <a href="{{ route('track-order') }}"
-                   class="group relative inline-flex items-center justify-center gap-3 bg-brand-red text-white px-8 py-4 rounded-full font-black text-base transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-2 active:scale-95">
-                    <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
-                    <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                    <span class="relative z-10">{{ __('Track Your Order') }}</span>
-                </a>
-                <a href="{{ route('products') }}"
-                   class="group inline-flex items-center justify-center gap-3 border-2 border-gray-200 dark:border-gray-600 px-8 py-4 rounded-full font-black text-base text-gray-700 dark:text-gray-300 hover:border-brand-red hover:text-brand-red hover:-translate-y-2 hover:shadow-lg transition-all duration-300 active:scale-95">
-                    <svg class="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"/></svg>
-                    {{ __('Continue Shopping') }}
-                </a>
-            </div>
-        </div>
         @endif
 
     </div>
