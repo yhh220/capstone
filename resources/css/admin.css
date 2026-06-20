@@ -1,3 +1,13 @@
+/* Filament panel theme — pulls in Tailwind + every Filament component style.
+   WITHOUT this @import the built theme is only the overrides below, so the whole
+   admin renders as unstyled raw HTML. (This is what broke the admin panel.) */
+@import '../../vendor/filament/filament/resources/css/theme.css';
+
+/* Scan our own admin code so any Tailwind utility classes used in custom Filament
+   pages/resources (e.g. the System Status page grid) get generated. */
+@source '../../app/Filament/**/*.php';
+@source '../../resources/views/filament/**/*.blade.php';
+
 /**
  * Admin Panel Responsive Design Overrides
  *
