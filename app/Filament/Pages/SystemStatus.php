@@ -27,68 +27,92 @@ class SystemStatus extends Page
         return Filament::auth()->user()?->isAdmin() ?? false;
     }
 
-    /** @return array<int, array{name:string, status:string, value:string}> */
+    private ?array $checksCache = null;
+
+    /**
+     * Plain-language health checks — written so a non-technical shop owner can tell
+     * what is going on at a glance. Cached so the summary doesn't re-run them.
+     *
+     * @return array<int, array{name:string, status:string, value:string}>
+     */
     public function getChecks(): array
     {
-        return [
-            $this->check('Database', function () {
+        return $this->checksCache ??= [
+            $this->check('Your data', function () {
                 DB::select('select 1');
-                // Show the actual DB size (sqlite file) so it's never confused with disk space.
                 $size = '';
                 $db = config('database.connections.' . config('database.default') . '.database');
                 if (is_string($db) && is_file($db)) {
-                    $size = ' · ' . $this->humanSize((int) filesize($db));
+                    $size = ' (' . $this->humanSize((int) filesize($db)) . ' stored)';
                 }
 
-                return ['ok', 'Connected' . $size];
+                return ['ok', 'Saved and reachable' . $size];
             }),
-            $this->check('Cache', function () {
+            $this->check('Website speed', function () {
                 $key = 'status:ping:' . uniqid();
                 Cache::put($key, '1', 5);
                 $ok = Cache::get($key) === '1';
                 Cache::forget($key);
 
-                return $ok ? ['ok', 'Read/write OK'] : ['fail', 'Read/write failed'];
+                return $ok ? ['ok', 'Fast — caching is working'] : ['fail', 'Caching is not working'];
             }),
-            $this->check('Queue backlog', function () {
+            $this->check('Background tasks', function () {
                 $n = DB::table('jobs')->count();
 
-                return [$n > 50 ? 'warn' : 'ok', $n . ' pending'];
+                return [$n > 50 ? 'warn' : 'ok', $n === 0 ? 'Nothing waiting' : $n . ' waiting to run'];
             }),
-            $this->check('Failed jobs', function () {
+            $this->check('Failed tasks', function () {
                 $n = DB::table('failed_jobs')->count();
 
-                return [$n > 0 ? 'warn' : 'ok', (string) $n];
+                return [$n > 0 ? 'warn' : 'ok', $n === 0 ? 'None failed' : $n . ' failed — worth a look'];
             }),
-            $this->check('Scheduler (cron)', function () {
+            $this->check('Automatic tasks', function () {
                 $last = Cache::get('scheduler:last_run');
                 if (! $last) {
-                    return ['fail', 'Never ran — is cron set up?'];
+                    return ['fail', 'Stopped — auto-emails and cleanup are paused'];
                 }
-                $when = Carbon::parse($last);
+                $stale = Carbon::parse($last)->diffInSeconds(now()) > 180;
 
-                return [$when->diffInSeconds(now()) > 180 ? 'fail' : 'ok', 'Last run ' . $when->diffForHumans()];
+                return [$stale ? 'fail' : 'ok', $stale ? 'Stopped — needs the cron set up' : 'Running normally'];
             }),
-            $this->check('Mail', fn () => filled(config('mail.mailers.smtp.username'))
-                ? ['ok', 'Configured · ' . config('mail.from.address')]
-                : ['warn', 'Not configured']),
-            $this->check('Disk space', function () {
+            $this->check('Email sending', fn () => filled(config('mail.mailers.smtp.username'))
+                ? ['ok', 'Ready · ' . config('mail.from.address')]
+                : ['warn', 'Not set up — customers will not get emails']),
+            $this->check('Server space', function () {
                 $writable = is_writable(storage_path('logs'));
                 $freeGb = round((disk_free_space(base_path()) ?: 0) / 1_000_000_000, 1);
+                if (! $writable) {
+                    return ['fail', 'Cannot save files — needs attention'];
+                }
 
-                // This is FREE DISK on the server — not the database size.
-                return [$writable ? 'ok' : 'fail', $freeGb . ' GB free' . ($writable ? '' : ' · logs NOT writable')];
+                return [$freeGb < 2 ? 'warn' : 'ok', $freeGb . ' GB free'];
             }),
-            $this->check('Errors (24h)', function () {
+            $this->check('Recent problems', function () {
                 $n = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
                     ->where('logged_at', '>=', now()->subDay())->count();
 
-                return [$n > 0 ? 'warn' : 'ok', $n . ' error' . ($n === 1 ? '' : 's')];
+                return [$n > 0 ? 'warn' : 'ok', $n === 0 ? 'None in the last 24 hours' : $n . ' in the last 24 hours'];
             }),
-            $this->check('Debug mode', fn () => config('app.debug')
-                ? ['warn', 'ON — turn OFF in production']
-                : ['ok', 'Off']),
+            $this->check('Developer mode', fn () => config('app.debug')
+                ? ['warn', 'On — turn off before going live']
+                : ['ok', 'Off (correct for a live site)']),
         ];
+    }
+
+    /** One-line overall verdict for the banner. @return array{0:string,1:string} */
+    public function getSummary(): array
+    {
+        $problems = collect($this->getChecks())->where('status', 'fail')->count();
+        $warnings = collect($this->getChecks())->where('status', 'warn')->count();
+
+        if ($problems > 0) {
+            return ['fail', $problems . ' thing' . ($problems === 1 ? '' : 's') . ' need fixing'];
+        }
+        if ($warnings > 0) {
+            return ['warn', $warnings . ' thing' . ($warnings === 1 ? '' : 's') . ' to keep an eye on'];
+        }
+
+        return ['ok', 'Everything is running smoothly'];
     }
 
     /** @return array<string, string> */

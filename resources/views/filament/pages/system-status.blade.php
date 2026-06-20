@@ -1,5 +1,20 @@
 <x-filament-panels::page>
-    @php $palette = ['ok' => '#22c55e', 'warn' => '#f59e0b', 'fail' => '#ef4444']; @endphp
+    @php
+        $palette = ['ok' => '#22c55e', 'warn' => '#f59e0b', 'fail' => '#ef4444'];
+        $words   = ['ok' => 'Good', 'warn' => 'Heads up', 'fail' => 'Problem'];
+        $icons   = ['ok' => '✅', 'warn' => '⚠️', 'fail' => '🔴'];
+        $summary = $this->getSummary();
+        $sc = $palette[$summary[0]];
+    @endphp
+
+    {{-- One-line verdict anyone can understand --}}
+    <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:14px;background:{{ $sc }}14;border:1px solid {{ $sc }}55;margin-bottom:4px;">
+        <span style="font-size:26px;line-height:1;">{{ $icons[$summary[0]] }}</span>
+        <div>
+            <div style="font-weight:800;font-size:16px;">{{ $summary[1] }}</div>
+            <div style="font-size:12px;opacity:0.7;">A quick health check of your website. Green = fine · Amber = keep an eye on it · Red = needs fixing.</div>
+        </div>
+    </div>
 
     {{-- Health checks --}}
     <div style="display:flex;flex-wrap:wrap;gap:12px;">
@@ -11,7 +26,7 @@
                     <div style="font-weight:700;font-size:13px;">{{ $check['name'] }}</div>
                     <div style="font-size:12px;opacity:0.7;">{{ $check['value'] }}</div>
                 </div>
-                <span style="margin-left:auto;font-size:11px;font-weight:800;text-transform:uppercase;color:{{ $c }};">{{ $check['status'] }}</span>
+                <span style="margin-left:auto;font-size:11px;font-weight:800;text-transform:uppercase;color:{{ $c }};white-space:nowrap;">{{ $words[$check['status']] ?? 'Problem' }}</span>
             </div>
         @endforeach
     </div>
