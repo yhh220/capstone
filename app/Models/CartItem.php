@@ -71,7 +71,8 @@ class CartItem extends Model
                     ->first();
 
                 if ($existing) {
-                    $existing->increment('quantity', $guestItem->quantity);
+                    $merged = min($existing->quantity + $guestItem->quantity, 99);
+                    $existing->update(['quantity' => $merged]);
                     $guestItem->delete();
                 } else {
                     $guestItem->update([

@@ -34,6 +34,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     {
         return LogOptions::defaults()
             ->logFillable()
+            ->logExcept(['password'])   // bcrypt hash must never appear in the audit log
             ->logOnlyDirty()
             ->dontLogEmptyChanges()
             ->dontLogIfAttributesChangedOnly(['remember_token']);
