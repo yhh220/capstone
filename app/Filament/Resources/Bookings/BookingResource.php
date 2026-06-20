@@ -18,9 +18,11 @@ class BookingResource extends Resource
 {
     protected static ?string $model = Booking::class;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Services & Bookings';
+    protected static \UnitEnum|string|null $navigationGroup = 'Sales';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
+
+    protected static ?int $navigationSort = 2;
 
     public static function getNavigationBadge(): ?string
     {

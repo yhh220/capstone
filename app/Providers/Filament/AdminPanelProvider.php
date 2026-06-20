@@ -40,7 +40,6 @@ class AdminPanelProvider extends PanelProvider
             // ── Branding ──────────────────────────────────────────────
             ->brandName('Win Win Car Audio')
             ->brandLogo(asset('images/logo/logo-dark.svg'))    // light mode: dark logo (dark text on white)
-            ->darkModeBrandLogo(asset('images/logo/logo-light.svg')) // dark mode: light logo (white text on dark)
             ->brandLogoHeight('2rem')
             // Responsive admin panel CSS overrides (charts, tables, forms, modals).
             ->viteTheme('resources/css/admin.css')
@@ -49,8 +48,11 @@ class AdminPanelProvider extends PanelProvider
             // panel matches the public site exactly — one source of truth.
 
             // ── Theme ─────────────────────────────────────────────────
-            ->defaultThemeMode(\Filament\Enums\ThemeMode::System)
-            ->darkMode(true)
+            // Dark mode off: its toggle button didn't switch anything (the admin
+            // theme CSS never picked up the dark variant), so it was a dead button
+            // rather than a real feature. Admin is light-only until that's built
+            // properly.
+            ->darkMode(false)
             ->font('DM Sans')
             ->colors([
                 // Brand red ramp anchored so shade 600 = #C8413D (the shade Filament
@@ -90,9 +92,6 @@ class AdminPanelProvider extends PanelProvider
             ])
 
             // ── Render Hooks ──────────────────────────────────────────
-            // (No custom theme toggle — Filament's native theme switcher in the
-            // user menu is the single source of truth. A second copy in the topbar
-            // kept its own state and desynced from it.)
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn () => view('filament.scroll-to-top'),
@@ -105,9 +104,8 @@ class AdminPanelProvider extends PanelProvider
             // ── Navigation ────────────────────────────────────────────
             ->sidebarFullyCollapsibleOnDesktop()
             ->navigationGroups([
-                NavigationGroup::make('Shop'),
+                NavigationGroup::make('Sales'),
                 NavigationGroup::make('Store Products'),
-                NavigationGroup::make('Services & Bookings'),
                 NavigationGroup::make('Customer Interactions'),
                 NavigationGroup::make('System Settings')
                     ->collapsed(),

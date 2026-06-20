@@ -28,7 +28,7 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingBag;
-    protected static \UnitEnum|string|null $navigationGroup = 'Shop';
+    protected static \UnitEnum|string|null $navigationGroup = 'Sales';
     protected static ?int $navigationSort = 1;
 
     /** Badge = paid/confirmed orders still awaiting fulfilment (same idea as Bookings). */
