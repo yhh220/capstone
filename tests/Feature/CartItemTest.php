@@ -75,4 +75,27 @@ class CartItemTest extends TestCase
             'quantity' => 1,
         ]);
     }
+
+    public function test_prune_only_removes_old_abandoned_guest_carts(): void
+    {
+        $product = Product::create([
+            'name' => 'Amp', 'slug' => 'amp-prune-test', 'price' => 100, 'stock' => 5, 'is_active' => true,
+        ]);
+
+        $oldGuest = CartItem::create(['session_id' => 'old-guest', 'product_id' => $product->id, 'quantity' => 1]);
+        $oldGuest->forceFill(['updated_at' => now()->subDays(31)])->saveQuietly();
+
+        $recentGuest = CartItem::create(['session_id' => 'recent-guest', 'product_id' => $product->id, 'quantity' => 1]);
+
+        $user = User::create(['name' => 'Loyal', 'email' => 'loyal@example.test', 'password' => 'password', 'role' => 'client']);
+        $oldUserCart = CartItem::create(['user_id' => $user->id, 'product_id' => $product->id, 'quantity' => 1]);
+        $oldUserCart->forceFill(['updated_at' => now()->subDays(31)])->saveQuietly();
+
+        $oldGuest->prunable()->get()->each(fn ($item) => $item->delete());
+
+        $this->assertDatabaseMissing('cart_items', ['id' => $oldGuest->id]);
+        $this->assertDatabaseHas('cart_items', ['id' => $recentGuest->id]);
+        // A logged-in customer's cart is never auto-pruned, no matter how old.
+        $this->assertDatabaseHas('cart_items', ['id' => $oldUserCart->id]);
+    }
 }

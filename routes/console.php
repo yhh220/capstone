@@ -11,9 +11,21 @@ Artisan::command('inspire', function () {
 // Auto-regenerate sitemap daily at midnight
 Schedule::command('sitemap:generate')->daily();
 
-// Prune chat logs (90d) and structured app logs (LOG_DB_RETENTION_DAYS) so the
-// tables can't grow unbounded.
-Schedule::command('model:prune', ['--model' => [\App\Models\ChatLog::class, \App\Models\AppLog::class]])->daily();
+// Prune chat logs (90d), structured app logs (LOG_DB_RETENTION_DAYS), and
+// abandoned guest carts (30d) so none of these tables can grow unbounded.
+Schedule::command('model:prune', ['--model' => [\App\Models\ChatLog::class, \App\Models\AppLog::class, \App\Models\CartItem::class]])->daily();
+
+// The database session driver never deletes its own expired rows — prune
+// anything past 2x the configured lifetime so the sessions table can't grow
+// unbounded under real traffic.
+Schedule::call(function () {
+    \Illuminate\Support\Facades\DB::table('sessions')
+        ->where('last_activity', '<', now()->subMinutes(config('session.lifetime') * 2)->getTimestamp())
+        ->delete();
+})->daily()->name('prune-expired-sessions');
+
+// Built-in Laravel cleanup for the queue's failed_jobs table.
+Schedule::command('queue:prune-failed', ['--hours' => 24 * 30])->daily();
 
 // Heartbeat: the System Status page reads this to tell whether cron is alive.
 Schedule::call(fn () => cache()->forever('scheduler:last_run', now()->toIso8601String()))

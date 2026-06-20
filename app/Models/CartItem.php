@@ -4,16 +4,29 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CartItem extends Model
 {
+    use Prunable;
+
     protected $fillable = ['user_id', 'session_id', 'product_id', 'quantity'];
 
     protected $casts = [
         'quantity' => 'integer',
     ];
+
+    /**
+     * Auto-prune (model:prune) — a guest cart is tied to a browser session that
+     * may never come back, so it can't ever check out. Logged-in carts (user_id
+     * set) are never touched here; the customer may return any time.
+     */
+    public function prunable(): Builder
+    {
+        return static::whereNull('user_id')->where('updated_at', '<=', now()->subDays(30));
+    }
 
     public function product()
     {
