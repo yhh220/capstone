@@ -89,7 +89,9 @@ class SystemStatus extends Page
             }),
             $this->check('Recent problems', function () {
                 $n = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
-                    ->where('logged_at', '>=', now()->subDay())->count();
+                    ->where('logged_at', '>=', now()->subDay())
+                    ->whereNull('resolved_at')
+                    ->count();
 
                 return [$n > 0 ? 'warn' : 'ok', $n === 0 ? 'None in the last 24 hours' : $n . ' in the last 24 hours'];
             }),
@@ -129,6 +131,7 @@ class SystemStatus extends Page
     public function getRecentErrors()
     {
         return AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
+            ->whereNull('resolved_at')
             ->latest('id')->limit(8)->get();
     }
 

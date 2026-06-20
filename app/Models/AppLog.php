@@ -19,12 +19,14 @@ class AppLog extends Model
     protected $fillable = [
         'level', 'level_name', 'message', 'channel', 'trace_id',
         'user_id', 'ip', 'method', 'path', 'context', 'logged_at', 'created_at',
+        'resolved_at',
     ];
 
     protected $casts = [
-        'context'    => 'array',
-        'logged_at'  => 'datetime',
-        'created_at' => 'datetime',
+        'context'     => 'array',
+        'logged_at'   => 'datetime',
+        'created_at'  => 'datetime',
+        'resolved_at' => 'datetime',
     ];
 
     /** Auto-prune old rows (model:prune) — keeps the table bounded. */

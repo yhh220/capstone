@@ -5,14 +5,19 @@ namespace App\Filament\Resources\Logs;
 use App\Models\AppLog;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Facades\Filament;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 
 class LogResource extends Resource
 {
@@ -37,6 +42,7 @@ class LogResource extends Resource
     {
         return (string) AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
             ->where('logged_at', '>=', now()->subDay())
+            ->whereNull('resolved_at')
             ->count() ?: null;
     }
 
@@ -49,6 +55,23 @@ class LogResource extends Resource
     {
         return $table
             ->defaultSort('id', 'desc')
+            ->description(fn (): ?\Illuminate\Contracts\Support\Htmlable => request()->query('trace_id')
+                ? new \Illuminate\Support\HtmlString(
+                    '<span class="text-sm">Showing only the log lines from one request (trace <code class="font-mono">'
+                    . e(request()->query('trace_id'))
+                    . '</code>). <a href="' . static::getUrl('index') . '" class="underline font-semibold">Clear</a></span>'
+                )
+                : null)
+            // "View trace" links here with ?trace_id=... . Table filters are a
+            // Livewire form whose state Filament does NOT hydrate from the URL
+            // query string on a fresh page load, so passing tableFilters[...] in
+            // the link (the first thing tried) silently did nothing — the table
+            // still showed every row. Reading the query string straight into the
+            // base query sidesteps that entirely and always works.
+            ->modifyQueryUsing(fn ($query) => $query->when(
+                request()->query('trace_id'),
+                fn ($q, $traceId) => $q->where('trace_id', $traceId),
+            ))
             ->columns([
                 TextColumn::make('logged_at')->label('Time')->dateTime('d M H:i:s')->sortable(),
                 TextColumn::make('level_name')->label('Level')->badge()
@@ -59,6 +82,16 @@ class LogResource extends Resource
                 TextColumn::make('trace_id')->label('Trace')->copyable()->limit(8)->placeholder('—')->toggleable(),
                 TextColumn::make('user_id')->label('User')->placeholder('—')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('path')->label('Path')->limit(30)->placeholder('—')->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('resolved_at')
+                    ->label('Fixed')
+                    ->boolean()
+                    ->trueIcon(Heroicon::OutlinedCheckCircle)
+                    ->falseIcon(Heroicon::OutlinedMinus)
+                    ->trueColor('success')
+                    ->falseColor('gray')
+                    ->tooltip(fn (AppLog $record): string => $record->resolved_at
+                        ? 'Marked fixed ' . $record->resolved_at->diffForHumans()
+                        : 'Not marked fixed'),
             ])
             ->filters([
                 SelectFilter::make('level_name')->label('Level')->multiple()->options([
@@ -67,6 +100,11 @@ class LogResource extends Resource
                 ]),
                 Filter::make('errors_only')->label('Errors & above')->toggle()
                     ->query(fn ($query) => $query->whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])),
+                // Old, already-fixed errors stay in the table for the audit trail —
+                // this is what hides them from view (and the nav badge) without
+                // deleting the history.
+                Filter::make('hide_fixed')->label('Hide fixed')->toggle()->default()
+                    ->query(fn ($query) => $query->whereNull('resolved_at')),
                 Filter::make('trace')
                     ->schema([Forms\Components\TextInput::make('trace_id')->label('Trace ID')])
                     ->query(fn ($query, array $data) => $query->when($data['trace_id'] ?? null, fn ($q, $t) => $q->where('trace_id', $t)))
@@ -88,11 +126,24 @@ class LogResource extends Resource
                     ->modalCancelActionLabel('Close'),
                 Action::make('trace')->label('View trace')->icon(Heroicon::OutlinedArrowsRightLeft)
                     ->visible(fn (AppLog $record): bool => filled($record->trace_id))
-                    ->url(fn (AppLog $record): string => static::getUrl('index', [
-                        'tableFilters' => ['trace' => ['trace_id' => $record->trace_id]],
-                    ])),
+                    ->url(fn (AppLog $record): string => static::getUrl('index', ['trace_id' => $record->trace_id])),
+                Action::make('markFixed')->label('Mark fixed')->icon(Heroicon::OutlinedCheckCircle)->color('success')
+                    ->visible(fn (AppLog $record): bool => $record->resolved_at === null)
+                    ->action(fn (AppLog $record) => $record->update(['resolved_at' => now()])),
+                Action::make('reopen')->label('Reopen')->icon(Heroicon::OutlinedArrowUturnLeft)->color('gray')
+                    ->visible(fn (AppLog $record): bool => $record->resolved_at !== null)
+                    ->action(fn (AppLog $record) => $record->update(['resolved_at' => null])),
             ])
-            ->toolbarActions([]);
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('markFixedBulk')->label('Mark fixed')->icon(Heroicon::OutlinedCheckCircle)->color('success')
+                        ->action(function (Collection $records): void {
+                            $records->each(fn (AppLog $log) => $log->resolved_at ?? $log->update(['resolved_at' => now()]));
+                            Notification::make()->title('Marked ' . $records->count() . ' log entr' . ($records->count() === 1 ? 'y' : 'ies') . ' fixed')->success()->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                ]),
+            ]);
     }
 
     public static function getPages(): array
