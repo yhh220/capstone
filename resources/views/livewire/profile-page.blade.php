@@ -108,22 +108,26 @@
             @endif
 
             @if(auth()->user()->hasPassword())
-            {{-- Account already has a password → change it (needs the current one). --}}
-            <form wire:submit="updatePassword" class="space-y-4">
+            {{-- Account already has a password → change it (needs the current one).
+                 Passwords stay in Alpine state only — never enter the Livewire snapshot. --}}
+            <form x-data="{ cp: '', np: '', npc: '' }"
+                  @submit.prevent="$wire.updatePassword(cp, np, npc)"
+                  x-on:password-changed.window="cp = np = npc = ''"
+                  class="space-y-4">
                 <div>
                     <label for="pf-current-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Current Password') }}</label>
-                    <input wire:model="current_password" id="pf-current-pass" type="password" autocomplete="current-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                    <input x-model="cp" id="pf-current-pass" type="password" autocomplete="current-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                     @error('current_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="pf-new-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('New Password') }}</label>
-                        <input wire:model="new_password" id="pf-new-pass" type="password" autocomplete="new-password" placeholder="{{ __('Min. 8 characters') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                        <input x-model="np" id="pf-new-pass" type="password" autocomplete="new-password" placeholder="{{ __('Min. 8 characters') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                         @error('new_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label for="pf-new-pass-confirm" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Confirm New Password') }}</label>
-                        <input wire:model="new_password_confirmation" id="pf-new-pass-confirm" type="password" autocomplete="new-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                        <input x-model="npc" id="pf-new-pass-confirm" type="password" autocomplete="new-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                     </div>
                 </div>
                 <div class="flex justify-end pt-1">
@@ -146,23 +150,25 @@
                 </button>
                 @error('set_otp') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
             @else
-                <form wire:submit="confirmSetPassword" class="space-y-4">
+                <form x-data="{ otp: '', np: '', npc: '' }"
+                      @submit.prevent="$wire.confirmSetPassword(otp, np, npc)"
+                      class="space-y-4">
                     <div>
                         <label for="pf-set-otp" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Verification code') }}</label>
-                        <input wire:model="set_otp" id="pf-set-otp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"
-                               x-on:input="$el.value = $el.value.replace(/\D/g, '')"
+                        <input x-model="otp" id="pf-set-otp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"
+                               x-on:input="$el.value = $el.value.replace(/\D/g, ''); otp = $el.value"
                                class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm tracking-[0.4em] focus:outline-none focus:border-brand-red transition">
                         @error('set_otp') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label for="pf-set-new" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('New Password') }}</label>
-                            <input wire:model="set_new_password" id="pf-set-new" type="password" autocomplete="new-password" placeholder="{{ __('Min. 8 characters') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                            <input x-model="np" id="pf-set-new" type="password" autocomplete="new-password" placeholder="{{ __('Min. 8 characters') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                             @error('set_new_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label for="pf-set-confirm" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Confirm New Password') }}</label>
-                            <input wire:model="set_new_password_confirmation" id="pf-set-confirm" type="password" autocomplete="new-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                            <input x-model="npc" id="pf-set-confirm" type="password" autocomplete="new-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                         </div>
                     </div>
                     <div class="flex items-center justify-between pt-1">
@@ -179,7 +185,7 @@
         </div>
 
         {{-- Danger Zone --}}
-        <div x-data="{ confirm: false }" class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border-2 border-red-200 dark:border-red-500/30">
+        <div x-data="{ confirm: false, dp: '' }" class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border-2 border-red-200 dark:border-red-500/30">
             <h2 class="text-lg font-black text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 {{ __('Delete Account') }}
@@ -196,12 +202,12 @@
             <div x-show="confirm" x-cloak style="display:none;" class="space-y-4">
                 <div>
                     <label for="pf-delete-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Enter your password to confirm') }}</label>
-                    <input wire:model="delete_password" id="pf-delete-pass" type="password" autocomplete="current-password" class="w-full border border-red-200 dark:border-red-500/40 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500 transition">
+                    <input x-model="dp" id="pf-delete-pass" type="password" autocomplete="current-password" class="w-full border border-red-200 dark:border-red-500/40 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500 transition">
                     @error('delete_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div class="flex items-center gap-3">
                     <button type="button"
-                            @click="$store.confirm.ask(@js(__('Are you sure? This will permanently close your account.')), () => $wire.deleteAccount())"
+                            @click="$store.confirm.ask(@js(__('Are you sure? This will permanently close your account.')), () => $wire.deleteAccount(dp))"
                             wire:loading.attr="disabled" wire:target="deleteAccount"
                             class="bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-700 active:scale-95 disabled:opacity-50">
                         <span wire:loading.remove wire:target="deleteAccount">{{ __('Permanently Delete') }}</span>

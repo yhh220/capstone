@@ -64,10 +64,7 @@ class SetPasswordTest extends TestCase
             return true;
         });
 
-        $page->set('set_otp', $code)
-            ->set('set_new_password', 'BrandNew1!@#')
-            ->set('set_new_password_confirmation', 'BrandNew1!@#')
-            ->call('confirmSetPassword')
+        $page->call('confirmSetPassword', $code, 'BrandNew1!@#', 'BrandNew1!@#')
             ->assertHasNoErrors();
 
         $user->refresh();

@@ -123,10 +123,7 @@ class AuthFlowTest extends TestCase
         $this->actingAs($u);
 
         Livewire::test(ProfilePage::class)
-            ->set('current_password', $this->pass)
-            ->set('new_password', 'NewPass1!@#')
-            ->set('new_password_confirmation', 'NewPass1!@#')
-            ->call('updatePassword');
+            ->call('updatePassword', $this->pass, 'NewPass1!@#', 'NewPass1!@#');
 
         $this->assertTrue(Hash::check('NewPass1!@#', $u->fresh()->password));
     }
@@ -159,8 +156,7 @@ class AuthFlowTest extends TestCase
         $this->actingAs($u);
 
         Livewire::test(ProfilePage::class)
-            ->set('delete_password', $this->pass)
-            ->call('deleteAccount');
+            ->call('deleteAccount', $this->pass);
 
         $this->assertFalse(User::where('email', $this->email)->exists(), 'hidden from normal queries');
         $this->assertTrue(
