@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\EmailOtpService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
 use Spatie\Honeypot\Http\Livewire\Concerns\HoneypotData;
@@ -21,11 +22,14 @@ class ForgotPassword extends Component
     /** 1 = request code · 2 = enter code + new password · 3 = done */
     public int $step = 1;
 
-    public string $email                 = '';
-    public string $otpCode               = '';
-    public string $password              = '';
-    public string $password_confirmation = '';
-    public bool   $showPassword          = false;
+    public string $email        = '';
+    public string $otpCode      = '';
+    public bool   $showPassword = false;
+
+    // password/password_confirmation are intentionally NOT public properties —
+    // Livewire serializes every public property into wire:snapshot (visible in
+    // page source / the Network tab). They're bound via Alpine-only state and
+    // passed into resetPassword() as #[\SensitiveParameter] method arguments.
 
     public function mount(): void
     {
@@ -122,15 +126,32 @@ class ForgotPassword extends Component
     /**
      * Step 2 → 3. Verify the code and set the new password.
      */
-    public function resetPassword(): void
-    {
-        $this->validate([
-            'otpCode'               => ['required', 'digits:6'],
-            'password'              => ['required', 'confirmed', Password::defaults()],
-            'password_confirmation' => ['required'],
-        ], [
-            'password.min' => __('Password must be at least 8 characters.'),
-        ]);
+    public function resetPassword(
+        #[\SensitiveParameter] string $password = '',
+        #[\SensitiveParameter] string $passwordConfirmation = '',
+    ): void {
+        $v = Validator::make(
+            [
+                'otpCode'               => $this->otpCode,
+                'password'              => $password,
+                'password_confirmation' => $passwordConfirmation,
+            ],
+            [
+                'otpCode'               => ['required', 'digits:6'],
+                'password'              => ['required', 'confirmed', Password::defaults()],
+                'password_confirmation' => ['required'],
+            ],
+            [
+                'password.min' => __('Password must be at least 8 characters.'),
+            ],
+        );
+
+        if ($v->fails()) {
+            foreach ($v->errors()->messages() as $field => $messages) {
+                $this->addError($field, $messages[0]);
+            }
+            return;
+        }
 
         $otp = app(EmailOtpService::class);
 
@@ -147,9 +168,9 @@ class ForgotPassword extends Component
         }
 
         // The 'hashed' cast hashes the new password on save.
-        $user->forceFill(['password' => $this->password])->save();
+        $user->forceFill(['password' => $password])->save();
 
-        $this->reset('password', 'password_confirmation', 'otpCode');
+        $this->reset('otpCode');
         $this->step = 3;
     }
 

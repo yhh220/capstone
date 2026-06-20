@@ -43,9 +43,7 @@ class AuthFlowTest extends TestCase
             ->set('isLoginTab', false)
             ->set('name', 'Flow Test')
             ->set('email', $this->email)
-            ->set('password', $this->pass)
-            ->set('password_confirmation', $this->pass)
-            ->call('register');
+            ->call('register', $this->pass, $this->pass);
 
         $c->assertSet('awaitingOtp', true);
         $this->assertFalse(User::where('email', $this->email)->exists(), 'user must not exist before OTP');
@@ -82,9 +80,7 @@ class AuthFlowTest extends TestCase
             ->set('isLoginTab', false)
             ->set('name', 'New Name')
             ->set('email', $this->email)
-            ->set('password', $this->pass)
-            ->set('password_confirmation', $this->pass)
-            ->call('register')
+            ->call('register', $this->pass, $this->pass)
             ->assertHasNoErrors()              // a soft-deleted email is NOT "taken"
             ->assertSet('awaitingOtp', true);
 
@@ -105,14 +101,12 @@ class AuthFlowTest extends TestCase
 
         Livewire::test(UserLogin::class)
             ->set('loginEmail', $this->email)
-            ->set('loginPassword', 'totally-wrong')
-            ->call('login');
+            ->call('login', 'totally-wrong');
         $this->assertFalse(Auth::check(), 'wrong password must not sign in');
 
         Livewire::test(UserLogin::class)
             ->set('loginEmail', $this->email)
-            ->set('loginPassword', $this->pass)
-            ->call('login');
+            ->call('login', $this->pass);
         $this->assertTrue(Auth::check());
         $this->assertSame($u->id, Auth::id());
     }
@@ -142,9 +136,7 @@ class AuthFlowTest extends TestCase
         $code = $this->captureOtp();
 
         $fp->set('otpCode', $code)
-            ->set('password', 'Reset1!@#xyz')
-            ->set('password_confirmation', 'Reset1!@#xyz')
-            ->call('resetPassword')
+            ->call('resetPassword', 'Reset1!@#xyz', 'Reset1!@#xyz')
             ->assertSet('step', 3);
 
         $this->assertTrue(Hash::check('Reset1!@#xyz', $u->fresh()->password));

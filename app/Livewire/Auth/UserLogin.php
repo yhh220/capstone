@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
@@ -29,16 +30,17 @@ class UserLogin extends Component
         'isLoginTab' => ['except' => true, 'as' => 'tab'],
     ];
 
-    // Sign In fields
+    // Sign In fields. Password is NOT a public property — Livewire serializes
+    // every public property into wire:snapshot (visible in page source / the
+    // Network tab), so it's bound via Alpine-only state and passed into
+    // login() as a #[\SensitiveParameter] method argument instead.
     public string $loginEmail = '';
-    public string $loginPassword = '';
     public bool $remember = false;
 
-    // Register fields
+    // Register fields — same reasoning: password/password_confirmation stay
+    // out of the public property list, passed as method params to register().
     public string $name = '';
     public string $email = '';
-    public string $password = '';
-    public string $password_confirmation = '';
 
     // Email-OTP verification step (shown after a valid register submission)
     public bool   $awaitingOtp = false;
@@ -90,12 +92,19 @@ class UserLogin extends Component
      * Tier 5: 25 fails → 1 hr wait
      * IP block: 30 fails from same IP → 1 hr IP-level block
      */
-    public function login(): void
+    public function login(#[\SensitiveParameter] string $loginPassword = ''): void
     {
-        $this->validate([
-            'loginEmail' => ['required', 'email'],
-            'loginPassword' => ['required', 'string'],
-        ]);
+        $v = Validator::make(
+            ['loginEmail' => $this->loginEmail, 'loginPassword' => $loginPassword],
+            ['loginEmail' => ['required', 'email'], 'loginPassword' => ['required', 'string']],
+        );
+
+        if ($v->fails()) {
+            foreach ($v->errors()->messages() as $field => $messages) {
+                $this->addError($field, $messages[0]);
+            }
+            return;
+        }
 
         $ip         = request()->ip();
         $emailKey   = 'login_fails:email:' . strtolower($this->loginEmail);
@@ -131,7 +140,7 @@ class UserLogin extends Component
         // Attempt authentication
         if (!Auth::attempt([
             'email'    => $this->loginEmail,
-            'password' => $this->loginPassword,
+            'password' => $loginPassword,
         ], $this->remember)) {
             // Increment failure counters
             $emailFails++;
@@ -210,25 +219,41 @@ class UserLogin extends Component
      * confirmed, so abandoned sign-ups never leave an orphan account and the email
      * stays free to register.
      */
-    public function register(): void
-    {
+    public function register(
+        #[\SensitiveParameter] string $password = '',
+        #[\SensitiveParameter] string $passwordConfirmation = '',
+    ): void {
         $this->protectAgainstSpam();
 
-        $validated = $this->validate([
-            'name'                  => ['required', 'string', 'min:2', 'max:255'],
-            // Only ACTIVE accounts block the email; a soft-deleted one is treated as
-            // available and gets reactivated on OTP confirmation (returning customer).
-            'email'                 => ['required', 'email', 'max:255', Rule::unique('users', 'email')->whereNull('deleted_at')],
-            'password'              => [
-                'required',
-                'confirmed',
-                Password::defaults(),
+        $v = Validator::make(
+            [
+                'name'                  => $this->name,
+                'email'                 => $this->email,
+                'password'              => $password,
+                'password_confirmation' => $passwordConfirmation,
             ],
-            'password_confirmation' => ['required'],
-        ], [
-            'password.min' => __('Password must be at least 8 characters.'),
-            'name.min'     => __('Name must be at least 2 characters.'),
-        ]);
+            [
+                'name'                  => ['required', 'string', 'min:2', 'max:255'],
+                // Only ACTIVE accounts block the email; a soft-deleted one is treated as
+                // available and gets reactivated on OTP confirmation (returning customer).
+                'email'                 => ['required', 'email', 'max:255', Rule::unique('users', 'email')->whereNull('deleted_at')],
+                'password'              => ['required', 'confirmed', Password::defaults()],
+                'password_confirmation' => ['required'],
+            ],
+            [
+                'password.min' => __('Password must be at least 8 characters.'),
+                'name.min'     => __('Name must be at least 2 characters.'),
+            ],
+        );
+
+        if ($v->fails()) {
+            foreach ($v->errors()->messages() as $field => $messages) {
+                $this->addError($field, $messages[0]);
+            }
+            return;
+        }
+
+        $validated = $v->validated();
 
         // Throttle by IP so registration can't be abused to mass-send OTP emails
         // (each valid submission dispatches a verification email).

@@ -32,8 +32,7 @@ class SetPasswordTest extends TestCase
 
         Livewire::test(UserLogin::class)
             ->set('loginEmail', $user->email)
-            ->set('loginPassword', 'anything123!')
-            ->call('login')
+            ->call('login', 'anything123!')
             ->assertHasErrors('loginEmail');
 
         $this->assertGuest();

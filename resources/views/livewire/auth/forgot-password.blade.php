@@ -84,7 +84,9 @@
                     </div>
                     @endif
 
-                    <form wire:submit="resetPassword" class="space-y-5">
+                    {{-- Password/confirmation stay in Alpine state only — never enter the
+                         Livewire snapshot. Passed to resetPassword() as method arguments. --}}
+                    <form x-data="{ password: '', password_confirmation: '' }" @submit.prevent="$wire.resetPassword(password, password_confirmation)" class="space-y-5">
                         {{-- Code --}}
                         <div>
                             <label for="reset-otp" class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-white/40 mb-2">{{ __('Verification Code') }}</label>
@@ -105,7 +107,7 @@
                                 <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/30 pointer-events-none">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                                 </span>
-                                <input wire:model="password" type="{{ $showPassword ? 'text' : 'password' }}" id="reset-password" placeholder="{{ __('Min. 8 characters') }}" autocomplete="new-password"
+                                <input x-model="password" type="{{ $showPassword ? 'text' : 'password' }}" id="reset-password" placeholder="{{ __('Min. 8 characters') }}" autocomplete="new-password"
                                        class="w-full pl-11 pr-12 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-white/25 focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition">
                                 <button type="button" wire:click="$toggle('showPassword')" aria-label="{{ $showPassword ? __('Hide password') : __('Show password') }}"
                                         class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/30 hover:text-brand-red transition-colors">
@@ -131,7 +133,7 @@
                                 <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/30 pointer-events-none">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                                 </span>
-                                <input wire:model="password_confirmation" type="{{ $showPassword ? 'text' : 'password' }}" id="reset-password-confirm" placeholder="{{ __('Re-enter password') }}" autocomplete="new-password"
+                                <input x-model="password_confirmation" type="{{ $showPassword ? 'text' : 'password' }}" id="reset-password-confirm" placeholder="{{ __('Re-enter password') }}" autocomplete="new-password"
                                        class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-white/25 focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition">
                             </div>
                             @error('password_confirmation')

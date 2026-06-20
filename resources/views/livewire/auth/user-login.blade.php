@@ -150,7 +150,10 @@
                         <h1 class="font-display font-black text-3xl uppercase text-gray-900 dark:text-white mb-1">{{ __('Welcome Back') }}</h1>
                         <p class="text-sm text-gray-500 dark:text-white/40 mb-7">{{ __('Sign in to your account') }}</p>
 
-                        <form wire:submit="login" class="space-y-5">
+                        {{-- Password stays in Alpine state only — never enters the Livewire
+                             snapshot (which is plaintext JSON visible in page source / the
+                             Network tab). Passed to login() as a method argument instead. --}}
+                        <form x-data="{ password: '' }" @submit.prevent="$wire.login(password)" class="space-y-5">
 
                             {{-- Email --}}
                             <div>
@@ -177,7 +180,7 @@
                                     <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/30 pointer-events-none">
                                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                                     </span>
-                                    <input wire:model="loginPassword" type="{{ $showPassword ? 'text' : 'password' }}" id="login-password" placeholder="••••••••" autocomplete="current-password"
+                                    <input x-model="password" type="{{ $showPassword ? 'text' : 'password' }}" id="login-password" placeholder="••••••••" autocomplete="current-password"
                                            class="w-full pl-11 pr-12 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-white/25 focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition">
                                     <button type="button" wire:click="$toggle('showPassword')" aria-label="{{ $showPassword ? __('Hide password') : __('Show password') }}"
                                             class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-500 dark:text-white/60 hover:text-brand-red transition-colors">
@@ -228,7 +231,11 @@
                         <h1 class="font-display font-black text-3xl uppercase text-gray-900 dark:text-white mb-1">{{ __('Create Account') }}</h1>
                         <p class="text-sm text-gray-500 dark:text-white/40 mb-7">{{ __('Join the Win Win community') }}</p>
 
-                        <form wire:submit="register" class="space-y-5">
+                        {{-- Password/confirmation stay in Alpine state only — never enter the
+                             Livewire snapshot. The strength meter is computed client-side from
+                             the same Alpine state for the same reason (a wire:model.live on a
+                             password field would re-send it to the server on every keystroke). --}}
+                        <form x-data="passwordStrength()" @submit.prevent="$wire.register(password, password_confirmation)" class="space-y-5">
                             <x-honeypot livewire-model="honeypotData" />
 
                             {{-- Full Name --}}
@@ -274,7 +281,7 @@
                                     <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/30 pointer-events-none">
                                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                                     </span>
-                                    <input wire:model.live="password" type="{{ $showPassword ? 'text' : 'password' }}" id="reg-password" placeholder="{{ __('Min. 8 characters') }}" autocomplete="new-password"
+                                    <input x-model="password" type="{{ $showPassword ? 'text' : 'password' }}" id="reg-password" placeholder="{{ __('Min. 8 characters') }}" autocomplete="new-password"
                                            class="w-full pl-11 pr-12 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-white/25 focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition">
                                     <button type="button" wire:click="$toggle('showPassword')" aria-label="{{ $showPassword ? __('Hide password') : __('Show password') }}"
                                             class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-500 dark:text-white/60 hover:text-brand-red transition-colors">
@@ -292,36 +299,25 @@
                                     </p>
                                 @enderror
 
-                                {{-- Password strength: 5 segment bars --}}
-                                @if(strlen($password) > 0)
-                                @php
-                                    $strength = 0;
-                                    if (strlen($password) >= 8) $strength++;
-                                    if (preg_match('/[A-Z]/', $password)) $strength++;
-                                    if (preg_match('/[a-z]/', $password)) $strength++;
-                                    if (preg_match('/[0-9]/', $password)) $strength++;
-                                    if (preg_match('/[^A-Za-z0-9]/', $password)) $strength++;
-                                    $strengthColorMap = ['bg-red-500','bg-red-400','bg-orange-400','bg-green-500','bg-emerald-500'];
-                                    $strengthLabels   = [__('Very Weak'),__('Weak'),__('Medium'),__('Strong'),__('Very Strong')];
-                                    $activeColor = $strengthColorMap[max(0, $strength - 1)];
-                                @endphp
-                                <div class="mt-2.5">
+                                {{-- Password strength: 5 segment bars, computed client-side in Alpine
+                                     (passwordStrength() below) so the value never leaves the browser
+                                     except on final submit. --}}
+                                <div class="mt-2.5" x-show="password.length > 0" x-cloak>
                                     <div class="flex gap-1 mb-1.5">
-                                        @for($s = 1; $s <= 5; $s++)
-                                        <div class="flex-1 h-1 rounded-full transition-colors duration-300 {{ $s <= $strength ? $activeColor : 'bg-gray-200 dark:bg-white/10' }}"></div>
-                                        @endfor
+                                        <template x-for="s in 5" :key="s">
+                                            <div class="flex-1 h-1 rounded-full transition-colors duration-300" :class="s <= strength ? activeColor : 'bg-gray-200 dark:bg-white/10'"></div>
+                                        </template>
                                     </div>
                                     <div class="flex justify-between items-center">
-                                        <p class="text-xs text-gray-400 dark:text-white/35">{{ $strengthLabels[max(0, $strength - 1)] }}</p>
+                                        <p class="text-xs text-gray-400 dark:text-white/35" x-text="strengthLabel"></p>
                                         <div class="flex gap-2 text-xs font-bold">
-                                            <span class="{{ strlen($password) >= 8 ? 'text-green-500' : 'text-gray-300 dark:text-white/20' }}">8+</span>
-                                            <span class="{{ preg_match('/[A-Z]/', $password) ? 'text-green-500' : 'text-gray-300 dark:text-white/20' }}">A</span>
-                                            <span class="{{ preg_match('/[0-9]/', $password) ? 'text-green-500' : 'text-gray-300 dark:text-white/20' }}">0</span>
-                                            <span class="{{ preg_match('/[^A-Za-z0-9]/', $password) ? 'text-green-500' : 'text-gray-300 dark:text-white/20' }}">#</span>
+                                            <span :class="password.length >= 8 ? 'text-green-500' : 'text-gray-300 dark:text-white/20'">8+</span>
+                                            <span :class="/[A-Z]/.test(password) ? 'text-green-500' : 'text-gray-300 dark:text-white/20'">A</span>
+                                            <span :class="/[0-9]/.test(password) ? 'text-green-500' : 'text-gray-300 dark:text-white/20'">0</span>
+                                            <span :class="/[^A-Za-z0-9]/.test(password) ? 'text-green-500' : 'text-gray-300 dark:text-white/20'">#</span>
                                         </div>
                                     </div>
                                 </div>
-                                @endif
                             </div>
 
                             {{-- Confirm Password --}}
@@ -331,7 +327,7 @@
                                     <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/30 pointer-events-none">
                                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                                     </span>
-                                    <input wire:model="password_confirmation" type="{{ $showPassword ? 'text' : 'password' }}" id="reg-password-confirm" placeholder="{{ __('Re-enter password') }}" autocomplete="new-password"
+                                    <input x-model="password_confirmation" type="{{ $showPassword ? 'text' : 'password' }}" id="reg-password-confirm" placeholder="{{ __('Re-enter password') }}" autocomplete="new-password"
                                            class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-white/25 focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 transition">
                                 </div>
                                 @error('password_confirmation')
@@ -385,4 +381,35 @@
         .auth-glow { animation: authGlowPulse 7s ease-in-out infinite; }
         @media (prefers-reduced-motion: reduce) { .auth-glow { animation: none; } }
     </style>
+
+    {{-- Registered once via @assets (before Alpine boots), not an inline <script> in
+         the Livewire view — same pattern as paymentTimer in payment-page.blade.php. --}}
+    @assets
+    <script>
+        document.addEventListener('alpine:init', () => {
+            const strengthLabels = @js([__('Very Weak'), __('Weak'), __('Medium'), __('Strong'), __('Very Strong')]);
+            const strengthColors = ['bg-red-500', 'bg-red-400', 'bg-orange-400', 'bg-green-500', 'bg-emerald-500'];
+
+            Alpine.data('passwordStrength', () => ({
+                password: '',
+                password_confirmation: '',
+                get strength() {
+                    let s = 0;
+                    if (this.password.length >= 8) s++;
+                    if (/[A-Z]/.test(this.password)) s++;
+                    if (/[a-z]/.test(this.password)) s++;
+                    if (/[0-9]/.test(this.password)) s++;
+                    if (/[^A-Za-z0-9]/.test(this.password)) s++;
+                    return s;
+                },
+                get strengthLabel() {
+                    return strengthLabels[Math.max(0, this.strength - 1)];
+                },
+                get activeColor() {
+                    return strengthColors[Math.max(0, this.strength - 1)];
+                },
+            }));
+        });
+    </script>
+    @endassets
 </div>
