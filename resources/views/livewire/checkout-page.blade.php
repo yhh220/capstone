@@ -80,7 +80,7 @@
                 </div>
                 <div>
                     <label for="co-city" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('City') }} *</label>
-                    <input wire:model.blur="city" id="co-city" type="text" autocomplete="address-level2" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
+                    <input wire:model.blur="city" id="co-city" type="text" autocomplete="off" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
                     @error('city') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div>

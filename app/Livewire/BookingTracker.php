@@ -12,7 +12,6 @@ class BookingTracker extends Component
     use SetsSeo;
 
     public string $reference = '';
-    public string $phone     = '';
     public ?Booking $booking = null;
     public bool   $searched  = false;
     public string $errorMsg  = '';
@@ -21,20 +20,14 @@ class BookingTracker extends Component
     {
         $this->setSeo(
             title: 'Track My Booking',
-            description: 'Check or cancel your service booking at Win Win Car Audio. Enter your booking reference and phone number.',
+            description: 'Check or cancel your service booking at Win Win Car Audio. Enter your booking reference.',
         );
     }
 
-    /**
-     * Look up a single booking by reference + phone. Requiring BOTH (like the
-     * order tracker's order number + email) means a reference alone is useless
-     * and there's no way to enumerate bookings by phone number.
-     */
     public function search(): void
     {
         $this->validate([
             'reference' => 'required|string|max:50',
-            'phone'     => 'required|string|min:6|max:20',
         ]);
 
         $this->searched = true;
@@ -52,7 +45,7 @@ class BookingTracker extends Component
         $this->booking = $this->findBooking();
 
         if (! $this->booking) {
-            $this->errorMsg = __('No booking found. Please check your reference and phone number.');
+            $this->errorMsg = __('No booking found. Please check your booking reference.');
         } else {
             RateLimiter::clear($key);
         }
@@ -60,11 +53,10 @@ class BookingTracker extends Component
 
     public function cancelBooking(): void
     {
-        // Re-verify reference + phone server-side before mutating anything.
         $booking = $this->findBooking();
 
         if (! $booking) {
-            $this->errorMsg = __('No booking found. Please check your reference and phone number.');
+            $this->errorMsg = __('No booking found. Please check your booking reference.');
             return;
         }
 
@@ -79,15 +71,13 @@ class BookingTracker extends Component
     private function findBooking(): ?Booking
     {
         $reference = trim($this->reference);
-        $digits    = preg_replace('/\D+/', '', $this->phone);
 
-        if ($reference === '' || $digits === '') {
+        if ($reference === '') {
             return null;
         }
 
         return Booking::with('service')
             ->where('reference', $reference)
-            ->whereRaw("REPLACE(REPLACE(REPLACE(REPLACE(customer_phone, '-', ''), ' ', ''), '+', ''), '.', '') = ?", [$digits])
             ->first();
     }
 

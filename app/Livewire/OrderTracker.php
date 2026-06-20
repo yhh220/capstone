@@ -12,7 +12,6 @@ class OrderTracker extends Component
     use SetsSeo;
 
     public string $orderNumber = '';
-    public string $email       = '';
     public ?Order $order       = null;
     public bool $searched      = false;
     public string $errorMsg    = '';
@@ -21,7 +20,7 @@ class OrderTracker extends Component
     {
         $this->setSeo(
             title: 'Track Your Order',
-            description: 'Enter your order number and email to track your order status.',
+            description: 'Enter your order number to check the status of your order.',
         );
     }
 
@@ -29,7 +28,6 @@ class OrderTracker extends Component
     {
         $this->validate([
             'orderNumber' => 'required|string',
-            'email'       => 'required|email',
         ]);
 
         $this->searched = true;
@@ -46,12 +44,11 @@ class OrderTracker extends Component
         RateLimiter::hit($throttleKey, 60);
 
         $this->order = Order::where('order_number', $this->orderNumber)
-            ->where('customer_email', $this->email)
             ->with('items')
             ->first();
 
         if (!$this->order) {
-            $this->errorMsg = __('No order found. Please check your order number and email address.');
+            $this->errorMsg = __('No order found. Please check your order number.');
         } else {
             RateLimiter::clear($throttleKey);
         }
