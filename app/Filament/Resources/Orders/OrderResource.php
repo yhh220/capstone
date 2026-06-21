@@ -14,10 +14,12 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use App\Filament\Exports\OrderExporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportBulkAction;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -597,6 +599,9 @@ class OrderResource extends Resource
                                 ->warning()
                                 ->send();
                         }),
+                    ExportBulkAction::make()
+                        ->exporter(OrderExporter::class)
+                        ->authorize(fn () => auth()->user()?->isAdmin()),
                 ]),
             ]);
     }

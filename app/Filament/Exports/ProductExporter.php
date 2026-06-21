@@ -22,8 +22,10 @@ class ProductExporter extends Exporter
             ExportColumn::make('price')->label('Price'),
             ExportColumn::make('sale_price')->label('Sale Price'),
             ExportColumn::make('stock')->label('Stock'),
-            ExportColumn::make('short_description')->label('Short Description'),
-            ExportColumn::make('description')->label('Description'),
+            ExportColumn::make('short_description')->label('Short Description')
+                ->formatStateUsing(fn (?string $state) => $state ? trim(preg_replace('/\s*\R+\s*/', ' ', $state)) : $state),
+            ExportColumn::make('description')->label('Description')
+                ->formatStateUsing(fn (?string $state) => $state ? trim(preg_replace('/\s*\R+\s*/', ' ', $state)) : $state),
             ExportColumn::make('is_active')->label('Is Active')
                 ->formatStateUsing(fn ($state) => $state ? '1' : '0'),
             ExportColumn::make('is_featured')->label('Is Featured')

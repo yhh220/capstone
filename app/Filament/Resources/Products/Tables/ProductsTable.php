@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use App\Filament\Exports\ProductExporter;
 use App\Models\Product;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportBulkAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -164,6 +166,9 @@ class ProductsTable
                         ->authorize(fn () => auth()->user()?->isAdmin())
                         ->action(fn (Collection $records) => $records->each->update(['is_featured' => false]))
                         ->deselectRecordsAfterCompletion(),
+                    ExportBulkAction::make()
+                        ->exporter(ProductExporter::class)
+                        ->authorize(fn () => auth()->user()?->isAdmin()),
                     DeleteBulkAction::make(),
                 ]),
             ]);

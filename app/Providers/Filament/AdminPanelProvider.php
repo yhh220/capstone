@@ -40,6 +40,7 @@ class AdminPanelProvider extends PanelProvider
             // ── Branding ──────────────────────────────────────────────
             ->brandName('Win Win Car Audio')
             ->brandLogo(asset('images/logo/logo-dark.svg'))    // light mode: dark logo (dark text on white)
+            ->darkModeBrandLogo(asset('images/logo/logo-light.svg')) // dark mode: light logo (light text on dark)
             ->brandLogoHeight('2rem')
             // Responsive admin panel CSS overrides (charts, tables, forms, modals).
             ->viteTheme('resources/css/admin.css')
