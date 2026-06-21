@@ -21,7 +21,9 @@ class ListOrders extends ListRecords
                 ->modifyQueryUsing(fn ($query, array $options) => $query
                     ->when($options['fromDate'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
                     ->when($options['untilDate'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '<=', $date))),
-            ImportAction::make()->importer(OrderImporter::class),
+            ImportAction::make()
+                ->importer(OrderImporter::class)
+                ->authorize(fn () => auth()->user()?->isAdmin()),
         ];
     }
 }

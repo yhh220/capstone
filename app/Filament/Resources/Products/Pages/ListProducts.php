@@ -18,7 +18,9 @@ class ListProducts extends ListRecords
     {
         return [
             ExportAction::make()->exporter(ProductExporter::class),
-            ImportAction::make()->importer(ProductImporter::class),
+            ImportAction::make()
+                ->importer(ProductImporter::class)
+                ->authorize(fn () => auth()->user()?->isAdmin()),
             CreateAction::make(),
         ];
     }

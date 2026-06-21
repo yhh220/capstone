@@ -310,6 +310,7 @@ class OrderResource extends Resource
                     ->icon(Heroicon::OutlinedCheckCircle)
                     ->color('success')
                     ->tooltip('Mark order as fully paid')
+                    ->authorize(fn () => auth()->user()?->isAdmin())
                     ->visible(fn (Order $record) => $record->payment_status === 'pending' && $record->status !== 'cancelled')
                     ->requiresConfirmation()
                     ->modalHeading('Mark this order as paid?')
@@ -355,6 +356,7 @@ class OrderResource extends Resource
                     ->icon(Heroicon::OutlinedTruck)
                     ->color('primary')
                     ->tooltip('Mark order as shipped and enter tracking number')
+                    ->authorize(fn () => auth()->user()?->isAdmin())
                     ->visible(fn (Order $record) => in_array($record->status, ['processing'], true))
                     ->schema([
                         Forms\Components\TextInput::make('tracking_number')
@@ -403,6 +405,7 @@ class OrderResource extends Resource
                     ->icon(Heroicon::OutlinedCheckCircle)
                     ->color('success')
                     ->tooltip('Mark order as delivered')
+                    ->authorize(fn () => auth()->user()?->isAdmin())
                     ->visible(fn (Order $record) => $record->status === 'shipped')
                     ->requiresConfirmation()
                     ->modalHeading('Mark as delivered?')
@@ -449,6 +452,7 @@ class OrderResource extends Resource
                     ->icon(Heroicon::OutlinedEnvelope)
                     ->color('gray')
                     ->tooltip('Resend the order confirmation email to the customer')
+                    ->authorize(fn () => auth()->user()?->isAdmin())
                     ->visible(fn (Order $record) => filled($record->customer_email) && $record->payment_status === 'paid' && $record->status !== 'cancelled')
                     ->requiresConfirmation()
                     ->modalHeading('Resend the order confirmation email?')
@@ -466,6 +470,7 @@ class OrderResource extends Resource
                     ->icon(Heroicon::OutlinedXCircle)
                     ->color('danger')
                     ->tooltip('Cancel this order and restock its items')
+                    ->authorize(fn () => auth()->user()?->isAdmin())
                     // Only before the goods leave the warehouse — shipped/delivered
                     // orders return stock through a manual returns process instead.
                     ->visible(fn (Order $record) => in_array($record->status, ['pending', 'processing'], true))
@@ -528,6 +533,7 @@ class OrderResource extends Resource
                     ->icon(Heroicon::OutlinedBanknotes)
                     ->color('success')
                     ->tooltip('Confirm the recorded refund has actually been sent to the customer')
+                    ->authorize(fn () => auth()->user()?->isAdmin())
                     ->visible(fn (Order $record) => $record->status === 'cancelled' && $record->refund_amount !== null && $record->refunded_at === null)
                     ->requiresConfirmation()
                     ->modalHeading('Mark this refund as sent?')

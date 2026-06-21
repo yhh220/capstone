@@ -121,6 +121,7 @@ class ProductsTable
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->tooltip('Activate all selected products')
+                        ->authorize(fn () => auth()->user()?->isAdmin())
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => true]))
                         ->deselectRecordsAfterCompletion(),
                     BulkAction::make('deactivate')
@@ -128,6 +129,7 @@ class ProductsTable
                         ->icon('heroicon-o-x-circle')
                         ->color('warning')
                         ->tooltip('Deactivate all selected products')
+                        ->authorize(fn () => auth()->user()?->isAdmin())
                         ->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => false]))
                         ->deselectRecordsAfterCompletion(),
@@ -135,6 +137,7 @@ class ProductsTable
                         ->label('Show on homepage')
                         ->icon('heroicon-o-star')
                         ->tooltip('Feature all selected products on homepage')
+                        ->authorize(fn () => auth()->user()?->isAdmin())
                         ->action(fn (Collection $records) => $records->each->update(['is_featured' => true]))
                         ->deselectRecordsAfterCompletion(),
                     BulkAction::make('unfeature')
@@ -142,6 +145,7 @@ class ProductsTable
                         ->icon('heroicon-o-star')
                         ->color('gray')
                         ->tooltip('Remove all selected products from homepage featured section')
+                        ->authorize(fn () => auth()->user()?->isAdmin())
                         ->action(fn (Collection $records) => $records->each->update(['is_featured' => false]))
                         ->deselectRecordsAfterCompletion(),
                     DeleteBulkAction::make(),

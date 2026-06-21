@@ -95,6 +95,7 @@ class BookingsTable
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->tooltip('Confirm this booking and email the customer')
+                    ->authorize(fn () => auth()->user()?->isAdmin())
                     ->visible(fn ($record) => $record->status === 'pending')
                     ->requiresConfirmation()
                     ->modalHeading('Confirm this booking?')
@@ -117,6 +118,7 @@ class BookingsTable
                     ->icon(\Filament\Support\Icons\Heroicon::OutlinedBell)
                     ->color('warning')
                     ->tooltip('Send a reminder email to customer now')
+                    ->authorize(fn () => auth()->user()?->isAdmin())
                     ->visible(fn ($record) => in_array($record->status, ['pending', 'confirmed'], true) && filled($record->customer_email))
                     ->requiresConfirmation()
                     ->modalHeading('Send a reminder email now?')
@@ -139,6 +141,7 @@ class BookingsTable
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->tooltip('Confirm all selected pending bookings and email each customer')
+                        ->authorize(fn () => auth()->user()?->isAdmin())
                         ->requiresConfirmation()
                         ->modalDescription('Each confirmed customer will receive a confirmation email.')
                         ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {

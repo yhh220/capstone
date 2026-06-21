@@ -99,6 +99,9 @@ class OrderImporter extends Importer
             }
         }
 
+        // Re-read after the cancelled block may have nullified it.
+        $status = $this->data['status'] ?? null;
+
         if ($status === 'shipped') {
             $trackingNumber = $this->data['tracking_number'] ?? null;
 
@@ -111,14 +114,18 @@ class OrderImporter extends Importer
     protected function afterFill(): void
     {
         $address = $this->record->shipping_address ?? [];
+        $changed = false;
 
         foreach (['street', 'city', 'postcode', 'state'] as $key) {
             if (array_key_exists($key, $this->data) && filled($this->data[$key])) {
                 $address[$key] = $this->data[$key];
+                $changed = true;
             }
         }
 
-        $this->record->shipping_address = $address;
+        if ($changed) {
+            $this->record->shipping_address = $address;
+        }
     }
 
     protected function afterSave(): void

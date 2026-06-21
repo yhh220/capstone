@@ -24,8 +24,10 @@ class ProductExporter extends Exporter
             ExportColumn::make('stock')->label('Stock'),
             ExportColumn::make('short_description')->label('Short Description'),
             ExportColumn::make('description')->label('Description'),
-            ExportColumn::make('is_active')->label('Is Active'),
-            ExportColumn::make('is_featured')->label('Is Featured'),
+            ExportColumn::make('is_active')->label('Is Active')
+                ->formatStateUsing(fn ($state) => $state ? '1' : '0'),
+            ExportColumn::make('is_featured')->label('Is Featured')
+                ->formatStateUsing(fn ($state) => $state ? '1' : '0'),
         ];
     }
 
