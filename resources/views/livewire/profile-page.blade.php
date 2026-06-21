@@ -202,11 +202,11 @@
             @endif
         </div>
 
-        {{-- Login Verification (Email 2FA) --}}
+        {{-- Two-Factor Authentication (Email 2FA) --}}
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
             <h2 class="text-lg font-black text-gray-800 dark:text-white mb-2 flex items-center gap-2">
                 <svg class="w-5 h-5 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                {{ __('Login Verification') }}
+                {{ __('Two-Factor Authentication (2FA)') }}
             </h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ __('When turned on, we email you a 6-digit code to enter every time you sign in, in addition to your password.') }}</p>
 

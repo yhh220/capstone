@@ -35,6 +35,18 @@
                     default   => 'bg-gray-500/10 text-gray-600 dark:text-gray-400',
                 };
             @endphp
+            @php
+                // Anything not "ok" is worth digging into — every check failure also
+                // lands a matching row in the Logs table (job failures, scheduler
+                // errors, etc. are all funnelled through the same DatabaseLogHandler),
+                // so linking every non-ok card there always has something to show.
+                // <x-filament::section> always renders a hardcoded <section> tag (no
+                // tag prop), so the link has to wrap it from the outside instead.
+                $isClickable = $check['status'] !== 'ok';
+            @endphp
+            @if ($isClickable)
+                <a href="{{ \App\Filament\Resources\Logs\LogResource::getUrl('index') }}" class="block transition hover:ring-2 hover:ring-rose-400/50 rounded-xl">
+            @endif
             <x-filament::section class="fi-section-contain">
                 <div class="flex items-center justify-between gap-3">
                     <div class="flex items-center gap-3 min-w-0">
@@ -58,6 +70,9 @@
                     </x-filament::badge>
                 </div>
             </x-filament::section>
+            @if ($isClickable)
+                </a>
+            @endif
         @endforeach
     </div>
 

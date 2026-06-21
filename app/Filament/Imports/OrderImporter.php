@@ -2,6 +2,7 @@
 
 namespace App\Filament\Imports;
 
+use App\Filament\Concerns\NotifiesImportExportCompletion;
 use App\Mail\OrderDeliveredMail;
 use App\Mail\OrderShippedMail;
 use App\Models\Order;
@@ -16,6 +17,8 @@ use Illuminate\Validation\Rule;
 
 class OrderImporter extends Importer
 {
+    use NotifiesImportExportCompletion;
+
     protected static ?string $model = Order::class;
 
     public static function getColumns(): array
@@ -168,9 +171,18 @@ class OrderImporter extends Importer
     {
         $body = 'Your order import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
 
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
+        $failedRowsCount = $import->getFailedRowsCount();
+        if ($failedRowsCount) {
             $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
         }
+
+        self::notifyCompletionToDatabase(
+            $import->user,
+            static::getCompletedNotificationTitle($import),
+            $body,
+            $failedRowsCount,
+            $import->total_rows,
+        );
 
         return $body;
     }

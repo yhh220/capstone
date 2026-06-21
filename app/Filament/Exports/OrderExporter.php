@@ -2,6 +2,7 @@
 
 namespace App\Filament\Exports;
 
+use App\Filament\Concerns\NotifiesImportExportCompletion;
 use App\Models\Order;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
@@ -10,6 +11,8 @@ use Filament\Forms\Components\DatePicker;
 
 class OrderExporter extends Exporter
 {
+    use NotifiesImportExportCompletion;
+
     protected static ?string $model = Order::class;
 
     public static function getColumns(): array
@@ -68,9 +71,18 @@ class OrderExporter extends Exporter
     {
         $body = 'Your order export has completed and ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
 
-        if ($failedRowsCount = $export->getFailedRowsCount()) {
+        $failedRowsCount = $export->getFailedRowsCount();
+        if ($failedRowsCount) {
             $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to export.';
         }
+
+        self::notifyCompletionToDatabase(
+            $export->user,
+            static::getCompletedNotificationTitle($export),
+            $body,
+            $failedRowsCount,
+            $export->total_rows,
+        );
 
         return $body;
     }

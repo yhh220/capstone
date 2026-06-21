@@ -2,6 +2,7 @@
 
 namespace App\Filament\Imports;
 
+use App\Filament\Concerns\NotifiesImportExportCompletion;
 use App\Models\Category;
 use App\Models\Product;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
@@ -12,6 +13,8 @@ use Illuminate\Support\Str;
 
 class ProductImporter extends Importer
 {
+    use NotifiesImportExportCompletion;
+
     protected static ?string $model = Product::class;
 
     public static function getColumns(): array
@@ -102,9 +105,18 @@ class ProductImporter extends Importer
     {
         $body = 'Your product import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
 
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
+        $failedRowsCount = $import->getFailedRowsCount();
+        if ($failedRowsCount) {
             $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
         }
+
+        self::notifyCompletionToDatabase(
+            $import->user,
+            static::getCompletedNotificationTitle($import),
+            $body,
+            $failedRowsCount,
+            $import->total_rows,
+        );
 
         return $body;
     }
