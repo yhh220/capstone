@@ -131,35 +131,37 @@ class LogResource extends Resource
                     ->visible(fn (AppLog $record): bool => $record->resolved_at === null)
                     ->action(function (AppLog $record): void {
                         $fingerprint = substr($record->message, 0, 100);
-                        $window      = now()->subHours(2);
+                        $base        = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
+                            ->whereRaw('SUBSTR(message, 1, 100) = ?', [$fingerprint]);
 
-                        // Find the most recent log with the same fingerprint within the last 2 hours.
-                        // Using the recency window (not "> this entry's logged_at") avoids false
-                        // positives when multiple entries from the same burst share the same second.
-                        $lastSeen = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
-                            ->whereRaw('SUBSTR(message, 1, 100) = ?', [$fingerprint])
-                            ->where('logged_at', '>=', $window)
+                        // Latest known occurrence of this error (could be a burst of many entries).
+                        $clusterEnd = (clone $base)->max('logged_at');
+
+                        // A TRUE recurrence is any entry logged MORE THAN 1 minute after the
+                        // cluster ended — this excludes the original burst (same-second entries)
+                        // and the entry itself from being mistaken as a new occurrence.
+                        $recurrence = (clone $base)
+                            ->where('logged_at', '>', \Carbon\Carbon::parse($clusterEnd)->addMinute())
                             ->orderByDesc('logged_at')
                             ->value('logged_at');
 
-                        if ($lastSeen) {
+                        if ($recurrence) {
                             Notification::make()
                                 ->title('Error is still occurring')
-                                ->body('Last seen ' . \Carbon\Carbon::parse($lastSeen)->diffForHumans() . ' — not marking fixed.')
+                                ->body('Recurred ' . \Carbon\Carbon::parse($recurrence)->diffForHumans() . ' — not marking fixed.')
                                 ->warning()
                                 ->send();
                             return;
                         }
 
-                        // No occurrence in the last 2 hours — resolve this and all unresolved siblings.
-                        $resolved = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
-                            ->whereRaw('SUBSTR(message, 1, 100) = ?', [$fingerprint])
+                        // No entry newer than the original cluster — resolve this and all siblings.
+                        $resolved = (clone $base)
                             ->whereNull('resolved_at')
                             ->update(['resolved_at' => now()]);
 
                         Notification::make()
                             ->title('Marked as fixed')
-                            ->body("No occurrence in the last 2 hours. Resolved {$resolved} log " . str('entry')->plural($resolved) . '.')
+                            ->body("No recurrence found. Resolved {$resolved} log " . str('entry')->plural($resolved) . '.')
                             ->success()
                             ->send();
                     }),
