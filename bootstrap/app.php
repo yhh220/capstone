@@ -15,6 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => AdminMiddleware::class,
         ]);
+        // Render (and most PaaS hosts) terminate TLS at the edge and forward
+        // plain HTTP to the container, with the original scheme only in
+        // X-Forwarded-Proto. Without trusting that header, Laravel generates
+        // http:// asset/URL links on an https:// page, which browsers block
+        // as mixed content (this is why CSS/JS silently failed to load).
+        $middleware->trustProxies(at: '*');
         // Runs first so every log line in the request carries a trace id.
         $middleware->web(prepend: [
             \App\Http\Middleware\AssignTraceId::class,
