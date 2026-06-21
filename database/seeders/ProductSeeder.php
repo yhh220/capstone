@@ -84,10 +84,14 @@ class ProductSeeder extends Seeder
                 ]
             );
 
-            // Attach image if it exists and hasn't been attached yet
+            // Keep seeded product images aligned even if an earlier seed attached
+            // the wrong media item.
             $path = "$imageDir/$imageFilename";
             if (File::exists($path)) {
-                if ($product->getMedia('images')->isEmpty()) {
+                $currentMedia = $product->getFirstMedia('images');
+
+                if (! $currentMedia || $currentMedia->file_name !== $imageFilename) {
+                    $product->clearMediaCollection('images');
                     $product->addMedia($path)
                             ->preservingOriginal()
                             ->toMediaCollection('images');
