@@ -48,11 +48,7 @@ class AdminPanelProvider extends PanelProvider
             // panel matches the public site exactly — one source of truth.
 
             // ── Theme ─────────────────────────────────────────────────
-            // Dark mode off: its toggle button didn't switch anything (the admin
-            // theme CSS never picked up the dark variant), so it was a dead button
-            // rather than a real feature. Admin is light-only until that's built
-            // properly.
-            ->darkMode(false)
+            ->darkMode(true)
             ->font('DM Sans')
             ->colors([
                 // Brand red ramp anchored so shade 600 = #C8413D (the shade Filament
