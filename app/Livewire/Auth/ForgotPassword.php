@@ -97,12 +97,18 @@ class ForgotPassword extends Component
      */
     public function resendCode(): void
     {
-        // Resends count toward the same per-IP burst cap as the initial request.
-        $ip  = request()->ip();
-        $key = 'pwreset:' . $ip;
+        // Resends count toward both the per-IP burst cap and the daily cap.
+        $ip       = request()->ip();
+        $key      = 'pwreset:' . $ip;
+        $dailyKey = 'pwreset-daily:' . $ip;
+
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
             $this->addError('otpCode', __('Too many submissions. Please wait :seconds seconds before trying again.', ['seconds' => $seconds]));
+            return;
+        }
+        if (RateLimiter::tooManyAttempts($dailyKey, 15)) {
+            $this->addError('otpCode', __('You have reached today’s message limit. Please WhatsApp us directly instead.'));
             return;
         }
 
@@ -115,6 +121,7 @@ class ForgotPassword extends Component
         }
 
         RateLimiter::hit($key, 600);
+        RateLimiter::hit($dailyKey, 86400);
 
         if (User::where('email', $this->email)->exists()) {
             $otp->send(EmailOtpService::PURPOSE_RESET, $this->email);
