@@ -2,7 +2,10 @@
 FROM node:20-alpine AS assets
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+# Not npm ci: the lockfile was generated with a newer local npm than the one
+# bundled with Render's node:20 image, and npm's optional-dependency sync
+# check for native binaries (lightningcss/oxide) disagreed across versions.
+RUN npm install
 COPY . .
 RUN npm run build
 
