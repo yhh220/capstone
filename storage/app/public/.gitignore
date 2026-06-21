@@ -1,7 +1,10 @@
 *
 !.gitignore
 
-# Track brand logos so admin-uploaded marquee logos sync via git to teammates
-# (the rest of storage stays ignored).
-!brand-logos/
-!brand-logos/**
+# Render's free tier has no persistent disk — anything not committed to git
+# is gone on the next deploy. So unlike a normal app (where this directory
+# would stay gitignored and rely on disk persistence), ALL uploaded media is
+# tracked here. After uploading new product/brand images in production,
+# `git add storage/app/public` + commit + push so they survive the next deploy.
+!**/
+!**/*

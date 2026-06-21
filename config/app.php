@@ -105,6 +105,11 @@ return [
         ),
     ],
 
+    // Gates the /cron/run-schedule/{token} route used on hosts with no native
+    // cron (e.g. Render's free tier) — an external pinger calls it instead of
+    // a real crontab running `schedule:run`.
+    'cron_secret' => env('CRON_SECRET'),
+
     /*
     |--------------------------------------------------------------------------
     | Maintenance Mode Driver

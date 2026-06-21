@@ -110,3 +110,17 @@ Route::get('/unauthorized', fn () => view('errors.unauthorized'))->name('unautho
 // ─── Admin Panel ───────────────────────────────────────────────
 // Admin dashboard is now powered by Filament and auto-registered
 // at /admin via AdminPanelProvider. No manual routes needed.
+
+// ─── Scheduler trigger (for hosts with no native cron, e.g. Render free tier) ──
+// An external pinger (cron-job.org) hits this every minute instead of a real
+// crontab running `schedule:run`. Token-gated so it can't be used to spam-run
+// scheduled jobs (order expiry, reminder emails) from a guessed public URL.
+Route::get('/cron/run-schedule/{token}', function (string $token) {
+    if (! hash_equals((string) config('app.cron_secret'), $token)) {
+        abort(403);
+    }
+
+    \Illuminate\Support\Facades\Artisan::call('schedule:run');
+
+    return response('OK', 200);
+})->name('cron.run-schedule');
