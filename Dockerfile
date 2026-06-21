@@ -1,4 +1,16 @@
-# ---- Stage 1: build frontend assets ----
+# ---- Stage 1: PHP deps ----
+# vendor/ has to exist before the frontend build, because admin.css imports
+# Filament's theme.css straight out of vendor/filament/filament/resources/css.
+FROM php:8.3-cli AS vendor
+RUN apt-get update && apt-get install -y --no-install-recommends git unzip libzip-dev \
+    && docker-php-ext-install -j$(nproc) zip \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+WORKDIR /app
+COPY . .
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# ---- Stage 2: build frontend assets ----
 FROM node:20-alpine AS assets
 WORKDIR /app
 COPY package*.json ./
@@ -7,9 +19,10 @@ COPY package*.json ./
 # check for native binaries (lightningcss/oxide) disagreed across versions.
 RUN npm install
 COPY . .
+COPY --from=vendor /app/vendor ./vendor
 RUN npm run build
 
-# ---- Stage 2: PHP application ----
+# ---- Stage 3: PHP application runtime ----
 FROM php:8.3-cli
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -19,15 +32,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && docker-php-ext-install -j$(nproc) pdo_mysql gd zip bcmath intl exif \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
 WORKDIR /var/www/html
 
 COPY . .
+COPY --from=vendor /app/vendor ./vendor
 COPY --from=assets /app/public/build ./public/build
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction \
-    && chmod -R 775 storage bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
