@@ -5,10 +5,12 @@ namespace App\Filament\Resources\Users\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\RestoreAction;
 use Filament\Facades\Filament;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
 class UsersTable
@@ -48,10 +50,14 @@ class UsersTable
                         'admin' => 'Admin',
                         'staff' => 'Staff',
                     ]),
+                // Deleted admin/staff accounts (e.g. a self-deletion mistake) are
+                // otherwise only recoverable by editing the database directly.
+                TrashedFilter::make(),
             ])
             ->recordActions([
                 EditAction::make()
                     ->visible(fn () => Filament::auth()->user()?->isAdmin() ?? false),
+                RestoreAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

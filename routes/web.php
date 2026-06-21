@@ -47,7 +47,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/account', MyAccountPage::class)->name('account');
 });
 // Invoices — owner (web guard) or admin/staff (admin guard) may view.
-Route::middleware('auth:web,admin')->group(function () {
+// Throttled (matches OrderTracker's own limit) so the 404/403/200 split
+// across order numbers can't be used to enumerate which ones are real.
+Route::middleware(['auth:web,admin', 'throttle:5,1'])->group(function () {
     Route::get('/orders/{orderNumber}/invoice', [InvoiceController::class, 'show'])->name('invoice.show');
     Route::get('/orders/{orderNumber}/invoice/pdf', [InvoiceController::class, 'download'])->name('invoice.pdf');
 });

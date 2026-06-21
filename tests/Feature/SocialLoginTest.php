@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Auth\UserLogin;
 use App\Models\User;
+use App\Notifications\EmailOtp;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
+use Livewire\Livewire;
 use Mockery;
 use Tests\TestCase;
 
@@ -75,6 +79,38 @@ class SocialLoginTest extends TestCase
         $this->get(route('social.callback', 'google'))->assertRedirect(route('account'));
 
         $this->assertNull($user->fresh()->deleted_at);
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_google_login_requires_otp_when_two_factor_is_enabled(): void
+    {
+        $user = User::create(['name' => 'Guarded', 'email' => 'guarded@example.test', 'password' => 'secret']);
+        $user->forceFill(['two_factor_enabled' => true])->save();
+        Notification::fake();
+
+        $this->fakeGoogle('g-guarded-1', 'guarded@example.test');
+
+        // The callback must NOT log the user in yet — it hands off to the
+        // login page's OTP challenge instead.
+        $this->get(route('social.callback', 'google'))->assertRedirect(route('login'));
+        $this->assertGuest();
+
+        $code = null;
+        Notification::assertSentOnDemand(EmailOtp::class, function ($n) use (&$code) {
+            $code = $n->code;
+            return true;
+        });
+        $this->assertNotNull($code, 'an OTP must have been sent');
+
+        // Loading the login page picks up the pending challenge from the session.
+        $c = Livewire::test(UserLogin::class)
+            ->assertSet('awaitingLoginOtp', true)
+            ->assertSet('loginEmail', 'guarded@example.test');
+
+        $c->set('loginOtpCode', '000000')->call('verifyLoginOtp');
+        $this->assertGuest();
+
+        $c->set('loginOtpCode', $code)->call('verifyLoginOtp');
         $this->assertAuthenticatedAs($user);
     }
 

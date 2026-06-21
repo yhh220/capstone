@@ -11,6 +11,7 @@ use App\Filament\Resources\Activities\Schemas\ActivityInfolist;
 use App\Filament\Resources\Activities\Tables\ActivitiesTable;
 use App\Models\Activity;
 use BackedEnum;
+use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -28,6 +29,14 @@ class ActivityResource extends Resource
     public static function getNavigationIcon(): ?string
     {
         return 'heroicon-o-shield-check';
+    }
+
+    // Audit trail rows include role changes, email changes, and IPs for
+    // privileged accounts — staff can't see Users/Settings directly, and
+    // without this they could reconstruct the same data here instead.
+    public static function canViewAny(): bool
+    {
+        return Filament::auth()->user()?->isAdmin() ?? false;
     }
 
     public static function form(Schema $schema): Schema

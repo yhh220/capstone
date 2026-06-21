@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SocialAccount;
 use App\Models\User;
+use App\Services\EmailOtpService;
 use App\Support\SocialLogin;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
@@ -42,6 +43,19 @@ class SocialAuthController extends Controller
         $user = $this->findOrCreateUser($provider, $socialUser, $wasTrashed);
 
         \App\Support\Breadcrumbs::push('auth', 'Social login', ['provider' => $provider, 'user' => $user->id]);
+
+        // Login verification (email OTP) protects this account on the password
+        // path — Google sign-in must honour the same promise instead of handing
+        // out a session immediately, otherwise enabling it gives a false sense
+        // of security for anyone who can complete the Google consent screen
+        // (e.g. an already-signed-in shared device, or a compromised Google
+        // account on the same email).
+        if ($user->two_factor_enabled) {
+            app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_LOGIN, $user->email);
+            session(['social_login_pending_email' => $user->email]);
+
+            return redirect()->route('login');
+        }
 
         Auth::login($user, remember: true);
         request()->session()->regenerate();

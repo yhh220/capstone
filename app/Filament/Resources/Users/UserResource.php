@@ -44,25 +44,6 @@ class UserResource extends Resource
             ->whereIn('role', ['owner', 'admin', 'staff']);
     }
 
-    /**
-     * Only owner and admin can edit staff.
-     */
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
-    {
-        return Filament::auth()->user()?->isAdmin() ?? false;
-    }
-
-    /**
-     * Only owner and admin can delete staff. An admin may never delete their own account.
-     */
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
-    {
-        $me = Filament::auth()->user();
-
-        return ($me?->isAdmin() ?? false)
-            && $me->id !== $record->id;
-    }
-
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);

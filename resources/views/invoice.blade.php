@@ -1,4 +1,9 @@
-@php $isPdf = $pdf ?? false; $paid = $order->payment_status === 'paid'; @endphp
+@php
+    $isPdf = $pdf ?? false;
+    $paid = $order->payment_status === 'paid';
+    $cancelled = $order->status === 'cancelled';
+    $refunded = $cancelled && $order->refund_amount !== null && (float) $order->refund_amount > 0;
+@endphp
 {{-- Invoices are a formal financial document, kept in fixed English regardless of
      the site's UI language — so no __() translation calls here, by design. --}}
 <!DOCTYPE html>
@@ -20,6 +25,9 @@
         .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
         .badge-paid { background: #dcfce7; color: #15803d; }
         .badge-pending { background: #fef3c7; color: #b45309; }
+        .badge-cancelled { background: #fee2e2; color: #b91c1c; }
+        .notice { border-radius: 8px; padding: 12px 14px; font-size: 12px; line-height: 1.6; margin-bottom: 20px; }
+        .notice-cancelled { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
         .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #a1a1aa; margin-bottom: 4px; }
         table.items { width: 100%; border-collapse: collapse; margin: 8px 0 0; }
         table.items th { text-align: left; font-size: 11px; text-transform: uppercase; color: #52525b; border-bottom: 2px solid #C8413D; padding: 8px 6px; }
@@ -49,6 +57,20 @@
         <div style="background:#fef3c7; border:1px solid #fcd34d; color:#b45309; text-align:center; padding:8px 12px; border-radius:8px; font-size:11px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; margin-bottom:24px;">
             For demo / testing only — not a valid tax invoice
         </div>
+
+        @if($cancelled)
+        <div class="notice notice-cancelled">
+            <strong>This order was cancelled</strong> on {{ $order->cancelled_at?->format('d M Y, h:i A') ?? 'an unrecorded date' }}.
+            @if($order->cancellation_reason)
+                Reason: {{ $order->cancellation_reason }}.
+            @endif
+            @if($refunded)
+                A refund of RM {{ number_format($order->refund_amount, 2) }} ({{ number_format($order->refund_percentage, 0) }}%) was issued{{ $order->refunded_at ? ' on ' . $order->refunded_at->format('d M Y, h:i A') : '' }}.
+            @else
+                No refund was issued for this order.
+            @endif
+        </div>
+        @endif
         <table class="head">
             <tr>
                 <td>
@@ -63,7 +85,11 @@
                     <div class="meta">
                         <strong>{{ $order->order_number }}</strong><br>
                         {{ $order->created_at->format('d M Y, h:i A') }}<br>
-                        <span class="badge {{ $paid ? 'badge-paid' : 'badge-pending' }}">{{ $paid ? 'Paid' : 'Unpaid' }}</span>
+                        @if($cancelled)
+                            <span class="badge badge-cancelled">Cancelled</span>
+                        @else
+                            <span class="badge {{ $paid ? 'badge-paid' : 'badge-pending' }}">{{ $paid ? 'Paid' : 'Unpaid' }}</span>
+                        @endif
                     </div>
                 </td>
             </tr>
@@ -128,6 +154,13 @@
                 <td class="right">Total</td>
                 <td class="right amt">RM {{ number_format($order->total_amount, 2) }}</td>
             </tr>
+            @if($refunded)
+            <tr>
+                <td></td>
+                <td class="right muted">Refunded</td>
+                <td class="right" style="color:#b91c1c;">-RM {{ number_format($order->refund_amount, 2) }}</td>
+            </tr>
+            @endif
         </table>
 
         <div class="foot">

@@ -83,6 +83,16 @@ class UserLogin extends Component
             title: __('Login'),
             description: 'Sign in or create an account to shop and track your orders at Win Win Car Audio.',
         );
+
+        // SocialAuthController redirects here (instead of completing the login
+        // itself) when the account has login verification enabled — the OTP was
+        // already sent server-side, so just surface the same challenge screen
+        // the password path uses. "remember" matches social login's own default.
+        if ($pendingEmail = session()->pull('social_login_pending_email')) {
+            $this->loginEmail       = $pendingEmail;
+            $this->awaitingLoginOtp = true;
+            $this->remember         = true;
+        }
     }
 
     public function switchTab(bool $isLogin): void

@@ -35,12 +35,15 @@ class UserPolicy
         if ($model->isOwner()) {
             return false; // Protect owner
         }
+        if ($user->id === $model->id) {
+            return false; // Never let an admin delete their own account mid-session
+        }
         return $user->isAdmin();
     }
 
     public function restore(User $user, User $model): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     public function forceDelete(User $user, User $model): bool

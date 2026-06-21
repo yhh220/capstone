@@ -45,7 +45,7 @@ class OrderTracker extends Component
 
         RateLimiter::hit($throttleKey, 60);
 
-        $order = Order::where('order_number', $this->orderNumber)
+        $order = Order::where('order_number', trim($this->orderNumber))
             ->with('items')
             ->first();
 
