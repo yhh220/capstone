@@ -38,7 +38,7 @@ class ProductImporter extends Importer
             ImportColumn::make('sale_price')
                 ->label('Sale Price')
                 ->numeric(decimalPlaces: 2)
-                ->rules(['nullable', 'numeric', 'min:0', 'lt:price']),
+                ->rules(['nullable', 'numeric', 'min:0']),
             ImportColumn::make('stock')
                 ->integer()
                 ->rules(['nullable', 'integer', 'min:0'])
@@ -87,6 +87,15 @@ class ProductImporter extends Importer
         }
 
         $this->record->category_id = $category->id;
+
+        // Cross-field check: sale_price must be less than price when both are set
+        // and price is non-zero. The column rule 'lt:price' would reject any
+        // sale_price when price=0, so the check is done here with proper guarding.
+        $price     = $this->record->price;
+        $salePrice = $this->record->sale_price;
+        if ($price > 0 && $salePrice !== null && $salePrice >= $price) {
+            throw new RowImportFailedException("Sale price ({$salePrice}) must be less than the regular price ({$price}).");
+        }
     }
 
     public static function getCompletedNotificationBody(Import $import): string

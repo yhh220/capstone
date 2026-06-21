@@ -18,6 +18,7 @@ class ListOrders extends ListRecords
         return [
             ExportAction::make()
                 ->exporter(OrderExporter::class)
+                ->authorize(fn () => auth()->user()?->isAdmin())
                 ->modifyQueryUsing(fn ($query, array $options) => $query
                     ->when($options['fromDate'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
                     ->when($options['untilDate'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '<=', $date))),

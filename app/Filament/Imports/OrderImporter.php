@@ -89,6 +89,13 @@ class OrderImporter extends Importer
     {
         $status = $this->data['status'] ?? null;
 
+        if ($this->record->status === 'cancelled' && filled($status) && $status !== 'cancelled') {
+            // A cancelled order has already had its stock restocked and its refund
+            // calculated. Silently re-opening it via import would leave inventory
+            // and financials in an inconsistent state. Reject the row explicitly.
+            throw new RowImportFailedException('This order is already cancelled. Re-opening a cancelled order via import is not supported.');
+        }
+
         if ($status === 'cancelled') {
             if ($this->record->status === 'cancelled') {
                 // Already cancelled and the row still says so — an untouched re-import
