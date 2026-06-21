@@ -91,6 +91,15 @@ class AdminPanelProvider extends PanelProvider
                 'gray'    => Color::Zinc,
             ])
 
+            // ── Notifications ─────────────────────────────────────────
+            // Bell icon + history panel in the topbar, backed by the `notifications`
+            // table. Note: the product/order import & export actions run with a
+            // forced 'sync' job connection (no queue worker needed), and Filament's
+            // own import/export internals deliberately use an on-screen toast rather
+            // than a database notification for that case — so their success/failure
+            // results show as a toast at completion, not in this bell's history.
+            ->databaseNotifications()
+
             // ── Render Hooks ──────────────────────────────────────────
             ->renderHook(
                 PanelsRenderHook::BODY_END,
