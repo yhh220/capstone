@@ -20,6 +20,14 @@ class CreateBooking extends CreateRecord
     {
         $data['reference'] ??= Booking::generateReference();
 
+        // Force end_at to be computed from start_at using the system slot length.
+        // An admin-supplied raw value could span hours and block every slot for the
+        // rest of the day because BookingService::isSlotAvailable() queries end_at.
+        if (! empty($data['start_at'])) {
+            $data['end_at'] = app(BookingService::class)
+                ->buildEndAt(Carbon::parse($data['start_at']));
+        }
+
         return $data;
     }
 

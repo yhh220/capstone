@@ -64,6 +64,11 @@ class BookingTracker extends Component
 
     public function cancelBooking(): void
     {
+        $this->validate([
+            'reference' => 'required|string|max:50',
+            'email'     => 'required|email|max:100',
+        ]);
+
         $cancelKey = 'booking-cancel:' . request()->ip();
         if (RateLimiter::tooManyAttempts($cancelKey, 3)) {
             $seconds = RateLimiter::availableIn($cancelKey);
@@ -79,7 +84,10 @@ class BookingTracker extends Component
             return;
         }
 
-        if (strtolower(trim($booking->customer_email ?? '')) !== strtolower(trim($this->email))) {
+        // A null stored email must never match any submitted value — treat it as
+        // non-matchable so a booking without an email can't be cancelled by anyone.
+        if (! $booking->customer_email
+            || strtolower(trim($booking->customer_email)) !== strtolower(trim($this->email))) {
             $this->errorMsg = __('Email does not match. Please check your email address.');
             return;
         }

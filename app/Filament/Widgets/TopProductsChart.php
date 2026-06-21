@@ -9,6 +9,11 @@ class TopProductsChart extends ChartWidget
 {
     protected static ?int $sort = 3;
 
+    public static function canView(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
+    }
+
     protected int|string|array $columnSpan = 'full';
 
     protected ?string $heading = 'Product Stock Overview';

@@ -28,8 +28,12 @@ class ProfilePage extends Component
     public bool $settingPassword = false;
 
     // Login verification (email 2FA) state
-    public bool $twoFactorEnabled  = false;
-    public bool $enablingTwoFactor = false;
+    public bool $twoFactorEnabled   = false;
+    public bool $enablingTwoFactor  = false;
+    public bool $disablingTwoFactor = false; // OTP path for social-only users
+
+    // Account deletion OTP state (for social-only users without a password)
+    public bool $deletingAccountByOtp = false;
 
     protected $rules = [
         'name'        => 'required|string|max:255',
@@ -249,10 +253,16 @@ class ProfilePage extends Component
     /**
      * Turn login verification back off. Requires the current password so a
      * hijacked, already-open session can't silently downgrade the account's
-     * security on its way out.
+     * security on its way out. Social-only accounts (no password) must use
+     * the OTP path: sendDisableTwoFactorCode() + confirmDisableTwoFactorViaOtp().
      */
     public function disableTwoFactor(#[\SensitiveParameter] string $password): void
     {
+        if (! Auth::user()->hasPassword()) {
+            $this->addError('two_factor_password', __('Your account uses social sign-in. Please use the email code path to turn off verification.'));
+            return;
+        }
+
         $v = Validator::make(
             ['two_factor_password' => $password],
             ['two_factor_password' => ['required', 'current_password']],
@@ -271,12 +281,73 @@ class ProfilePage extends Component
     }
 
     /**
-     * Soft-delete the account after the user re-enters their password. The row
-     * stays in the database (deleted_at) so order/booking history keeps its
-     * foreign keys; the SoftDeletes scope stops the account from signing in again.
+     * Step 1 (social-only): send an OTP to prove inbox control before disabling 2FA.
+     */
+    public function sendDisableTwoFactorCode(): void
+    {
+        $user = Auth::user();
+        if ($user->hasPassword() || ! $user->two_factor_enabled) {
+            return;
+        }
+
+        $otp  = app(EmailOtpService::class);
+        $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_DISABLE_2FA, $user->email);
+        if ($wait > 0) {
+            $this->addError('disable_two_factor_otp', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+            return;
+        }
+
+        $otp->send(EmailOtpService::PURPOSE_DISABLE_2FA, $user->email);
+        $this->disablingTwoFactor = true;
+        session()->flash('two_factor_success', __('We sent a 6-digit code to :email.', ['email' => $user->email]));
+    }
+
+    /**
+     * Step 2 (social-only): confirm the code, then turn login verification off.
+     */
+    public function confirmDisableTwoFactorViaOtp(#[\SensitiveParameter] string $otp): void
+    {
+        $user = Auth::user();
+        if ($user->hasPassword() || ! $user->two_factor_enabled) {
+            return;
+        }
+
+        $v = Validator::make(['disable_two_factor_otp' => $otp], ['disable_two_factor_otp' => ['required', 'digits:6']]);
+        if ($v->fails()) {
+            $this->addError('disable_two_factor_otp', $v->errors()->first('disable_two_factor_otp'));
+            return;
+        }
+
+        if (! app(EmailOtpService::class)->verify(EmailOtpService::PURPOSE_DISABLE_2FA, $user->email, $otp)) {
+            $this->addError('disable_two_factor_otp', __('Invalid or expired code. Please try again.'));
+            return;
+        }
+
+        $user->forceFill(['two_factor_enabled' => false])->save();
+        $this->twoFactorEnabled   = false;
+        $this->disablingTwoFactor = false;
+        $this->resetErrorBag('disable_two_factor_otp');
+        session()->flash('two_factor_success', __('Login verification is now off.'));
+    }
+
+    public function cancelDisableTwoFactor(): void
+    {
+        app(EmailOtpService::class)->clear(EmailOtpService::PURPOSE_DISABLE_2FA, Auth::user()->email);
+        $this->disablingTwoFactor = false;
+        $this->resetErrorBag('disable_two_factor_otp');
+    }
+
+    /**
+     * Soft-delete the account after the user re-enters their password. Social-only
+     * accounts (no password) must use the OTP path instead.
      */
     public function deleteAccount(#[\SensitiveParameter] string $password = ''): void
     {
+        if (! Auth::user()->hasPassword()) {
+            $this->addError('delete_password', __('Your account uses social sign-in. Please use the email code path to delete your account.'));
+            return;
+        }
+
         $v = Validator::make(
             ['delete_password' => $password],
             ['delete_password' => ['required', 'current_password']],
@@ -290,6 +361,56 @@ class ProfilePage extends Component
             return;
         }
 
+        $this->performAccountDeletion();
+    }
+
+    /**
+     * Step 1 (social-only): send an OTP before deleting the account.
+     */
+    public function sendDeleteAccountCode(): void
+    {
+        $user = Auth::user();
+        if ($user->hasPassword()) {
+            return;
+        }
+
+        $otp  = app(EmailOtpService::class);
+        $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_DELETE_ACCOUNT, $user->email);
+        if ($wait > 0) {
+            $this->addError('delete_otp', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+            return;
+        }
+
+        $otp->send(EmailOtpService::PURPOSE_DELETE_ACCOUNT, $user->email);
+        $this->deletingAccountByOtp = true;
+    }
+
+    /**
+     * Step 2 (social-only): confirm OTP then delete the account.
+     */
+    public function confirmDeleteAccountViaOtp(#[\SensitiveParameter] string $otp): void
+    {
+        $user = Auth::user();
+        if ($user->hasPassword()) {
+            return;
+        }
+
+        $v = Validator::make(['delete_otp' => $otp], ['delete_otp' => ['required', 'digits:6']]);
+        if ($v->fails()) {
+            $this->addError('delete_otp', $v->errors()->first('delete_otp'));
+            return;
+        }
+
+        if (! app(EmailOtpService::class)->verify(EmailOtpService::PURPOSE_DELETE_ACCOUNT, $user->email, $otp)) {
+            $this->addError('delete_otp', __('Invalid or expired code. Please try again.'));
+            return;
+        }
+
+        $this->performAccountDeletion();
+    }
+
+    private function performAccountDeletion(): void
+    {
         $user = Auth::user();
 
         // Release the guest/session cart so a deleted account leaves nothing behind.

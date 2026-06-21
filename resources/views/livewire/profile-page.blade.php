@@ -218,39 +218,67 @@
             @endif
 
             @if($twoFactorEnabled)
-                {{-- Enabled → offer to disable (re-enter password) --}}
-                <div x-data="{ confirm: false, pw: '' }">
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400">
-                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            {{ __('Enabled') }}
-                        </span>
-                    </div>
-
-                    <div x-show="!confirm">
-                        <button type="button" @click="confirm = true"
-                                class="border-2 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:border-red-400 hover:text-red-600 active:scale-95">
-                            {{ __('Turn off') }}
-                        </button>
-                    </div>
-
-                    <div x-show="confirm" x-cloak style="display:none;" class="space-y-4 mt-2">
-                        <div>
-                            <label for="pf-2fa-disable-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Enter your password to confirm') }}</label>
-                            <input x-model="pw" id="pf-2fa-disable-pass" type="password" autocomplete="current-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
-                            @error('two_factor_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button type="button" @click="$wire.disableTwoFactor(pw).then(() => { pw = ''; confirm = false; })"
-                                    wire:loading.attr="disabled" wire:target="disableTwoFactor"
-                                    class="bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-700 active:scale-95 disabled:opacity-50">
-                                <span wire:loading.remove wire:target="disableTwoFactor">{{ __('Turn off') }}</span>
-                                <span wire:loading wire:target="disableTwoFactor">{{ __('Saving...') }}</span>
-                            </button>
-                            <button type="button" @click="confirm = false" class="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('Cancel') }}</button>
-                        </div>
-                    </div>
+                {{-- Enabled → offer to disable --}}
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        {{ __('Enabled') }}
+                    </span>
                 </div>
+
+                @if(auth()->user()->hasPassword())
+                    {{-- Password-based confirmation --}}
+                    <div x-data="{ confirm: false, pw: '' }">
+                        <div x-show="!confirm">
+                            <button type="button" @click="confirm = true"
+                                    class="border-2 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:border-red-400 hover:text-red-600 active:scale-95">
+                                {{ __('Turn off') }}
+                            </button>
+                        </div>
+                        <div x-show="confirm" x-cloak style="display:none;" class="space-y-4 mt-2">
+                            <div>
+                                <label for="pf-2fa-disable-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Enter your password to confirm') }}</label>
+                                <input x-model="pw" id="pf-2fa-disable-pass" type="password" autocomplete="current-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                                @error('two_factor_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button type="button" @click="$wire.disableTwoFactor(pw).then(() => { pw = ''; confirm = false; })"
+                                        wire:loading.attr="disabled" wire:target="disableTwoFactor"
+                                        class="bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-700 active:scale-95 disabled:opacity-50">
+                                    <span wire:loading.remove wire:target="disableTwoFactor">{{ __('Turn off') }}</span>
+                                    <span wire:loading wire:target="disableTwoFactor">{{ __('Saving...') }}</span>
+                                </button>
+                                <button type="button" @click="confirm = false" class="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('Cancel') }}</button>
+                            </div>
+                        </div>
+                    </div>
+                @elseif($disablingTwoFactor)
+                    {{-- OTP confirmation (social-only accounts) --}}
+                    <form x-data="{ otp: '' }" @submit.prevent="$wire.confirmDisableTwoFactorViaOtp(otp)" class="space-y-4">
+                        <div>
+                            <label for="pf-2fa-disable-otp" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Verification code') }}</label>
+                            <input x-model="otp" id="pf-2fa-disable-otp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"
+                                   x-on:input="$el.value = $el.value.replace(/\D/g, ''); otp = $el.value"
+                                   class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm tracking-[0.4em] focus:outline-none focus:border-brand-red transition">
+                            @error('disable_two_factor_otp') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="flex items-center justify-between pt-1">
+                            <button type="button" wire:click="cancelDisableTwoFactor" class="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('Cancel') }}</button>
+                            <button type="submit" wire:loading.attr="disabled" wire:target="confirmDisableTwoFactorViaOtp"
+                                    class="bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-700 active:scale-95 disabled:opacity-50">
+                                <span wire:loading.remove wire:target="confirmDisableTwoFactorViaOtp">{{ __('Turn off') }}</span>
+                                <span wire:loading wire:target="confirmDisableTwoFactorViaOtp">{{ __('Verifying...') }}</span>
+                            </button>
+                        </div>
+                    </form>
+                @else
+                    {{-- Initial button for social-only accounts --}}
+                    <button type="button" wire:click="sendDisableTwoFactorCode" wire:loading.attr="disabled" wire:target="sendDisableTwoFactorCode"
+                            class="border-2 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:border-red-400 hover:text-red-600 active:scale-95 disabled:opacity-50">
+                        <span wire:loading.remove wire:target="sendDisableTwoFactorCode">{{ __('Turn off') }}</span>
+                        <span wire:loading wire:target="sendDisableTwoFactorCode">{{ __('Sending code...') }}</span>
+                    </button>
+                @endif
             @elseif(! $enablingTwoFactor)
                 {{-- Disabled → offer to enable (email-code gated) --}}
                 <button type="button" wire:click="sendEnableTwoFactorCode" wire:loading.attr="disabled" wire:target="sendEnableTwoFactorCode"
@@ -291,30 +319,60 @@
             </h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ __('Close your account. Your order and booking history is retained for our records, and you will be signed out immediately. Signing in again later (with a password or social login) will reactivate the account.') }}</p>
 
-            <div x-show="!confirm">
-                <button type="button" @click="confirm = true"
-                        class="border-2 border-red-500 text-red-600 dark:text-red-400 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-500 hover:text-white active:scale-95">
-                    {{ __('Delete My Account') }}
+            @if(auth()->user()->hasPassword())
+                {{-- Password-based deletion --}}
+                <div x-data="{ confirm: false, dp: '' }">
+                    <div x-show="!confirm">
+                        <button type="button" @click="confirm = true"
+                                class="border-2 border-red-500 text-red-600 dark:text-red-400 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-500 hover:text-white active:scale-95">
+                            {{ __('Delete My Account') }}
+                        </button>
+                    </div>
+                    <div x-show="confirm" x-cloak style="display:none;" class="space-y-4">
+                        <div>
+                            <label for="pf-delete-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Enter your password to confirm') }}</label>
+                            <input x-model="dp" id="pf-delete-pass" type="password" autocomplete="current-password" class="w-full border border-red-200 dark:border-red-500/40 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500 transition">
+                            @error('delete_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="button"
+                                    @click="$store.confirm.ask(@js(__('Are you sure? This will permanently close your account.')), () => $wire.deleteAccount(dp))"
+                                    wire:loading.attr="disabled" wire:target="deleteAccount"
+                                    class="bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-700 active:scale-95 disabled:opacity-50">
+                                <span wire:loading.remove wire:target="deleteAccount">{{ __('Permanently Delete') }}</span>
+                                <span wire:loading wire:target="deleteAccount">{{ __('Deleting...') }}</span>
+                            </button>
+                            <button type="button" @click="confirm = false" class="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('Cancel') }}</button>
+                        </div>
+                    </div>
+                </div>
+            @elseif($deletingAccountByOtp)
+                {{-- OTP confirmation (social-only accounts) --}}
+                <form x-data="{ otp: '' }" @submit.prevent="$store.confirm.ask(@js(__('Are you sure? This will permanently close your account.')), () => $wire.confirmDeleteAccountViaOtp(otp))" class="space-y-4">
+                    <div>
+                        <label for="pf-delete-otp" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Verification code') }}</label>
+                        <input x-model="otp" id="pf-delete-otp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"
+                               x-on:input="$el.value = $el.value.replace(/\D/g, ''); otp = $el.value"
+                               class="w-full border border-red-200 dark:border-red-500/40 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm tracking-[0.4em] focus:outline-none focus:border-red-500 transition">
+                        @error('delete_otp') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button type="submit" wire:loading.attr="disabled" wire:target="confirmDeleteAccountViaOtp"
+                                class="bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-700 active:scale-95 disabled:opacity-50">
+                            <span wire:loading.remove wire:target="confirmDeleteAccountViaOtp">{{ __('Permanently Delete') }}</span>
+                            <span wire:loading wire:target="confirmDeleteAccountViaOtp">{{ __('Verifying...') }}</span>
+                        </button>
+                        <button type="button" wire:click="$set('deletingAccountByOtp', false)" class="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('Cancel') }}</button>
+                    </div>
+                </form>
+            @else
+                {{-- Initial button for social-only accounts --}}
+                <button type="button" wire:click="sendDeleteAccountCode" wire:loading.attr="disabled" wire:target="sendDeleteAccountCode"
+                        class="border-2 border-red-500 text-red-600 dark:text-red-400 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-500 hover:text-white active:scale-95 disabled:opacity-50">
+                    <span wire:loading.remove wire:target="sendDeleteAccountCode">{{ __('Delete My Account') }}</span>
+                    <span wire:loading wire:target="sendDeleteAccountCode">{{ __('Sending code...') }}</span>
                 </button>
-            </div>
-
-            <div x-show="confirm" x-cloak style="display:none;" class="space-y-4">
-                <div>
-                    <label for="pf-delete-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Enter your password to confirm') }}</label>
-                    <input x-model="dp" id="pf-delete-pass" type="password" autocomplete="current-password" class="w-full border border-red-200 dark:border-red-500/40 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500 transition">
-                    @error('delete_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
-                </div>
-                <div class="flex items-center gap-3">
-                    <button type="button"
-                            @click="$store.confirm.ask(@js(__('Are you sure? This will permanently close your account.')), () => $wire.deleteAccount(dp))"
-                            wire:loading.attr="disabled" wire:target="deleteAccount"
-                            class="bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-700 active:scale-95 disabled:opacity-50">
-                        <span wire:loading.remove wire:target="deleteAccount">{{ __('Permanently Delete') }}</span>
-                        <span wire:loading wire:target="deleteAccount">{{ __('Deleting...') }}</span>
-                    </button>
-                    <button type="button" @click="confirm = false" class="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('Cancel') }}</button>
-                </div>
-            </div>
+            @endif
         </div>
     </div>
 </div>

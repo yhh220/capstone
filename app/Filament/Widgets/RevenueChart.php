@@ -11,6 +11,11 @@ class RevenueChart extends ChartWidget
 {
     protected static ?int $sort = 2;
 
+    public static function canView(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
+    }
+
     protected int|string|array $columnSpan = [
         'default' => 'full',
         'xl'      => 7,

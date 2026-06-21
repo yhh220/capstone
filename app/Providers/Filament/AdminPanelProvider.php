@@ -148,6 +148,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 \App\Http\Middleware\LogoutAdminGuardOnly::class,
+                \App\Http\Middleware\AdminMiddleware::class,
             ]);
     }
 }

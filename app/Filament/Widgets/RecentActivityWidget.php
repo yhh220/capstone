@@ -11,6 +11,11 @@ class RecentActivityWidget extends BaseWidget
 {
     protected static ?int $sort = 5;
 
+    public static function canView(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
+    }
+
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table

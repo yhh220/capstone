@@ -41,6 +41,7 @@ class BrandsTable
                     ->label('Active')
                     ->sortable()
                     ->alignCenter()
+                    ->disabled(fn () => !auth()->user()?->isAdmin())
                     ->updateStateUsing(fn ($record, $state) => $record->update(['is_active' => (bool) $state])),
                 TextColumn::make('sort_order')
                     ->label('Order')

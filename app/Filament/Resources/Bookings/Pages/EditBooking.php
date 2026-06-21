@@ -34,6 +34,14 @@ class EditBooking extends EditRecord
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         $startAt = ! empty($data['start_at']) ? Carbon::parse($data['start_at']) : null;
+
+        // Force end_at to be computed from start_at using the system slot length,
+        // same as CreateBooking does — prevents an inflated raw end_at from
+        // ghost-blocking all subsequent slots on that day.
+        if ($startAt) {
+            $data['end_at'] = app(BookingService::class)->buildEndAt($startAt);
+        }
+
         $statusBefore = $record->status;
         $startAtBefore = $record->start_at;
 

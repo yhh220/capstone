@@ -59,7 +59,7 @@ Route::redirect('/my-orders', '/account');
 Route::middleware(['auth', ShoppingEnabled::class])->group(function () {
     Route::get('/cart', CartPage::class)->name('cart');
     Route::get('/checkout', CheckoutPage::class)->name('checkout');
-    Route::get('/pay/{orderNumber}', PaymentPage::class)->name('payment');
+    Route::get('/pay/{orderNumber}', PaymentPage::class)->name('payment')->middleware('throttle:20,1');
 });
 
 // ─── Language Switcher ─────────────────────────────────────────

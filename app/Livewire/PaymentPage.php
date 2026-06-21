@@ -18,6 +18,7 @@ class PaymentPage extends Component
 {
     use NotifiesOwner, SetsSeo;
 
+    #[\Livewire\Attributes\Locked]
     public Order $order;
 
     public function mount(string $orderNumber): void
@@ -68,7 +69,9 @@ class PaymentPage extends Component
             // winner / "unique-index" bottom guard: only the request that finds the
             // order still 'pending' transitions it, so the email can fire only once.
             $result = DB::transaction(function () {
-                $order = Order::where('id', $this->order->id)->lockForUpdate()->first();
+                $order = Order::where('id', $this->order->id)
+                    ->where('user_id', Auth::id())
+                    ->lockForUpdate()->first();
 
                 if (! $order || ! $order->isAwaitingPayment()) {
                     return 'noop'; // already paid / cancelled
@@ -106,6 +109,15 @@ class PaymentPage extends Component
 
         \App\Support\Breadcrumbs::push('payment', 'Order paid', ['order' => $this->order->order_number]);
 
+        // The atomic builder UPDATE bypasses Eloquent model events, so spatie/activitylog
+        // would not see this state change. Log it explicitly so the audit trail reflects
+        // the most security-sensitive transition in the system.
+        activity('order')
+            ->performedOn($this->order)
+            ->causedBy(Auth::user())
+            ->withProperties(['payment_status' => 'paid', 'status' => 'processing'])
+            ->log('paid');
+
         try {
             \App\Support\Breadcrumbs::push('mail', 'Sending order confirmation');
             Mail::to($this->order->customer_email)->send(new OrderConfirmationMail($this->order->fresh('items')));
@@ -129,7 +141,9 @@ class PaymentPage extends Component
     public function expireOrder(): void
     {
         $expired = DB::transaction(function () {
-            $order = Order::where('id', $this->order->id)->lockForUpdate()->with('items')->first();
+            $order = Order::where('id', $this->order->id)
+                ->where('user_id', Auth::id())
+                ->lockForUpdate()->with('items')->first();
 
             if (! $order || ! $order->isAwaitingPayment()) {
                 return false;

@@ -282,10 +282,16 @@ class BookingForm extends Component
         // Daily cap: stops slow drip-spam that keeps resetting the burst window.
         $dailyKey = 'booking-daily:'.$ip;
         if (RateLimiter::tooManyAttempts($dailyKey, 8)) {
-            $this->addError('customer_phone', __('You have reached today’s booking limit. Please WhatsApp us directly instead.'));
+            $this->addError('customer_phone', __("You have reached today's booking limit. Please WhatsApp us directly instead."));
 
             return;
         }
+
+        // Increment rate-limit counters immediately so every submission attempt
+        // burns quota regardless of whether the slot is taken or the date is invalid —
+        // without this, targeting a known-unavailable slot bypasses the limiter entirely.
+        RateLimiter::hit($throttleKey, 600);   // 10-minute burst window
+        RateLimiter::hit($dailyKey, 86400);    // 24-hour daily window
 
         $this->validate();
 
@@ -323,9 +329,6 @@ class BookingForm extends Component
 
             return;
         }
-
-        RateLimiter::hit($throttleKey, 600);   // 10-minute burst window
-        RateLimiter::hit($dailyKey, 86400);    // 24-hour daily window
 
         try {
             $booking = DB::transaction(function () use ($startAt) {

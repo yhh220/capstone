@@ -195,14 +195,24 @@ class UserLogin extends Component
             return;
         }
 
-        // Successful credential check — clear all failure counters
+        // Successful credential check — clear per-email failure counters only.
+        // The IP-level counter ($ipKey) is intentionally NOT cleared: an attacker
+        // who controls a valid account could otherwise reset the IP-wide spray
+        // detection by interleaving their own successful logins between attempts
+        // against victim accounts.
         Cache::forget($emailKey);
-        Cache::forget($ipKey);
         Cache::forget($lockoutKey);
         Cache::forget($lockoutKey . ':expires');
 
         if ($emailUser->two_factor_enabled) {
-            app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_LOGIN, $emailUser->email);
+            // Guard against OTP inbox flooding: someone who knows a victim's password
+            // could repeatedly call login() to trigger unlimited OTP emails without
+            // ever completing the second factor. Apply the same 60-second send
+            // cooldown that resendLoginOtp() already enforces.
+            $wait = app(EmailOtpService::class)->resendAvailableIn(EmailOtpService::PURPOSE_LOGIN, $emailUser->email);
+            if ($wait <= 0) {
+                app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_LOGIN, $emailUser->email);
+            }
             $this->awaitingLoginOtp = true;
             $this->loginOtpCode     = '';
             return;

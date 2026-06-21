@@ -17,14 +17,16 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || !Auth::user()->isAdmin()) {
-            // Logout any non-admin user that somehow reached here
-            if (Auth::check()) {
-                Auth::logout();
+        // Within the Filament panel the active guard is 'admin', not the default 'web' guard.
+        $user = Auth::guard('admin')->user() ?? Auth::user();
+
+        if (! $user || (! $user->isAdmin() && ! $user->isStaff())) {
+            if ($user) {
+                Auth::guard('admin')->logout();
             }
 
             return redirect()->route('filament.admin.auth.login')
-                ->with('error', 'Unauthorized access. Admin credentials required.');
+                ->with('error', 'Unauthorized access. Please sign in with an authorised account.');
         }
 
         return $next($request);

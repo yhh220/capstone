@@ -67,12 +67,14 @@ class ProductsTable
                     ->label('Active')
                     ->alignCenter()
                     ->tooltip('Toggle product visibility in the store catalog')
+                    ->disabled(fn () => !auth()->user()?->isAdmin())
                     ->updateStateUsing(fn ($record, $state) => $record->update(['is_active' => (bool) $state])),
                 ToggleColumn::make('is_featured')
                     ->label('Show on Homepage')
                     ->alignCenter()
                     ->visibleFrom('md')
                     ->tooltip('Toggle showing this product in the homepage featured section')
+                    ->disabled(fn () => !auth()->user()?->isAdmin())
                     ->updateStateUsing(fn ($record, $state) => $record->update(['is_featured' => (bool) $state])),
                 TextColumn::make('slug')
                     ->searchable()
