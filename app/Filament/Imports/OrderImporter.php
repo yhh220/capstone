@@ -149,6 +149,10 @@ class OrderImporter extends Importer
             return;
         }
 
+        if (! filled($this->record->customer_email)) {
+            return;
+        }
+
         try {
             $mail = $this->record->status === 'shipped'
                 ? new OrderShippedMail($this->record->fresh())
