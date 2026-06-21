@@ -29,6 +29,11 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->authGuard('admin')
             ->login(\App\Filament\Pages\Auth\Login::class)
+            // Without this, Filament links carry no wire:navigate attribute at all —
+            // every sidebar click was a full hard page reload (re-running the whole
+            // Laravel + Filament bootstrap), which is what made navigation feel slow
+            // and is why a wire:navigate-based loading overlay never fired.
+            ->spa()
             // Profile page lets admins manage their account + set up 2FA.
             ->profile()
             // Optional app (TOTP) two-factor auth with recovery codes. Admins
