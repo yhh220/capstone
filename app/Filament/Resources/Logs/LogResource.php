@@ -127,7 +127,8 @@ class LogResource extends Resource
                 Action::make('trace')->label('View trace')->icon(Heroicon::OutlinedArrowsRightLeft)
                     ->visible(fn (AppLog $record): bool => filled($record->trace_id))
                     ->url(fn (AppLog $record): string => static::getUrl('index', ['trace_id' => $record->trace_id])),
-                Action::make('checkFixed')->label('Check if fixed')->icon(Heroicon::OutlinedMagnifyingGlass)->color('info')
+                Action::make('checkFixed')->label('Check for recurrence')->icon(Heroicon::OutlinedMagnifyingGlass)->color('info')
+                    ->tooltip("Checks the log history only — it doesn't re-run anything. If the same error hasn't appeared again, it marks this resolved as a best guess; it can't prove the underlying code is actually fixed.")
                     ->visible(fn (AppLog $record): bool => $record->resolved_at === null)
                     ->action(function (AppLog $record): void {
                         $fingerprint = substr($record->message, 0, 100);
@@ -147,8 +148,8 @@ class LogResource extends Resource
 
                         if ($recurrence) {
                             Notification::make()
-                                ->title('Error is still occurring')
-                                ->body('Recurred ' . \Carbon\Carbon::parse($recurrence)->diffForHumans() . ' — not marking fixed.')
+                                ->title('Still recurring')
+                                ->body('This error happened again ' . \Carbon\Carbon::parse($recurrence)->diffForHumans() . ' — leaving it open.')
                                 ->warning()
                                 ->send();
                             return;
@@ -160,8 +161,8 @@ class LogResource extends Resource
                             ->update(['resolved_at' => now()]);
 
                         Notification::make()
-                            ->title('Marked as fixed')
-                            ->body("No recurrence found. Resolved {$resolved} log " . str('entry')->plural($resolved) . '.')
+                            ->title('No recurrence found')
+                            ->body("Not seen again since it last happened, so {$resolved} log " . str('entry')->plural($resolved) . ' marked resolved. This only reflects log history — it has not re-tested the underlying code.')
                             ->success()
                             ->send();
                     }),
