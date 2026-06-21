@@ -131,23 +131,27 @@ class LogResource extends Resource
                     ->visible(fn (AppLog $record): bool => $record->resolved_at === null)
                     ->action(function (AppLog $record): void {
                         $fingerprint = substr($record->message, 0, 100);
+                        $window      = now()->subHours(2);
 
+                        // Find the most recent log with the same fingerprint within the last 2 hours.
+                        // Using the recency window (not "> this entry's logged_at") avoids false
+                        // positives when multiple entries from the same burst share the same second.
                         $lastSeen = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
                             ->whereRaw('SUBSTR(message, 1, 100) = ?', [$fingerprint])
-                            ->where('logged_at', '>', $record->logged_at)
+                            ->where('logged_at', '>=', $window)
                             ->orderByDesc('logged_at')
                             ->value('logged_at');
 
                         if ($lastSeen) {
                             Notification::make()
                                 ->title('Error is still occurring')
-                                ->body('Last seen ' . \Carbon\Carbon::parse($lastSeen)->diffForHumans() . '.')
+                                ->body('Last seen ' . \Carbon\Carbon::parse($lastSeen)->diffForHumans() . ' — not marking fixed.')
                                 ->warning()
                                 ->send();
                             return;
                         }
 
-                        // No recurrence — resolve this entry and all unresolved siblings.
+                        // No occurrence in the last 2 hours — resolve this and all unresolved siblings.
                         $resolved = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
                             ->whereRaw('SUBSTR(message, 1, 100) = ?', [$fingerprint])
                             ->whereNull('resolved_at')
@@ -155,7 +159,7 @@ class LogResource extends Resource
 
                         Notification::make()
                             ->title('Marked as fixed')
-                            ->body("No recurrence found. Resolved {$resolved} log " . str('entry')->plural($resolved) . '.')
+                            ->body("No occurrence in the last 2 hours. Resolved {$resolved} log " . str('entry')->plural($resolved) . '.')
                             ->success()
                             ->send();
                     }),
