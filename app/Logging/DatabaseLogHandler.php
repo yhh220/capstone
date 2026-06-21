@@ -52,7 +52,7 @@ class DatabaseLogHandler extends AbstractProcessingHandler
             if (in_array($record->level->toPsrLogLevel(), ['error', 'critical', 'alert', 'emergency'], true)) {
                 $fingerprint = substr($record->message, 0, 100);
                 AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
-                    ->whereRaw('LEFT(message, 100) = ?', [$fingerprint])
+                    ->whereRaw('SUBSTR(message, 1, 100) = ?', [$fingerprint])
                     ->whereNotNull('resolved_at')
                     ->update(['resolved_at' => null]);
             }

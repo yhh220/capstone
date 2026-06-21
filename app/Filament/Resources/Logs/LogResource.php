@@ -127,6 +127,38 @@ class LogResource extends Resource
                 Action::make('trace')->label('View trace')->icon(Heroicon::OutlinedArrowsRightLeft)
                     ->visible(fn (AppLog $record): bool => filled($record->trace_id))
                     ->url(fn (AppLog $record): string => static::getUrl('index', ['trace_id' => $record->trace_id])),
+                Action::make('checkFixed')->label('Check if fixed')->icon(Heroicon::OutlinedMagnifyingGlass)->color('info')
+                    ->visible(fn (AppLog $record): bool => $record->resolved_at === null)
+                    ->action(function (AppLog $record): void {
+                        $fingerprint = substr($record->message, 0, 100);
+
+                        $lastSeen = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
+                            ->whereRaw('SUBSTR(message, 1, 100) = ?', [$fingerprint])
+                            ->where('logged_at', '>', $record->logged_at)
+                            ->orderByDesc('logged_at')
+                            ->value('logged_at');
+
+                        if ($lastSeen) {
+                            Notification::make()
+                                ->title('Error is still occurring')
+                                ->body('Last seen ' . \Carbon\Carbon::parse($lastSeen)->diffForHumans() . '.')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+
+                        // No recurrence — resolve this entry and all unresolved siblings.
+                        $resolved = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
+                            ->whereRaw('SUBSTR(message, 1, 100) = ?', [$fingerprint])
+                            ->whereNull('resolved_at')
+                            ->update(['resolved_at' => now()]);
+
+                        Notification::make()
+                            ->title('Marked as fixed')
+                            ->body("No recurrence found. Resolved {$resolved} log " . str('entry')->plural($resolved) . '.')
+                            ->success()
+                            ->send();
+                    }),
                 Action::make('markFixed')->label('Mark fixed')->icon(Heroicon::OutlinedCheckCircle)->color('success')
                     ->visible(fn (AppLog $record): bool => $record->resolved_at === null)
                     ->action(fn (AppLog $record) => $record->update(['resolved_at' => now()])),

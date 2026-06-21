@@ -26,7 +26,7 @@ class AutoResolveErrorLogs extends Command
                     $fingerprint = substr($log->message, 0, 100);
 
                     $hasRecurred = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
-                        ->whereRaw('LEFT(message, 100) = ?', [$fingerprint])
+                        ->whereRaw('SUBSTR(message, 1, 100) = ?', [$fingerprint])
                         ->where('logged_at', '>', $cutoff)
                         ->exists();
 
