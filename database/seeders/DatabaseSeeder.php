@@ -13,12 +13,26 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        // No hardcoded fallback here on purpose: this seeder's source is on a
+        // public GitHub repo, so a default like "admin@example.com" / "password"
+        // would be a publicly known backdoor owner account the moment anyone
+        // ran `db:seed` without setting these two — fail loudly instead.
+        $email = env('DEFAULT_ADMIN_EMAIL');
+        $password = env('DEFAULT_ADMIN_PASSWORD');
+
+        if (blank($email) || blank($password)) {
+            throw new \RuntimeException(
+                'Set DEFAULT_ADMIN_EMAIL and DEFAULT_ADMIN_PASSWORD before seeding — '
+                . 'there is no default, to avoid a publicly-known owner account.'
+            );
+        }
+
         // 'role' is not mass-assignable; set it explicitly via forceFill.
         User::firstOrCreate(
-            ['email' => env('DEFAULT_ADMIN_EMAIL', 'admin@example.com')],
+            ['email' => $email],
             [
                 'name' => 'Admin',
-                'password' => bcrypt(env('DEFAULT_ADMIN_PASSWORD', 'password')),
+                'password' => bcrypt($password),
             ]
         )->forceFill(['role' => 'owner'])->save();
 
