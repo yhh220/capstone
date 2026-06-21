@@ -102,6 +102,12 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::BODY_END,
                 fn () => view('filament.scroll-to-top'),
             )
+            // Top progress bar + dimmed-content state while a page navigates,
+            // so switching tabs shows a loading transition instead of a blank flash.
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn () => view('filament.nav-loading'),
+            )
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn () => view('partials.favicons'),
