@@ -41,3 +41,7 @@ Schedule::command('orders:expire-unpaid')->everyMinute();
 
 // Email a day-before reminder for tomorrow's bookings (skips cancelled/completed).
 Schedule::command('bookings:send-reminders')->dailyAt('09:00');
+
+// Auto-resolve error logs that have been silent for LOG_AUTO_RESOLVE_HOURS (default 48 h).
+// Regression detection runs on write in DatabaseLogHandler — this handles the "went quiet" side.
+Schedule::command('logs:auto-resolve')->dailyAt('03:00');
