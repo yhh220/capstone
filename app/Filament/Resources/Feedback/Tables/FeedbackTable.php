@@ -39,7 +39,12 @@ class FeedbackTable
                     ->label('Status')
                     ->alignCenter()
                     ->disabled(fn () => !auth()->user()?->isAdmin())
-                    ->updateStateUsing(fn ($record, $state) => $record->update(['is_active' => (bool) $state])),
+                    ->updateStateUsing(function ($record, $state) {
+                        if (! auth()->user()?->isAdmin()) {
+                            return;
+                        }
+                        $record->update(['is_active' => (bool) $state]);
+                    }),
                 TextColumn::make('sort_order')
                     ->label('Rank')
                     ->alignCenter()
