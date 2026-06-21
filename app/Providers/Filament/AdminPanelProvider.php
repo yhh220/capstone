@@ -35,7 +35,8 @@ class AdminPanelProvider extends PanelProvider
             // and is why a wire:navigate-based loading overlay never fired.
             ->spa()
             // Profile page lets admins manage their account + set up 2FA.
-            ->profile()
+            // Custom subclass adds a confirmation step before the post-password-change logout.
+            ->profile(\App\Filament\Pages\Auth\EditProfile::class)
             // Optional app (TOTP) two-factor auth with recovery codes. Admins
             // opt in from their profile; not forced, so no one gets locked out.
             ->multiFactorAuthentication([
