@@ -252,6 +252,7 @@ class OrderResource extends Resource
                 TextColumn::make('refund_status')
                     ->label('Refund if cancelled')
                     ->toggleable()
+                    ->visibleFrom('md')
                     ->state(function (Order $record): string {
                         if ($record->status === 'cancelled') {
                             if ($record->refund_amount === null) {

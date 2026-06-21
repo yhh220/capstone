@@ -45,6 +45,7 @@ class ProductsTable
                     ->searchable()
                     ->sortable()
                     ->toggleable()
+                    ->visibleFrom('md')
                     ->placeholder('—'),
                 TextColumn::make('price')
                     ->money('MYR', locale: 'ms_MY')
@@ -70,6 +71,7 @@ class ProductsTable
                 ToggleColumn::make('is_featured')
                     ->label('Show on Homepage')
                     ->alignCenter()
+                    ->visibleFrom('md')
                     ->tooltip('Toggle showing this product in the homepage featured section')
                     ->updateStateUsing(fn ($record, $state) => $record->update(['is_featured' => (bool) $state])),
                 TextColumn::make('slug')

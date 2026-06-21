@@ -23,7 +23,7 @@
     </x-filament::callout>
 
     {{-- Health checks grid --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach($this->getChecks() as $check)
             @php
                 $statusColor = $palette[$check['status']] ?? 'gray';
@@ -62,7 +62,7 @@
     </div>
 
     {{-- Bottom Grid: App Info, Cache Control, Recent Errors --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {{-- App Info --}}
         <x-filament::section heading="Application">
             <div class="divide-y divide-gray-100 dark:divide-white/10">
