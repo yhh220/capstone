@@ -65,11 +65,13 @@ class ProductsTable
                 ToggleColumn::make('is_active')
                     ->label('Active')
                     ->alignCenter()
-                    ->tooltip('Toggle product visibility in the store catalog'),
+                    ->tooltip('Toggle product visibility in the store catalog')
+                    ->updateStateUsing(fn ($record, $state) => $record->update(['is_active' => (bool) $state])),
                 ToggleColumn::make('is_featured')
                     ->label('Show on Homepage')
                     ->alignCenter()
-                    ->tooltip('Toggle showing this product in the homepage featured section'),
+                    ->tooltip('Toggle showing this product in the homepage featured section')
+                    ->updateStateUsing(fn ($record, $state) => $record->update(['is_featured' => (bool) $state])),
                 TextColumn::make('slug')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),

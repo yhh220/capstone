@@ -37,7 +37,8 @@ class FeedbackTable
                     ->alignCenter(),
                 ToggleColumn::make('is_active')
                     ->label('Status')
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->updateStateUsing(fn ($record, $state) => $record->update(['is_active' => (bool) $state])),
                 TextColumn::make('sort_order')
                     ->label('Rank')
                     ->alignCenter()
