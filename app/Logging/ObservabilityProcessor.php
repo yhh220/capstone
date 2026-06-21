@@ -19,6 +19,17 @@ class ObservabilityProcessor implements ProcessorInterface
     {
         $extra = $record->extra;
 
+        // For CLI commands, generate a stable trace_id once per process and store
+        // the artisan command name as the path so errors are identifiable in the log.
+        if (app()->runningInConsole() && Context::get('trace_id') === null) {
+            $argv    = $_SERVER['argv'] ?? [];
+            $command = implode(' ', array_slice($argv, 1));
+            Context::add([
+                'trace_id' => 'cli:' . \Illuminate\Support\Str::uuid()->toString(),
+                'path'     => $command ?: 'artisan',
+            ]);
+        }
+
         foreach (['trace_id', 'ip', 'method', 'path'] as $key) {
             $value = Context::get($key);
             if ($value !== null) {
