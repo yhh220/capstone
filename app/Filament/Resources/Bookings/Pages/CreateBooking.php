@@ -27,6 +27,16 @@ class CreateBooking extends CreateRecord
     {
         $startAt = ! empty($data['start_at']) ? Carbon::parse($data['start_at']) : null;
 
+        if ($startAt && app(BookingService::class)->isClosedDate($startAt)) {
+            Notification::make()
+                ->title('The shop is closed on that day')
+                ->body('Please pick a different date.')
+                ->danger()
+                ->send();
+
+            $this->halt();
+        }
+
         try {
             $booking = DB::transaction(function () use ($data, $startAt) {
                 if ($startAt && ! app(BookingService::class)->isSlotAvailable($startAt, lock: true)) {

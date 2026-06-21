@@ -98,7 +98,7 @@ class BookingForm extends Component
                 'vehicle_model' => $this->service_id !== '' ? 'required|min:2|max:120' : 'nullable|max:120',
                 'vehicle_plate' => 'nullable|max:30',
             ],
-            4 => ['customer_name' => 'required|min:2|max:100', 'customer_phone' => 'required|max:20', 'customer_email' => 'nullable|email|max:100'],
+            4 => ['customer_name' => 'required|min:2|max:100', 'customer_phone' => 'required|max:20', 'customer_email' => 'required|email|max:100'],
             default => [],
         };
         $this->validate($rules);
@@ -140,7 +140,7 @@ class BookingForm extends Component
         return [
             'customer_name' => 'required|min:2|max:100',
             'customer_phone' => 'required|max:20',
-            'customer_email' => 'nullable|email|max:100',
+            'customer_email' => 'required|email|max:100',
             // Required only when a specific service is chosen; optional for a
             // general visit (matches the per-step rule).
             'vehicle_model' => $this->service_id !== '' ? 'required|min:2|max:120' : 'nullable|max:120',

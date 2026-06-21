@@ -461,8 +461,7 @@
 
                                 <div>
                                     <label for="booking-email" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                        {{ __('Email') }}
-                                        <span class="text-gray-400 font-normal text-xs ml-1">({{ __('optional') }})</span>
+                                        {{ __('Email') }} <span class="text-brand-red">*</span>
                                     </label>
                                     <input wire:model="customer_email"
                                            id="booking-email"

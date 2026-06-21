@@ -26,8 +26,9 @@ class BookingForm
                     ->required()
                     ->maxLength(20),
                 TextInput::make('customer_email')
-                    ->label('Email (optional)')
+                    ->label('Email')
                     ->email()
+                    ->required()
                     ->maxLength(100),
                 TextInput::make('vehicle_model')
                     ->maxLength(120),

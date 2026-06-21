@@ -63,7 +63,7 @@ class Booking extends Model
     /**
      * Human-friendly, sequential booking reference like BK-2026-00042.
      * Mirrors Order::generateOrderNumber() — the customer quotes this together
-     * with their phone number to look up or cancel a booking (no opaque tokens).
+     * with their email to look up or cancel a booking (no opaque tokens).
      * Uses withTrashed() + a row lock so soft-deleted rows can't cause the
      * unique reference to be reused, and concurrent creates stay collision-free.
      */
