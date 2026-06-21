@@ -202,6 +202,87 @@
             @endif
         </div>
 
+        {{-- Login Verification (Email 2FA) --}}
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+            <h2 class="text-lg font-black text-gray-800 dark:text-white mb-2 flex items-center gap-2">
+                <svg class="w-5 h-5 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                {{ __('Login Verification') }}
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ __('When turned on, we email you a 6-digit code to enter every time you sign in, in addition to your password.') }}</p>
+
+            @if(session('two_factor_success'))
+            <div class="flex items-center gap-2 mb-5 px-4 py-3 rounded-xl bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20">
+                <svg class="w-4 h-4 text-green-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <p class="text-sm text-green-700 dark:text-green-300">{{ session('two_factor_success') }}</p>
+            </div>
+            @endif
+
+            @if($twoFactorEnabled)
+                {{-- Enabled → offer to disable (re-enter password) --}}
+                <div x-data="{ confirm: false, pw: '' }">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            {{ __('Enabled') }}
+                        </span>
+                    </div>
+
+                    <div x-show="!confirm">
+                        <button type="button" @click="confirm = true"
+                                class="border-2 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:border-red-400 hover:text-red-600 active:scale-95">
+                            {{ __('Turn off') }}
+                        </button>
+                    </div>
+
+                    <div x-show="confirm" x-cloak style="display:none;" class="space-y-4 mt-2">
+                        <div>
+                            <label for="pf-2fa-disable-pass" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Enter your password to confirm') }}</label>
+                            <input x-model="pw" id="pf-2fa-disable-pass" type="password" autocomplete="current-password" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
+                            @error('two_factor_password') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="button" @click="$wire.disableTwoFactor(pw).then(() => { pw = ''; confirm = false; })"
+                                    wire:loading.attr="disabled" wire:target="disableTwoFactor"
+                                    class="bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:bg-red-700 active:scale-95 disabled:opacity-50">
+                                <span wire:loading.remove wire:target="disableTwoFactor">{{ __('Turn off') }}</span>
+                                <span wire:loading wire:target="disableTwoFactor">{{ __('Saving...') }}</span>
+                            </button>
+                            <button type="button" @click="confirm = false" class="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('Cancel') }}</button>
+                        </div>
+                    </div>
+                </div>
+            @elseif(! $enablingTwoFactor)
+                {{-- Disabled → offer to enable (email-code gated) --}}
+                <button type="button" wire:click="sendEnableTwoFactorCode" wire:loading.attr="disabled" wire:target="sendEnableTwoFactorCode"
+                        class="bg-brand-red text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
+                    <span wire:loading.remove wire:target="sendEnableTwoFactorCode">{{ __('Turn on') }}</span>
+                    <span wire:loading wire:target="sendEnableTwoFactorCode">{{ __('Sending...') }}</span>
+                </button>
+            @else
+                {{-- Awaiting confirmation code --}}
+                <form x-data="{ otp: '' }" @submit.prevent="$wire.confirmEnableTwoFactor(otp)" class="space-y-4">
+                    <div>
+                        <label for="pf-2fa-otp" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Verification code') }}</label>
+                        <input x-model="otp" id="pf-2fa-otp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"
+                               x-on:input="$el.value = $el.value.replace(/\D/g, ''); otp = $el.value"
+                               class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm tracking-[0.4em] focus:outline-none focus:border-brand-red transition">
+                        @error('two_factor_otp') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="flex items-center justify-between pt-1">
+                        <button type="button" wire:click="cancelEnableTwoFactor" class="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('Cancel') }}</button>
+                        <div class="flex items-center gap-3">
+                            <button type="button" wire:click="sendEnableTwoFactorCode" class="text-sm text-gray-500 dark:text-gray-400 hover:text-brand-red font-semibold">{{ __('Resend code') }}</button>
+                            <button type="submit" wire:loading.attr="disabled" wire:target="confirmEnableTwoFactor"
+                                    class="bg-gray-800 dark:bg-white text-white dark:text-gray-900 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
+                                <span wire:loading.remove wire:target="confirmEnableTwoFactor">{{ __('Confirm') }}</span>
+                                <span wire:loading wire:target="confirmEnableTwoFactor">{{ __('Verifying...') }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            @endif
+        </div>
+
         {{-- Danger Zone --}}
         <div x-data="{ confirm: false, dp: '' }" class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border-2 border-red-200 dark:border-red-500/30">
             <h2 class="text-lg font-black text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">

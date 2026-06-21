@@ -111,6 +111,68 @@ class AuthFlowTest extends TestCase
         $this->assertSame($u->id, Auth::id());
     }
 
+    public function test_login_with_two_factor_enabled_requires_otp(): void
+    {
+        $u = $this->makeUser();
+        $u->forceFill(['two_factor_enabled' => true])->save();
+        Notification::fake();
+
+        $c = Livewire::test(UserLogin::class)
+            ->set('loginEmail', $this->email)
+            ->call('login', $this->pass);
+
+        // Correct password, but 2FA is on — must not be signed in yet.
+        $this->assertFalse(Auth::check());
+        $c->assertSet('awaitingLoginOtp', true);
+
+        // Wrong code → still not signed in.
+        $c->set('loginOtpCode', '000000')->call('verifyLoginOtp');
+        $this->assertFalse(Auth::check());
+
+        // Correct code → signed in.
+        $c->set('loginOtpCode', $this->captureOtp())->call('verifyLoginOtp');
+        $this->assertTrue(Auth::check());
+        $this->assertSame($u->id, Auth::id());
+    }
+
+    public function test_enabling_two_factor_requires_otp_confirmation(): void
+    {
+        $u = $this->makeUser();
+        $this->actingAs($u);
+        Notification::fake();
+
+        $c = Livewire::test(ProfilePage::class)
+            ->call('sendEnableTwoFactorCode')
+            ->assertSet('enablingTwoFactor', true);
+
+        $this->assertFalse($u->fresh()->two_factor_enabled);
+
+        // Wrong code → stays off.
+        $c->call('confirmEnableTwoFactor', '000000');
+        $this->assertFalse($u->fresh()->two_factor_enabled);
+
+        // Correct code → turns on.
+        $c->call('confirmEnableTwoFactor', $this->captureOtp());
+        $this->assertTrue($u->fresh()->two_factor_enabled);
+    }
+
+    public function test_disabling_two_factor_requires_correct_password(): void
+    {
+        $u = $this->makeUser();
+        $u->forceFill(['two_factor_enabled' => true])->save();
+        $this->actingAs($u);
+
+        $c = Livewire::test(ProfilePage::class);
+
+        // Wrong password → stays on.
+        $c->call('disableTwoFactor', 'totally-wrong');
+        $this->assertTrue($u->fresh()->two_factor_enabled);
+
+        // Correct password → turns off.
+        $c->call('disableTwoFactor', $this->pass);
+        $this->assertFalse($u->fresh()->two_factor_enabled);
+    }
+
     public function test_change_password(): void
     {
         $u = $this->makeUser();

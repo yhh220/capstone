@@ -8,6 +8,7 @@ use App\Services\EmailOtpService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -46,6 +47,14 @@ class UserLogin extends Component
     public bool   $awaitingOtp = false;
     public string $otpEmail    = '';
     public string $otpCode     = '';
+
+    // Login 2FA step — shown after a valid password when the account has
+    // email login-verification enabled. Credentials are confirmed by this
+    // point; only the second factor remains, so this never reveals whether
+    // 2FA is the reason a login didn't complete immediately to an attacker
+    // who doesn't already have the right password.
+    public bool   $awaitingLoginOtp = false;
+    public string $loginOtpCode     = '';
 
     // Honeypot for Register form — powered by spatie/laravel-honeypot
     public HoneypotData $honeypotData;
@@ -137,11 +146,10 @@ class UserLogin extends Component
             return;
         }
 
-        // Attempt authentication
-        if (!Auth::attempt([
-            'email'    => $this->loginEmail,
-            'password' => $loginPassword,
-        ], $this->remember)) {
+        // Validate credentials without starting a session yet — an account with
+        // login verification enabled still has to clear the OTP step below
+        // before Auth::login() actually runs.
+        if (! $emailUser || ! Hash::check($loginPassword, $emailUser->password)) {
             // Increment failure counters
             $emailFails++;
             $ipFails = (int) Cache::get($ipKey, 0) + 1;
@@ -177,12 +185,81 @@ class UserLogin extends Component
             return;
         }
 
-        // Successful login — clear all counters
+        // Successful credential check — clear all failure counters
         Cache::forget($emailKey);
         Cache::forget($ipKey);
         Cache::forget($lockoutKey);
         Cache::forget($lockoutKey . ':expires');
 
+        if ($emailUser->two_factor_enabled) {
+            app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_LOGIN, $emailUser->email);
+            $this->awaitingLoginOtp = true;
+            $this->loginOtpCode     = '';
+            return;
+        }
+
+        $this->completeLogin($emailUser);
+    }
+
+    /**
+     * Step 2 for accounts with login verification enabled: confirm the emailed
+     * code, then finish the login that login() put on hold.
+     */
+    public function verifyLoginOtp(): void
+    {
+        $this->validate(['loginOtpCode' => ['required', 'digits:6']]);
+
+        $user = User::where('email', $this->loginEmail)->first();
+
+        if (! $user) {
+            $this->awaitingLoginOtp = false;
+            $this->addError('loginEmail', __('Something went wrong. Please sign in again.'));
+            return;
+        }
+
+        if (! app(EmailOtpService::class)->verify(EmailOtpService::PURPOSE_LOGIN, $user->email, $this->loginOtpCode)) {
+            $this->addError('loginOtpCode', __('Invalid or expired code. Please try again.'));
+            return;
+        }
+
+        $this->completeLogin($user);
+    }
+
+    /**
+     * Resend the login code (throttled to once per 60s by EmailOtpService).
+     */
+    public function resendLoginOtp(): void
+    {
+        if (! $this->awaitingLoginOtp) {
+            return;
+        }
+
+        $otp  = app(EmailOtpService::class);
+        $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_LOGIN, $this->loginEmail);
+
+        if ($wait > 0) {
+            $this->addError('loginOtpCode', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+            return;
+        }
+
+        $otp->send(EmailOtpService::PURPOSE_LOGIN, $this->loginEmail);
+        session()->flash('otp_resent', __('A new code has been sent to your email.'));
+    }
+
+    /**
+     * Abandon the login-verification step and return to the sign-in form.
+     */
+    public function cancelLoginOtp(): void
+    {
+        app(EmailOtpService::class)->clear(EmailOtpService::PURPOSE_LOGIN, $this->loginEmail);
+        $this->awaitingLoginOtp = false;
+        $this->loginOtpCode     = '';
+        $this->resetErrorBag();
+    }
+
+    private function completeLogin(User $user): void
+    {
+        Auth::login($user, $this->remember);
         CartItem::claimGuestCart(session()->getId(), Auth::id());
         session()->regenerate();
 

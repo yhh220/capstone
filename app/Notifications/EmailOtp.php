@@ -7,9 +7,10 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * Emails a 6-digit verification code for either registration or password reset.
- * Sent on-demand (Notification::route) because during registration the user
- * record does not exist yet.
+ * Emails a 6-digit verification code for registration, password reset, setting
+ * a password, enabling login 2FA, or a login itself. Sent on-demand
+ * (Notification::route) because during registration the user record does not
+ * exist yet.
  */
 class EmailOtp extends Notification
 {
@@ -27,18 +28,21 @@ class EmailOtp extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $isReset = $this->purpose === 'pwreset';
-        $store   = config('services.store.seo_name', 'Win Win Car Audio');
+        $store = config('services.store.seo_name', 'Win Win Car Audio');
 
-        $subject = $isReset
-            ? __('Your password reset code')
-            : __('Your verification code');
+        $subject = match ($this->purpose) {
+            'pwreset'   => __('Your password reset code'),
+            'login2fa'  => __('Your login verification code'),
+            'enable2fa' => __('Your security code'),
+            'setpw'     => __('Your password setup code'),
+            default     => __('Your verification code'),
+        };
 
         return (new MailMessage)
             ->subject($subject . ' — ' . $store)
             ->view('mail.email-otp', [
                 'code'    => $this->code,
-                'isReset' => $isReset,
+                'purpose' => $this->purpose,
                 'minutes' => 10,
             ]);
     }

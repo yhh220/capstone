@@ -27,6 +27,10 @@ class ProfilePage extends Component
     // Set-password flow state (social-login accounts with no password yet)
     public bool $settingPassword = false;
 
+    // Login verification (email 2FA) state
+    public bool $twoFactorEnabled  = false;
+    public bool $enablingTwoFactor = false;
+
     protected $rules = [
         'name'        => 'required|string|max:255',
         'phone'       => 'nullable|string|max:20',
@@ -53,6 +57,7 @@ class ProfilePage extends Component
         $this->city        = $user->city ?? '';
         $this->postcode    = $user->postcode ?? '';
         $this->state       = $user->state ?? '';
+        $this->twoFactorEnabled = $user->two_factor_enabled ?? false;
 
         $this->setSeo(
             title: 'My Profile',
@@ -179,6 +184,90 @@ class ProfilePage extends Component
         $this->settingPassword = false;
         $this->resetErrorBag(['set_otp', 'set_new_password', 'set_new_password_confirmation']);
         session()->flash('password_success', __('Password set! You can now also log in with your email and password.'));
+    }
+
+    /**
+     * Step 1 of enabling login verification: email a code to prove the user
+     * controls the inbox that will be guarding their future logins.
+     */
+    public function sendEnableTwoFactorCode(): void
+    {
+        $user = Auth::user();
+        if ($user->two_factor_enabled) {
+            return;
+        }
+
+        $otp  = app(EmailOtpService::class);
+        $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_ENABLE_2FA, $user->email);
+        if ($wait > 0) {
+            $this->addError('two_factor_otp', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+            return;
+        }
+
+        $otp->send(EmailOtpService::PURPOSE_ENABLE_2FA, $user->email);
+        $this->enablingTwoFactor = true;
+        session()->flash('two_factor_success', __('We sent a 6-digit code to :email.', ['email' => $user->email]));
+    }
+
+    /**
+     * Step 2: confirm the code, then turn login verification on.
+     */
+    public function confirmEnableTwoFactor(#[\SensitiveParameter] string $otp): void
+    {
+        $user = Auth::user();
+        if ($user->two_factor_enabled) {
+            return;
+        }
+
+        $v = Validator::make(['two_factor_otp' => $otp], ['two_factor_otp' => ['required', 'digits:6']]);
+        if ($v->fails()) {
+            $this->addError('two_factor_otp', $v->errors()->first('two_factor_otp'));
+            return;
+        }
+
+        $otpService = app(EmailOtpService::class);
+        if (! $otpService->verify(EmailOtpService::PURPOSE_ENABLE_2FA, $user->email, $otp)) {
+            $this->addError('two_factor_otp', __('Invalid or expired code. Please try again.'));
+            return;
+        }
+
+        $user->forceFill(['two_factor_enabled' => true])->save();
+
+        $this->twoFactorEnabled  = true;
+        $this->enablingTwoFactor = false;
+        $this->resetErrorBag('two_factor_otp');
+        session()->flash('two_factor_success', __('Login verification is now on. We will email you a code each time you sign in.'));
+    }
+
+    public function cancelEnableTwoFactor(): void
+    {
+        app(EmailOtpService::class)->clear(EmailOtpService::PURPOSE_ENABLE_2FA, Auth::user()->email);
+        $this->enablingTwoFactor = false;
+        $this->resetErrorBag('two_factor_otp');
+    }
+
+    /**
+     * Turn login verification back off. Requires the current password so a
+     * hijacked, already-open session can't silently downgrade the account's
+     * security on its way out.
+     */
+    public function disableTwoFactor(#[\SensitiveParameter] string $password): void
+    {
+        $v = Validator::make(
+            ['two_factor_password' => $password],
+            ['two_factor_password' => ['required', 'current_password']],
+            ['two_factor_password.current_password' => __('Your password is incorrect.')]
+        );
+
+        if ($v->fails()) {
+            $this->addError('two_factor_password', $v->errors()->first('two_factor_password'));
+            return;
+        }
+
+        Auth::user()->forceFill(['two_factor_enabled' => false])->save();
+        $this->twoFactorEnabled = false;
+        $this->resetErrorBag('two_factor_password');
+        session()->flash('two_factor_success', __('Login verification is now off.'));
     }
 
     /**

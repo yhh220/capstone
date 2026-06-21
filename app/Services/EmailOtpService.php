@@ -29,6 +29,8 @@ class EmailOtpService
     public const PURPOSE_REGISTER     = 'register';
     public const PURPOSE_RESET        = 'pwreset';
     public const PURPOSE_SET_PASSWORD = 'setpw';
+    public const PURPOSE_LOGIN        = 'login2fa';
+    public const PURPOSE_ENABLE_2FA   = 'enable2fa';
 
     /**
      * Generate a fresh 6-digit code, store it hashed, and email it. Returns the
