@@ -64,6 +64,7 @@ class CheckoutPage extends Component
         'city' => 'required|string|max:255',
         'postcode' => 'required|digits:5',
         'state' => 'required|string|max:100',
+        'orderNotes' => 'nullable|string|max:1000',
     ];
 
     public function mount(): void
@@ -152,6 +153,10 @@ class CheckoutPage extends Component
 
             return;
         }
+
+        // Re-validate here so that placeOrder() can't be called directly via
+        // a Livewire XHR request without going through goToStep2() first.
+        $this->validate();
 
         // Throttle order creation — a scripted account shouldn't be able to
         // flood the orders table with junk.
