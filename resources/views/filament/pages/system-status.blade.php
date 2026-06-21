@@ -48,7 +48,7 @@
                             <div class="font-bold text-sm text-gray-900 dark:text-white truncate">
                                 {{ $check['name'] }}
                             </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 leading-snug">
                                 {{ $check['value'] }}
                             </div>
                         </div>

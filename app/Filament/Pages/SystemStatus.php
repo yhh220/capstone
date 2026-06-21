@@ -150,6 +150,10 @@ class SystemStatus extends Page
     public function clearCache(): void
     {
         try {
+            // Preserve the scheduler heartbeat so the System Status check
+            // doesn't flip to "Stopped" just because we flushed the cache.
+            $heartbeat = Cache::get('scheduler:last_run');
+
             // Flush all Laravel cache entries
             Cache::flush();
 
@@ -158,6 +162,10 @@ class SystemStatus extends Page
             \Illuminate\Support\Facades\Artisan::call('config:clear');
             \Illuminate\Support\Facades\Artisan::call('view:clear');
             \Illuminate\Support\Facades\Artisan::call('route:clear');
+
+            if ($heartbeat) {
+                Cache::forever('scheduler:last_run', $heartbeat);
+            }
 
             \Filament\Notifications\Notification::make()
                 ->title('System Cache Cleared')
