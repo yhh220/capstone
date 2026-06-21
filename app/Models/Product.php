@@ -82,7 +82,7 @@ class Product extends Model implements HasMedia
                 $base = Str::slug($product->name);
                 $slug = $base;
                 $i    = 2;
-                while (static::withTrashed()->where('slug', $slug)->exists()) {
+                while (static::where('slug', $slug)->exists()) {
                     $slug = $base . '-' . $i++;
                 }
                 $product->slug = $slug;
