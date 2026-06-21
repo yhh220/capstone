@@ -49,6 +49,22 @@ class SettingResource extends Resource
             Forms\Components\TextInput::make('value')
                 ->required()
                 ->label('Setting Value')
+                // Every numeric setting is already independently clamped to a sane
+                // range wherever it's consumed (RefundCalculator, BookingService,
+                // ShippingCalculator), so a bad value here can't crash or miscalculate
+                // anything downstream — but it should still be rejected here with a
+                // clear error instead of silently saving "abc" into a number field.
+                ->rules(fn (Setting $record): array => match ($record->key) {
+                    'ONLINE_SHOPPING_ENABLED' => ['in:true,false'],
+                    'BUSINESS_HOURS_START', 'BUSINESS_HOURS_END' => ['date_format:H:i'],
+                    'BUSINESS_CLOSED_WEEKDAYS' => ['regex:/^\s*[0-6](\s*,\s*[0-6])*\s*$/'],
+                    'BOOKING_SLOT_MINUTES' => ['integer', 'min:15'],
+                    'BACKORDER_DAYS' => ['integer', 'min:0'],
+                    'SHIPPING_FLAT_RATE', 'SHIPPING_FREE_THRESHOLD' => ['numeric', 'min:0'],
+                    'CANCELLATION_FULL_REFUND_HOURS' => ['integer', 'min:0'],
+                    'CANCELLATION_FEE_PERCENT' => ['numeric', 'min:0', 'max:100'],
+                    default => [],
+                })
                 ->placeholder(fn (Setting $record): string => match ($record->key) {
                     'BUSINESS_HOURS_START', 'BUSINESS_HOURS_END' => 'e.g. 09:00',
                     'BUSINESS_CLOSED_WEEKDAYS' => 'e.g. 5 for Friday, or 0,5 for Sunday and Friday',
