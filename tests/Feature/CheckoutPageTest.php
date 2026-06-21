@@ -75,7 +75,7 @@ class CheckoutPageTest extends TestCase
         $this->assertSame(1, $product->fresh()->stock);
     }
 
-    public function test_out_of_stock_product_blocks_checkout(): void
+    public function test_out_of_stock_product_is_backordered_at_checkout(): void
     {
         $user = User::create([
             'name' => 'Backorder Buyer',
@@ -84,7 +84,9 @@ class CheckoutPageTest extends TestCase
             'role' => 'client',
         ]);
 
-        // Zero on-hand stock — checkout must refuse, not silently backorder.
+        // Zero on-hand stock — checkout still succeeds. The cart and product
+        // pages both advertise backordering (BACKORDER_DAYS setting, "ships in
+        // ~N days" badge), so checkout must honour that instead of rejecting it.
         $product = Product::create([
             'name' => 'Backorder Subwoofer',
             'slug' => 'backorder-subwoofer',
@@ -109,14 +111,17 @@ class CheckoutPageTest extends TestCase
             ->set('postcode', '40150')
             ->set('state', 'Selangor')
             ->call('placeOrder')
-            ->assertHasErrors('stock');
+            ->assertHasNoErrors()
+            ->assertRedirect();
 
-        $this->assertDatabaseMissing('orders', [
+        $this->assertDatabaseHas('orders', [
             'user_id' => $user->id,
+            'customer_email' => 'backorder@example.test',
         ]);
 
-        // Stock is untouched — nothing was reserved for a rejected checkout.
-        $this->assertSame(0, $product->fresh()->stock);
+        // Stock goes negative — that deficit is exactly what's owed to the
+        // customer, and nets back to a normal count on the next restock.
+        $this->assertSame(-2, $product->fresh()->stock);
     }
 
     public function test_sufficient_stock_allows_checkout(): void

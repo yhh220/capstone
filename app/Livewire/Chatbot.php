@@ -433,7 +433,28 @@ class Chatbot extends Component
     {
         $t = mb_strtolower($text);
 
-        $has = fn (array $words) => collect($words)->contains(fn ($w) => str_contains($t, $w));
+        // Word-boundary aware so a short keyword can't fire from inside an
+        // unrelated word — e.g. "call" must not match inside "recall". Mirrors
+        // MockDriver::keywordMatches()'s tiering: ≤3 chars need a boundary on
+        // both sides (whole word only); 4 chars only need a leading boundary
+        // (so "book" still catches "booking" as a stem, just not "facebook");
+        // longer words, phrases, and CJK (no word boundaries) fall back to a
+        // plain substring check.
+        $has = fn (array $words) => collect($words)->contains(function (string $w) use ($t): bool {
+            $isLatin = ! preg_match('/[^\x00-\x7f]/', $w);
+
+            if ($isLatin && ! str_contains($w, ' ')) {
+                $len = mb_strlen($w);
+                if ($len <= 3) {
+                    return (bool) preg_match('/\b' . preg_quote($w, '/') . '\b/i', $t);
+                }
+                if ($len === 4) {
+                    return (bool) preg_match('/\b' . preg_quote($w, '/') . '/i', $t);
+                }
+            }
+
+            return str_contains($t, $w);
+        });
 
         // Order matters: more specific intents (tracking) are checked first.
         $intents = [

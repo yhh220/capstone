@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\CartItem;
 use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -73,26 +74,36 @@ class CartPage extends Component
 
     public function incrementQuantity(int $cartItemId): void
     {
-        $item = CartItem::forCurrentOwner()->where('id', $cartItemId)->first();
+        // Locked read-then-write so the MAX_QTY cap can't be exceeded by two
+        // concurrent +1 clicks both reading the same pre-increment quantity.
+        DB::transaction(function () use ($cartItemId) {
+            $item = CartItem::forCurrentOwner()->where('id', $cartItemId)->lockForUpdate()->first();
 
-        if ($item && $item->quantity < self::MAX_QTY) {
-            $item->increment('quantity');
-            $this->dispatch('cart-updated', count: self::getCartCount());
-        }
+            if ($item && $item->quantity < self::MAX_QTY) {
+                $item->increment('quantity');
+            }
+        });
+
+        $this->dispatch('cart-updated', count: self::getCartCount());
     }
 
     public function decrementQuantity(int $cartItemId): void
     {
-        $item = CartItem::forCurrentOwner()->where('id', $cartItemId)->first();
+        DB::transaction(function () use ($cartItemId) {
+            $item = CartItem::forCurrentOwner()->where('id', $cartItemId)->lockForUpdate()->first();
 
-        if ($item) {
+            if (! $item) {
+                return;
+            }
+
             if ($item->quantity <= 1) {
                 $item->delete();
             } else {
                 $item->decrement('quantity');
             }
-            $this->dispatch('cart-updated', count: self::getCartCount());
-        }
+        });
+
+        $this->dispatch('cart-updated', count: self::getCartCount());
     }
 
     public function removeItem(int $cartItemId): void
@@ -119,25 +130,32 @@ class CartPage extends Component
             return;
         }
 
-        $existing = CartItem::forCurrentOwner()
-            ->where('product_id', $productId)
-            ->first();
+        // Locked read-then-write (mirrors CartItem::claimGuestCart()) — without this,
+        // two concurrent adds for the same product (double-click, two tabs) could
+        // both read the same starting quantity and silently drop one of them, or
+        // both miss the existing row and create two duplicate cart lines.
+        DB::transaction(function () use ($productId, $quantity) {
+            $existing = CartItem::forCurrentOwner()
+                ->where('product_id', $productId)
+                ->lockForUpdate()
+                ->first();
 
-        $currentQty = $existing?->quantity ?? 0;
-        $targetQty  = min($currentQty + $quantity, self::MAX_QTY);
+            $currentQty = $existing?->quantity ?? 0;
+            $targetQty  = min($currentQty + $quantity, self::MAX_QTY);
 
-        if ($targetQty <= $currentQty) {
-            return; // already at the per-line cap
-        }
+            if ($targetQty <= $currentQty) {
+                return; // already at the per-line cap
+            }
 
-        if ($existing) {
-            $existing->update(['quantity' => $targetQty]);
-        } else {
-            CartItem::create(array_merge(
-                CartItem::currentOwnerAttributes(),
-                ['product_id' => $productId, 'quantity' => $targetQty],
-            ));
-        }
+            if ($existing) {
+                $existing->update(['quantity' => $targetQty]);
+            } else {
+                CartItem::create(array_merge(
+                    CartItem::currentOwnerAttributes(),
+                    ['product_id' => $productId, 'quantity' => $targetQty],
+                ));
+            }
+        });
     }
 
     public static function getCartCount(): int

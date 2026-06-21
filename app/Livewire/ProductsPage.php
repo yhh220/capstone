@@ -72,11 +72,16 @@ class ProductsPage extends Component
             ->latest();
 
         if ($this->search !== '') {
+            // addcslashes backslash-escapes literal % and _ in the search term, but
+            // that only works if the query also tells the DB which character is the
+            // escape character — without an explicit ESCAPE clause, SQLite doesn't
+            // treat \ as one, so a term containing % or _ (e.g. "50% Tint Film")
+            // would never match anything.
             $term = '%' . addcslashes($this->search, '%_\\') . '%';
             $query->where(function ($q) use ($term) {
-                $q->where('name', 'like', $term)
-                  ->orWhere('short_description', 'like', $term)
-                  ->orWhere('sku', 'like', $term);
+                $q->whereRaw("name LIKE ? ESCAPE '\\'", [$term])
+                  ->orWhereRaw("short_description LIKE ? ESCAPE '\\'", [$term])
+                  ->orWhereRaw("sku LIKE ? ESCAPE '\\'", [$term]);
             });
         }
 

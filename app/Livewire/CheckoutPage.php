@@ -217,12 +217,10 @@ class CheckoutPage extends Component
                     if ($cartItem->quantity < 1 || $cartItem->quantity > self::MAX_QTY_PER_ITEM) {
                         throw new \RuntimeException(__('Please order between 1 and :max of each item.', ['max' => self::MAX_QTY_PER_ITEM]));
                     }
-                    if ($product->stock < $cartItem->quantity) {
-                        throw new \RuntimeException(__(':product is out of stock. Only :stock unit(s) remaining.', [
-                            'product' => $product->name,
-                            'stock'   => max(0, $product->stock),
-                        ]));
-                    }
+                    // No stock gate here — out-of-stock items can be backordered (same
+                    // rule the cart and product pages already advertise). stock is left
+                    // to go negative below, representing units owed to customers; it
+                    // nets back to a normal count whenever the product is restocked.
                 }
 
                 $lineItems = $cartItems->map(function ($cartItem) use ($products): array {
