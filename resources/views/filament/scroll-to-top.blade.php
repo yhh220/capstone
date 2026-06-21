@@ -1,7 +1,7 @@
 <button id="filament-scroll-to-top"
         aria-label="Scroll to top"
         type="button"
-        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-rose-600 text-white shadow-2xl transition-all duration-500 translate-y-24 opacity-0 pointer-events-none hover:bg-rose-500 hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-4 focus:ring-rose-500/30 group">
+        class="fixed bottom-6 inset-x-0 mx-auto z-50 w-10 h-10 flex items-center justify-center rounded-full bg-rose-600 text-white shadow-2xl transition-all duration-500 translate-y-24 opacity-0 pointer-events-none hover:bg-rose-500 hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-4 focus:ring-rose-500/30 group">
     <svg class="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
     </svg>
