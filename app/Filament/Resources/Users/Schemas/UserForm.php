@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Password;
 
 class UserForm
 {
@@ -21,7 +23,8 @@ class UserForm
                         TextInput::make('email')
                             ->label('Email Address')
                             ->email()
-                            ->required(),
+                            ->required()
+                            ->unique(User::class, 'email', ignoreRecord: true),
                         TextInput::make('phone')
                             ->label('Phone Number')
                             ->tel(),
@@ -30,6 +33,7 @@ class UserForm
                             ->revealable()
                             ->dehydrated(fn ($state) => filled($state))
                             ->required(fn (string $context): bool => $context === 'create')
+                            ->rule(Password::defaults())
                             ->confirmed()
                             // Only the edit form has a "current password" to keep.
                             ->helperText(fn (string $context): ?string => $context === 'edit'
