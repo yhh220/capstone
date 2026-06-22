@@ -324,14 +324,18 @@
                                     <svg wire:loading wire:target="selectDate, prevMonth, nextMonth" class="w-4 h-4 text-brand-red animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                                 </label>
                                 @if(count($this->availableTimes) > 0)
-                                <div class="flex flex-wrap gap-2.5">
+                                {{-- selected is entangled with preferred_time (not a disconnected
+                                     Alpine var) so the highlight applies instantly on tap and stays
+                                     correct across re-renders — picking a slot used to wait on a
+                                     full wire:click round-trip before it visually registered. --}}
+                                <div x-data="{ selected: $wire.entangle('preferred_time') }" class="flex flex-wrap gap-2.5">
                                     @foreach($this->availableTimes as $time)
-                                    <button wire:click="$set('preferred_time', '{{ $time }}')"
+                                    <button @click="selected = '{{ $time }}'"
                                             type="button"
-                                            class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all duration-150 active:scale-95
-                                                {{ $preferred_time === $time
-                                                    ? 'border-brand-red bg-brand-red text-white shadow-[0_4px_12px_rgba(220,38,38,0.3)]'
-                                                    : 'border-gray-100 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-brand-red/50 hover:text-brand-red' }}">
+                                            class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all duration-150 active:scale-95"
+                                            :class="selected === '{{ $time }}'
+                                                ? 'border-brand-red bg-brand-red text-white shadow-[0_4px_12px_rgba(220,38,38,0.3)]'
+                                                : 'border-gray-100 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-brand-red/50 hover:text-brand-red'">
                                         {{ $time }}
                                     </button>
                                     @endforeach
