@@ -538,7 +538,7 @@
                         @if($currentStep > 1)
                         <button wire:click="prevStep"
                                 type="button"
-                                class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-gray-500 dark:text-gray-400 border-2 border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 active:scale-95">
+                                class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-gray-500 dark:text-gray-400 border-2 border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 active:scale-95 shrink-0 whitespace-nowrap">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                             {{ __('Back') }}
                         </button>
@@ -551,7 +551,7 @@
                                 wire:loading.attr="disabled"
                                 wire:target="nextStep"
                                 type="button"
-                                class="group relative inline-flex items-center gap-2 px-7 py-3 bg-brand-red text-white rounded-xl text-sm font-black transition-all duration-300 shadow-[0_4px_15px_rgb(var(--brand-red-rgb)_/_0.3)] overflow-hidden hover:shadow-[0_8px_25px_rgb(var(--brand-red-rgb)_/_0.45)] hover:-translate-y-1 active:scale-95 disabled:opacity-60">
+                                class="group relative inline-flex items-center gap-2 px-7 py-3 bg-brand-red text-white rounded-xl text-sm font-black transition-all duration-300 shadow-[0_4px_15px_rgb(var(--brand-red-rgb)_/_0.3)] overflow-hidden hover:shadow-[0_8px_25px_rgb(var(--brand-red-rgb)_/_0.45)] hover:-translate-y-1 active:scale-95 disabled:opacity-60 shrink-0 whitespace-nowrap">
                             <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
                             <span class="relative z-10" wire:loading.remove wire:target="nextStep">{{ __('Continue') }}</span>
                             <span class="relative z-10 hidden" wire:loading.class.remove="hidden" wire:target="nextStep">{{ __('Checking...') }}</span>
