@@ -50,12 +50,17 @@
                 md:inset-auto md:bottom-24 md:right-6 md:h-[620px] md:max-h-[85vh] md:w-[400px] md:rounded-[1.75rem]
                 bg-white dark:bg-gray-900
                 shadow-[0_24px_60px_-12px_rgba(0,0,0,0.4)] md:border border-gray-100 dark:border-gray-800
-                animate-[chatIn_0.3s_cubic-bezier(0.22,1,0.36,1)]"
+                animate-[chatIn_0.3s_cubic-bezier(0.22,1,0.36,1)]
+                transition-all duration-150"
+         {{-- Closing starts fading/shrinking the instant X is tapped, instead of
+              the window just sitting still until the wire:click round-trip
+              resolves and yanks it out of the DOM with zero visual feedback. --}}
+         :class="closing ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'"
          wire:key="chatbot-window"
          role="dialog"
          aria-modal="true"
          aria-label="{{ $ui['title'] }}"
-         x-data="{ langOpen: false }"
+         x-data="{ langOpen: false, closing: false }"
          x-init="$nextTick(() => { let m = document.getElementById('chatbot-messages'); if (m) m.scrollTop = m.scrollHeight; if (window.matchMedia('(min-width: 768px)').matches) document.getElementById('chatbot-input')?.focus() })"
          @chatbot-scroll.window="$nextTick(() => { let el = document.getElementById('chatbot-messages'); if (el) el.scrollTop = el.scrollHeight; })"
          @chatbot-focus.window="$nextTick(() => document.getElementById('chatbot-input')?.focus())"
@@ -102,11 +107,11 @@
                 </div>
 
                 <button wire:click="clearChat"
-                        class="text-gray-500 dark:text-gray-400 hover:text-brand-red p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:rotate-[-45deg] transition-all duration-300"
+                        class="text-gray-500 dark:text-gray-400 hover:text-brand-red p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:rotate-[-45deg] active:scale-90 transition-all duration-300"
                         aria-label="{{ $ui['clear'] }}" title="{{ $ui['clear'] }}">
                     {!! $icon('reset', 'w-[18px] h-[18px]') !!}
                 </button>
-                <button wire:click="close"
+                <button @click="closing = true" wire:click="close"
                         class="text-gray-500 dark:text-gray-400 hover:text-brand-red p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:rotate-90 transition-all duration-300 active:scale-90"
                         aria-label="{{ $ui['close'] }}"
                         title="{{ $ui['close'] }}">
