@@ -41,6 +41,12 @@
             document.cookie = 'app_theme=' + (dark ? 'dark' : 'light') + '; path=/; max-age=31536000; SameSite=Lax';
         })();
     </script>
+    <script>
+        // iOS Safari only renders :active/:hover on tap if a touch listener
+        // exists somewhere in the document — otherwise every active: utility
+        // (hamburger, buttons, etc.) silently never shows on a real iPhone.
+        document.addEventListener('touchstart', function () {}, false);
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
