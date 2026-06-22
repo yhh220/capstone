@@ -82,7 +82,7 @@
                 {{-- Language switcher --}}
                 <div class="relative" @click.outside="langOpen = false">
                     <button @click="langOpen = !langOpen"
-                            class="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-brand-red text-xs font-bold px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            class="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-brand-red text-xs font-bold px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 transition-all"
                             aria-label="{{ $ui['lang'] }}">
                         {!! $icon('languages', 'w-4 h-4') !!}
                         <span>{{ $langLabels[$chatLang] }}</span>
@@ -92,8 +92,8 @@
                          class="absolute right-0 top-full mt-1.5 w-36 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden z-20">
                         @foreach(['en' => 'English', 'ms' => 'Bahasa Melayu', 'zh' => '中文'] as $code => $name)
                         <button wire:click="switchLang('{{ $code }}')" @click="langOpen = false"
-                                class="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-left text-sm transition-colors
-                                       {{ $chatLang === $code ? 'text-brand-red font-bold bg-red-50 dark:bg-red-500/10' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60' }}">
+                                class="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-left text-sm active:scale-95 transition-all
+                                       {{ $chatLang === $code ? 'text-brand-red font-bold bg-red-50 dark:bg-red-500/10' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60 active:bg-gray-100 dark:active:bg-gray-700' }}">
                             <span>{{ $name }}</span>
                             @if($chatLang === $code) {!! $icon('check', 'w-4 h-4') !!} @endif
                         </button>

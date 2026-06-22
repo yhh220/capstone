@@ -599,7 +599,7 @@
                                 aria-label="{{ __('Select language') }}"
                                 aria-expanded="false"
                                 aria-haspopup="true"
-                                class="flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-lg text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-brand-red transition-colors duration-200">
+                                class="flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-lg text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-brand-red active:scale-95 transition-all duration-200">
                             <svg class="w-3.5 h-3.5 text-brand-red" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                                 <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
                             </svg>
@@ -629,7 +629,7 @@
                                    role="menuitem"
                                    data-lang-code="{{ $code }}"
                                    data-lang-url="{{ route('lang', $code) }}"
-                                   class="lang-option w-full text-left flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-150 {{ $isActive ? 'bg-brand-red text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800' }}">
+                                   class="lang-option w-full text-left flex items-center gap-2.5 px-2 py-1.5 rounded-lg active:scale-95 transition-all duration-150 {{ $isActive ? 'bg-brand-red text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700' }}">
                                     <span class="w-8 shrink-0 text-center text-[10px] font-black uppercase tracking-wider rounded py-1 {{ $isActive ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300' }}">{{ $short }}</span>
                                     <span class="flex-1 text-sm font-bold">{{ $name }}</span>
                                     @if($isActive)
@@ -643,17 +643,17 @@
 
                     <!-- Theme switcher (segmented control) — hidden on xs, visible lg+ -->
                     <div id="theme-wrapper" class="hidden lg:flex items-center h-9 p-0.5 rounded-lg bg-gray-100 dark:bg-gray-900 gap-0.5">
-                        <button class="theme-option w-8 h-full flex items-center justify-center rounded-md transition-colors duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="light" title="{{ __('Light mode') }}" aria-label="{{ __('Light mode') }}">
+                        <button class="theme-option w-8 h-full flex items-center justify-center rounded-md active:scale-90 transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="light" title="{{ __('Light mode') }}" aria-label="{{ __('Light mode') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
                             </svg>
                         </button>
-                        <button class="theme-option w-8 h-full flex items-center justify-center rounded-md transition-colors duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="dark" title="{{ __('Dark mode') }}" aria-label="{{ __('Dark mode') }}">
+                        <button class="theme-option w-8 h-full flex items-center justify-center rounded-md active:scale-90 transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="dark" title="{{ __('Dark mode') }}" aria-label="{{ __('Dark mode') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                             </svg>
                         </button>
-                        <button class="theme-option w-8 h-full flex items-center justify-center rounded-md transition-colors duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="system" title="{{ __('System theme') }}" aria-label="{{ __('System theme') }}">
+                        <button class="theme-option w-8 h-full flex items-center justify-center rounded-md active:scale-90 transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="system" title="{{ __('System theme') }}" aria-label="{{ __('System theme') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/>
                             </svg>
@@ -756,7 +756,7 @@
                     <button type="button"
                             @click="cartOpen = true"
                             aria-label="{{ __('Open cart') }}"
-                            class="group relative p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-brand-red hover:text-white border border-transparent hover:border-brand-red transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                            class="group relative p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-brand-red hover:text-white border border-transparent hover:border-brand-red active:scale-90 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
                         <svg class="w-4 h-4 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-[10deg]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
                         </svg>
@@ -772,7 +772,7 @@
 
                     <!-- Mobile menu button (Lucide Animated) -->
                     <button id="mobile-menu-btn"
-                            class="lg:hidden group p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-300"
+                            class="lg:hidden group p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 active:scale-90 transition-all duration-300"
                             aria-label="{{ __('Toggle mobile menu') }}"
                             aria-expanded="false"
                             aria-controls="mobile-menu">
@@ -795,13 +795,13 @@
                 <div class="lg:hidden flex items-center gap-2 px-3 py-2 mb-1">
                     <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 mr-1">{{ __('Theme') }}:</span>
                     <div class="flex items-center h-9 p-0.5 rounded-lg bg-gray-100 dark:bg-gray-900 gap-0.5">
-                        <button class="theme-option w-8 h-full flex items-center justify-center rounded-md transition-colors duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="light" title="{{ __('Light mode') }}" aria-label="{{ __('Light mode') }}">
+                        <button class="theme-option w-8 h-full flex items-center justify-center rounded-md active:scale-90 transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="light" title="{{ __('Light mode') }}" aria-label="{{ __('Light mode') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
                         </button>
-                        <button class="theme-option w-8 h-full flex items-center justify-center rounded-md transition-colors duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="dark" title="{{ __('Dark mode') }}" aria-label="{{ __('Dark mode') }}">
+                        <button class="theme-option w-8 h-full flex items-center justify-center rounded-md active:scale-90 transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="dark" title="{{ __('Dark mode') }}" aria-label="{{ __('Dark mode') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                         </button>
-                        <button class="theme-option w-8 h-full flex items-center justify-center rounded-md transition-colors duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="system" title="{{ __('System theme') }}" aria-label="{{ __('System theme') }}">
+                        <button class="theme-option w-8 h-full flex items-center justify-center rounded-md active:scale-90 transition-all duration-200 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200" data-theme="system" title="{{ __('System theme') }}" aria-label="{{ __('System theme') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
                         </button>
                     </div>
@@ -907,7 +907,7 @@
                     <h2 class="text-lg font-bold text-gray-800 dark:text-white">{{ __('Your Cart') }}</h2>
                     <button @click="cartOpen = false"
                             type="button"
-                            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+                            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-90 transition-all duration-200 text-gray-600 dark:text-gray-300"
                             aria-label="{{ __('Close cart') }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
