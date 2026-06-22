@@ -71,7 +71,12 @@ class SystemStatus extends Page
                 if (! $last) {
                     return ['fail', 'Stopped — auto-emails and cleanup are paused'];
                 }
-                $stale = Carbon::parse($last)->diffInSeconds(now()) > 180;
+                // On a real server cron fires every minute, so 180s of silence
+                // would mean it's genuinely stuck. In production the scheduler
+                // is instead driven by an external pinger (cron-job.org) hitting
+                // /cron/run-schedule every ~10 minutes — the threshold has to be
+                // looser than that interval or this flaps "stopped" between pings.
+                $stale = Carbon::parse($last)->diffInSeconds(now()) > 900;
 
                 return [$stale ? 'fail' : 'ok', $stale ? 'Stopped — needs the cron set up' : 'Running normally'];
             }),
