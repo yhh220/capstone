@@ -185,16 +185,23 @@
                     </div>
                     @else
 
-                    {{-- Segmented sliding tab --}}
-                    <div class="relative grid grid-cols-2 p-1 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
+                    {{-- Segmented sliding tab. The pill + label color flip instantly via
+                         Alpine (no network wait); wire:click still fires right after to swap
+                         the actual form markup and reset validation — so the tab itself never
+                         feels stuck waiting on the round-trip. --}}
+                    <div x-data="{ tab: @js($isLoginTab ? 'login' : 'register') }"
+                         class="relative grid grid-cols-2 p-1 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
                         <div class="absolute top-1 bottom-1 left-1 rounded-lg bg-brand-red transition-transform duration-300 ease-out"
-                             style="width: calc(50% - 0.25rem); box-shadow: 0 4px 14px rgba(200,65,61,0.45); transform: translateX({{ $isLoginTab ? '0%' : '100%' }});" aria-hidden="true"></div>
-                        <button type="button" wire:click="switchTab(true)"
-                                class="relative z-10 py-2.5 text-sm font-black uppercase tracking-widest transition-colors duration-200 {{ $isLoginTab ? 'text-white' : 'text-gray-500 dark:text-white/45 hover:text-gray-800 dark:hover:text-white/70' }}">
+                             :style="{ transform: 'translateX(' + (tab === 'login' ? '0%' : '100%') + ')' }"
+                             style="width: calc(50% - 0.25rem); box-shadow: 0 4px 14px rgba(200,65,61,0.45);" aria-hidden="true"></div>
+                        <button type="button" @click="tab = 'login'" wire:click="switchTab(true)"
+                                class="relative z-10 py-2.5 text-sm font-black uppercase tracking-widest transition-colors duration-200"
+                                :class="tab === 'login' ? 'text-white' : 'text-gray-500 dark:text-white/45 hover:text-gray-800 dark:hover:text-white/70'">
                             {{ __('Sign In') }}
                         </button>
-                        <button type="button" wire:click="switchTab(false)"
-                                class="relative z-10 py-2.5 text-sm font-black uppercase tracking-widest transition-colors duration-200 {{ !$isLoginTab ? 'text-white' : 'text-gray-500 dark:text-white/45 hover:text-gray-800 dark:hover:text-white/70' }}">
+                        <button type="button" @click="tab = 'register'" wire:click="switchTab(false)"
+                                class="relative z-10 py-2.5 text-sm font-black uppercase tracking-widest transition-colors duration-200"
+                                :class="tab === 'register' ? 'text-white' : 'text-gray-500 dark:text-white/45 hover:text-gray-800 dark:hover:text-white/70'">
                             {{ __('Register') }}
                         </button>
                     </div>

@@ -341,7 +341,7 @@
                      @pointerleave="dragEnd()"
                      @pointercancel="dragEnd()"
                      :class="dragging ? 'cursor-grabbing select-none' : 'cursor-grab'"
-                     class="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 scroll-smooth">
+                     class="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 scroll-pl-4 scroll-smooth">
                     @foreach($cards as $testimonial)
                     <article class="snap-start shrink-0 w-72 sm:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 transition-all duration-300 hover:border-brand-red/40 hover:shadow-md flex flex-col">
                         <div class="flex text-amber-400 gap-0.5 mb-4" role="img" aria-label="{{ $testimonial->rating }}/5">

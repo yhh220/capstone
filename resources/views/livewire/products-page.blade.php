@@ -173,7 +173,7 @@
                     @endfor
                 </div>
 
-                <div wire:loading.remove wire:target="search,category,minPrice,maxPrice,nextPage,previousPage,gotoPage">
+                <div id="products-grid" wire:loading.remove wire:target="search,category,minPrice,maxPrice,nextPage,previousPage,gotoPage">
                 @if($products->count() > 0)
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($products as $product)
@@ -263,7 +263,10 @@
                 </div>
 
                 <div class="mt-8">
-                    {{ $products->links() }}
+                    {{-- Override Livewire's default scrollTo ('body') — scrolling the whole
+                         <body> into view lands somewhere unpredictable on long pages; scroll
+                         to the top of the grid itself so the new page's results are visible. --}}
+                    {{ $products->links(data: ['scrollTo' => '#products-grid']) }}
                 </div>
                 @else
                 <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 group">
