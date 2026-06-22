@@ -279,7 +279,7 @@
                            transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-red/30"
                     aria-label="{{ $isOpen ? $ui['close'] : $ui['open'] }}">
                 {{-- shine sweep --}}
-                <span class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" aria-hidden="true"></span>
+                <span class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full group-active:translate-x-full transition-transform duration-700" aria-hidden="true"></span>
                 @if($isOpen)
                 <span class="relative">{!! $icon('x', 'w-6 h-6 md:w-7 md:h-7 transition-transform duration-300 group-hover:rotate-90') !!}</span>
                 @else

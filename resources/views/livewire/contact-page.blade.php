@@ -163,7 +163,7 @@
                                 wire:loading.attr="disabled"
                                 wire:loading.class="opacity-75"
                                 wire:target="submit">
-                            <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
+                            <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] group-active:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
                             <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1" wire:loading.remove wire:target="submit" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"></path><path d="m22 2-7 20-4-9-9-4 20-7z"></path></svg>
                             <span class="relative z-10" wire:loading.remove wire:target="submit">{{ __('Send Message') }}</span>
                             <svg class="w-5 h-5 relative z-10 icon-spin hidden" wire:loading.class.remove="hidden" wire:target="submit" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>

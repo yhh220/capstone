@@ -49,7 +49,7 @@
             </a>
             <button wire:click="$set('submitted', false)"
                     class="group relative inline-flex items-center gap-3 bg-brand-red text-white px-8 py-4 rounded-full font-black text-base transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-2 active:scale-95">
-                <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
+                <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] group-active:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
                 <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:rotate-[15deg]" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
                 <span class="relative z-10">{{ __('Make Another Booking') }}</span>
             </button>
@@ -191,20 +191,23 @@
 
                         {{-- ══ STEP 1: WHAT'S THE VISIT ABOUT (optional) ══ --}}
                         @if($currentStep === 1)
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {{-- selected is entangled with service_id so the card highlight + badge
+                             apply instantly on tap instead of waiting on a wire:click round-trip
+                             (service_id has no side effects beyond the raw value, same as the
+                             time-slot fix below). --}}
+                        <div x-data="{ selected: $wire.entangle('service_id') }" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {{-- General visit — the default, no specific service --}}
-                            <button wire:click="$set('service_id', '')"
+                            <button @click="selected = ''"
                                     type="button"
-                                    class="group relative text-left p-5 rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]
-                                        {{ $service_id === ''
-                                            ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10 shadow-[0_4px_20px_rgba(220,38,38,0.15)]'
-                                            : 'border-gray-100 dark:border-gray-700 hover:border-brand-red/40 bg-white dark:bg-gray-800' }}">
-                                @if($service_id === '')
-                                <div class="absolute top-3 right-3 w-5 h-5 bg-brand-red rounded-full flex items-center justify-center shadow">
+                                    class="group relative text-left p-5 rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
+                                    :class="selected === ''
+                                        ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10 shadow-[0_4px_20px_rgba(220,38,38,0.15)]'
+                                        : 'border-gray-100 dark:border-gray-700 hover:border-brand-red/40 bg-white dark:bg-gray-800'">
+                                <div x-show="selected === ''" class="absolute top-3 right-3 w-5 h-5 bg-brand-red rounded-full flex items-center justify-center shadow">
                                     <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                 </div>
-                                @endif
-                                <div class="w-10 h-10 rounded-lg mb-3 flex items-center justify-center {{ $service_id === '' ? 'bg-brand-red text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 group-hover:bg-brand-red/10 group-hover:text-brand-red' }} transition-all duration-200">
+                                <div class="w-10 h-10 rounded-lg mb-3 flex items-center justify-center transition-all duration-200"
+                                     :class="selected === '' ? 'bg-brand-red text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 group-hover:bg-brand-red/10 group-hover:text-brand-red'">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                                 </div>
                                 <p class="font-black text-gray-900 dark:text-white text-sm leading-tight mb-1">{{ __('General visit') }}</p>
@@ -212,24 +215,21 @@
                             </button>
 
                             @foreach($services as $svc)
-                            <button wire:click="$set('service_id', '{{ $svc->id }}')"
+                            <button @click="selected = '{{ $svc->id }}'"
                                     type="button"
-                                    class="group relative text-left p-5 rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]
-                                        {{ $service_id == $svc->id
-                                            ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10 shadow-[0_4px_20px_rgba(220,38,38,0.15)]'
-                                            : 'border-gray-100 dark:border-gray-700 hover:border-brand-red/40 bg-white dark:bg-gray-800' }}">
+                                    class="group relative text-left p-5 rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
+                                    :class="selected == '{{ $svc->id }}'
+                                        ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10 shadow-[0_4px_20px_rgba(220,38,38,0.15)]'
+                                        : 'border-gray-100 dark:border-gray-700 hover:border-brand-red/40 bg-white dark:bg-gray-800'">
 
                                 {{-- Selected badge --}}
-                                @if($service_id == $svc->id)
-                                <div class="absolute top-3 right-3 w-5 h-5 bg-brand-red rounded-full flex items-center justify-center shadow">
+                                <div x-show="selected == '{{ $svc->id }}'" class="absolute top-3 right-3 w-5 h-5 bg-brand-red rounded-full flex items-center justify-center shadow">
                                     <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                 </div>
-                                @endif
 
                                 {{-- Icon --}}
-                                <div class="w-10 h-10 rounded-lg mb-3 flex items-center justify-center
-                                    {{ $service_id == $svc->id ? 'bg-brand-red text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 group-hover:bg-brand-red/10 group-hover:text-brand-red' }}
-                                    transition-all duration-200">
+                                <div class="w-10 h-10 rounded-lg mb-3 flex items-center justify-center transition-all duration-200"
+                                     :class="selected == '{{ $svc->id }}' ? 'bg-brand-red text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 group-hover:bg-brand-red/10 group-hover:text-brand-red'">
                                     {!! str_replace('w-6 h-6', 'w-5 h-5', $iconFor($svc->name)) !!}
                                 </div>
 
@@ -285,15 +285,18 @@
                                         @endforeach
                                     </div>
 
-                                    {{-- Day grid --}}
-                                    <div class="grid grid-cols-7 gap-1">
+                                    {{-- Day grid. selectedDate is entangled with preferred_date so the
+                                         tapped day highlights instantly; wire:click still fires
+                                         selectDate() for its real server-side validation (past/closed/
+                                         out-of-range) and the preferred_time reset side effect. --}}
+                                    <div x-data="{ selectedDate: $wire.entangle('preferred_date') }" class="grid grid-cols-7 gap-1">
                                         @foreach($this->calendarDays as $cell)
                                             @if($cell['selectable'])
-                                            <button type="button" wire:click="selectDate('{{ $cell['date'] }}')"
-                                                    class="aspect-square flex items-center justify-center rounded-lg text-sm font-semibold transition-all active:scale-90
-                                                        {{ $cell['isSelected']
-                                                            ? 'bg-brand-red text-white shadow-[0_4px_12px_rgba(200,65,61,0.35)]'
-                                                            : 'text-gray-700 dark:text-gray-200 hover:bg-brand-red/10 hover:text-brand-red ' . ($cell['isToday'] ? 'ring-1 ring-brand-red/40' : '') }}">
+                                            <button type="button" @click="selectedDate = '{{ $cell['date'] }}'" wire:click="selectDate('{{ $cell['date'] }}')"
+                                                    class="aspect-square flex items-center justify-center rounded-lg text-sm font-semibold transition-all active:scale-90"
+                                                    :class="selectedDate === '{{ $cell['date'] }}'
+                                                        ? 'bg-brand-red text-white shadow-[0_4px_12px_rgba(200,65,61,0.35)]'
+                                                        : 'text-gray-700 dark:text-gray-200 hover:bg-brand-red/10 hover:text-brand-red {{ $cell['isToday'] ? 'ring-1 ring-brand-red/40' : '' }}'">
                                                 {{ $cell['day'] }}
                                             </button>
                                             @else
@@ -556,7 +559,7 @@
                                 wire:target="nextStep"
                                 type="button"
                                 class="group relative inline-flex items-center gap-2 px-7 py-3 bg-brand-red text-white rounded-xl text-sm font-black transition-all duration-300 shadow-[0_4px_15px_rgb(var(--brand-red-rgb)_/_0.3)] overflow-hidden hover:shadow-[0_8px_25px_rgb(var(--brand-red-rgb)_/_0.45)] hover:-translate-y-1 active:scale-95 disabled:opacity-60 shrink-0 whitespace-nowrap">
-                            <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
+                            <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] group-active:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
                             <span class="relative z-10" wire:loading.remove wire:target="nextStep">{{ __('Continue') }}</span>
                             <span class="relative z-10 hidden" wire:loading.class.remove="hidden" wire:target="nextStep">{{ __('Checking...') }}</span>
                             <svg class="w-4 h-4 relative z-10 transition-transform duration-300 group-hover:translate-x-1" wire:loading.remove wire:target="nextStep" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
@@ -567,7 +570,7 @@
                                 wire:target="submit"
                                 type="button"
                                 class="group relative inline-flex items-center gap-2 px-8 py-3 bg-brand-red text-white rounded-xl font-black text-sm transition-all duration-300 shadow-[0_4px_15px_rgb(var(--brand-red-rgb)_/_0.3)] overflow-hidden hover:shadow-[0_8px_25px_rgb(var(--brand-red-rgb)_/_0.45)] hover:-translate-y-1 active:scale-95 disabled:opacity-60">
-                            <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
+                            <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] group-active:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
                             <svg class="w-4 h-4 relative z-10 transition-transform duration-300 group-hover:scale-110" wire:loading.remove wire:target="submit" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <span class="relative z-10" wire:loading.remove wire:target="submit">{{ __('Confirm Booking') }}</span>
                             <span class="relative z-10 hidden" wire:loading.class.remove="hidden" wire:target="submit">{{ __('Submitting...') }}</span>

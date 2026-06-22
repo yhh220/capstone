@@ -42,7 +42,7 @@
                     wire:loading.attr="disabled"
                     wire:target="search"
                     class="group relative overflow-hidden w-full bg-brand-red text-white px-6 py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-300 hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 whitespace-nowrap disabled:opacity-60">
-                <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 group-active:translate-x-0 transition-transform duration-500 ease-out"></span>
                 <svg class="w-4 h-4 relative z-10" wire:loading.remove wire:target="search" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
                 <span class="relative z-10" wire:loading.remove wire:target="search">{{ __('Search') }}</span>
                 <span class="relative z-10" wire:loading wire:target="search">{{ __('Searching...') }}</span>
@@ -119,7 +119,7 @@
                         wire:loading.attr="disabled"
                         wire:target="cancelBooking"
                         class="group relative overflow-hidden w-full mt-5 bg-red-600 text-white py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-[0_4px_15px_rgba(220,38,38,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-60">
-                    <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+                    <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 group-active:translate-x-0 transition-transform duration-500 ease-out"></span>
                     <span class="relative z-10">{{ __('Cancel Booking') }}</span>
                 </button>
                 @endif
