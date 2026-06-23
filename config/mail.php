@@ -45,7 +45,11 @@ return [
             'port' => env('MAIL_PORT', 2525),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
-            'timeout' => null,
+            // If the SMTP port is silently dropped (e.g. blocked by the host's network)
+            // rather than actively refused, an unbounded timeout leaves the request
+            // hanging for the OS default (60s+) before failing. Cap it so a blocked
+            // mail send fails fast instead of stalling the booking/checkout submit.
+            'timeout' => (int) env('MAIL_TIMEOUT', 10),
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
