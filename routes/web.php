@@ -136,33 +136,3 @@ Route::get('/cron/run-schedule/{token}', function (string $token) {
 
     return response('OK', 200);
 })->name('cron.run-schedule');
-
-// ─── TEMPORARY: SMTP connectivity diagnostic ───────────────────
-// One-off check for whether this host's network allows outbound SMTP at all
-// (Render and similar platforms commonly block ports 25/465/587). Reuses the
-// cron secret so this isn't a public unauthenticated probe. Remove once the
-// mail transport decision (stay on SMTP vs switch to an HTTP API provider) is
-// made — this route has no reason to exist long-term.
-Route::get('/debug/smtp-check/{token}', function (string $token) {
-    if (! hash_equals((string) config('app.cron_secret'), $token)) {
-        abort(403);
-    }
-
-    $targets = [['smtp.gmail.com', 587], ['smtp.gmail.com', 465]];
-    $lines = [];
-
-    foreach ($targets as [$host, $port]) {
-        $start = microtime(true);
-        $sock = @stream_socket_client("tcp://{$host}:{$port}", $errno, $errstr, 8);
-        $elapsed = round(microtime(true) - $start, 2);
-
-        if ($sock) {
-            $lines[] = "{$host}:{$port} -> CONNECTED in {$elapsed}s";
-            fclose($sock);
-        } else {
-            $lines[] = "{$host}:{$port} -> FAILED in {$elapsed}s: [{$errno}] {$errstr}";
-        }
-    }
-
-    return response(implode("\n", $lines), 200)->header('Content-Type', 'text/plain');
-})->name('debug.smtp-check');
