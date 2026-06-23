@@ -50,6 +50,12 @@ return [
         'email' => env('STORE_EMAIL', 'winwincaraudio@gmail.com'),
         'facebook_url' => env('STORE_FACEBOOK_URL', 'https://www.facebook.com/winwincaraudio/'),
         'address' => env('STORE_ADDRESS', 'NO. 22, GROUND FLOOR, JALAN DINAR C U3/C, TAMAN SUBANG PERDANA, SEKSYEN U3., Shah Alam, Malaysia, 40150'),
+        // Free-text address search on Google Maps re-geocodes per viewer and isn't
+        // deterministic — different visitors can land on different pins for the same
+        // query string. Map links use this verified lat/lng instead so everyone lands
+        // on the exact same spot (matches the embedded store-map pin on the contact page).
+        'lat' => (float) env('STORE_LAT', 3.1491),
+        'lng' => (float) env('STORE_LNG', 101.5465),
         'hours' => env('STORE_HOURS'),
     ],
 

@@ -15,7 +15,7 @@
     $storeAddress = config('services.store.address');
     $storeHours = config('services.store.hours');
     $whatsAppUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hello, I would like to ask about your products and showroom visit.');
-    $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($storeAddress);
+    $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . config('services.store.lat') . ',' . config('services.store.lng');
     $telLink = 'tel:' . preg_replace('/[^0-9+]/', '', $storePhoneDisplay);
 @endphp
 <head>

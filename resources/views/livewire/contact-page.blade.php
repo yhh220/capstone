@@ -8,7 +8,7 @@
         $storeAddress = config('services.store.address');
         $storeHours = config('services.store.hours');
         $whatsAppUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hello, I would like to contact ' . $storeName . '.');
-        $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($storeAddress);
+        $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . config('services.store.lat') . ',' . config('services.store.lng');
     @endphp
 
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-16">
@@ -196,7 +196,7 @@
                 function initMap() {
                     var el = document.getElementById('store-map');
                     if (!el || el._leaflet_id) return;
-                    var lat = 3.1491, lng = 101.5465;
+                    var lat = {{ config('services.store.lat') }}, lng = {{ config('services.store.lng') }};
                     var map = L.map('store-map', { zoomControl: true, scrollWheelZoom: false }).setView([lat, lng], 17);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
