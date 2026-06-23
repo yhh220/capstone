@@ -115,4 +115,35 @@ class UserAdminAuthorizationTest extends TestCase
 
         $this->assertNotSoftDeleted($admin);
     }
+
+    public function test_admin_can_demote_their_own_role_to_staff(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin, 'admin');
+
+        Livewire::test(EditUser::class, ['record' => $admin->getRouteKey()])
+            ->fillForm(['role' => 'staff'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame('staff', $admin->refresh()->role);
+    }
+
+    /**
+     * The role Select only offers 'owner' as an option when the acting user
+     * is already the owner, but that's UI-only. This proves the server-side
+     * backstop in EditUser::handleRecordUpdate() actually holds if a request
+     * is crafted to bypass the Select (e.g. devtools-edited form payload).
+     */
+    public function test_admin_cannot_promote_self_to_owner_via_a_crafted_request(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin, 'admin');
+
+        Livewire::test(EditUser::class, ['record' => $admin->getRouteKey()])
+            ->fillForm(['role' => 'owner'])
+            ->call('save');
+
+        $this->assertSame('admin', $admin->refresh()->role);
+    }
 }
