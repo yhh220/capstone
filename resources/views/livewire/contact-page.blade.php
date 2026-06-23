@@ -8,7 +8,7 @@
         $storeAddress = config('services.store.address');
         $storeHours = config('services.store.hours');
         $whatsAppUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hello, I would like to contact ' . $storeName . '.');
-        $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . config('services.store.lat') . ',' . config('services.store.lng');
+        $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($storeAddress);
     @endphp
 
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-16">

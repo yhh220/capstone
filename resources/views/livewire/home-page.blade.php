@@ -3,7 +3,7 @@
         $storePhoneRaw = config('services.store.phone_raw');
         $storeAddress  = config('services.store.address');
         $whatsAppUrl   = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hello, I would like to learn more about your products.');
-        $mapUrl        = 'https://www.google.com/maps/search/?api=1&query=' . config('services.store.lat') . ',' . config('services.store.lng');
+        $mapUrl        = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($storeAddress);
 
         // Lucide icons (lucide.dev) — stroke style, inherit currentColor
         $lucide = [
