@@ -7,12 +7,14 @@ use App\Filament\Resources\Brands\Pages\ListBrands;
 use App\Filament\Resources\Categories\Pages\ListCategories;
 use App\Filament\Resources\Contacts\Pages\ListContacts;
 use App\Filament\Resources\Feedback\Pages\ListFeedback;
+use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Filament\Resources\Products\Pages\ListProducts;
 use App\Models\Booking;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Contact;
 use App\Models\Feedback;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -135,6 +137,49 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
             ->assertTableBulkActionHidden('delete');
 
         $this->assertNotNull(Product::find($product->id));
+    }
+
+    public function test_staff_cannot_bulk_delete_orders(): void
+    {
+        $order = Order::create([
+            'order_number'   => Order::generateOrderNumber(),
+            'customer_name'  => 'Test',
+            'customer_email' => 'test@example.test',
+            'customer_phone' => '0123456789',
+            'subtotal'       => 100,
+            'shipping_fee'   => 0,
+            'total_amount'   => 100,
+            'status'         => 'delivered',
+            'payment_status' => 'paid',
+        ]);
+        $this->actingAs($this->staff(), 'admin');
+
+        Livewire::test(ListOrders::class)
+            ->assertTableBulkActionHidden('delete');
+
+        $this->assertNotNull(Order::find($order->id));
+    }
+
+    public function test_admin_can_still_bulk_delete_delivered_orders(): void
+    {
+        $order = Order::create([
+            'order_number'   => Order::generateOrderNumber(),
+            'customer_name'  => 'Test',
+            'customer_email' => 'test@example.test',
+            'customer_phone' => '0123456789',
+            'subtotal'       => 100,
+            'shipping_fee'   => 0,
+            'total_amount'   => 100,
+            'status'         => 'delivered',
+            'payment_status' => 'paid',
+        ]);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin, 'admin');
+
+        Livewire::test(ListOrders::class)
+            ->callTableBulkAction('delete', [$order]);
+
+        $this->assertNull(Order::find($order->id));
     }
 
     public function test_admin_can_still_bulk_delete_products(): void

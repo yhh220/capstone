@@ -581,6 +581,7 @@ class OrderResource extends Resource
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()?->isAdmin() ?? false)
                         ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
                             [$protected, $deletable] = $records->partition(
                                 fn (Order $order) => in_array($order->status, ['pending', 'processing'], true)
