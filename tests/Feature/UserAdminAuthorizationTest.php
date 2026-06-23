@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class UserAdminAuthorizationTest extends TestCase
@@ -61,5 +63,38 @@ class UserAdminAuthorizationTest extends TestCase
         $staff->delete();
 
         $this->assertTrue($admin->can('restore', $staff));
+    }
+
+    /**
+     * Regression test: UserPolicy::delete() always protected the owner, but
+     * the table's bulk delete action never actually consulted it — Filament's
+     * DeleteBulkAction only checks per-record policies when explicitly told
+     * to via authorizeIndividualRecords(). Without that wired up, an admin
+     * selecting the owner's row and confirming bulk delete would delete them
+     * with no authorization check at all, despite every can('delete', ...)
+     * unit test above passing.
+     */
+    public function test_bulk_delete_action_cannot_delete_the_owner(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin, 'admin');
+
+        Livewire::test(ListUsers::class)
+            ->callTableBulkAction('delete', [$owner]);
+
+        $this->assertNotSoftDeleted($owner);
+    }
+
+    public function test_bulk_delete_action_can_delete_a_staff_account(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $staff = User::factory()->create(['role' => 'staff']);
+        $this->actingAs($admin, 'admin');
+
+        Livewire::test(ListUsers::class)
+            ->callTableBulkAction('delete', [$staff]);
+
+        $this->assertSoftDeleted($staff);
     }
 }

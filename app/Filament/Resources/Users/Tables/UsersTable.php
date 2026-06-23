@@ -62,7 +62,12 @@ class UsersTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->visible(fn () => Filament::auth()->user()?->isAdmin() ?? false),
+                        ->visible(fn () => Filament::auth()->user()?->isAdmin() ?? false)
+                        // Without this, Filament deletes every selected record
+                        // without ever consulting UserPolicy::delete() — the
+                        // owner-protection and no-self-deletion rules there were
+                        // silently never enforced for the bulk action.
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }
