@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Mail\Transport\GmailApiTransport;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use SocialiteProviders\Manager\SocialiteWasCalled;
@@ -35,6 +37,16 @@ class AppServiceProvider extends ServiceProvider
         // Register the Microsoft Socialite driver (Google ships with Socialite).
         Event::listen(function (SocialiteWasCalled $event) {
             $event->extendSocialite('microsoft', \SocialiteProviders\Microsoft\Provider::class);
+        });
+
+        // Gmail-over-HTTPS mail transport (see GmailApiTransport docblock) —
+        // selected via MAIL_MAILER=gmail_api in config/mail.php.
+        Mail::extend('gmail_api', function () {
+            return new GmailApiTransport(
+                config('services.google.client_id'),
+                config('services.google.client_secret'),
+                config('services.google.gmail_send_refresh_token'),
+            );
         });
     }
 }

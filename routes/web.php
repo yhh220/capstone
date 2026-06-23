@@ -24,6 +24,7 @@ use App\Livewire\Auth\UserLogin;
 use App\Livewire\Auth\ForgotPassword;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\SocialAuthController;
+use App\Http\Controllers\GmailSendSetupController;
 use App\Http\Middleware\ShoppingEnabled;
 
 // ─── Public Routes ─────────────────────────────────────────────
@@ -86,6 +87,17 @@ Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])
     ->whereIn('provider', ['google', 'microsoft'])
     ->name('social.callback');
+
+// One-time admin setup: authorize this app to send mail as the store's Gmail
+// account via the Gmail API (see GmailApiTransport docblock for why). Admin
+// guard only — this hands back an OAuth refresh token, not something a
+// customer-facing flow should ever expose.
+Route::middleware('auth:admin')->group(function () {
+    Route::get('/gmail-send/connect', [GmailSendSetupController::class, 'connect'])
+        ->name('gmail-send.connect');
+    Route::get('/gmail-send/callback', [GmailSendSetupController::class, 'callback'])
+        ->name('gmail-send.callback');
+});
 
 // Logout (POST only — CSRF protected)
 Route::post('/logout', function () {

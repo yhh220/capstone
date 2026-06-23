@@ -68,6 +68,10 @@ return [
         'client_id'     => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect'      => env('GOOGLE_REDIRECT_URI'),
+        // Refresh token for sending mail as winwincaraudio85@gmail.com via the
+        // Gmail API — obtained once via /gmail-send/connect. Separate from the
+        // login flow above; same OAuth client, different scope.
+        'gmail_send_refresh_token' => env('GMAIL_SEND_REFRESH_TOKEN'),
     ],
 
     'microsoft' => [
