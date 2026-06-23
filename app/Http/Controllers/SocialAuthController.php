@@ -51,7 +51,12 @@ class SocialAuthController extends Controller
         // (e.g. an already-signed-in shared device, or a compromised Google
         // account on the same email).
         if ($user->two_factor_enabled) {
-            app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_LOGIN, $user->email);
+            try {
+                app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_LOGIN, $user->email);
+            } catch (\App\Exceptions\OtpSendFailedException $e) {
+                return redirect()->route('login')->withErrors(['loginEmail' => $e->getMessage()]);
+            }
+
             session(['social_login_pending_email' => $user->email]);
 
             return redirect()->route('login');

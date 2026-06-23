@@ -84,7 +84,12 @@ class ForgotPassword extends Component
             $otp->resendAvailableIn(EmailOtpService::PURPOSE_RESET, $this->email) === 0
             && User::where('email', $this->email)->exists()
         ) {
-            $otp->send(EmailOtpService::PURPOSE_RESET, $this->email);
+            try {
+                $otp->send(EmailOtpService::PURPOSE_RESET, $this->email);
+            } catch (\App\Exceptions\OtpSendFailedException $e) {
+                $this->addError('email', $e->getMessage());
+                return;
+            }
         }
 
         $this->step    = 2;
@@ -124,7 +129,12 @@ class ForgotPassword extends Component
         RateLimiter::hit($dailyKey, 86400);
 
         if (User::where('email', $this->email)->exists()) {
-            $otp->send(EmailOtpService::PURPOSE_RESET, $this->email);
+            try {
+                $otp->send(EmailOtpService::PURPOSE_RESET, $this->email);
+            } catch (\App\Exceptions\OtpSendFailedException $e) {
+                $this->addError('otpCode', $e->getMessage());
+                return;
+            }
         }
 
         session()->flash('reset_sent', __('If an account exists for that email, a 6-digit code has been sent.'));

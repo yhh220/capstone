@@ -139,7 +139,13 @@ class ProfilePage extends Component
             return;
         }
 
-        $otp->send(EmailOtpService::PURPOSE_SET_PASSWORD, $user->email);
+        try {
+            $otp->send(EmailOtpService::PURPOSE_SET_PASSWORD, $user->email);
+        } catch (\App\Exceptions\OtpSendFailedException $e) {
+            $this->addError('set_otp', $e->getMessage());
+            return;
+        }
+
         $this->settingPassword = true;
         $this->set_otp = '';
         session()->flash('password_success', __('We sent a 6-digit code to :email.', ['email' => $user->email]));
@@ -208,7 +214,13 @@ class ProfilePage extends Component
             return;
         }
 
-        $otp->send(EmailOtpService::PURPOSE_ENABLE_2FA, $user->email);
+        try {
+            $otp->send(EmailOtpService::PURPOSE_ENABLE_2FA, $user->email);
+        } catch (\App\Exceptions\OtpSendFailedException $e) {
+            $this->addError('two_factor_otp', $e->getMessage());
+            return;
+        }
+
         $this->enablingTwoFactor = true;
         session()->flash('two_factor_success', __('We sent a 6-digit code to :email.', ['email' => $user->email]));
     }
@@ -297,7 +309,13 @@ class ProfilePage extends Component
             return;
         }
 
-        $otp->send(EmailOtpService::PURPOSE_DISABLE_2FA, $user->email);
+        try {
+            $otp->send(EmailOtpService::PURPOSE_DISABLE_2FA, $user->email);
+        } catch (\App\Exceptions\OtpSendFailedException $e) {
+            $this->addError('disable_two_factor_otp', $e->getMessage());
+            return;
+        }
+
         $this->disablingTwoFactor = true;
         session()->flash('two_factor_success', __('We sent a 6-digit code to :email.', ['email' => $user->email]));
     }
@@ -381,7 +399,13 @@ class ProfilePage extends Component
             return;
         }
 
-        $otp->send(EmailOtpService::PURPOSE_DELETE_ACCOUNT, $user->email);
+        try {
+            $otp->send(EmailOtpService::PURPOSE_DELETE_ACCOUNT, $user->email);
+        } catch (\App\Exceptions\OtpSendFailedException $e) {
+            $this->addError('delete_otp', $e->getMessage());
+            return;
+        }
+
         $this->deletingAccountByOtp = true;
     }
 

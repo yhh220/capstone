@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\OtpSendFailedException;
 use App\Notifications\EmailOtp;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -37,6 +38,10 @@ class EmailOtpService
     /**
      * Generate a fresh 6-digit code, store it hashed, and email it. Returns the
      * plaintext code only so callers can optionally surface it in demo mode.
+     *
+     * @throws OtpSendFailedException if the email could not be sent — unlike
+     *         booking/order notifications, the email IS the action here, so a
+     *         failure must surface to the user rather than be swallowed.
      */
     public function send(string $purpose, string $email): string
     {
@@ -45,8 +50,15 @@ class EmailOtpService
         Cache::put($this->codeKey($purpose, $email), Hash::make($code), self::TTL);
         Cache::put($this->attemptsKey($purpose, $email), 0, self::TTL);
 
-        Notification::route('mail', $this->normalize($email))
-            ->notify(new EmailOtp($code, $purpose));
+        try {
+            Notification::route('mail', $this->normalize($email))
+                ->notify(new EmailOtp($code, $purpose));
+        } catch (\Throwable $e) {
+            logger()->error('OTP email failed: ' . $e->getMessage());
+            $this->clear($purpose, $email);
+
+            throw new OtpSendFailedException();
+        }
 
         RateLimiter::hit($this->resendKey($purpose, $email), self::RESEND_COOLDOWN);
 

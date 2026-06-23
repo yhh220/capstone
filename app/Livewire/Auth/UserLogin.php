@@ -211,7 +211,12 @@ class UserLogin extends Component
             // cooldown that resendLoginOtp() already enforces.
             $wait = app(EmailOtpService::class)->resendAvailableIn(EmailOtpService::PURPOSE_LOGIN, $emailUser->email);
             if ($wait <= 0) {
-                app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_LOGIN, $emailUser->email);
+                try {
+                    app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_LOGIN, $emailUser->email);
+                } catch (\App\Exceptions\OtpSendFailedException $e) {
+                    $this->addError('loginEmail', $e->getMessage());
+                    return;
+                }
             }
             $this->awaitingLoginOtp = true;
             $this->loginOtpCode     = '';
@@ -262,7 +267,13 @@ class UserLogin extends Component
             return;
         }
 
-        $otp->send(EmailOtpService::PURPOSE_LOGIN, $this->loginEmail);
+        try {
+            $otp->send(EmailOtpService::PURPOSE_LOGIN, $this->loginEmail);
+        } catch (\App\Exceptions\OtpSendFailedException $e) {
+            $this->addError('loginOtpCode', $e->getMessage());
+            return;
+        }
+
         session()->flash('otp_resent', __('A new code has been sent to your email.'));
     }
 
@@ -368,7 +379,12 @@ class UserLogin extends Component
             'password' => Crypt::encryptString($validated['password']),
         ], EmailOtpService::TTL);
 
-        app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_REGISTER, $validated['email']);
+        try {
+            app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_REGISTER, $validated['email']);
+        } catch (\App\Exceptions\OtpSendFailedException $e) {
+            $this->addError('email', $e->getMessage());
+            return;
+        }
 
         $this->otpEmail    = $validated['email'];
         $this->awaitingOtp = true;
@@ -471,7 +487,13 @@ class UserLogin extends Component
             return;
         }
 
-        $otp->send(EmailOtpService::PURPOSE_REGISTER, $this->otpEmail);
+        try {
+            $otp->send(EmailOtpService::PURPOSE_REGISTER, $this->otpEmail);
+        } catch (\App\Exceptions\OtpSendFailedException $e) {
+            $this->addError('otpCode', $e->getMessage());
+            return;
+        }
+
         session()->flash('otp_resent', __('A new code has been sent to your email.'));
     }
 
