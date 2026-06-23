@@ -28,10 +28,30 @@ class BookingService
         $start = Carbon::parse($date->format('Y-m-d').' '.setting('BUSINESS_HOURS_START', '09:00'));
         $end = Carbon::parse($date->format('Y-m-d').' '.setting('BUSINESS_HOURS_END', '18:00'));
         $length = $this->visitMinutes();
+
+        // Fetch the day's bookings once and check each candidate slot in memory,
+        // instead of one query per slot (isSlotAvailable() below) — that was
+        // ~18 sequential round-trips against the remote DB on every render of
+        // this step, which is fine on local SQLite but visibly slow in
+        // production (e.g. clicking "Back" into this step).
+        $dayBookings = Booking::query()
+            ->where('status', '!=', 'cancelled')
+            ->whereNotNull('start_at')
+            ->whereNotNull('end_at')
+            ->where('start_at', '<', $end)
+            ->where('end_at', '>', $start)
+            ->get(['start_at', 'end_at']);
+
         $slots = collect();
 
         while ($start->copy()->addMinutes($length) <= $end) {
-            if ($this->isSlotAvailable($start)) {
+            $slotEnd = $start->copy()->addMinutes($length);
+
+            $isAvailable = ! $dayBookings->contains(
+                fn (Booking $booking) => $booking->start_at->lt($slotEnd) && $booking->end_at->gt($start)
+            );
+
+            if ($isAvailable) {
                 $slots->push($start->format('H:i'));
             }
 
