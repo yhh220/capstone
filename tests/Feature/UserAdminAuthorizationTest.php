@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
@@ -96,5 +97,22 @@ class UserAdminAuthorizationTest extends TestCase
             ->callTableBulkAction('delete', [$staff]);
 
         $this->assertSoftDeleted($staff);
+    }
+
+    /**
+     * Unlike the bulk action, Filament auto-resolves single-record DeleteAction
+     * authorization against the resource's policy with no opt-in needed — this
+     * confirms the header "Delete" button on an admin's own edit page already
+     * respects UserPolicy::delete()'s no-self-deletion rule.
+     */
+    public function test_single_delete_action_cannot_delete_self(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin, 'admin');
+
+        Livewire::test(EditUser::class, ['record' => $admin->getRouteKey()])
+            ->assertActionHidden('delete');
+
+        $this->assertNotSoftDeleted($admin);
     }
 }
