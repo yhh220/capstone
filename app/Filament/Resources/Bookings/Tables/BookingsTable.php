@@ -161,7 +161,8 @@ class BookingsTable
                             });
                         })
                         ->deselectRecordsAfterCompletion(),
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()?->isAdmin() ?? false),
                 ]),
             ]);
     }

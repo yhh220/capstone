@@ -169,7 +169,8 @@ class ProductsTable
                     ExportBulkAction::make()
                         ->exporter(ProductExporter::class)
                         ->authorize(fn () => auth()->user()?->isAdmin()),
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()?->isAdmin() ?? false),
                 ]),
             ]);
     }
