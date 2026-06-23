@@ -50,12 +50,18 @@ return [
         'email' => env('STORE_EMAIL', 'winwincaraudio@gmail.com'),
         'facebook_url' => env('STORE_FACEBOOK_URL', 'https://www.facebook.com/winwincaraudio/'),
         'address' => env('STORE_ADDRESS', 'NO. 22, GROUND FLOOR, JALAN DINAR C U3/C, TAMAN SUBANG PERDANA, SEKSYEN U3., Shah Alam, Malaysia, 40150'),
-        // Free-text address search on Google Maps re-geocodes per viewer and isn't
-        // deterministic — different visitors can land on different pins for the same
-        // query string. Map links use this verified lat/lng instead so everyone lands
-        // on the exact same spot (matches the embedded store-map pin on the contact page).
         'lat' => (float) env('STORE_LAT', 3.1491),
         'lng' => (float) env('STORE_LNG', 101.5465),
+        // Free-text address search on Google Maps re-geocodes per viewer and isn't
+        // deterministic — confirmed in production: a visitor's link resolved to a
+        // different business a few doors down on a similarly-named street (Jalan
+        // Dinar C vs G). The cid is this store's specific Google Maps listing —
+        // google.com/maps?cid=<this> always opens the exact same place with the
+        // business name shown (unlike a bare lat/lng link, which shows raw
+        // coordinates with no name). Read off the store's own Maps listing URL:
+        // the hex pair after "!1s" is "<placeIdHex>:<cidHex>" — this is the cid
+        // half, converted from hex to decimal.
+        'place_cid' => env('STORE_PLACE_CID', '5750306395518804732'),
         'hours' => env('STORE_HOURS'),
     ],
 

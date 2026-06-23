@@ -3,7 +3,7 @@
         $storePhoneRaw = config('services.store.phone_raw');
         $storeAddress = config('services.store.address');
         $generalWhatsAppUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hi Win Win Car Studio! I would like to ask about your installation services.');
-        $mapUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($storeAddress);
+        $mapUrl = 'https://www.google.com/maps?cid=' . config('services.store.place_cid');
 
         $serviceIcons = [
             'audio' => '<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>',
