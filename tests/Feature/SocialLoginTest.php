@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Livewire\Auth\UserLogin;
+use App\Models\CartItem;
+use App\Models\Product;
 use App\Models\User;
 use App\Notifications\EmailOtp;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -31,6 +33,40 @@ class SocialLoginTest extends TestCase
         $provider->shouldReceive('redirectUrl')->andReturnSelf();
         $provider->shouldReceive('user')->andReturn($socialUser);
         Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+    }
+
+    /**
+     * Regression test: Auth::login() regenerates the session id internally
+     * (SessionGuard::updateSession() session-fixation hardening) before any
+     * application code runs — every claimGuestCart() call site, including
+     * the password-login path, was reading session()->getId() AFTER
+     * Auth::login() and so was claiming against the wrong (already new) id.
+     * A guest's cart was silently orphaned on every login path, not just
+     * Google's — this just happened to be the one a real user hit first.
+     */
+    public function test_google_login_claims_the_guest_cart(): void
+    {
+        $product = Product::create([
+            'name' => 'Speaker Kit', 'slug' => 'speaker-kit', 'price' => 250, 'stock' => 5, 'is_active' => true,
+        ]);
+
+        $this->get('/');
+        $guestSessionId = session()->getId();
+        CartItem::create(['session_id' => $guestSessionId, 'product_id' => $product->id, 'quantity' => 2]);
+
+        $this->fakeGoogle('g-cart-1', 'cartguest@example.test');
+
+        $cookieName = config('session.cookie');
+        $this->withCookie($cookieName, $guestSessionId)
+            ->get(route('social.callback', 'google'))
+            ->assertRedirect(route('account'));
+
+        $user = User::where('email', 'cartguest@example.test')->first();
+        $this->assertSame(
+            2,
+            CartItem::where('user_id', $user->id)->where('product_id', $product->id)->value('quantity'),
+        );
+        $this->assertDatabaseMissing('cart_items', ['session_id' => $guestSessionId]);
     }
 
     public function test_google_login_creates_a_new_client_and_links_it(): void

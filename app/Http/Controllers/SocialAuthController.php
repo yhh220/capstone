@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CartItem;
 use App\Models\SocialAccount;
 use App\Models\User;
 use App\Services\EmailOtpService;
@@ -62,7 +63,15 @@ class SocialAuthController extends Controller
             return redirect()->route('login');
         }
 
+        // Captured before Auth::login() — SessionGuard::login() regenerates the
+        // session id internally (session-fixation hardening) before this method
+        // gets a chance to run, so reading session()->getId() any later than this
+        // already returns the new id and claimGuestCart() would find nothing to
+        // claim (the guest's cart is still tagged with this original id).
+        $guestSessionId = session()->getId();
+
         Auth::login($user, remember: true);
+        CartItem::claimGuestCart($guestSessionId, $user->id);
         request()->session()->regenerate();
 
         if ($wasTrashed) {

@@ -290,8 +290,13 @@ class UserLogin extends Component
 
     private function completeLogin(User $user): void
     {
+        // Captured before Auth::login() — SessionGuard::login() regenerates the
+        // session id internally (session-fixation hardening), so reading
+        // session()->getId() after it returns the new id, not the guest's.
+        $guestSessionId = session()->getId();
+
         Auth::login($user, $this->remember);
-        CartItem::claimGuestCart(session()->getId(), Auth::id());
+        CartItem::claimGuestCart($guestSessionId, Auth::id());
         session()->regenerate();
 
         $this->redirect(session()->pull('url.intended', '/'), navigate: false);
@@ -452,8 +457,11 @@ class UserLogin extends Component
 
         Cache::forget($this->pendingKey($this->otpEmail));
 
+        // Captured before Auth::login() — see completeLogin() for why.
+        $guestSessionId = session()->getId();
+
         Auth::login($user);
-        CartItem::claimGuestCart(session()->getId(), Auth::id());
+        CartItem::claimGuestCart($guestSessionId, Auth::id());
         session()->regenerate();
 
         if ($wasTrashed) {
