@@ -12,6 +12,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -55,6 +56,23 @@ class EditBooking extends EditRecord
             $this->halt();
         }
 
+        // Same phantom-read gap as BookingForm::submit() — lockForUpdate() can't
+        // block on a row that doesn't exist yet, so two concurrent reschedules
+        // onto the same never-before-booked slot could both pass the check. Keyed
+        // identically to BookingForm's lock so a customer booking and an admin
+        // rescheduling onto the same slot at the same instant also serialise.
+        $lock = $startAt ? Cache::lock('booking-slot:' . $startAt->toDateTimeString(), 10) : null;
+
+        if ($lock && ! $lock->get()) {
+            Notification::make()
+                ->title('That slot is already booked')
+                ->body('Please pick a different start time.')
+                ->danger()
+                ->send();
+
+            $this->halt();
+        }
+
         try {
             DB::transaction(function () use ($record, $data, $startAt) {
                 if ($startAt && ! app(BookingService::class)->isSlotAvailable($startAt, ignoreBookingId: $record->getKey(), lock: true)) {
@@ -71,6 +89,8 @@ class EditBooking extends EditRecord
                 ->send();
 
             $this->halt();
+        } finally {
+            $lock?->release();
         }
 
         // Rescheduling invalidates a reminder already sent for the old time —

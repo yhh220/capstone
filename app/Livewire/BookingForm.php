@@ -10,6 +10,7 @@ use App\Models\Service;
 use App\Services\Booking\BookingService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
@@ -330,6 +331,20 @@ class BookingForm extends Component
             return;
         }
 
+        // lockForUpdate() below only locks rows that already exist — it can't stop
+        // two requests racing for the SAME never-before-booked slot, since neither
+        // sees a conflicting row to lock until one of them actually inserts. This
+        // cache lock serialises every attempt at this exact slot (booking here and
+        // rescheduling in EditBooking) so the second request always re-checks
+        // against the first one's committed result instead of a stale "it's free".
+        $lock = Cache::lock('booking-slot:' . $startAt->toDateTimeString(), 10);
+
+        if (! $lock->get()) {
+            $this->addError('preferred_time', __('This slot is already booked. Please pick another time.'));
+
+            return;
+        }
+
         try {
             $booking = DB::transaction(function () use ($startAt) {
                 if (! $this->bookingService()->isSlotAvailable($startAt, lock: true)) {
@@ -358,6 +373,8 @@ class BookingForm extends Component
             $this->addError('preferred_time', $e->getMessage());
 
             return;
+        } finally {
+            $lock->release();
         }
 
         $this->reference = $booking->reference;
