@@ -112,6 +112,36 @@ class OrderImporter extends Importer
         // Re-read after the cancelled block may have nullified it.
         $status = $this->data['status'] ?? null;
 
+        if ($status !== null && $status === $this->record->status) {
+            // Untouched re-import of an exported file — not an attempted
+            // transition, so the precursor checks below don't apply.
+            $this->data['status'] = null;
+            $status = null;
+        }
+
+        // The admin UI only ever changes status through markPaid/markShipped/
+        // markDelivered, each gated on the order currently being in the exact
+        // preceding state (and markPaid on payment_status being pending). An
+        // import row bypassing that lets a never-paid order jump straight to
+        // "delivered" — wrongly emailing the customer and leaving shipped_at/
+        // delivered_at stamped on an order that was never actually processed
+        // or shipped. Enforce the same forward-only chain here.
+        $requiredPrecursor = [
+            'processing' => 'pending',
+            'shipped'    => 'processing',
+            'delivered'  => 'shipped',
+        ];
+
+        if ($status !== null && isset($requiredPrecursor[$status]) && $this->record->status !== $requiredPrecursor[$status]) {
+            throw new RowImportFailedException(
+                "Cannot set status to \"{$status}\" — the order is currently \"{$this->record->status}\", but must be \"{$requiredPrecursor[$status]}\" first. Use the matching action on the order instead."
+            );
+        }
+
+        if ($status === 'processing' && $this->record->payment_status !== 'paid') {
+            throw new RowImportFailedException('Cannot mark this order as processing — it has not been paid yet. Use the "Mark Paid" action instead.');
+        }
+
         if ($status === 'shipped') {
             $trackingNumber = $this->data['tracking_number'] ?? null;
 
