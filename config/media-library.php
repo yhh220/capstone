@@ -27,9 +27,14 @@ return [
     'queue_name' => env('MEDIA_QUEUE', ''),
 
     /*
-     * By default all conversions will be performed on a queue.
+     * By default all conversions are performed on a queue — but this app runs
+     * QUEUE_CONNECTION=database with no queue:work process anywhere (Render
+     * only runs `php artisan serve`), so a queued conversion job would sit in
+     * the jobs table forever and the thumb/card URLs would 404. Default to
+     * running conversions synchronously instead; flip back to queued only
+     * once a real worker process exists.
      */
-    'queue_conversions_by_default' => env('QUEUE_CONVERSIONS_BY_DEFAULT', true),
+    'queue_conversions_by_default' => env('QUEUE_CONVERSIONS_BY_DEFAULT', false),
 
     /*
      * Should database transactions be run after database commits?
