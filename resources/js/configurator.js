@@ -93,7 +93,7 @@ let animationFrameId = null;
 let renderUntil = 0;
 let mixer;
 const doorActions = [];
-const clock = new THREE.Clock();
+const clock = new THREE.Timer();
 
 const cameraAnimation = {
     active: false,
@@ -502,7 +502,7 @@ function requestRender(duration = 350) {
     renderUntil = Math.max(renderUntil, performance.now() + duration);
 
     if (!animationFrameId) {
-        clock.getDelta();
+        clock.update();
         animationFrameId = requestAnimationFrame(animate);
     }
 }
@@ -718,7 +718,7 @@ function initThree() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.autoUpdate = false;
     renderer.shadowMap.needsUpdate = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
 
@@ -1069,6 +1069,7 @@ async function streamGlb(url, knownSize, onProgress) {
  */
 function animate() {
     const now = performance.now();
+    clock.update();
     const delta = clock.getDelta();
 
     let keepRendering = now < renderUntil;
