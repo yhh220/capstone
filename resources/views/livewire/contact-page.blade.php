@@ -26,7 +26,7 @@
                 <h2 class="text-2xl font-black text-brand-black dark:text-white mb-6">{{ __('Get In Touch') }}</h2>
 
                 <div class="flex items-start gap-4 group">
-                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 text-brand-black dark:text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:bg-brand-red group-hover:text-white group-hover:shadow-[0_4px_15px_rgba(232,100,96,0.3)] group-hover:-translate-y-1" aria-hidden="true">
+                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 text-brand-black dark:text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:bg-brand-red-solid group-hover:text-white group-hover:shadow-[0_4px_15px_rgba(232,100,96,0.3)] group-hover:-translate-y-1" aria-hidden="true">
                         <svg class="w-6 h-6 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                     </div>
                     <div>
@@ -35,7 +35,7 @@
                     </div>
                 </div>
                 <div class="flex items-start gap-4 group">
-                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 text-brand-black dark:text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:bg-brand-red group-hover:text-white group-hover:shadow-[0_4px_15px_rgba(232,100,96,0.3)] group-hover:-translate-y-1" aria-hidden="true">
+                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 text-brand-black dark:text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:bg-brand-red-solid group-hover:text-white group-hover:shadow-[0_4px_15px_rgba(232,100,96,0.3)] group-hover:-translate-y-1" aria-hidden="true">
                         <svg class="w-6 h-6 transition-transform duration-300 group-hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                     </div>
                     <div>
@@ -44,7 +44,7 @@
                     </div>
                 </div>
                 <div class="flex items-start gap-4 group">
-                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 text-brand-black dark:text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:bg-brand-red group-hover:text-white group-hover:shadow-[0_4px_15px_rgba(232,100,96,0.3)] group-hover:-translate-y-1" aria-hidden="true">
+                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 text-brand-black dark:text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:bg-brand-red-solid group-hover:text-white group-hover:shadow-[0_4px_15px_rgba(232,100,96,0.3)] group-hover:-translate-y-1" aria-hidden="true">
                         <svg class="w-6 h-6 transition-transform duration-300 group-hover:-rotate-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
                     </div>
                     <div>
@@ -54,7 +54,7 @@
                 </div>
                 @if($storeHours)
                 <div class="flex items-start gap-4 group">
-                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 text-brand-black dark:text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:bg-brand-red group-hover:text-white group-hover:shadow-[0_4px_15px_rgba(232,100,96,0.3)] group-hover:-translate-y-1" aria-hidden="true">
+                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 text-brand-black dark:text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:bg-brand-red-solid group-hover:text-white group-hover:shadow-[0_4px_15px_rgba(232,100,96,0.3)] group-hover:-translate-y-1" aria-hidden="true">
                         <svg class="w-6 h-6 transition-transform duration-300 group-hover:rotate-45" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     </div>
                     <div>
@@ -159,7 +159,7 @@
                         </div>
 
                         <button type="submit"
-                                class="group relative overflow-hidden w-full bg-brand-red text-white py-4 flex items-center justify-center gap-3 rounded-xl font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                                class="group relative overflow-hidden w-full bg-brand-red-solid text-white py-4 flex items-center justify-center gap-3 rounded-xl font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                                 wire:loading.attr="disabled"
                                 wire:loading.class="opacity-75"
                                 wire:target="submit">

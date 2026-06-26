@@ -17,7 +17,7 @@
                 @foreach([1 => __('Details'), 2 => __('Payment')] as $num => $label)
                 <div class="flex items-center gap-2 {{ $step >= $num ? 'text-brand-red' : 'text-gray-400' }}">
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-black
-                                {{ $step >= $num ? 'bg-brand-red text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500' }}">
+                                {{ $step >= $num ? 'bg-brand-red-solid text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500' }}">
                         @if($step > $num)
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                         @else
@@ -134,7 +134,7 @@
                 <button wire:click="goToStep2"
                         wire:loading.attr="disabled"
                         wire:target="goToStep2"
-                        class="group relative inline-flex justify-center items-center gap-2 flex-1 bg-brand-red text-white py-3 rounded-full font-black text-base sm:text-lg transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
+                        class="group relative inline-flex justify-center items-center gap-2 flex-1 bg-brand-red-solid text-white py-3 rounded-full font-black text-base sm:text-lg transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
                     <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] group-active:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
                     <span class="relative z-10" wire:loading.remove wire:target="goToStep2">{{ __('Continue to Payment') }}</span>
                     <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1" wire:loading.remove wire:target="goToStep2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
@@ -296,7 +296,7 @@
                         @click="$store.confirm.ask(@js(__('Demo mode — no real payment will be charged. Place this test order?')), () => $wire.placeOrder())"
                         wire:loading.attr="disabled"
                         wire:target="placeOrder"
-                        class="group relative inline-flex justify-center items-center gap-2 flex-1 bg-brand-red text-white py-3 rounded-full font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-50">
+                        class="group relative inline-flex justify-center items-center gap-2 flex-1 bg-brand-red-solid text-white py-3 rounded-full font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-50">
                     <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] group-active:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
                     <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110" wire:loading.remove wire:target="placeOrder" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     <span class="relative z-10" wire:loading.remove wire:target="placeOrder">{{ __('Place Order (Demo)') }}</span>

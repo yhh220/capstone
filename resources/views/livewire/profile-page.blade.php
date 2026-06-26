@@ -85,7 +85,7 @@
             <div class="flex justify-end">
                 <button type="submit"
                         wire:loading.attr="disabled"
-                        class="group relative overflow-hidden bg-brand-red text-white px-8 py-3 flex items-center justify-center gap-2 rounded-full font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
+                        class="group relative overflow-hidden bg-brand-red-solid text-white px-8 py-3 flex items-center justify-center gap-2 rounded-full font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
                     <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 group-active:translate-x-0 transition-transform duration-500 ease-out"></span>
                     <span class="relative z-10" wire:loading.remove wire:target="updateProfile">{{ __('Save Changes') }}</span>
                     <span class="relative z-10 hidden" wire:loading.class.remove="hidden" wire:target="updateProfile">{{ __('Saving...') }}</span>
@@ -154,7 +154,7 @@
 
             @if(! $settingPassword)
                 <button type="button" wire:click="sendSetPasswordCode" wire:loading.attr="disabled" wire:target="sendSetPasswordCode"
-                        class="bg-brand-red text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
+                        class="bg-brand-red-solid text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
                     <span wire:loading.remove wire:target="sendSetPasswordCode">{{ __('Send verification code') }}</span>
                     <span wire:loading wire:target="sendSetPasswordCode">{{ __('Sending...') }}</span>
                 </button>
@@ -282,7 +282,7 @@
             @elseif(! $enablingTwoFactor)
                 {{-- Disabled → offer to enable (email-code gated) --}}
                 <button type="button" wire:click="sendEnableTwoFactorCode" wire:loading.attr="disabled" wire:target="sendEnableTwoFactorCode"
-                        class="bg-brand-red text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
+                        class="bg-brand-red-solid text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50">
                     <span wire:loading.remove wire:target="sendEnableTwoFactorCode">{{ __('Turn on') }}</span>
                     <span wire:loading wire:target="sendEnableTwoFactorCode">{{ __('Sending...') }}</span>
                 </button>

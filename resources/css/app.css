@@ -19,6 +19,15 @@
     --color-brand-red: rgb(var(--brand-red-rgb));
     --color-brand-yellow: rgb(var(--brand-yellow-rgb));
     --color-brand-black: rgb(var(--brand-black-rgb));
+
+    /* Solid red fills paired with white text (buttons, badges) — kept separate
+       from --color-brand-red because that token also colors red TEXT directly
+       on a dark background, where the lighter Ember Light is what keeps ITS
+       contrast passing. Dark mode's --brand-red-rgb (Ember Light) only gives
+       white-on-fill 3.27:1, below WCAG AA's 4.5:1; this stays Ember Red in both
+       themes so it holds 4.91:1. See layouts/app.blade.php's :root comment. */
+    --color-brand-red-solid: rgb(var(--btn-primary-bg-rgb));
+    --color-brand-red-solid-hover: rgb(var(--btn-primary-bg-hover-rgb));
 }
 
 /* AOS entrance animations offset elements (e.g. fade-left starts at

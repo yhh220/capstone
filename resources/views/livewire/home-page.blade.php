@@ -100,7 +100,7 @@
                 <a href="{{ route('products', ['category' => $category->id]) }}"
                    data-aos="fade-up" data-aos-delay="{{ $i * 50 }}"
                    class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 transition-all duration-300 hover:border-brand-red/50 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]">
-                    <div class="w-10 h-10 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center mb-4 transition-colors duration-300 group-hover:bg-brand-red group-hover:text-white" aria-hidden="true">
+                    <div class="w-10 h-10 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center mb-4 transition-colors duration-300 group-hover:bg-brand-red-solid group-hover:text-white" aria-hidden="true">
                         <i data-lucide="{{ $category->icon }}" class="w-5 h-5"></i>
                     </div>
                     <div class="font-bold text-sm text-gray-800 dark:text-gray-100 leading-snug group-hover:text-brand-red transition-colors">{{ __($category->name) }}</div>
@@ -149,7 +149,7 @@
                             </div>
                         @endif
                         @if($shoppingEnabled && $product->sale_price && $product->sale_price < $product->price)
-                        <span class="absolute top-3 left-3 bg-brand-red text-white text-xs font-bold px-2 py-1 rounded-full">{{ __('SALE') }}</span>
+                        <span class="absolute top-3 left-3 bg-brand-red-solid text-white text-xs font-bold px-2 py-1 rounded-full">{{ __('SALE') }}</span>
                         @endif
                     </div>
                     <div class="p-4 flex flex-col flex-1">
@@ -203,7 +203,7 @@
                 ] as $i => [$cardIcon, $title, $description])
                 <div data-aos="fade-up" data-aos-delay="{{ $i * 75 }}"
                      class="group p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl transition-all duration-300 hover:border-brand-red/50 hover:shadow-md hover:-translate-y-0.5">
-                    <div class="w-11 h-11 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center mb-5 transition-colors duration-300 group-hover:bg-brand-red group-hover:text-white" aria-hidden="true">{!! $cardIcon !!}</div>
+                    <div class="w-11 h-11 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center mb-5 transition-colors duration-300 group-hover:bg-brand-red-solid group-hover:text-white" aria-hidden="true">{!! $cardIcon !!}</div>
                     <h3 class="text-xl text-brand-black dark:text-white mb-2.5">{{ $title }}</h3>
                     <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{{ $description }}</p>
                 </div>
@@ -377,11 +377,11 @@
                 {{-- Manual controls --}}
                 <div class="flex justify-end gap-2 mt-3">
                     <button type="button" @click="prev()" aria-label="{{ __('Previous') }}"
-                            class="w-9 h-9 rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-brand-red hover:text-white hover:border-brand-red transition-colors flex items-center justify-center">
+                            class="w-9 h-9 rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-brand-red-solid hover:text-white hover:border-brand-red transition-colors flex items-center justify-center">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
                     </button>
                     <button type="button" @click="next()" aria-label="{{ __('Next') }}"
-                            class="w-9 h-9 rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-brand-red hover:text-white hover:border-brand-red transition-colors flex items-center justify-center">
+                            class="w-9 h-9 rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-brand-red-solid hover:text-white hover:border-brand-red transition-colors flex items-center justify-center">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                 </div>

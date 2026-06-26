@@ -22,7 +22,7 @@
             <span class="flex-1 min-w-0">
                 <span class="flex items-center gap-2 font-black text-sm sm:text-base">
                     {{ __('Try Our 3D Configurator') }}
-                    <span class="text-[9px] font-bold uppercase tracking-wider bg-brand-red px-1.5 py-0.5 rounded">{{ __('Beta') }}</span>
+                    <span class="text-[9px] font-bold uppercase tracking-wider bg-brand-red-solid px-1.5 py-0.5 rounded">{{ __('Beta') }}</span>
                 </span>
                 <span class="block text-xs sm:text-sm text-gray-300 truncate">{{ __('Customise your build and preview it in 3D before you buy.') }}</span>
             </span>
@@ -194,7 +194,7 @@
                                 </div>
                                 @endif
                                 @if($shoppingEnabled && $product->sale_price && $product->sale_price < $product->price)
-                                <div class="absolute top-3 left-3 bg-brand-red text-white text-xs font-bold px-2 py-1 rounded-full">
+                                <div class="absolute top-3 left-3 bg-brand-red-solid text-white text-xs font-bold px-2 py-1 rounded-full">
                                     {{ __('SALE') }}
                                 </div>
                                 @endif
@@ -470,27 +470,27 @@
                 <div class="sidebar-section" id="section-rims">
                     <div class="section-title">{{ __('Choose Rims') }}</div>
                     <div class="options-grid">
-                        <div class="option-card active" data-category="rims" data-item="rim7">
+                        <button type="button" class="option-card active" data-category="rims" data-item="rim7">
                             <span class="option-name">{{ __('Sport Rims (Default)') }}</span>
-                        </div>
-                        <div class="option-card" data-category="rims" data-item="rim1">
+                        </button>
+                        <button type="button" class="option-card" data-category="rims" data-item="rim1">
                             <span class="option-name">{{ __('Vossen CV3 Style') }}</span>
-                        </div>
-                        <div class="option-card" data-category="rims" data-item="rim2">
+                        </button>
+                        <button type="button" class="option-card" data-category="rims" data-item="rim2">
                             <span class="option-name">{{ __('BBS Super RS Style') }}</span>
-                        </div>
-                        <div class="option-card" data-category="rims" data-item="rim3">
+                        </button>
+                        <button type="button" class="option-card" data-category="rims" data-item="rim3">
                             <span class="option-name">{{ __('Rotiform LAS-R Style') }}</span>
-                        </div>
-                        <div class="option-card" data-category="rims" data-item="rim4">
+                        </button>
+                        <button type="button" class="option-card" data-category="rims" data-item="rim4">
                             <span class="option-name">{{ __('HRE P101 Style') }}</span>
-                        </div>
-                        <div class="option-card" data-category="rims" data-item="rim5">
+                        </button>
+                        <button type="button" class="option-card" data-category="rims" data-item="rim5">
                             <span class="option-name">{{ __('Advan Racing GT Style') }}</span>
-                        </div>
-                        <div class="option-card" data-category="rims" data-item="rim6">
+                        </button>
+                        <button type="button" class="option-card" data-category="rims" data-item="rim6">
                             <span class="option-name">{{ __('TE37 Black Edition') }}</span>
-                        </div>
+                        </button>
                     </div>
                 </div>
 
@@ -498,18 +498,18 @@
                 <div class="sidebar-section" id="section-spoilers">
                     <div class="section-title">{{ __('Choose Spoiler') }}</div>
                     <div class="options-grid">
-                        <div class="option-card active" data-category="spoilers" data-item="wing4">
+                        <button type="button" class="option-card active" data-category="spoilers" data-item="wing4">
                             <span class="option-name">{{ __('Integrated Lip (Default)') }}</span>
-                        </div>
-                        <div class="option-card" data-category="spoilers" data-item="wing1">
+                        </button>
+                        <button type="button" class="option-card" data-category="spoilers" data-item="wing1">
                             <span class="option-name">{{ __('Carbon Fiber High Wing') }}</span>
-                        </div>
-                        <div class="option-card" data-category="spoilers" data-item="wing2">
+                        </button>
+                        <button type="button" class="option-card" data-category="spoilers" data-item="wing2">
                             <span class="option-name">{{ __('GT Performance Wing') }}</span>
-                        </div>
-                        <div class="option-card" data-category="spoilers" data-item="wing3">
+                        </button>
+                        <button type="button" class="option-card" data-category="spoilers" data-item="wing3">
                             <span class="option-name">{{ __('Sleek Ducktail Wing') }}</span>
-                        </div>
+                        </button>
                     </div>
                 </div>
 
@@ -517,12 +517,12 @@
                 <div class="sidebar-section" id="section-bumpers">
                     <div class="section-title">{{ __('Choose Front Bumper') }}</div>
                     <div class="options-grid">
-                        <div class="option-card active" data-category="bumpers" data-item="bumperF3">
+                        <button type="button" class="option-card active" data-category="bumpers" data-item="bumperF3">
                             <span class="option-name">{{ __('Standard Sport (Default)') }}</span>
-                        </div>
-                        <div class="option-card" data-category="bumpers" data-item="bumperF2">
+                        </button>
+                        <button type="button" class="option-card" data-category="bumpers" data-item="bumperF2">
                             <span class="option-name">{{ __('Widebody Spec Bumper') }}</span>
-                        </div>
+                        </button>
                     </div>
                 </div>
 
@@ -530,24 +530,24 @@
                 <div class="sidebar-section" id="section-tint">
                     <div class="section-title">{{ __('Choose Window Tint Level') }}</div>
                     <div class="options-grid">
-                        <div class="option-card active" data-tint="100">
+                        <button type="button" class="option-card active" data-tint="100">
                             <span class="option-name">{{ __('100% (Fully Transparent)') }}</span>
-                        </div>
-                        <div class="option-card" data-tint="70">
+                        </button>
+                        <button type="button" class="option-card" data-tint="70">
                             <span class="option-name">{{ __('70% Tint') }}</span>
-                        </div>
-                        <div class="option-card" data-tint="50">
+                        </button>
+                        <button type="button" class="option-card" data-tint="50">
                             <span class="option-name">{{ __('50% Tint') }}</span>
-                        </div>
-                        <div class="option-card" data-tint="35">
+                        </button>
+                        <button type="button" class="option-card" data-tint="35">
                             <span class="option-name">{{ __('35% Tint') }}</span>
-                        </div>
-                        <div class="option-card" data-tint="15">
+                        </button>
+                        <button type="button" class="option-card" data-tint="15">
                             <span class="option-name">{{ __('15% Tint') }}</span>
-                        </div>
-                        <div class="option-card" data-tint="5">
+                        </button>
+                        <button type="button" class="option-card" data-tint="5">
                             <span class="option-name">{{ __('5% Tint (Darkest)') }}</span>
-                        </div>
+                        </button>
                     </div>
                 </div>
 
@@ -555,18 +555,18 @@
                 <div class="sidebar-section" id="section-dashcams">
                     <div class="section-title">{{ __('Choose Dash Camera') }}</div>
                     <div class="options-grid">
-                        <div class="option-card active" data-category="dashcams" data-item="dashcam0">
+                        <button type="button" class="option-card active" data-category="dashcams" data-item="dashcam0">
                             <span class="option-name">{{ __('None (Default)') }}</span>
-                        </div>
-                        <div class="option-card" data-category="dashcams" data-item="dashcam1">
+                        </button>
+                        <button type="button" class="option-card" data-category="dashcams" data-item="dashcam1">
                             <span class="option-name">{{ __('Mohawk') }}</span>
-                        </div>
-                        <div class="option-card" data-category="dashcams" data-item="dashcam2">
+                        </button>
+                        <button type="button" class="option-card" data-category="dashcams" data-item="dashcam2">
                             <span class="option-name">{{ __('70mai') }}</span>
-                        </div>
-                        <div class="option-card" data-category="dashcams" data-item="dashcam3">
+                        </button>
+                        <button type="button" class="option-card" data-category="dashcams" data-item="dashcam3">
                             <span class="option-name">{{ __('DDPAI') }}</span>
-                        </div>
+                        </button>
                     </div>
                 </div>
             </div>

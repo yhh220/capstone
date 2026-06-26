@@ -137,14 +137,14 @@
                     @else
                     @auth
                     <a href="{{ route('checkout') }}"
-                       class="group relative overflow-hidden block w-full bg-brand-red text-white text-center py-3.5 rounded-full font-bold text-lg mt-6 transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95">
+                       class="group relative overflow-hidden block w-full bg-brand-red-solid text-white text-center py-3.5 rounded-full font-bold text-lg mt-6 transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95">
                         <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 group-active:translate-x-0 transition-transform duration-500 ease-out"></span>
                         <span class="relative z-10">{{ __('Proceed to Checkout') }}</span>
                     </a>
                     @else
                     {{-- Guests must sign in first — show a prompt instead of a silent redirect --}}
                     <button type="button" onclick="window.dispatchEvent(new CustomEvent('require-signin'))"
-                       class="group relative overflow-hidden block w-full bg-brand-red text-white text-center py-3.5 rounded-full font-bold text-lg mt-6 transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95">
+                       class="group relative overflow-hidden block w-full bg-brand-red-solid text-white text-center py-3.5 rounded-full font-bold text-lg mt-6 transition-all duration-300 shadow-lg hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-0.5 active:scale-95">
                         <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 group-active:translate-x-0 transition-transform duration-500 ease-out"></span>
                         <span class="relative z-10">{{ __('Proceed to Checkout') }}</span>
                     </button>
@@ -172,7 +172,7 @@
             <h2 class="text-2xl font-black text-gray-700 dark:text-gray-200 mb-2">{{ __('Your cart is empty') }}</h2>
             <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('Explore our products and add something you love!') }}</p>
             <a href="{{ route('products') }}"
-               class="group relative inline-flex items-center gap-2 bg-brand-red text-white px-8 py-3 rounded-full font-bold transition-all duration-300 overflow-hidden hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 active:scale-95">
+               class="group relative inline-flex items-center gap-2 bg-brand-red-solid text-white px-8 py-3 rounded-full font-bold transition-all duration-300 overflow-hidden hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 active:scale-95">
                 <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 group-active:translate-x-0 transition-transform duration-500 ease-out"></span>
                 <span class="relative z-10">{{ __('Browse Products') }}</span>
             </a>

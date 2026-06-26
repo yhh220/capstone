@@ -105,12 +105,23 @@
             --brand-yellow-rgb: 232 100 96;   /* #E86460 — Ember Light (accent/glow) */
             --brand-black-rgb: 18 18 18;      /* #121212 — Carbon Black */
             --brand-red-hover-rgb: 168 52 50; /* #A83432 — Ember Dark (hover) */
+            /* Dedicated to .btn-primary's fill — kept separate from --brand-red-rgb
+               because that token also colors ghost/secondary button TEXT on a dark
+               background, where the lighter Ember Light is what keeps ITS contrast
+               passing. Reusing it for the primary button's white-on-fill background
+               would fix one and break the other, so the button gets its own pair,
+               fixed to the values that keep white text >= 4.5:1 in both themes. */
+            --btn-primary-bg-rgb: 200 65 61;       /* #C8413D — Ember Red, white text = 4.91:1 */
+            --btn-primary-bg-hover-rgb: 168 52 50; /* #A83432 — Ember Dark, white text = 6.56:1 */
         }
         .dark {
             --brand-red-rgb: 232 100 96;      /* #E86460 — Ember Light on dark */
             --brand-yellow-rgb: 232 224 216;  /* #E8E0D8 — Bone White accent */
             --brand-black-rgb: 28 25 23;      /* #1C1917 — Asphalt surface */
             --brand-red-hover-rgb: 200 65 61; /* #C8413D — Ember Red hover on dark */
+            /* Unchanged from :root — the lighter Ember Light used elsewhere in dark
+               mode (--brand-red-rgb) only gave white button text 3.27:1, below WCAG
+               AA's 4.5:1. Kept identical to light mode so .btn-primary passes in both. */
         }
 
         /* Carbon-black body in dark mode */
@@ -394,16 +405,17 @@
         /* Pill variant */
         .btn-pill { border-radius: 9999px; }
 
-        /* Primary — red fill */
+        /* Primary — red fill. Uses --btn-primary-bg-rgb (not --brand-red-rgb) so the
+           white button text stays >= 4.5:1 in dark mode too — see the :root comment. */
         .btn-primary {
-            background-color: rgb(var(--brand-red-rgb));
+            background-color: rgb(var(--btn-primary-bg-rgb));
             color: #fff;
-            box-shadow: 0 6px 20px rgba(var(--brand-red-rgb), 0.35);
+            box-shadow: 0 6px 20px rgba(var(--btn-primary-bg-rgb), 0.35);
         }
         .btn-primary:hover {
-            background-color: rgb(var(--brand-red-hover-rgb));
+            background-color: rgb(var(--btn-primary-bg-hover-rgb));
             transform: translateY(-4px);
-            box-shadow: 0 10px 30px rgba(var(--brand-red-rgb), 0.5);
+            box-shadow: 0 10px 30px rgba(var(--btn-primary-bg-rgb), 0.5);
         }
 
         /* Secondary — bordered, red on hover */
@@ -635,7 +647,7 @@
                                    role="menuitem"
                                    data-lang-code="{{ $code }}"
                                    data-lang-url="{{ route('lang', $code) }}"
-                                   class="lang-option w-full text-left flex items-center gap-2.5 px-2 py-1.5 rounded-lg active:scale-95 transition-all duration-150 {{ $isActive ? 'bg-brand-red text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700' }}">
+                                   class="lang-option w-full text-left flex items-center gap-2.5 px-2 py-1.5 rounded-lg active:scale-95 transition-all duration-150 {{ $isActive ? 'bg-brand-red-solid text-white' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700' }}">
                                     <span class="w-8 shrink-0 text-center text-[10px] font-black uppercase tracking-wider rounded py-1 {{ $isActive ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300' }}">{{ $short }}</span>
                                     <span class="flex-1 text-sm font-bold">{{ $name }}</span>
                                     @if($isActive)
@@ -682,7 +694,7 @@
                                 class="group flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-300 hover:shadow-sm"
                                 aria-label="{{ __('User menu') }}">
                             @auth
-                                <div class="w-6 h-6 rounded-full bg-brand-red flex items-center justify-center text-white text-[11px] font-black group-hover:scale-110 transition-transform duration-300">
+                                <div class="w-6 h-6 rounded-full bg-brand-red-solid flex items-center justify-center text-white text-[11px] font-black group-hover:scale-110 transition-transform duration-300">
                                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                                 </div>
                             @else
@@ -762,13 +774,13 @@
                     <button type="button"
                             @click="cartOpen = true"
                             aria-label="{{ __('Open cart') }}"
-                            class="group relative p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-brand-red hover:text-white border border-transparent hover:border-brand-red active:scale-90 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                            class="group relative p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-brand-red-solid hover:text-white border border-transparent hover:border-brand-red active:scale-90 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
                         <svg class="w-4 h-4 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-[10deg]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
                         </svg>
                         <span id="cart-count-badge"
                               @if($cartCount <= 0) style="display:none;" @endif
-                              class="absolute -top-1 -right-1 bg-brand-red text-white text-[10px] leading-none font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center shadow-sm group-hover:bg-white group-hover:text-brand-red">
+                              class="absolute -top-1 -right-1 bg-brand-red-solid text-white text-[10px] leading-none font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center shadow-sm group-hover:bg-white group-hover:text-brand-red">
                             {{ $cartCount > 9 ? '9+' : $cartCount }}
                         </span>
                     </button>
@@ -833,7 +845,7 @@
                     @auth
                         <div class="px-3 py-2 mb-1">
                             <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-full bg-brand-red flex items-center justify-center text-white text-sm font-black">
+                                <div class="w-8 h-8 rounded-full bg-brand-red-solid flex items-center justify-center text-white text-sm font-black">
                                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                                 </div>
                                 <div>
@@ -974,7 +986,7 @@
             <svg class="w-5 h-5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
             <span class="text-sm font-semibold">{{ __('Added to cart') }}</span>
             <button type="button" @click="$dispatch('open-cart'); show = false"
-                    class="text-xs font-bold bg-brand-red hover:bg-red-700 text-white px-3 py-1.5 rounded-full transition-colors">
+                    class="text-xs font-bold bg-brand-red-solid hover:bg-red-700 text-white px-3 py-1.5 rounded-full transition-colors">
                 {{ __('View cart') }}
             </button>
         </div>
@@ -1308,7 +1320,7 @@
                     {{ __('Cancel') }}
                 </button>
                 <button type="button" @click="$store.confirm.accept()"
-                        class="px-5 py-2 rounded-xl text-sm font-black text-white bg-brand-red hover:shadow-[0_4px_15px_rgb(var(--brand-red-rgb)_/_0.4)] transition-all active:scale-95"
+                        class="px-5 py-2 rounded-xl text-sm font-black text-white bg-brand-red-solid hover:shadow-[0_4px_15px_rgb(var(--brand-red-rgb)_/_0.4)] transition-all active:scale-95"
                         x-text="$store.confirm.confirmText"></button>
             </div>
         </div>

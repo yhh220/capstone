@@ -89,7 +89,7 @@
     </section>
 
 
-    <section class="py-16 bg-brand-red text-white" aria-labelledby="core-values-heading">
+    <section class="py-16 bg-brand-red-solid text-white" aria-labelledby="core-values-heading">
         <div class="max-w-7xl mx-auto px-4">
             <div class="text-center mb-12" data-aos="fade-up">
                 <h2 id="core-values-heading" class="text-3xl sm:text-4xl font-black mb-3">{{ __('Our Core Values') }}</h2>

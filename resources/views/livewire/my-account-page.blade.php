@@ -13,13 +13,13 @@
             @if($shoppingEnabled)
             <button wire:click="setTab('orders')" role="tab"
                     class="px-5 py-2.5 rounded-full text-sm font-bold transition-colors
-                           {{ $tab === 'orders' ? 'bg-brand-red text-white shadow-sm' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                           {{ $tab === 'orders' ? 'bg-brand-red-solid text-white shadow-sm' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                 {{ __('Orders') }}
             </button>
             @endif
             <button wire:click="setTab('bookings')" role="tab"
                     class="px-5 py-2.5 rounded-full text-sm font-bold transition-colors
-                           {{ $tab === 'bookings' ? 'bg-brand-red text-white shadow-sm' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                           {{ $tab === 'bookings' ? 'bg-brand-red-solid text-white shadow-sm' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                 {{ __('Bookings') }}
             </button>
         </div>
@@ -168,7 +168,7 @@
                 </div>
                 <h2 class="text-2xl font-black text-gray-700 dark:text-gray-200 mb-2">{{ __('No orders yet') }}</h2>
                 <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('Start shopping and your orders will appear here!') }}</p>
-                <a href="{{ route('products') }}" class="group relative inline-flex items-center gap-2 bg-brand-red text-white px-8 py-3 rounded-full font-bold transition-all duration-300 overflow-hidden hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 active:scale-95">
+                <a href="{{ route('products') }}" class="group relative inline-flex items-center gap-2 bg-brand-red-solid text-white px-8 py-3 rounded-full font-bold transition-all duration-300 overflow-hidden hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 active:scale-95">
                     <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 group-active:translate-x-0 transition-transform duration-500 ease-out"></span>
                     <span class="relative z-10">{{ __('Browse Products') }}</span>
                 </a>
@@ -239,7 +239,7 @@
                 </div>
                 <h2 class="text-2xl font-black text-gray-700 dark:text-gray-200 mb-2">{{ __('No bookings yet') }}</h2>
                 <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('Book a service and it will show up here.') }}</p>
-                <a href="{{ route('booking') }}" class="group relative inline-flex items-center gap-2 bg-brand-red text-white px-8 py-3 rounded-full font-bold transition-all duration-300 overflow-hidden hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 active:scale-95">
+                <a href="{{ route('booking') }}" class="group relative inline-flex items-center gap-2 bg-brand-red-solid text-white px-8 py-3 rounded-full font-bold transition-all duration-300 overflow-hidden hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 active:scale-95">
                     <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 group-active:translate-x-0 transition-transform duration-500 ease-out"></span>
                     <span class="relative z-10">{{ __('Book a Service') }}</span>
                 </a>

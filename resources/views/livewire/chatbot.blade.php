@@ -71,7 +71,7 @@
                     bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700/60">
 
             <div class="flex items-center gap-3 relative z-10 min-w-0">
-                <div class="w-10 h-10 flex-shrink-0 rounded-xl bg-brand-red text-white flex items-center justify-center">
+                <div class="w-10 h-10 flex-shrink-0 rounded-xl bg-brand-red-solid text-white flex items-center justify-center">
                     {!! $icon('car', 'w-6 h-6') !!}
                 </div>
                 <div class="min-w-0">
@@ -138,7 +138,7 @@
                 <div class="max-w-[80%] flex flex-col {{ $msg['role'] === 'user' ? 'items-end' : 'items-start' }}">
                     <div class="rounded-2xl px-4 py-2.5 shadow-sm
                         {{ $msg['role'] === 'user'
-                            ? 'bg-brand-red text-white rounded-br-md'
+                            ? 'bg-brand-red-solid text-white rounded-br-md'
                             : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700/60 rounded-bl-md' }}">
                         <span class="leading-relaxed whitespace-pre-wrap text-[14px]">{!! $msg['role'] === 'user' ? e($msg['text']) : $formatBot($msg['text']) !!}</span>
                     </div>
@@ -148,7 +148,7 @@
                     {{-- Full-page navigation (no wire:navigate) — matches the rest of the
                          site and lets the <head> theme script re-apply dark mode cleanly. --}}
                     <a href="{{ $msg['cta']['url'] }}"
-                       class="group mt-2 inline-flex items-center gap-2 bg-brand-red text-white text-[13px] font-bold pl-4 pr-3 py-2 rounded-xl shadow-sm
+                       class="group mt-2 inline-flex items-center gap-2 bg-brand-red-solid text-white text-[13px] font-bold pl-4 pr-3 py-2 rounded-xl shadow-sm
                               hover:shadow-[0_6px_18px_rgb(var(--brand-red-rgb)_/_0.4)] hover:-translate-y-0.5 active:scale-95 transition-all duration-300">
                         <span>{{ $msg['cta']['label'] }}</span>
                         {!! $icon('arrow-right', 'w-4 h-4 transition-transform duration-300 group-hover:translate-x-1') !!}
@@ -163,7 +163,7 @@
                                 wire:loading.attr="disabled"
                                 wire:target="sendMessage,quickAsk,generateReply"
                                 class="text-[12px] font-semibold px-3 py-1.5 rounded-full border border-brand-red/30 text-brand-red bg-brand-red/5
-                                       hover:bg-brand-red hover:text-white hover:border-brand-red active:scale-95 transition-all duration-300 disabled:opacity-50">
+                                       hover:bg-brand-red-solid hover:text-white hover:border-brand-red active:scale-95 transition-all duration-300 disabled:opacity-50">
                             {{ $sug['label'] }}
                         </button>
                         @endforeach
@@ -242,7 +242,7 @@
                         wire:target="sendMessage,quickAsk,generateReply"
                         @disabled($isLoading)
                         class="group w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
-                               bg-brand-red text-white shadow-md shadow-red-500/20
+                               bg-brand-red-solid text-white shadow-md shadow-red-500/20
                                hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/40 hover:-translate-y-0.5 active:scale-95
                                disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                         aria-label="{{ $ui['send'] }}">
@@ -273,7 +273,7 @@
         <div class="relative group">
             <button wire:click="{{ $isOpen ? 'close' : 'open' }}"
                     class="relative w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center overflow-hidden
-                           bg-brand-red text-white
+                           bg-brand-red-solid text-white
                            shadow-[0_8px_30px_rgb(var(--brand-red-rgb)_/_0.45)]
                            hover:shadow-[0_8px_40px_rgb(var(--brand-red-rgb)_/_0.65)] hover:scale-110 active:scale-95
                            transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-red/30"

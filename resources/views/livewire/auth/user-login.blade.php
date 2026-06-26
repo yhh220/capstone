@@ -195,7 +195,7 @@
                          wire:click still fires to swap the form markup and reset validation. --}}
                     <div x-data="{ isLogin: $wire.entangle('isLoginTab') }"
                          class="relative grid grid-cols-2 p-1 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8">
-                        <div class="absolute top-1 bottom-1 left-1 rounded-lg bg-brand-red transition-transform duration-300 ease-out"
+                        <div class="absolute top-1 bottom-1 left-1 rounded-lg bg-brand-red-solid transition-transform duration-300 ease-out"
                              :style="{ transform: 'translateX(' + (isLogin ? '0%' : '100%') + ')' }"
                              style="width: calc(50% - 0.25rem); box-shadow: 0 4px 14px rgba(200,65,61,0.45);" aria-hidden="true"></div>
                         <button type="button" @click="isLogin = true" wire:click="switchTab(true)"

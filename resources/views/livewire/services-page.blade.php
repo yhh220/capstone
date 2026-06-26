@@ -58,7 +58,7 @@
                     $blobStyles = [
                         ['bg-brand-red/10 dark:bg-brand-red/15 text-brand-red', 'svc-blob'],
                         ['bg-gray-900 text-brand-red',                           'svc-blob-alt'],
-                        ['bg-brand-red text-white',                              'svc-blob'],
+                        ['bg-brand-red-solid text-white',                        'svc-blob'],
                         ['bg-gray-800 text-brand-yellow',                        'svc-blob-alt'],
                     ];
                 @endphp
