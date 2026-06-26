@@ -310,6 +310,8 @@ The visual language is sourced from a fixed set of reference libraries (kept con
 | 4.10 | Rate limiting | `throttle:5,1` (invoices, order tracker), `throttle:20,1` (payment); OTP resend 60 s cooldown; register 5/10 min per IP ([UserLogin.php](../app/Livewire/Auth/UserLogin.php), [EmailOtpService.php](../app/Services/EmailOtpService.php)) |
 | 4.11 | HTTPS/SSL readiness | `trustProxies(at:'*')` in [bootstrap/app.php](../bootstrap/app.php) so URLs render `https://` behind Render's proxy; HSTS header when `request->secure()` |
 | 4.12 | Sensitive data | `.env`, `.env.*` git-ignored; password excluded from activity log & `#[Hidden]`; `role` **not** mass-assignable (privilege-escalation guard); seeder refuses to run without explicit admin creds (no public default) |
+| 4.13 | Secret-leak audit (verified) | **Whole git history scanned — no secrets leaked.** Only `.env.example` (placeholder template) is tracked; the real `.env` was never committed; TiDB host/username/password appear in **no** commit; the one-off credential scripts used during deploy were never committed; no hardcoded passwords/API keys/tokens in any tracked file; this audit doc itself contains no live credentials. Live secrets exist only in the local `.env` + Render's encrypted env vars. |
+| 4.14 | Production DB protection | TiDB Serverless is **TLS-enforced + username/password** (plain connections are rejected). **Not** a "public, unprotected" database. Caveat: the free tier has **no IP allowlist** by default, so the (strong, random, un-leaked) credential is the sole gatekeeper — optional hardening: restrict to Render's egress IPs in the TiDB console. |
 | — | Security headers | [SecurityHeaders.php](../app/Http/Middleware/SecurityHeaders.php): CSP, X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy, HSTS; strips `X-Powered-By`/`Server` |
 | — | Honeypot | `spatie/laravel-honeypot` enabled w/ randomized field name + timing check ([config/honeypot.php](../config/honeypot.php)) |
 | — | Open-redirect guard | Language switcher + social callback only return to same-host URLs |
@@ -473,6 +475,8 @@ capstone/
 - **PWA** — `site.webmanifest` present but **no service worker** (not an installable offline PWA).
 - **Dormant interface method** — [ChatServiceInterface](../app/Contracts/ChatServiceInterface.php) declares `recommend()` (product recommendation) but it is **not wired up anywhere** (only `chat()` and `generateDescription()` are used).
 - **Removed feature** — a `gallery_items` table/feature existed earlier and was **fully dropped** (migration `drop_gallery_items_table`); no gallery in the live app.
+- **Backup hardening** — no app-level automated DB backup (relies on TiDB's managed backups); adding a scheduled `mysqldump`/`spatie/laravel-backup` export would give an independent off-provider copy (see §22.8).
+- **DB network hardening** — TiDB free tier has no IP allowlist; restricting connections to Render's egress IPs would add defense-in-depth beyond the credential (see §4.14). *(No secret leak found — see §4.13.)*
 
 ---
 
@@ -791,7 +795,7 @@ Powered by `artesaos/seotools` ([config/seotools.php](../config/seotools.php)), 
 | 22.5 | Static assets | `php artisan storage:link` on boot; `storage/app/public` committed to git (Render has no persistent disk) |
 | 22.6 | Continuous deployment | Auto-deploy from GitHub `main` on push (Render native) |
 | 22.7 | Error monitoring | Laravel multi-channel logging + DB `app_logs` table viewable in admin **Logs** + **System Status** page. No Sentry/Bugsnag |
-| 22.8 | Backup | Manual SQLite backups during dev; TiDB managed service for prod. No automated backup job in repo |
+| 22.8 | Backup strategy | **Dev:** a manual SQLite snapshot exists (`database/database.sqlite.backup-…`, git-ignored, taken before the pre-launch data wipe). **Prod:** relies on **TiDB Serverless's built-in managed backups** (automatic snapshots / PITR). ⚠️ **No application-level backup job** in the repo (no `spatie/laravel-backup`/`mysqldump` cron) — recommended future hardening for an independent off-provider copy. |
 | — | Scheduler | No native cron on Render free tier → external **cron-job.org** pings `/cron/run-schedule/{CRON_SECRET}` every 10 min, running `schedule:run` (also keeps the instance warm) |
 | — | Boot tasks | [docker-entrypoint.sh](../docker-entrypoint.sh): storage:link, migrate --force, config/route/view cache, `php artisan serve` on `$PORT` |
 
