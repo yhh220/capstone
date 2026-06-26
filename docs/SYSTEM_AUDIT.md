@@ -329,7 +329,7 @@ Source: [database/migrations/](../database/migrations/) (67 migration files). Pr
 | `password_reset_tokens` | email (pk), token, created_at | |
 | `sessions` | id (pk), user_id, ip_address, user_agent, payload, last_activity (idx) | DB session driver |
 | `cache` / `cache_locks` | key, value, expiration | DB cache store |
-| `jobs` / `job_batches` / `failed_jobs` | queue payloads | DB queue (currently `sync` in prod) |
+| `jobs` / `job_batches` / `failed_jobs` | queue payloads | `QUEUE_CONNECTION=database`, but no `queue:work` process runs anywhere — should normally stay empty (see 9 / 31.8) |
 | `categories` | name, slug, description, image, is_active, sort_order | |
 | `products` | category_id (FK nullOnDelete), name, slug (unique), brand, description(+_ms/_zh), short_description, price, sale_price, sku (unique), stock, image, images(json), specs(json), compatible_vehicles(json), model_url, has_3d, is_active, is_featured | |
 | `contacts` | name, email, phone, subject, message, is_read | **SoftDeletes** |
@@ -1170,7 +1170,7 @@ Scan of [app/](../app/) subfolders:
 |---|---|---|
 | 32.1 | Templates | 10 mailables ([app/Mail/](../app/Mail/)): BookingConfirmation, BookingConfirmed, BookingCancelled, BookingReminder, OrderConfirmation, OrderShipped, OrderDelivered, OrderCancelled, OrderRefundProcessed, OwnerAlert. Blade views in [resources/views/mail/](../resources/views/mail/) + [components/mail/layout.blade.php](../resources/views/components/mail/layout.blade.php). OTP via [EmailOtp](../app/Notifications/EmailOtp.php). |
 | 32.2 | Driver | Default `MAIL_MAILER=log` (dev). Production uses a **custom `gmail_api` transport** ([GmailApiTransport.php](../app/Mail/Transport/GmailApiTransport.php)) sending as the store Gmail via OAuth refresh token (access token cached 50 min). SMTP/SES/Postmark/Resend configs also present. |
-| 32.3 | Queue | `QUEUE_CONNECTION=sync` — mail sent inline (no worker). |
+| 32.3 | Queue | Mail is sent inline — every mailable call site uses `Mail::send()`, never `->queue()` — so `QUEUE_CONNECTION` doesn't apply to email regardless of its value (see 9 / 31.8 for the actual queue setup). |
 | 32.4 | Notification channels | `mail` (OTP) + `database` (Filament bell). **No** broadcast (`BROADCAST_CONNECTION=log`). |
 | — | Owner alerts | [NotifiesOwner](../app/Livewire/Concerns/NotifiesOwner.php) concern emails the store owner (`OwnerAlertMail`) on key customer events (e.g. new booking/order) with a heading, detail rows, and an action link. |
 | 32.5 | Preview routes | **None** (no mailable preview route). |
@@ -1243,7 +1243,7 @@ Scan of [app/](../app/) subfolders:
 |---|---|---|
 | 37.1 | Cookie consent banner | **Not implemented** |
 | 37.2 | PDPA/GDPR | Privacy Policy page; minimal cookies (session, theme, locale); chatbot answers privacy/PDPA questions |
-| 37.3 | Cookie categories | Only essential (`laravel_session`, CSRF, `app_theme`, locale) — no analytics/marketing cookies |
+| 37.3 | Cookie categories | Only essential: the session cookie (name derived from `APP_NAME`, e.g. `win-win-car-audio-session` — not the Laravel default `laravel_session`; see [config/session.php](../config/session.php)), CSRF token, `app_theme`. Locale is stored **in the session**, not a separate cookie (see 46.5). No analytics/marketing cookies. |
 | 37.4 | Data retention | Prunable tables (chat 90 d, carts 30 d, logs configurable); activity log trimmed to 5,000 |
 | 37.5 | Data export (GDPR) | **Not implemented** |
 | 37.6 | Account deletion | ✅ Self-service in [ProfilePage.php](../app/Livewire/ProfilePage.php) (OTP-confirmed for social-only accounts); soft-deletes user |
