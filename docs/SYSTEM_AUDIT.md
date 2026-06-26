@@ -557,6 +557,23 @@ Live-updating summary elements: `#summary-rim-color`, `#summary-brake-color`, `#
 
 Plus an **ownership check** (`where user_id = Auth::id()`), an **expiry check** (`isPaymentExpired()` → auto-cancel + restock), and an **explicit activity-log entry** for the paid transition (the atomic UPDATE bypasses Eloquent events, so it's logged manually to keep the audit trail complete). Covered by [PaymentHardeningTest](../tests/Feature/PaymentHardeningTest.php).
 
+### Cancellation & Refund policy — tiered logic
+Driven by two admin settings and implemented in [RefundCalculator.php](../app/Services/RefundCalculator.php):
+- `CANCELLATION_FULL_REFUND_HOURS` (default **24**) — hours after payment a cancelled order still gets **100%**.
+- `CANCELLATION_FEE_PERCENT` (default **10**) — fee deducted once that window passes.
+
+**Logic (`calculate()` for a paid order being cancelled now):**
+| Condition | Outcome |
+|---|---|
+| Not paid yet (`payment_status != 'paid'`) | No refund row — cancelling is **free** (nothing charged) |
+| Paid, within full-refund window (`hours_since_paid ≤ FULL_REFUND_HOURS`) | **`full` tier → 100%** refund |
+| Paid, past the window | **`fee` tier → (100 − FEE%)** refund (e.g. **90%**, 10% fee kept) |
+| **Shipped / delivered / already cancelled** | **Not cancellable at all** — self-service cancel is **blocked** (a wall, not a worse tier; returns/exchange handled separately) |
+
+- `eligibilityLabel()` renders a plain-language standing badge ("Eligible for full refund if cancelled now" / "Eligible for a 90% refund (10% fee applies)" / "Not yet paid — cancelling is free" / "Not eligible — order has shipped").
+- Hours use truncated whole-hour comparison (so 24.0002 elapsed still counts as within a 24-hr window).
+- On actual cancel ([MyAccountPage::cancelOrder()](../app/Livewire/MyAccountPage.php)): refund computed → order cancelled + `cancelled_at` stamped → **stock restocked** → `OrderCancelledMail` / `OrderRefundProcessedMail` sent. The public-facing policy page ([CancellationRefundPolicyPage](../app/Livewire/CancellationRefundPolicyPage.php)) explains these same settings-driven terms.
+
 **Order numbers:** `ORD-YYYY-#####` generated transactionally with `lockForUpdate` + `withTrashed` collision-avoidance ([Order.php](../app/Models/Order.php)).
 **Shipping:** flat rate + free-shipping threshold from settings ([ShippingCalculator](../app/Services/ShippingCalculator.php)).
 **Payment expiry:** unpaid orders auto-cancelled after 15 min + stock restocked ([ExpireUnpaidOrders.php](../app/Console/Commands/ExpireUnpaidOrders.php), runs every minute).
@@ -1084,8 +1101,8 @@ No in-app backup/restore. Dev: manual SQLite file backups. Prod: TiDB managed se
 The project was built by a **team using Git + GitHub for collaborative development**, with **Visual Studio Code** as the editor.
 
 ## 26.1 Version control (Git)
-- **509 commits** total (≈348 on `main`), spanning **2026-04-06 → 2026-06-25** (~2.5 months of active development).
-- **Conventional Commits** convention followed throughout — `type(scope): summary`. Distribution: **190 `fix`**, **131 `feat`**, 17 `perf`, 16 `refactor`, 11 `style`, 11 `chore`, 4 `test`, 3 `docs`. This gives a clean, scannable change history.
+- **355 commits on `main`** (516 across all branches incl. a safety branch), spanning **2026-04-06 → 2026-06-26** (~2.5 months of active development by the team).
+- **Conventional Commits** convention followed throughout — `type(scope): summary`. Distribution: **192 `fix`**, **131 `feat`**, 17 `perf`, 16 `refactor`, 11 `style`, 11 `chore`, 8 `docs`, 4 `test`. This gives a clean, scannable change history.
 - Branching: `main` (primary) + safety branch (`backup/main-before-origin-reset-…`) taken before a history reset — evidence of deliberate, recoverable version management.
 - The commit history doubles as the project **changelog / audit trail** (who changed what, when, and why — every message explains the rationale).
 
