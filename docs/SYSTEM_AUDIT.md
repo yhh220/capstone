@@ -468,7 +468,7 @@ capstone/
 - **Chatbot** — knowledge-base matcher, not a live LLM (Anthropic key slot unused).
 - **Microsoft OAuth** — code-complete but only enabled when keys are set; production uses Google only.
 - **File-storage persistence** — Render free tier has no persistent disk; admin-uploaded media after deploy must be committed to git to survive redeploys (mitigated by tracking `storage/app/public`).
-- **Queue** — `QUEUE_CONNECTION=sync` in production (no background worker); fine because no `ShouldQueue` jobs exist.
+- **Queue** — `QUEUE_CONNECTION=database` in production, but no `queue:work` process runs anywhere (Render only runs `php artisan serve`). The one `ShouldQueue` job in the app — Spatie Media Library's conversion job for product thumb/card images — was queued by default and would have sat in the `jobs` table forever, leaving uploaded images broken. Fixed by forcing `queue_conversions_by_default=false` (see 25.14), so conversions run synchronously instead; nothing in the app relies on a real queue worker.
 - **Accessibility** — best-effort, not formally WCAG-audited.
 - **PWA** — `site.webmanifest` present but **no service worker** (not an installable offline PWA).
 - **Dormant interface method** — [ChatServiceInterface](../app/Contracts/ChatServiceInterface.php) declares `recommend()` (product recommendation) but it is **not wired up anywhere** (only `chat()` and `generateDescription()` are used).
@@ -1012,6 +1012,8 @@ Columns + validation: **Order Number** (required mapping, match key), Status (nu
 3. Found → applies the mapped fields (status, tracking, customer/shipping details).
 
 **`afterSave()` email side-effect:** if the "Email customers about status changes" toggle is on (default true) **and** the order has a `customer_email`, the matching status mailable is sent; failures are caught + logged (never aborts the import). Status excludes `cancelled` so an import can't silently cancel + wrongly email.
+
+**`beforeValidate()` forward-only status guard:** the bulk import enforces the *exact same* state machine as the single-row `markPaid`/`markShipped`/`markDelivered` actions (25.3) — a row can only move a status to `processing` if the order is currently `pending` **and** `payment_status=paid`, to `shipped` only from `processing`, and to `delivered` only from `shipped`; any other target throws `RowImportFailedException` and the row fails individually. Without this, a row could jump a never-paid order straight to `delivered` (wrongly emailing the customer) or regress a `delivered` order back to `processing` while `shipped_at`/`delivered_at` stayed stamped. Re-importing a row with its current, unchanged status is a no-op, not a rejected transition. Covered by [OrderImporterTest](../tests/Feature/OrderImporterTest.php).
 
 > **No** dedicated full-database backup/restore feature (see 25.21).
 
