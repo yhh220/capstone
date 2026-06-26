@@ -319,7 +319,7 @@ The visual language is sourced from a fixed set of reference libraries (kept con
 
 # 5. Database Schema
 
-Source: [database/migrations/](../database/migrations/) (68 migration files). Production DB = **TiDB Serverless (MySQL-compatible)**; local = SQLite.
+Source: [database/migrations/](../database/migrations/) (67 migration files). Production DB = **TiDB Serverless (MySQL-compatible)**; local = SQLite.
 
 ## Tables
 
@@ -378,7 +378,7 @@ Source: [database/migrations/](../database/migrations/) (68 migration files). Pr
 | spatie/laravel-sitemap | ^8.1 | Sitemap generation |
 | barryvdh/laravel-dompdf | ^3.1 | PDF invoice generation |
 | artesaos/seotools | ^1.4 | SEO meta / OG / JSON-LD |
-| intervention/image-laravel | ^4.0 | Image manipulation |
+| intervention/image-laravel | ^4.0 | Installed but **unused** — no `Intervention\Image` reference anywhere in `app/`; Spatie Media Library's actual conversions run on the `gd` driver (`config/media-library.php`), not this package |
 | laravel/tinker | ^3.0 | REPL |
 
 ## 6.2 Frontend (JS — [package.json](../package.json))
@@ -443,7 +443,7 @@ capstone/
 ├── bootstrap/                  # app.php (middleware, proxies, exceptions)
 ├── config/                     # 16 config files
 ├── database/
-│   ├── migrations/             # 68 migrations
+│   ├── migrations/             # 67 migrations
 │   └── seeders/                # DatabaseSeeder + Car/Faq/Feedback/Product/ChatbotFaq seeders
 ├── docs/                       # SYSTEM_AUDIT.md (this file)
 ├── lang/                       # ms.json, zh.json
@@ -1141,14 +1141,14 @@ Scan of [app/](../app/) subfolders:
 
 | # | Layer | Status / Detail |
 |---|---|---|
-| 31.1 | Models | 21 models in [app/Models/](../app/Models/) (+ `Concerns/HasSortableOrder`). See Section 5 for relations/casts. Accessors/mutators: `Product::getCurrentPriceAttribute`, `getIsOnSaleAttribute`, `getTranslatedDescriptionAttribute`, `getImageUrl`; `Booking::getStatusColorAttribute`; `Order::getNextStatusAttribute`; `Category::getIconAttribute`; `Service::getDurationLabelAttribute`. Casts: arrays/json, booleans, `decimal:2`, `hashed` password, datetimes. |
+| 31.1 | Models | 20 models in [app/Models/](../app/Models/) (+ `Concerns/HasSortableOrder`). See Section 5 for relations/casts. Accessors/mutators: `Product::getCurrentPriceAttribute`, `getIsOnSaleAttribute`, `getTranslatedDescriptionAttribute`, `getImageUrl`; `Booking::getStatusColorAttribute`; `Order::getNextStatusAttribute`; `Category::getIconAttribute`; `Service::getDurationLabelAttribute`. Casts: arrays/json, booleans, `decimal:2`, `hashed` password, datetimes. |
 | 31.2 | Controllers | 4 in [app/Http/Controllers/](../app/Http/Controllers/): base Controller, **InvoiceController** (HTML+PDF invoice), **SocialAuthController** (OAuth), **GmailSendSetupController** (one-time Gmail OAuth). Most logic is in Livewire instead. |
-| 31.3 | Livewire components | 22 in [app/Livewire/](../app/Livewire/) (+ `Auth/UserLogin`, `Auth/ForgotPassword`, `Concerns/`). Each maps to a route or is globally injected (Chatbot). See Section 1.1. |
+| 31.3 | Livewire components | 21 in [app/Livewire/](../app/Livewire/), including `Auth/UserLogin` and `Auth/ForgotPassword` (plus 2 non-component traits in `Concerns/`). Each maps to a route or is globally injected (Chatbot). See Section 1.1. |
 | 31.4 | Form Requests | **None** ([app/Http/Requests/](../app/Http/) does not exist) — validation lives inline in Livewire components and Filament form schemas. |
 | 31.5 | Middleware | 6 custom in [app/Http/Middleware/](../app/Http/Middleware/): `AdminMiddleware`, `AssignTraceId`, `LogoutAdminGuardOnly`, `SecurityHeaders`, `SetLocale`, `ShoppingEnabled`. |
 | 31.6 | Service Providers | [app/Providers/](../app/Providers/): `AppServiceProvider`, `ChatServiceProvider` (binds chatbot driver), `Filament/AdminPanelProvider`. |
 | 31.7 | Events & Listeners | **None** (`app/Events`, `app/Listeners` absent) — model boot hooks + scheduled commands used instead. |
-| 31.8 | Jobs / Queues | **No custom Jobs** (`app/Jobs` absent); no `ShouldQueue` classes. `QUEUE_CONNECTION=sync`. Filament import/export run synchronously. |
+| 31.8 | Jobs / Queues | **No custom Jobs** (`app/Jobs` absent). `QUEUE_CONNECTION=database`, but no `queue:work` process runs anywhere — the one real `ShouldQueue` class in the app is Spatie Media Library's conversion job, forced to run synchronously instead (`queue_conversions_by_default=false`, see 9 / 25.14). Filament import/export also run synchronously (`getJobConnection() => 'sync'`). |
 | 31.9 | Mail classes | 10 mailables in [app/Mail/](../app/Mail/) + `Transport/GmailApiTransport`. See Section 32. |
 | 31.10 | Notifications | 1: [EmailOtp](../app/Notifications/EmailOtp.php) (mail channel). |
 | 31.11 | Policies | 12 in [app/Policies/](../app/Policies/). See Section 25.9. |
@@ -1357,7 +1357,7 @@ Scan of [app/](../app/) subfolders:
 
 | # | Aspect | Detail |
 |---|---|---|
-| 45.1 | Migration count | **68** files in [database/migrations/](../database/migrations/) |
+| 45.1 | Migration count | **67** files in [database/migrations/](../database/migrations/) |
 | 45.2 | Seeders | DatabaseSeeder + CarModelSeeder, ChatbotFaqSeeder (+ `chatbot_faqs.json`), FaqSeeder, FeedbackSeeder, ProductSeeder |
 | 45.3 | Factories | Only [UserFactory](../database/factories/UserFactory.php) |
 | 45.4 | Soft deletes | `users`, `orders`, `bookings`, `feedback`, `contacts` |
