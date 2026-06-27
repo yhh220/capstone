@@ -437,7 +437,7 @@ capstone/
 │   ├── Livewire/               # Storefront page components + Auth/ + Chatbot
 │   ├── Logging/                # Custom DB log channel
 │   ├── Mail/                   # 10 mailables + Transport/GmailApiTransport
-│   ├── Models/                 # 21 Eloquent models + Concerns/
+│   ├── Models/                 # 20 Eloquent models + Concerns/ (HasSortableOrder trait)
 │   ├── Notifications/          # EmailOtp
 │   ├── Policies/               # 12 authorization policies
 │   ├── Providers/              # AppServiceProvider, ChatServiceProvider, Filament/AdminPanelProvider
@@ -574,6 +574,21 @@ Driven by two admin settings and implemented in [RefundCalculator.php](../app/Se
 - Hours use truncated whole-hour comparison (so 24.0002 elapsed still counts as within a 24-hr window).
 - On actual cancel ([MyAccountPage::cancelOrder()](../app/Livewire/MyAccountPage.php)): refund computed → order cancelled + `cancelled_at` stamped → **stock restocked** → `OrderCancelledMail` / `OrderRefundProcessedMail` sent. The public-facing policy page ([CancellationRefundPolicyPage](../app/Livewire/CancellationRefundPolicyPage.php)) explains these same settings-driven terms.
 
+### Order & Booking trackers — guest lookup logic
+Both let a **guest (no login)** check status, with a deliberately enumeration-resistant, rate-limited design:
+
+| | Order Tracker ([OrderTracker.php](../app/Livewire/OrderTracker.php)) | Booking Tracker ([BookingTracker.php](../app/Livewire/BookingTracker.php)) |
+|---|---|---|
+| Route | `/track-order` | `/booking/track` |
+| Lookup keys | **order number + email** (both required) | **booking reference + email** (both required) |
+| Match rule | found order's `customer_email` must equal the submitted email (case-insensitive) | same — reference + matching email |
+| Mismatch response | generic "email does not match" (doesn't reveal whether the order exists) | generic "no booking found" / "email does not match" |
+| Null-email guard | — | a stored **null email never matches** any submitted value (can't be bypassed with blank) |
+| Rate limit (per IP) | **5 / 60 s** | search **6 / 120 s**; **cancel 3 / 120 s** |
+| Extra | `getStatusStepsProperty()` renders a **visual status timeline** (pending → paid → shipped → delivered) | guests can **cancel** the booking here (logged-out self-service) |
+
+→ Two-factor lookup (id **+** matching email) + per-IP throttling means the public endpoints can't be used to enumerate or scrape orders/bookings.
+
 **Order numbers:** `ORD-YYYY-#####` generated transactionally with `lockForUpdate` + `withTrashed` collision-avoidance ([Order.php](../app/Models/Order.php)).
 **Shipping:** flat rate + free-shipping threshold from settings ([ShippingCalculator](../app/Services/ShippingCalculator.php)).
 **Payment expiry:** unpaid orders auto-cancelled after 15 min + stock restocked ([ExpireUnpaidOrders.php](../app/Console/Commands/ExpireUnpaidOrders.php), runs every minute).
@@ -654,7 +669,9 @@ A Google/Microsoft account starts with a **NULL password**. Such users can brows
 | 13.10 | Browse by category | ✅ category quick links |
 | 13.11 | Related products | ✅ Up to 4 products from the same category in [ProductDetail::render()](../app/Livewire/ProductDetail.php) |
 
-Stock badges via colored Filament columns admin-side; storefront shows in-stock/backorder messaging. Compatible vehicles via `product_compatibilities` ↔ `car_models`.
+Stock badges via colored Filament columns admin-side; storefront shows in-stock/backorder messaging.
+
+**Vehicle compatibility:** the product detail page displays a **"Compatible Vehicles"** list from the product's `compatible_vehicles` data, and the chatbot answers "will it fit my car?" fitment questions. *(Note: an early interactive "Compatibility Checker" tool — select-your-car → match — was **simplified down to this display + chatbot Q&A**; there is no standalone interactive checker widget in the current app, and `car_models`/`product_compatibilities` have no admin UI.)*
 
 ---
 
@@ -744,8 +761,21 @@ The inline head script in [layouts/app.blade.php](../resources/views/layouts/app
 
 | # | Channel | Detail |
 |---|---|---|
-| 19.1 | WhatsApp | `wa.me/60169150917` (from `config('services.store.phone_raw')`) |
-| 19.2 | Prefilled WA messages | Configurator enquiry (full itemized build); chatbot fallback ("WhatsApp us at 016-915 0917"); generic contact CTA |
+| 19.1 | WhatsApp | `wa.me/60169150917` (from `config('services.store.phone_raw')`). A unified, brand-green **`<x-btn.whatsapp>`** component (shine sweep + lift/active scale, [btn/whatsapp.blade.php](../resources/views/components/btn/whatsapp.blade.php)) is reused everywhere. WhatsApp links appear in the nav, footer, home, products, product detail, services, about, contact, the chatbot, **and every transactional email**. |
+| 19.2 | **Context-aware prefilled WA messages** | Each entry point opens WhatsApp with text tailored to where the user clicked: |
+
+**WhatsApp prefilled-message contexts (verified):**
+| Where | Pre-filled message |
+|---|---|
+| Global (nav/footer) | "Hello, I would like to ask about your products and showroom visit." |
+| Products page | "Hello, I would like to ask about your product range." |
+| **Product detail (per-product)** | "Hi Win Win Car Studio! I'm interested in **{product name}**. Can you provide more details?" — **auto-fills the specific product's name** |
+| Services page | "Hi Win Win Car Studio! I would like to ask about your installation services." |
+| About page | "Hello, I would like to learn more about your products." |
+| Home page CTAs | "Hello, I would like to know more about …" / "…to contact …" |
+| **3D Configurator** ("Enquire Configuration") | Full **itemized build** — paint, rim style+color+price, brake color, spoiler, bumper, tint %, dash cam, base price, estimated total (§10.7) |
+| Chatbot fallback / topics | "WhatsApp us at 016-915 0917" (+ location/pricing/warranty topics funnel here) |
+| Transactional emails | Every order/booking email includes a "WhatsApp us" contact link |
 | 19.3 | Phone call | `tel:` links using `phone_display` (016-9150917) |
 | 19.4 | Email | Store email `winwincaraudio@gmail.com` (config) |
 | 19.5 | Google Maps | `cid=5750306395518804732` deep link + Leaflet map (lat 3.1491 / lng 101.5465) |
