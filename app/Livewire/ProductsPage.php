@@ -72,16 +72,19 @@ class ProductsPage extends Component
             ->latest();
 
         if ($this->search !== '') {
-            // addcslashes backslash-escapes literal % and _ in the search term, but
-            // that only works if the query also tells the DB which character is the
-            // escape character — without an explicit ESCAPE clause, SQLite doesn't
-            // treat \ as one, so a term containing % or _ (e.g. "50% Tint Film")
-            // would never match anything.
-            $term = '%' . addcslashes($this->search, '%_\\') . '%';
+            // Escape the LIKE wildcards (% and _) so a term like "50% Tint Film"
+            // matches literally. Use '!' as the ESCAPE character, NOT backslash:
+            // in MySQL/TiDB a backslash is itself a string-literal escape, so
+            // "ESCAPE '\\'" (which PHP renders as ESCAPE '\') breaks the string
+            // literal and throws a 1064 syntax error (SQLite tolerated it, TiDB
+            // does not). '!' has no special meaning in either engine.
+            // Escape '!' first, then the wildcards, so added markers aren't doubled.
+            $escaped = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $this->search);
+            $term = '%' . $escaped . '%';
             $query->where(function ($q) use ($term) {
-                $q->whereRaw("name LIKE ? ESCAPE '\\'", [$term])
-                  ->orWhereRaw("short_description LIKE ? ESCAPE '\\'", [$term])
-                  ->orWhereRaw("sku LIKE ? ESCAPE '\\'", [$term]);
+                $q->whereRaw("name LIKE ? ESCAPE '!'", [$term])
+                  ->orWhereRaw("short_description LIKE ? ESCAPE '!'", [$term])
+                  ->orWhereRaw("sku LIKE ? ESCAPE '!'", [$term]);
             });
         }
 
