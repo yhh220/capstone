@@ -3,6 +3,8 @@
 > **Purpose:** Complete feature & implementation inventory for the Capstone Report.
 > **Method:** Every entry below was verified by scanning the codebase (file paths given). Items that do not exist are explicitly marked **Not implemented** / **Not found**.
 > **Generated:** 2026-06-26
+> **Live site (production):** https://winwincaraudio.onrender.com · **Admin panel:** https://winwincaraudio.onrender.com/admin
+> **Repository:** https://github.com/yhh220/capstone
 > **Stack at a glance:** Laravel 13 · Livewire 4 · Filament 5 · PHP 8.4 · Tailwind CSS 4 (Vite) · Three.js · TiDB (prod) / SQLite (local) · Hosted on Render
 
 ---
@@ -835,7 +837,7 @@ Powered by `artesaos/seotools` ([config/seotools.php](../config/seotools.php)), 
 
 | # | Aspect | Detail |
 |---|---|---|
-| 22.1 | Hosting | **Render.com** Web Service via **Docker** (PHP has no native Render runtime). No `render.yaml` — configured via dashboard. URL: `winwincaraudio.onrender.com` |
+| 22.1 | Hosting | **Render.com** Web Service via **Docker** (PHP has no native Render runtime). No `render.yaml` — configured via dashboard. **Live URL: https://winwincaraudio.onrender.com** (admin at `/admin`) |
 | 22.2 | Production DB | **TiDB Serverless** (MySQL-compatible, TLS-required via `MYSQL_ATTR_SSL_CA`); local dev uses SQLite |
 | 22.3 | Env vars | Documented in [.env.example](../.env.example): APP_*, DB_* (mysql/TiDB), MAIL_*, GOOGLE_CLIENT_*, CRON_SECRET, DEFAULT_ADMIN_* |
 | 22.4 | Build process | 3-stage [Dockerfile](../Dockerfile): (1) `composer install` → vendor/, (2) `npm install` + `vite build` (needs vendor for Filament theme.css), (3) PHP 8.4 runtime w/ pdo_mysql, gd, zip, bcmath, intl, exif + image optimizers |
