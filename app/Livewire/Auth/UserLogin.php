@@ -22,14 +22,13 @@ class UserLogin extends Component
     use \App\Livewire\Concerns\SetsSeo;
     use UsesSpamProtection;
 
-    // Tab toggle: true = Sign In, false = Register
-    public bool $isLoginTab = true;
-
+    // Tab toggle: true = Sign In, false = Register.
     // Keep the active tab in the URL (Register adds ?tab=false) so a refresh stays
-    // on the same tab instead of snapping back to Sign In.
-    protected $queryString = [
-        'isLoginTab' => ['except' => true, 'as' => 'tab'],
-    ];
+    // on the same tab instead of snapping back to Sign In. Uses Livewire 4's
+    // #[Url] attribute — the legacy `protected $queryString` property is ignored
+    // in v4, so the tab never actually synced to the URL before.
+    #[\Livewire\Attributes\Url(except: true, as: 'tab')]
+    public bool $isLoginTab = true;
 
     // Sign In fields. Password is NOT a public property — Livewire serializes
     // every public property into wire:snapshot (visible in page source / the
