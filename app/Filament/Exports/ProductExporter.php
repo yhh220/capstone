@@ -51,6 +51,7 @@ class ProductExporter extends Exporter
             $body,
             $failedRowsCount,
             $export->total_rows,
+            $export, // exports get "Download CSV/XLSX" buttons on the bell notification
         );
 
         return $body;
