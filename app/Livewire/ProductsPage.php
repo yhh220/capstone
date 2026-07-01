@@ -6,6 +6,7 @@ use App\Livewire\Concerns\SetsSeo;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -13,17 +14,21 @@ class ProductsPage extends Component
 {
     use SetsSeo, WithPagination;
 
-    public string $search   = '';
-    public string $category = '';
-    public string $minPrice = '';
-    public string $maxPrice = '';
+    // Livewire 4 syncs these to the query string via the #[Url] attribute — the
+    // legacy `protected $queryString` property is ignored in v4, which is why the
+    // search/filters never appeared in the URL. `except: ''` keeps empty values
+    // out of the URL so a clean /products stays clean.
+    #[Url(except: '')]
+    public string $search = '';
 
-    protected $queryString = [
-        'category' => ['except' => ''],
-        'search'   => ['except' => ''],
-        'minPrice' => ['except' => ''],
-        'maxPrice' => ['except' => ''],
-    ];
+    #[Url(except: '')]
+    public string $category = '';
+
+    #[Url(except: '')]
+    public string $minPrice = '';
+
+    #[Url(except: '')]
+    public string $maxPrice = '';
 
     public function mount(): void
     {
