@@ -81,14 +81,14 @@
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
                 <div>
                     <h2 class="text-xl font-black text-gray-800 dark:text-white">{{ $order->order_number }}</h2>
-                    <div class="text-xs text-gray-400 mt-1">{{ __('Ordered on') }} {{ $order->created_at->format('d M Y, h:i A') }}</div>
+                    <div class="text-xs text-gray-400 mt-1">{{ __('Ordered on') }} {{ $order->created_at->translatedFormat('d M Y, h:i A') }}</div>
                 </div>
                 <div class="px-4 py-1.5 rounded-full text-sm font-bold
                     {{ $order->status === 'delivered' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                        ($order->status === 'cancelled' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
                        ($order->status === 'shipped' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
                        'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400')) }}">
-                    {{ ucfirst($order->status) }}
+                    {{ __(ucfirst($order->status)) }}
                 </div>
             </div>
 

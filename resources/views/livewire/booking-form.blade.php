@@ -99,9 +99,9 @@
                                     {{ $step['label'] }}
                                 </p>
                                 @if($num === 1 && $currentStep > 1)
-                                    <p class="text-xs text-gray-400 truncate mt-0.5">{{ $selectedService?->name ?? __('General visit') }}</p>
+                                    <p class="text-xs text-gray-400 truncate mt-0.5">{{ $selectedService ? __($selectedService->name) : __('General visit') }}</p>
                                 @elseif($num === 2 && $preferred_date && $preferred_time && $currentStep > 2)
-                                    <p class="text-xs text-gray-400 truncate mt-0.5">{{ \Carbon\Carbon::parse($preferred_date)->format('d M') }} · {{ $preferred_time }}</p>
+                                    <p class="text-xs text-gray-400 truncate mt-0.5">{{ \Carbon\Carbon::parse($preferred_date)->translatedFormat('d M') }} · {{ $preferred_time }}</p>
                                 @elseif($num === 3 && $vehicle_model && $currentStep > 3)
                                     <p class="text-xs text-gray-400 truncate mt-0.5">{{ $vehicle_model }}</p>
                                 @endif
@@ -129,12 +129,12 @@
                         <div class="space-y-2">
                             <div class="flex justify-between items-start gap-2">
                                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('About') }}</span>
-                                <span class="text-xs font-bold text-gray-800 dark:text-gray-200 text-right">{{ $selectedService?->name ?? __('General visit') }}</span>
+                                <span class="text-xs font-bold text-gray-800 dark:text-gray-200 text-right">{{ $selectedService ? __($selectedService->name) : __('General visit') }}</span>
                             </div>
                             @if($preferred_date)
                             <div class="flex justify-between items-start gap-2">
                                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('Date') }}</span>
-                                <span class="text-xs font-bold text-gray-800 dark:text-gray-200">{{ \Carbon\Carbon::parse($preferred_date)->format('d M Y') }}</span>
+                                <span class="text-xs font-bold text-gray-800 dark:text-gray-200">{{ \Carbon\Carbon::parse($preferred_date)->translatedFormat('d M Y') }}</span>
                             </div>
                             @endif
                             @if($preferred_time)
@@ -233,10 +233,10 @@
                                     {!! str_replace('w-6 h-6', 'w-5 h-5', $iconFor($svc->name)) !!}
                                 </div>
 
-                                <p class="font-black text-gray-900 dark:text-white text-sm leading-tight mb-1">{{ $svc->name }}</p>
+                                <p class="font-black text-gray-900 dark:text-white text-sm leading-tight mb-1">{{ __($svc->name) }}</p>
 
                                 @if($svc->description)
-                                <p class="text-xs text-gray-400 leading-relaxed line-clamp-2">{{ $svc->description }}</p>
+                                <p class="text-xs text-gray-400 leading-relaxed line-clamp-2">{{ __($svc->description) }}</p>
                                 @endif
                             </button>
                             @endforeach
@@ -495,7 +495,7 @@
                                             </div>
                                             <div>
                                                 <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">{{ __('Service') }}</p>
-                                                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $selectedService->name }}</p>
+                                                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ __($selectedService->name) }}</p>
                                             </div>
                                         </div>
                                         @endif
@@ -507,7 +507,7 @@
                                             </div>
                                             <div>
                                                 <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">{{ __('Date & Time') }}</p>
-                                                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ \Carbon\Carbon::parse($preferred_date)->format('d M Y') }}</p>
+                                                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ \Carbon\Carbon::parse($preferred_date)->translatedFormat('d M Y') }}</p>
                                                 <p class="text-xs text-gray-400">{{ $preferred_time }}</p>
                                             </div>
                                         </div>
@@ -530,7 +530,7 @@
 
                                         <div class="flex items-center justify-between pt-1">
                                             <span class="text-xs font-black uppercase tracking-wider text-gray-400">{{ __('About') }}</span>
-                                            <span class="text-sm font-bold text-gray-900 dark:text-white text-right">{{ $selectedService?->name ?? __('General visit') }}</span>
+                                            <span class="text-sm font-bold text-gray-900 dark:text-white text-right">{{ $selectedService ? __($selectedService->name) : __('General visit') }}</span>
                                         </div>
                                     </div>
                                 </div>

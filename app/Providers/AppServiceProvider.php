@@ -23,6 +23,16 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Keep Carbon's locale in lockstep with the app locale so
+        // translatedFormat() renders month/day names in the visitor's language.
+        // App::setLocale() alone only switches the translator — it never touches
+        // Carbon — so this listener covers the SetLocale middleware, Mailable's
+        // ->locale() rendering, and any manual setLocale() call in one place.
+        \Illuminate\Support\Carbon::setLocale(app()->getLocale());
+        Event::listen(function (\Illuminate\Foundation\Events\LocaleUpdated $event) {
+            \Illuminate\Support\Carbon::setLocale($event->locale);
+        });
+
         // Single source of truth for password strength, applied everywhere via
         // Password::defaults() (registration, password reset, profile change):
         // 8+ chars with mixed case, a number and a symbol, and rejected if found

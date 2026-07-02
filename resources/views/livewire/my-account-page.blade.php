@@ -69,7 +69,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-5 border-b border-gray-100 dark:border-gray-700">
                         <div>
                             <div class="font-black text-gray-800 dark:text-white text-lg">{{ $order->order_number }}</div>
-                            <div class="text-xs text-gray-400 mt-0.5">{{ $order->created_at->format('d M Y, h:i A') }}</div>
+                            <div class="text-xs text-gray-400 mt-0.5">{{ $order->created_at->translatedFormat('d M Y, h:i A') }}</div>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="px-3 py-1 rounded-full text-xs font-bold
@@ -131,7 +131,7 @@
                             @if($order->refund_amount === null)
                                 {{ __('Cancelled — nothing to refund.') }}
                             @elseif($order->refunded_at !== null)
-                                {{ __('Refund of RM :amount sent on :date.', ['amount' => number_format($order->refund_amount, 2), 'date' => $order->refunded_at->format('d M Y')]) }}
+                                {{ __('Refund of RM :amount sent on :date.', ['amount' => number_format($order->refund_amount, 2), 'date' => $order->refunded_at->translatedFormat('d M Y')]) }}
                             @else
                                 {{ __('Refund of RM :amount (:pct%) recorded — pending.', ['amount' => number_format($order->refund_amount, 2), 'pct' => number_format((float) $order->refund_percentage, 0)]) }}
                             @endif
@@ -192,7 +192,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-5 border-b border-gray-100 dark:border-gray-700">
                         <div>
                             <div class="font-black text-gray-800 dark:text-white text-lg">{{ $booking->reference }}</div>
-                            <div class="text-xs text-gray-400 mt-0.5">{{ $booking->service?->name ?? __('Service') }}</div>
+                            <div class="text-xs text-gray-400 mt-0.5">{{ $booking->service ? __($booking->service->name) : __('Service') }}</div>
                         </div>
                         <span class="px-3 py-1 rounded-full text-xs font-bold
                             {{ $booking->status === 'completed' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
@@ -206,7 +206,7 @@
                     <div class="px-5 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                         <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                             <svg class="w-4 h-4 text-brand-red shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            {{ optional($booking->start_at)->format('D, d M Y · g:i A') ?? optional($booking->preferred_date)->format('D, d M Y') }}
+                            {{ optional($booking->start_at)->translatedFormat('D, d M Y · g:i A') ?? optional($booking->preferred_date)->translatedFormat('D, d M Y') }}
                         </div>
                         @if($booking->vehicle_model || $booking->vehicle_plate)
                         <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
