@@ -4,7 +4,36 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
-// Configuration Data (配置数据：颜色映射表)
+// Configuration Data (配置数据：包含配件价格和颜色映射表)
+const BASE_PRICE = 150000;
+const ACCESSORY_PRICES = {
+    rims: {
+        rim7: { name: 'Sport Rims (Default)', price: 0 },
+        rim1: { name: 'Vossen CV3 Style', price: 1200 },
+        rim2: { name: 'BBS Super RS Style', price: 1800 },
+        rim3: { name: 'Rotiform LAS-R Style', price: 1500 },
+        rim4: { name: 'HRE P101 Style', price: 2200 },
+        rim5: { name: 'Advan Racing GT Style', price: 2000 },
+        rim6: { name: 'TE37 Black Edition', price: 2500 },
+    },
+    spoilers: {
+        wing4: { name: 'Integrated Lip (Default)', price: 0 },
+        wing1: { name: 'Carbon Fiber High Wing', price: 1200 },
+        wing2: { name: 'GT Performance Wing', price: 1500 },
+        wing3: { name: 'Sleek Ducktail Wing', price: 600 },
+    },
+    bumpers: {
+        bumperF3: { name: 'Standard Sport (Default)', price: 0 },
+        bumperF2: { name: 'Widebody Spec Bumper', price: 2200 },
+    },
+    dashcams: {
+        dashcam0: { name: 'None (Default)', price: 0 },
+        dashcam1: { name: 'Mohawk', price: 0 },
+        dashcam2: { name: '70mai', price: 0 },
+        dashcam3: { name: 'DDPAI', price: 0 },
+    }
+};
+
 const COLOR_MAP = {
     red: { hex: 0xc8413d, name: 'Ember Red' },
     yellow: { hex: 0xfacc15, name: 'Racing Yellow' },
@@ -256,6 +285,13 @@ function wireConfiguratorEvents() {
     document.addEventListener('click', (e) => {
         if (e.target.closest('#toggle-interior-pos-btn')) {
             toggleInteriorPos();
+        }
+    });
+
+    // WhatsApp Enquiry Export (导出并跳转到WhatsApp询价)
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#enquire-config-btn')) {
+            sendWhatsAppEnquiry();
         }
     });
 
@@ -1458,4 +1494,45 @@ function updateRimMaterials() {
             }
         });
     }
+}
+
+/**
+ * Grab chosen options and compile a WhatsApp link
+ * 获取选中的配件配置，并拼接成 WhatsApp 发送询价的链接
+ */
+function sendWhatsAppEnquiry() {
+    const enquireBtn = document.getElementById('enquire-config-btn');
+    if (!enquireBtn) return;
+
+    const colorSpec = COLOR_MAP[state.color].name;
+    const rimColorSpec = RIM_COLOR_MAP[state.rimColor].name;
+    const brakeColorSpec = BRAKE_COLOR_MAP[state.brakeColor].name;
+    const rimSpec = ACCESSORY_PRICES.rims[state.rims].name;
+    const rimPrice = ACCESSORY_PRICES.rims[state.rims].price === 0 ? 'Included' : `+RM ${ACCESSORY_PRICES.rims[state.rims].price.toLocaleString()}`;
+    const spoilerSpec = ACCESSORY_PRICES.spoilers[state.spoilers].name;
+    const spoilerPrice = ACCESSORY_PRICES.spoilers[state.spoilers].price === 0 ? 'Included' : `+RM ${ACCESSORY_PRICES.spoilers[state.spoilers].price.toLocaleString()}`;
+    const bumperSpec = ACCESSORY_PRICES.bumpers[state.bumpers].name;
+    const bumperPrice = ACCESSORY_PRICES.bumpers[state.bumpers].price === 0 ? 'Included' : `+RM ${ACCESSORY_PRICES.bumpers[state.bumpers].price.toLocaleString()}`;
+    const windowTintSpec = state.windowTint + '%';
+    const dashcamSpec = ACCESSORY_PRICES.dashcams[state.dashcams];
+
+    const total = BASE_PRICE + ACCESSORY_PRICES.rims[state.rims].price + ACCESSORY_PRICES.spoilers[state.spoilers].price + ACCESSORY_PRICES.bumpers[state.bumpers].price + dashcamSpec.price;
+
+    const storePhoneRaw = enquireBtn.dataset.phone || '60123456789';
+
+    const textMessage = `Hello Win Win Car Studio! 🚗\n\nI have customized a car on your website using the 3D Car Configurator. Here is my custom configuration details:\n\n` +
+        `• Paint Color: ${colorSpec}\n` +
+        `• Rim Style: ${rimSpec} (Color: ${rimColorSpec}) (${rimPrice})\n` +
+        `• Brake Caliper Color: ${brakeColorSpec}\n` +
+        `• Spoiler Style: ${spoilerSpec} (${spoilerPrice})\n` +
+        `• Front Bumper: ${bumperSpec} (${bumperPrice})\n` +
+        `• Window Tint: ${windowTintSpec}\n` +
+        `• Dash Camera: ${dashcamSpec.name}\n\n` +
+        `----------------------------\n` +
+        `• Base Price: RM ${BASE_PRICE.toLocaleString()}\n` +
+        `• Estimated Total: RM ${total.toLocaleString()}\n\n` +
+        `Please check availability and guide me on ordering these accessories! Thank you.`;
+
+    const whatsAppUrl = `https://wa.me/${storePhoneRaw}?text=${encodeURIComponent(textMessage)}`;
+    window.open(whatsAppUrl, '_blank');
 }
