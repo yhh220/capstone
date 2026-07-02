@@ -56,40 +56,18 @@ Built on the **TALL stack** (Tailwind, Alpine.js, Livewire, Laravel).
 
 ---
 
-## Getting Started
+## Live Demo
 
-```bash
-# Install dependencies
-composer install
-npm install
+- Storefront: [winwincaraudio.onrender.com](https://winwincaraudio.onrender.com)
+- Admin panel: [winwincaraudio.onrender.com/admin](https://winwincaraudio.onrender.com/admin)
 
-# Set up environment
-cp .env.example .env
-php artisan key:generate
+---
 
-# Run migrations and seed demo data
-php artisan migrate --seed
-php artisan storage:link
+## Project Scope
 
-# Build front-end assets (or `npm run dev` while developing)
-npm run build
+This is a solo capstone project, built end-to-end (backend, frontend, admin panel, and deployment) to demonstrate a complete, production-shaped web application rather than an isolated coding exercise. It covers a full customer-facing storefront, a real booking/ordering workflow, a role-based admin panel, and the supporting concerns (security, accessibility, localization, observability) that a real small-business site would need.
 
-# Start the server
-php artisan serve
-```
-
-- Storefront: `http://localhost:8000`
-- Admin panel: `http://localhost:8000/admin`
-- Default admin: `admin@example.com` / `password`
-
-### Windows Note
-
-If you get a `rename(): Access is denied` error:
-
-```cmd
-icacls storage /grant Everyone:(OI)(CI)F /T
-php artisan view:clear
-```
+The business itself — Win Win Car Studio — and all product data, images, and customer information are fictional, created for demonstration purposes only.
 
 ---
 
