@@ -140,7 +140,7 @@
                     <div class="relative aspect-square bg-gray-100 dark:bg-gray-900 overflow-hidden">
                         @if($product->getImageUrl('thumb'))
                             <img src="{{ $product->getImageUrl('thumb') }}"
-                                 alt="{{ $product->name }}"
+                                 alt="{{ $product->translated_name }}"
                                  loading="lazy"
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         @else
@@ -153,8 +153,8 @@
                         @endif
                     </div>
                     <div class="p-4 flex flex-col flex-1">
-                        <div class="text-xs text-gray-400 dark:text-gray-500 mb-1">{{ $product->category?->name }}</div>
-                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 leading-snug line-clamp-2 group-hover:text-brand-red transition-colors">{{ $product->name }}</h3>
+                        <div class="text-xs text-gray-400 dark:text-gray-500 mb-1">{{ $product->category ? __($product->category->name) : '' }}</div>
+                        <h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 leading-snug line-clamp-2 group-hover:text-brand-red transition-colors">{{ $product->translated_name }}</h3>
                         @if($shoppingEnabled)
                         <div class="mt-auto pt-3 flex items-center gap-2">
                             @if($product->sale_price && $product->sale_price < $product->price)

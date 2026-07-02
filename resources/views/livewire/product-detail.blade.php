@@ -2,7 +2,7 @@
     @php
         $storePhoneRaw = config('services.store.phone_raw');
         $storeAddress = config('services.store.address');
-        $whatsAppUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hi Win Win Car Studio! I\'m interested in ' . $product->name . '. Can you provide more details?');
+        $whatsAppUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode(__("Hi Win Win Car Studio! I'm interested in :product. Can you provide more details?", ['product' => $product->translated_name]));
         $mapUrl = 'https://www.google.com/maps?cid=' . config('services.store.place_cid');
     @endphp
 
@@ -18,7 +18,7 @@
                 </li>
                 <li role="listitem" aria-hidden="true"><span class="mx-1">/</span></li>
                 <li role="listitem" class="text-gray-800 dark:text-gray-200 font-medium truncate max-w-xs" aria-current="page">
-                    {{ $product->name }}
+                    {{ $product->translated_name }}
                 </li>
             </ol>
         </div>
@@ -30,17 +30,17 @@
                 <div class="bg-gray-100 dark:bg-gray-700 rounded-2xl h-64 sm:h-80 md:h-96 flex items-center justify-center overflow-hidden">
                     @if($product->getImageUrl('card'))
                     <img src="{{ $product->getImageUrl('card') }}"
-                         alt="{{ $product->name }}"
+                         alt="{{ $product->translated_name }}"
                          class="w-full h-full object-cover rounded-2xl"
                          fetchpriority="high">
                     @elseif($product->getImageUrl())
                     <img src="{{ $product->getImageUrl() }}"
-                         alt="{{ $product->name }}"
+                         alt="{{ $product->translated_name }}"
                          class="w-full h-full object-cover rounded-2xl"
                          fetchpriority="high">
                     @elseif($product->image)
                     <img src="{{ Storage::url($product->image) }}"
-                         alt="{{ $product->name }}"
+                         alt="{{ $product->translated_name }}"
                          class="w-full h-full object-cover rounded-2xl"
                          fetchpriority="high">
                     @else
@@ -53,10 +53,10 @@
 
             <div data-aos="fade-left" data-aos-delay="80">
                 <div class="text-sm text-brand-red font-semibold mb-2">
-                    {{ $product->category?->name ?? 'Accessories' }}
+                    {{ __($product->category?->name ?? 'Accessories') }}
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black text-brand-black dark:text-white mb-4">
-                    {{ $product->name }}
+                    {{ $product->translated_name }}
                 </h1>
                 @if($product->brand)
                 <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">
@@ -141,8 +141,8 @@
                     <span>{{ __('Enquire on WhatsApp or visit the showroom for pricing and compatibility.') }}</span>
                 </div>
 
-                @if($product->short_description)
-                <p class="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">{{ $product->short_description }}</p>
+                @if($product->translated_short_description)
+                <p class="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">{{ $product->translated_short_description }}</p>
                 @endif
 
                 <div class="flex flex-col sm:flex-row gap-3 mb-8">
@@ -241,12 +241,12 @@
                     <div class="bg-gray-100 dark:bg-gray-700 h-40 flex items-center justify-center overflow-hidden">
                         @if($item->getImageUrl('thumb'))
                         <img src="{{ $item->getImageUrl('thumb') }}"
-                             alt="{{ $item->name }}"
+                             alt="{{ $item->translated_name }}"
                              loading="lazy"
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         @elseif($item->image)
                         <img src="{{ Storage::url($item->image) }}"
-                             alt="{{ $item->name }}"
+                             alt="{{ $item->translated_name }}"
                              loading="lazy"
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         @else
@@ -257,7 +257,7 @@
                     </div>
                     <div class="p-3">
                         <div class="font-semibold text-sm text-gray-800 dark:text-gray-200 group-hover:text-brand-red transition-colors line-clamp-2">
-                            {{ $item->name }}
+                            {{ $item->translated_name }}
                         </div>
                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('View details and enquire') }}</div>
                     </div>

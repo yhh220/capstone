@@ -29,6 +29,12 @@ class ProductForm
                 TextInput::make('name')
                     ->required()
                     ->columnSpanFull(),
+                TextInput::make('name_ms')
+                    ->label('Name (MS)')
+                    ->maxLength(255),
+                TextInput::make('name_zh')
+                    ->label('Name (ZH)')
+                    ->maxLength(255),
                 TextInput::make('slug')
                     ->required()
                     ->columnSpanFull()
@@ -45,6 +51,12 @@ class ProductForm
                     ->label('Description (ZH)')
                     ->columnSpanFull(),
                 Textarea::make('short_description')
+                    ->columnSpanFull(),
+                Textarea::make('short_description_ms')
+                    ->label('Short description (MS)')
+                    ->columnSpanFull(),
+                Textarea::make('short_description_zh')
+                    ->label('Short description (ZH)')
                     ->columnSpanFull(),
                 TextInput::make('price')
                     ->required()

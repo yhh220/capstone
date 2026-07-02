@@ -56,7 +56,8 @@ class Product extends Model implements HasMedia
     }
 
     protected $fillable = [
-        'category_id', 'name', 'brand', 'slug', 'description', 'description_ms', 'description_zh', 'short_description',
+        'category_id', 'name', 'name_ms', 'name_zh', 'brand', 'slug', 'description', 'description_ms', 'description_zh',
+        'short_description', 'short_description_ms', 'short_description_zh',
         'price', 'sale_price', 'sku', 'stock', 'image', 'images', 'specs', 'compatible_vehicles',
         'model_url', 'has_3d', 'is_active', 'is_featured',
     ];
@@ -112,10 +113,26 @@ class Product extends Model implements HasMedia
 
     public function getTranslatedDescriptionAttribute(): ?string
     {
+        return $this->translatedField('description');
+    }
+
+    public function getTranslatedNameAttribute(): ?string
+    {
+        return $this->translatedField('name');
+    }
+
+    public function getTranslatedShortDescriptionAttribute(): ?string
+    {
+        return $this->translatedField('short_description');
+    }
+
+    /** Locale variant of a *_ms / *_zh column pair, falling back to the English base column. */
+    private function translatedField(string $field): ?string
+    {
         return match (app()->getLocale()) {
-            'ms' => $this->description_ms ?: $this->description,
-            'zh' => $this->description_zh ?: $this->description,
-            default => $this->description,
+            'ms' => $this->{$field . '_ms'} ?: $this->{$field},
+            'zh' => $this->{$field . '_zh'} ?: $this->{$field},
+            default => $this->{$field},
         };
     }
 }
