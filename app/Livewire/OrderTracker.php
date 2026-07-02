@@ -49,13 +49,11 @@ class OrderTracker extends Component
             ->with('items')
             ->first();
 
-        if (! $order) {
-            $this->errorMsg = __('No order found. Please check your order number.');
-            return;
-        }
-
-        if (strtolower(trim($order->customer_email ?? '')) !== strtolower(trim($this->email))) {
-            $this->errorMsg = __('Email does not match. Please check your email address.');
+        // One message for both "no such order" and "wrong email" — order numbers
+        // are sequential (ORD-YYYY-NNNNN), so distinct messages would let anyone
+        // enumerate which numbers exist (and thus the store's order volume).
+        if (! $order || strtolower(trim($order->customer_email ?? '')) !== strtolower(trim($this->email))) {
+            $this->errorMsg = __('No matching order found. Please check your order number and email.');
             return;
         }
 

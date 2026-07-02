@@ -2,7 +2,7 @@
 
 > **Purpose:** Complete feature & implementation inventory for the Capstone Report.
 > **Method:** Every entry below was verified by scanning the codebase (file paths given). Items that do not exist are explicitly marked **Not implemented** / **Not found**.
-> **Generated:** 2026-06-26
+> **Generated:** 2026-06-26 · **Last updated:** 2026-07-02 (deep security + UX audit — see §49)
 > **Live site (production):** https://winwincaraudio.onrender.com · **Admin panel:** https://winwincaraudio.onrender.com/admin
 > **Repository:** https://github.com/yhh220/capstone
 > **Stack at a glance:** Laravel 13 · Livewire 4 · Filament 5 · PHP 8.4 · Tailwind CSS 4 (Vite) · Three.js · TiDB (prod) / SQLite (local) · Hosted on Render
@@ -36,7 +36,7 @@
 24. Form Handling Patterns
 25. Admin Panel (Filament) — Full Detail
 26. Version Control, Tooling & Collaboration
-29. Keyword-Based Chatbot · 31. Laravel Application Layer · 32. Email & Notifications · 33. Caching · 34. Search · 35. Error Handling · 36. Performance · 37. Cookie/Privacy · 38. Analytics · 39. CX Enhancements · 40. Testing & Code Quality · 41. Documentation · 42. Navigation · 43. CTA Strategy · 44. Content Management · 45. DB & Migrations · 46. Routes · 47. Localization · 48. Final QA Checklist
+29. Keyword-Based Chatbot · 31. Laravel Application Layer · 32. Email & Notifications · 33. Caching · 34. Search · 35. Error Handling · 36. Performance · 37. Cookie/Privacy · 38. Analytics · 39. CX Enhancements · 40. Testing & Code Quality · 41. Documentation · 42. Navigation · 43. CTA Strategy · 44. Content Management · 45. DB & Migrations · 46. Routes · 47. Localization · 48. Final QA Checklist · 49. Deep Security & UX Audit (2 Jul 2026)
 
 ---
 
@@ -299,7 +299,7 @@ The visual language is sourced from a fixed set of reference libraries (kept con
 | # | Control | Evidence |
 |---|---|---|
 | 4.1 | Authentication | Multi-guard: `web` (customers) + `admin` (Filament). Email/password, email-OTP 2FA, social OAuth. Admin TOTP app-auth via Filament `multiFactorAuthentication()` |
-| 4.1b | Brute-force / login lockout | **Apple-style progressive lockout** per email+IP ([UserLogin.php](../app/Livewire/Auth/UserLogin.php)): 5 fails→30 s, 10→60 s, 15→5 min, 20→15 min, 25+→1 hr; plus a hard **IP block after 30 attempts** (1 hr) for bot/spray detection |
+| 4.1b | Brute-force / login lockout | **Apple-style progressive lockout** per email+IP ([UserLogin.php](../app/Livewire/Auth/UserLogin.php)): 5 fails→30 s, 10→60 s, 15→5 min, 20→15 min, 25+→1 hr; plus a hard **IP block after 30 attempts** (1 hr) for bot/spray detection. *Fixed 2026-07-02:* lockouts now fire only at tier boundaries (every 5th failure) with the "N attempts remaining" countdown between tiers, and every auth action resets Livewire's persisted error bag so retries show the **current** message instead of the first stale one (regression-guarded by [LoginLockoutTest](../tests/Feature/LoginLockoutTest.php)) |
 | 4.2 | Authorization | Role-based (`owner`/`admin`/`staff`/`client`) via [User.php](../app/Models/User.php) `isAdmin()`/`isStaff()`/`canAccessPanel()`; 12 Laravel Policies in [app/Policies/](../app/Policies/); `AdminMiddleware` |
 | 4.3 | CSRF | Laravel `PreventRequestForgery` middleware; `@csrf`/`<meta csrf-token>`; logout is POST-only |
 | 4.4 | XSS | Blade `{{ }}` auto-escaping default; `{!! !!}` used only for trusted SEO tag generators; CSP `object-src 'none'` |
@@ -310,7 +310,8 @@ The visual language is sourced from a fixed set of reference libraries (kept con
 | 4.8 | File upload security | Product media `acceptsMimeTypes(['image/jpeg','png','webp','gif'])` + `singleFile()`; Filament `FileUpload->image()` |
 | 4.9 | Session security | `http_only=true`, `same_site=lax`, `encrypt` configurable, DB-driven sessions, `secure` cookie via env ([config/session.php](../config/session.php)); `AuthenticateSession` middleware |
 | 4.10 | Rate limiting | `throttle:5,1` (invoices, order tracker), `throttle:20,1` (payment); OTP resend 60 s cooldown; register 5/10 min per IP ([UserLogin.php](../app/Livewire/Auth/UserLogin.php), [EmailOtpService.php](../app/Services/EmailOtpService.php)) |
-| 4.11 | HTTPS/SSL readiness | `trustProxies(at:'*')` in [bootstrap/app.php](../bootstrap/app.php) so URLs render `https://` behind Render's proxy; HSTS header when `request->secure()` |
+| 4.11 | HTTPS/SSL readiness | `trustProxies()` in [bootstrap/app.php](../bootstrap/app.php) so URLs render `https://` behind Render's proxy; HSTS header when `request->secure()`. *Hardened 2026-07-02:* proxy list is env-configurable (`TRUSTED_PROXIES`, default `*` for Render) and **X-Forwarded-Host is no longer trusted** — only For/Proto/Port — so a spoofed forwarded host can't poison generated URLs (reset links, signed URLs) |
+| 4.11b | Lookup anti-enumeration | Order & booking trackers return **one unified message** for both "not found" and "wrong email" ([OrderTracker.php](../app/Livewire/OrderTracker.php), [BookingTracker.php](../app/Livewire/BookingTracker.php)) — sequential `ORD-/BK-` numbers can't be probed for existence (business-volume leak); invoice route additionally throttled `5,1` |
 | 4.12 | Sensitive data | `.env`, `.env.*` git-ignored; password excluded from activity log & `#[Hidden]`; `role` **not** mass-assignable (privilege-escalation guard); seeder refuses to run without explicit admin creds (no public default) |
 | 4.13 | Secret-leak audit (verified) | **Whole git history scanned — no secrets leaked.** Only `.env.example` (placeholder template) is tracked; the real `.env` was never committed; TiDB host/username/password appear in **no** commit; the one-off credential scripts used during deploy were never committed; no hardcoded passwords/API keys/tokens in any tracked file; this audit doc itself contains no live credentials. Live secrets exist only in the local `.env` + Render's encrypted env vars. |
 | 4.14 | Production DB protection | TiDB Serverless is **TLS-enforced + username/password** (plain connections are rejected). **Not** a "public, unprotected" database. Caveat: the free tier has **no IP allowlist** by default, so the (strong, random, un-leaked) credential is the sole gatekeeper — optional hardening: restrict to Render's egress IPs in the TiDB console. |
@@ -479,6 +480,9 @@ capstone/
 - **Removed feature** — a `gallery_items` table/feature existed earlier and was **fully dropped** (migration `drop_gallery_items_table`); no gallery in the live app.
 - **Backup hardening** — no app-level automated DB backup (relies on TiDB's managed backups); adding a scheduled `mysqldump`/`spatie/laravel-backup` export would give an independent off-provider copy (see §22.8).
 - **DB network hardening** — TiDB free tier has no IP allowlist; restricting connections to Render's egress IPs would add defense-in-depth beyond the credential (see §4.14). *(No secret leak found — see §4.13.)*
+- **Sequential order/booking numbers** — `ORD-YYYY-NNNNN` / `BK-YYYY-NNNNN` are guessable by design (customers quote them verbally). Accepted risk: lookups require the matching email and return a unified not-found message (§4.11b); a random suffix would close the residual volume-inference channel if ever needed.
+- **CSP `unsafe-inline`/`unsafe-eval`** — required by the page's inline scripts and Livewire/Alpine; high-value directives (`object-src 'none'`, `frame-ancestors`, `base-uri`, `form-action`) are enforced. Migrating to nonces is a possible future hardening.
+- **Transactional emails are English-only by design** — every Mailable pins `locale('en')` (matches the invoice convention); revisit only if the owner wants per-customer language emails.
 
 ---
 
@@ -1265,6 +1269,7 @@ Scan of [app/](../app/) subfolders:
 | 35.1 | 404 | Custom [errors/404.blade.php](../resources/views/errors/404.blade.php) |
 | 35.2 | 500 | Custom [errors/500.blade.php](../resources/views/errors/500.blade.php) |
 | 35.3 | 503 maintenance | Custom [errors/503.blade.php](../resources/views/errors/503.blade.php) |
+| — | 403 | Custom [errors/403.blade.php](../resources/views/errors/403.blade.php) (added 2026-07-02) — themed Access-Denied page for invoice/payment ownership rejections, with Home + Login actions |
 | — | 419 / 429 | Custom CSRF-expired + rate-limited pages ([419](../resources/views/errors/419.blade.php), [429](../resources/views/errors/429.blade.php)); plus `unauthorized` |
 | 35.4 | Validation errors | Livewire `@error`/error bags inline; Filament inline field errors |
 | 35.5 | Exception logging & observability | **Self-hosted observability stack.** Log `stack` channel fans out to 3 channels ([config/logging.php](../config/logging.php)): `single` (file), `structured` (daily **JSON** at `storage/logs/structured.log`), and `database` (custom [CreateDatabaseLogger](../app/Logging/CreateDatabaseLogger.php) → [DatabaseLogHandler](../app/Logging/DatabaseLogHandler.php) → `app_logs`, with regression detection). **Trace IDs:** [AssignTraceId](../app/Http/Middleware/AssignTraceId.php) reads/generates `X-Request-Id`, shares it + request metadata via Laravel **Context** so every log line is correlated, and echoes it back in the response header. [ObservabilityProcessor](../app/Logging/ObservabilityProcessor.php) attaches the trace id + breadcrumb trail to each entry. Custom exception render in [bootstrap/app.php](../bootstrap/app.php). |
@@ -1441,12 +1446,13 @@ Scan of [app/](../app/) subfolders:
 
 | # | Aspect | Detail |
 |---|---|---|
-| 47.1 | Structure | JSON-based: [lang/ms.json](../lang/ms.json), [lang/zh.json](../lang/zh.json); English is the source key (no `lang/en.json`) |
+| 47.1 | Structure | JSON-based: [lang/ms.json](../lang/ms.json), [lang/zh.json](../lang/zh.json); English is the source key (no `lang/en.json`). PHP files for framework messages: [lang/zh/validation.php](../lang/zh/validation.php) + [lang/ms/validation.php](../lang/ms/validation.php) (added 2026-07-02 — full rule set + friendly attribute names for every form field) |
 | 47.2 | Keys | Flat key=English-string → translation maps |
-| 47.3 | Completeness | Enforced by [LocalizationCoverageTest](../tests/Feature/LocalizationCoverageTest.php) — guards MS/ZH parity with used `__()` keys |
-| 47.4 | `__()`/`trans()` | Used throughout Blade + components for all user-facing strings |
+| 47.3 | Completeness | Enforced by [LocalizationCoverageTest](../tests/Feature/LocalizationCoverageTest.php) — guards MS/ZH parity with used `__()` keys; end-to-end rendering guarded by [LocalizedPagesTest](../tests/Feature/LocalizedPagesTest.php) |
+| 47.4 | `__()`/`trans()` | Used throughout Blade + components for all user-facing strings; DB-driven service & category names pass through `__()` with JSON entries |
 | 47.5 | Pluralization | Standard Laravel; `:count`/`:seconds` placeholders used |
-| 47.6 | Date/number per locale | MYR money formatted `locale: ms_MY`; dates via Carbon |
+| 47.6 | Date/number per locale | MYR money formatted `locale: ms_MY`; dates localized via Carbon — `LocaleUpdated` listener in [AppServiceProvider.php](../app/Providers/AppServiceProvider.php) keeps Carbon's locale in lockstep, and customer-facing views use `translatedFormat()` (added 2026-07-02) |
+| 47.7 | Product content translations | Per-language columns `name_ms/_zh`, `short_description_ms/_zh`, `description_ms/_zh` on `products` + `translated_*` accessors with English fallback ([Product.php](../app/Models/Product.php)); entered via Filament product form (added 2026-07-02) |
 
 ---
 
@@ -1463,3 +1469,35 @@ Scan of [app/](../app/) subfolders:
 | 48.7 | Storage symlink | ✅ `php artisan storage:link --force` on every container boot; media committed to git (Render has no persistent disk) |
 | 48.8 | Render config file | No `render.yaml`/`Procfile` — Docker-based deploy configured via the Render dashboard ([Dockerfile](../Dockerfile) + [docker-entrypoint.sh](../docker-entrypoint.sh)) |
 | — | Seeder safety | ✅ DatabaseSeeder refuses to run without explicit `DEFAULT_ADMIN_*` (no public default credentials) |
+
+---
+
+# 49. Deep Security & UX Audit — 2 Jul 2026
+
+> Full-codebase pass over authentication, authorization, payment, injection/XSS surface, config posture, and UX gaps. Method: route/middleware review, pattern greps (`{!! !!}`, raw SQL, mass assignment, `env()` leaks), file-by-file reads of every money/auth/lookup flow, plus git-history secret scan (§4.13 re-confirmed).
+
+## 49.1 Findings & resolutions
+
+| # | Severity | Finding | Resolution |
+|---|---|---|---|
+| 1 | Medium | **Order/booking lookup enumeration** — trackers returned different messages for "no such number" vs "wrong email"; with sequential `ORD-/BK-` numbers this let anyone probe which numbers exist (business-volume leak) | **Fixed** — unified not-found message in both trackers ([OrderTracker.php](../app/Livewire/OrderTracker.php), [BookingTracker.php](../app/Livewire/BookingTracker.php)), search + cancel paths |
+| 2 | Medium (UX-visible) | **Login "attempts remaining" counter appeared stuck at 4** — Livewire persists the error bag across requests; `addError()` appends while `@error` renders `first()`, so every retry displayed the first stale message; separately, `lockoutSecondsFor()` matched tiers with `>=` so every failure past the 5th re-locked instantly (countdown was dead code) | **Fixed** — error-bag reset at the start of every reporting action across UserLogin, ForgotPassword, ProfilePage (11 actions, field-scoped), BookingForm, ContactPage, CheckoutPage; tier logic fires only at 5/10/15/20/25 boundaries; covered by [LoginLockoutTest](../tests/Feature/LoginLockoutTest.php) |
+| 3 | Low | **`trustProxies(at:'*')` + all X-Forwarded headers** — spoofable client IPs would undermine per-IP rate limits if ever deployed without a trusted edge; X-Forwarded-Host spoofing could poison generated URLs | **Hardened** — `TRUSTED_PROXIES` env override (default `*` for Render), X-Forwarded-**Host** no longer trusted ([bootstrap/app.php](../bootstrap/app.php)) |
+| 4 | Low | **No custom 403 page** — invoice/payment ownership `abort(403)` fell back to Laravel's unthemed default | **Fixed** — [errors/403.blade.php](../resources/views/errors/403.blade.php) matching the 404/500 design, localized, with Home + Login actions |
+| 5 | Low | Sequential order/booking numbers; CSP `unsafe-inline`/`unsafe-eval`; English-only transactional mails | **Accepted risks**, documented in §9 with rationale |
+
+## 49.2 Verified-clean areas (no action needed)
+
+- **Payment** ([PaymentPage.php](../app/Livewire/PaymentPage.php)): cache lock + pessimistic row lock + atomic conditional flip (single-winner); server-side price computation; whitelisted payment methods; `#[Locked]` order property.
+- **IDOR**: invoice, payment page, account pages all enforce `user_id` ownership or admin/staff role.
+- **Injection**: every `whereRaw` parameter-bound; product search escapes LIKE wildcards (`ESCAPE '!'`).
+- **XSS**: all `{!! !!}` sinks are trusted SEO generators, hardcoded SVG icons, or pre-escaped (`nl2br(e(...))`, chatbot `e()` before phone-linkification).
+- **Privilege escalation**: `role` not mass-assignable; profile update uses field whitelist (email immutable); admin panel double-guarded (`Authenticate` + `AdminMiddleware` role check).
+- **Chatbot**: input capped + `strip_tags`, injection/moderation classifiers, burst + hourly rate limits, abuse cooldown, `#[Locked]` state, MockDriver (no external LLM key to leak).
+- **Secrets**: `.env*` ignored; git history clean; cron endpoint `hash_equals`-gated; seeder refuses default credentials.
+
+## 49.3 Remaining UX notes (minor, unfixed by choice)
+
+- Language switch is a full-page redirect (correctly open-redirect-guarded) rather than soft navigation.
+- The custom 429 page mostly applies to route-level throttles; component-level limits intentionally show inline messages instead.
+- Guest bookings without an email rely on the on-screen reference; consider a "screenshot this" nudge on the success card.

@@ -49,13 +49,11 @@ class BookingTracker extends Component
 
         $booking = $this->findBookingByReference();
 
-        if (! $booking) {
-            $this->errorMsg = __('No booking found. Please check your booking reference.');
-            return;
-        }
-
-        if (strtolower(trim($booking->customer_email ?? '')) !== strtolower(trim($this->email))) {
-            $this->errorMsg = __('Email does not match. Please check your email address.');
+        // One message for both "no such booking" and "wrong email" — references
+        // are sequential (BK-YYYY-NNNNN), so distinct messages would let anyone
+        // enumerate which references exist (and thus the shop's booking volume).
+        if (! $booking || strtolower(trim($booking->customer_email ?? '')) !== strtolower(trim($this->email))) {
+            $this->errorMsg = __('No matching booking found. Please check your booking reference and email.');
             return;
         }
 
@@ -79,16 +77,13 @@ class BookingTracker extends Component
 
         $booking = $this->findBookingByReference();
 
-        if (! $booking) {
-            $this->errorMsg = __('No booking found. Please check your booking reference.');
-            return;
-        }
-
-        // A null stored email must never match any submitted value — treat it as
-        // non-matchable so a booking without an email can't be cancelled by anyone.
-        if (! $booking->customer_email
+        // Same unified message as search() (no reference enumeration), and a null
+        // stored email must never match any submitted value — a booking made
+        // without an email can't be cancelled by anyone through this form.
+        if (! $booking
+            || ! $booking->customer_email
             || strtolower(trim($booking->customer_email)) !== strtolower(trim($this->email))) {
-            $this->errorMsg = __('Email does not match. Please check your email address.');
+            $this->errorMsg = __('No matching booking found. Please check your booking reference and email.');
             return;
         }
 

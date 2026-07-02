@@ -20,7 +20,19 @@ return Application::configure(basePath: dirname(__DIR__))
         // X-Forwarded-Proto. Without trusting that header, Laravel generates
         // http:// asset/URL links on an https:// page, which browsers block
         // as mixed content (this is why CSS/JS silently failed to load).
-        $middleware->trustProxies(at: '*');
+        //
+        // TRUSTED_PROXIES narrows this to specific proxy IPs/CIDRs on hosts
+        // that publish them; '*' stays the default because Render doesn't.
+        // X-Forwarded-Host is deliberately NOT trusted — the app's host comes
+        // from the real Host header, so a spoofed forwarded host can't poison
+        // generated URLs (password-reset links, signed URLs). Forwarded-For is
+        // still needed: the per-IP rate limits and login lockouts key on it.
+        $middleware->trustProxies(
+            at: env('TRUSTED_PROXIES', '*'),
+            headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR
+                | \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO
+                | \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT,
+        );
         // Runs first so every log line in the request carries a trace id.
         $middleware->web(prepend: [
             \App\Http\Middleware\AssignTraceId::class,

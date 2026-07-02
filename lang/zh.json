@@ -1095,5 +1095,9 @@
     "Aircond Gas": "冷气雪种",
     "Oil Compressor": "压缩机油",
     "Car Wash": "洗车",
-    "Hi Win Win Car Studio! I'm interested in :product. Can you provide more details?": "你好 Win Win Car Studio！我对 :product 感兴趣，可以提供更多详情吗？"
+    "Hi Win Win Car Studio! I'm interested in :product. Can you provide more details?": "你好 Win Win Car Studio！我对 :product 感兴趣，可以提供更多详情吗？",
+    "No matching order found. Please check your order number and email.": "没有找到匹配的订单，请核对订单编号和电子邮箱。",
+    "No matching booking found. Please check your booking reference and email.": "没有找到匹配的预约，请核对预约编号和电子邮箱。",
+    "Forbidden": "禁止访问",
+    "You don't have permission to view this page. If you think this is a mistake, please sign in with the right account.": "您没有权限查看此页面。如果您认为这是一个错误，请使用正确的账号登录。"
 }
