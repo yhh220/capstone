@@ -38,6 +38,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | In-Admin Database Log (app_logs)
+    |--------------------------------------------------------------------------
+    |
+    | Housekeeping for the admin Logs viewer. Read via config() — not env() —
+    | so the values survive `config:cache` (env() reads nothing from .env once
+    | the config is cached, which silently reverted these to their defaults).
+    |
+    */
+
+    'db_log' => [
+        // model:prune deletes app_logs rows older than this many days.
+        'retention_days' => (int) env('LOG_DB_RETENTION_DAYS', 7),
+        // logs:auto-resolve marks an error fixed after this many hours of silence.
+        'auto_resolve_hours' => (int) env('LOG_AUTO_RESOLVE_HOURS', 48),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Log Channels
     |--------------------------------------------------------------------------
     |

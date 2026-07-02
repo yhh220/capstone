@@ -17,6 +17,10 @@ class DatabaseLogHandler extends AbstractProcessingHandler
 {
     private static bool $writing = false;
 
+    // hasTable() hits information_schema — one network round-trip per log line
+    // on a remote DB (TiDB). The answer can't change mid-process, so ask once.
+    private static ?bool $tableExists = null;
+
     protected function write(LogRecord $record): void
     {
         if (self::$writing) {
@@ -26,33 +30,36 @@ class DatabaseLogHandler extends AbstractProcessingHandler
         self::$writing = true;
 
         try {
-            if (! Schema::hasTable('app_logs')) {
+            if (! (self::$tableExists ??= Schema::hasTable('app_logs'))) {
                 return;
             }
 
             $extra = $record->extra;
 
             AppLog::create([
-                'level'      => $record->level->value,
-                'level_name' => $record->level->toPsrLogLevel(),
-                'message'    => Str::limit($record->message, 2000),
-                'channel'    => $record->channel,
-                'trace_id'   => $extra['trace_id'] ?? null,
-                'user_id'    => $extra['user_id'] ?? null,
-                'ip'         => $extra['ip'] ?? null,
-                'method'     => $extra['method'] ?? null,
-                'path'       => $extra['path'] ?? null,
-                'context'    => $this->payload($record->context, $extra),
-                'logged_at'  => $record->datetime,
-                'created_at' => now(),
+                'level'       => $record->level->value,
+                'level_name'  => $record->level->toPsrLogLevel(),
+                'message'     => Str::limit($record->message, 2000),
+                // Grouping key for regression-reopen / auto-resolve / the admin
+                // "check for recurrence" action — precomputed + indexed so those
+                // are equality lookups instead of SUBSTR() table scans.
+                'fingerprint' => AppLog::fingerprintFor($record->message),
+                'channel'     => $record->channel,
+                'trace_id'    => $extra['trace_id'] ?? null,
+                'user_id'     => $extra['user_id'] ?? null,
+                'ip'          => $extra['ip'] ?? null,
+                'method'      => $extra['method'] ?? null,
+                'path'        => $extra['path'] ?? null,
+                'context'     => $this->payload($record->context, $extra),
+                'logged_at'   => $record->datetime,
+                'created_at'  => now(),
             ]);
 
             // Regression detection: if the same error was previously marked fixed,
             // reopen it automatically so it resurfaces in the admin log view.
-            if (in_array($record->level->toPsrLogLevel(), ['error', 'critical', 'alert', 'emergency'], true)) {
-                $fingerprint = substr($record->message, 0, 100);
-                AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
-                    ->whereRaw('SUBSTR(message, 1, 100) = ?', [$fingerprint])
+            if (in_array($record->level->toPsrLogLevel(), AppLog::ERROR_LEVELS, true)) {
+                AppLog::whereIn('level_name', AppLog::ERROR_LEVELS)
+                    ->where('fingerprint', AppLog::fingerprintFor($record->message))
                     ->whereNotNull('resolved_at')
                     ->update(['resolved_at' => null]);
             }

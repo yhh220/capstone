@@ -12,30 +12,30 @@ class AutoResolveErrorLogs extends Command
 
     public function handle(): int
     {
-        $hours  = (int) ($this->option('hours') ?: env('LOG_AUTO_RESOLVE_HOURS', 48));
-        $hours  = max(1, $hours);
+        // config(), not env() — env() reads nothing from .env once config is
+        // cached (the entrypoint runs config:cache), silently reverting to 48.
+        $hours  = max(1, (int) ($this->option('hours') ?: config('logging.db_log.auto_resolve_hours')));
         $cutoff = now()->subHours($hours);
-        $now    = now();
-        $count  = 0;
 
-        AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
+        // Two set-based queries instead of a per-row exists() loop. (Not a single
+        // correlated NOT EXISTS: MySQL/TiDB reject the update target reappearing
+        // in a subquery FROM — error 1093 — so materialise the active set first.)
+        // Step 1: fingerprints still seen inside the silence window (indexed, and
+        // a handful of distinct values at most given the 7-day retention).
+        $activeFingerprints = AppLog::query()
+            ->whereIn('level_name', AppLog::ERROR_LEVELS)
+            ->where('logged_at', '>', $cutoff)
+            ->whereNotNull('fingerprint')
+            ->distinct()
+            ->pluck('fingerprint');
+
+        // Step 2: everything stale, unresolved, and not in the active set is done.
+        $count = AppLog::query()
+            ->whereIn('level_name', AppLog::ERROR_LEVELS)
             ->whereNull('resolved_at')
             ->where('logged_at', '<=', $cutoff)
-            ->chunkById(100, function ($logs) use ($cutoff, $now, &$count): void {
-                foreach ($logs as $log) {
-                    $fingerprint = substr($log->message, 0, 100);
-
-                    $hasRecurred = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
-                        ->whereRaw('SUBSTR(message, 1, 100) = ?', [$fingerprint])
-                        ->where('logged_at', '>', $cutoff)
-                        ->exists();
-
-                    if (! $hasRecurred) {
-                        $log->update(['resolved_at' => $now]);
-                        $count++;
-                    }
-                }
-            });
+            ->whereNotIn('fingerprint', $activeFingerprints)
+            ->update(['resolved_at' => now()]);
 
         $this->info("Auto-resolved {$count} error log(s) silent for {$hours}+ hours.");
 

@@ -131,38 +131,32 @@ class LogResource extends Resource
                     ->tooltip("Checks the log history only — it doesn't re-run anything. If the same error hasn't appeared again, it marks this resolved as a best guess; it can't prove the underlying code is actually fixed.")
                     ->visible(fn (AppLog $record): bool => $record->resolved_at === null)
                     ->action(function (AppLog $record): void {
-                        $fingerprint = substr($record->message, 0, 100);
-                        $base        = AppLog::whereIn('level_name', ['error', 'critical', 'alert', 'emergency'])
-                            ->whereRaw('SUBSTR(message, 1, 100) = ?', [$fingerprint]);
+                        ['state' => $state, 'last_seen' => $lastSeen] = $record->recurrenceState();
 
-                        // Latest known occurrence of this error (could be a burst of many entries).
-                        $clusterEnd = (clone $base)->max('logged_at');
-
-                        // A TRUE recurrence is any entry logged MORE THAN 1 minute after the
-                        // cluster ended — this excludes the original burst (same-second entries)
-                        // and the entry itself from being mistaken as a new occurrence.
-                        $recurrence = (clone $base)
-                            ->where('logged_at', '>', \Carbon\Carbon::parse($clusterEnd)->addMinute())
-                            ->orderByDesc('logged_at')
-                            ->value('logged_at');
-
-                        if ($recurrence) {
+                        if ($state === 'active') {
                             Notification::make()
-                                ->title('Still recurring')
-                                ->body('This error happened again ' . \Carbon\Carbon::parse($recurrence)->diffForHumans() . ' — leaving it open.')
+                                ->title('Still happening')
+                                ->body('This error last occurred ' . $lastSeen->diffForHumans() . ' — too recent to call fixed. Leaving it open.')
                                 ->warning()
                                 ->send();
                             return;
                         }
 
-                        // No entry newer than the original cluster — resolve this and all siblings.
-                        $resolved = (clone $base)
-                            ->whereNull('resolved_at')
-                            ->update(['resolved_at' => now()]);
+                        if ($state === 'recurred') {
+                            Notification::make()
+                                ->title('Still recurring')
+                                ->body('This error happened again after this entry (last seen ' . $lastSeen->diffForHumans() . ') — leaving it open.')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+
+                        // Quiet — nothing newer than this entry's burst. Resolve the whole group.
+                        $resolved = $record->resolveSiblings();
 
                         Notification::make()
                             ->title('No recurrence found')
-                            ->body("Not seen again since it last happened, so {$resolved} log " . str('entry')->plural($resolved) . ' marked resolved. This only reflects log history — it has not re-tested the underlying code.')
+                            ->body('Last seen ' . $lastSeen->diffForHumans() . ", so {$resolved} log " . str('entry')->plural($resolved) . ' marked resolved. This only reflects log history — it has not re-tested the underlying code.')
                             ->success()
                             ->send();
                     }),
