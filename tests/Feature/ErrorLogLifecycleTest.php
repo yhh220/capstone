@@ -2,9 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Logs\Pages\ListLogs;
 use App\Models\AppLog;
+use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
@@ -100,5 +104,40 @@ class ErrorLogLifecycleTest extends TestCase
         $this->assertNull($stillActive->fresh()->resolved_at, 'An error still recurring inside the window must stay open.');
         $this->assertNull($recent->fresh()->resolved_at);
         $this->assertNotNull($wentQuiet->fresh()->resolved_at, 'An error silent past the window must be auto-resolved.');
+    }
+
+    public function test_auto_resolve_marks_everything_when_nothing_is_recent(): void
+    {
+        // Empty "active fingerprints" set — whereNotIn([]) must resolve all stale
+        // rows, not none of them.
+        $a = $this->makeLog('Old error A', now()->subDays(5));
+        $b = $this->makeLog('Old error B', now()->subDays(5));
+
+        $this->artisan('logs:auto-resolve', ['--hours' => 48])->assertSuccessful();
+
+        $this->assertNotNull($a->fresh()->resolved_at);
+        $this->assertNotNull($b->fresh()->resolved_at);
+    }
+
+    public function test_check_recurrence_action_is_hidden_on_non_error_rows(): void
+    {
+        // Grouping only spans error levels, so on a warning row the action would
+        // report "0 resolved" and leave the row open — hide it there instead.
+        $admin = User::forceCreate([
+            'name' => 'Admin', 'email' => 'admin@example.test', 'password' => bcrypt('secret'), 'role' => 'admin',
+        ]);
+
+        $error   = $this->makeLog('A real error', now()->subDays(3));
+        $warning = AppLog::create([
+            'level' => 300, 'level_name' => 'warning', 'message' => 'Just a warning',
+            'fingerprint' => AppLog::fingerprintFor('Just a warning'), 'logged_at' => now()->subDays(3),
+        ]);
+
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+        $this->actingAs($admin, 'admin');
+
+        Livewire::test(ListLogs::class)
+            ->assertTableActionVisible('checkFixed', $error)
+            ->assertTableActionHidden('checkFixed', $warning);
     }
 }

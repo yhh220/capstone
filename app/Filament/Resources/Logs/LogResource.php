@@ -129,7 +129,12 @@ class LogResource extends Resource
                     ->url(fn (AppLog $record): string => static::getUrl('index', ['trace_id' => $record->trace_id])),
                 Action::make('checkFixed')->label('Check for recurrence')->icon(Heroicon::OutlinedMagnifyingGlass)->color('info')
                     ->tooltip("Checks the log history only — it doesn't re-run anything. If the same error hasn't appeared again, it marks this resolved as a best guess; it can't prove the underlying code is actually fixed.")
-                    ->visible(fn (AppLog $record): bool => $record->resolved_at === null)
+                    // Error-level only: recurrence grouping (siblings/resolveSiblings)
+                    // works over ERROR_LEVELS, so on a warning/info row it would
+                    // find nothing and cheerfully report "0 resolved" while leaving
+                    // the row open. Those rows still get the plain "Mark fixed".
+                    ->visible(fn (AppLog $record): bool => $record->resolved_at === null
+                        && in_array($record->level_name, AppLog::ERROR_LEVELS, true))
                     ->action(function (AppLog $record): void {
                         ['state' => $state, 'last_seen' => $lastSeen] = $record->recurrenceState();
 
