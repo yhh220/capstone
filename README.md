@@ -65,7 +65,7 @@ Built on the **TALL stack** (Tailwind, Alpine.js, Livewire, Laravel).
 
 ## Project Scope
 
-This is a solo capstone project, built end-to-end (backend, frontend, admin panel, and deployment) to demonstrate a complete, production-shaped web application rather than an isolated coding exercise. It covers a full customer-facing storefront, a real booking/ordering workflow, a role-based admin panel, and the supporting concerns (security, accessibility, localization, observability) that a real small-business site would need.
+This is a group capstone project built by a team of three, covering the full stack end-to-end (backend, frontend, admin panel, and deployment) to demonstrate a complete, production-shaped web application rather than an isolated coding exercise. It covers a full customer-facing storefront, a real booking/ordering workflow, a role-based admin panel, and the supporting concerns (security, accessibility, localization, observability) that a real small-business site would need.
 
 The business itself — Win Win Car Studio — and all product data, images, and customer information are fictional, created for demonstration purposes only.
 
