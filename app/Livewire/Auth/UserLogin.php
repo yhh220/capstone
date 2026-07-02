@@ -112,6 +112,13 @@ class UserLogin extends Component
      */
     public function login(#[\SensitiveParameter] string $loginPassword = ''): void
     {
+        // Livewire persists the error bag across requests and addError() only
+        // appends to it, while the Blade @error directive renders first() — so
+        // without this reset every retry kept showing the FIRST failure's
+        // message ("4 attempts remaining") forever, no matter how the counter
+        // and lockout actually progressed underneath.
+        $this->resetErrorBag();
+
         $v = Validator::make(
             ['loginEmail' => $this->loginEmail, 'loginPassword' => $loginPassword],
             ['loginEmail' => ['required', 'email'], 'loginPassword' => ['required', 'string']],
@@ -231,6 +238,8 @@ class UserLogin extends Component
      */
     public function verifyLoginOtp(): void
     {
+        $this->resetErrorBag(); // same stale-first()-message trap as login()
+
         $this->validate(['loginOtpCode' => ['required', 'digits:6']]);
 
         $user = User::where('email', $this->loginEmail)->first();
@@ -257,6 +266,8 @@ class UserLogin extends Component
         if (! $this->awaitingLoginOtp) {
             return;
         }
+
+        $this->resetErrorBag(); // same stale-first()-message trap as login()
 
         $otp  = app(EmailOtpService::class);
         $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_LOGIN, $this->loginEmail);
@@ -303,13 +314,15 @@ class UserLogin extends Component
 
     private function lockoutSecondsFor(int $fails): int
     {
-        $seconds = 0;
-        foreach (self::LOCKOUT_TIERS as $threshold => $wait) {
-            if ($fails >= $threshold) {
-                $seconds = $wait;
-            }
+        // A lockout fires only when the count lands exactly on a tier boundary
+        // (every 5th failure); between boundaries the "N attempts remaining"
+        // countdown runs. Matching on >= instead used to re-lock on EVERY
+        // failure past the 5th, so the countdown never appeared again.
+        if ($fails < 5 || $fails % 5 !== 0) {
+            return 0;
         }
-        return $seconds;
+
+        return self::LOCKOUT_TIERS[min($fails, 25)] ?? self::LOCKOUT_TIERS[25];
     }
 
     private function lockoutMessage(int $seconds): string
@@ -335,6 +348,8 @@ class UserLogin extends Component
         #[\SensitiveParameter] string $password = '',
         #[\SensitiveParameter] string $passwordConfirmation = '',
     ): void {
+        $this->resetErrorBag(); // same stale-first()-message trap as login()
+
         $this->protectAgainstSpam();
 
         $v = Validator::make(
@@ -401,6 +416,8 @@ class UserLogin extends Component
      */
     public function verifyRegistrationOtp(): void
     {
+        $this->resetErrorBag(); // same stale-first()-message trap as login()
+
         $this->validate(['otpCode' => ['required', 'digits:6']]);
 
         $otp = app(EmailOtpService::class);
@@ -478,6 +495,8 @@ class UserLogin extends Component
         if (! $this->awaitingOtp || $this->otpEmail === '') {
             return;
         }
+
+        $this->resetErrorBag(); // same stale-first()-message trap as login()
 
         $otp  = app(EmailOtpService::class);
         $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_REGISTER, $this->otpEmail);
