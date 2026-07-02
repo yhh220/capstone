@@ -148,6 +148,10 @@ class CheckoutPage extends Component
 
     public function placeOrder(): void
     {
+        // Livewire keeps the error bag across requests and addError() appends,
+        // while @error shows first() — reset so retries report fresh messages.
+        $this->resetErrorBag();
+
         if (! Auth::check()) {
             $this->redirect(route('login'));
 

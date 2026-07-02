@@ -42,6 +42,10 @@ class ContactPage extends Component
 
     public function submit(): void
     {
+        // Livewire keeps the error bag across requests and addError() appends,
+        // while @error shows first() — reset so retries report fresh messages.
+        $this->resetErrorBag();
+
         // Honeypot check — powered by spatie/laravel-honeypot (field check + time gate)
         $this->protectAgainstSpam();
 

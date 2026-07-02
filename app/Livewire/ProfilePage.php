@@ -96,6 +96,11 @@ class ProfilePage extends Component
         #[\SensitiveParameter] string $newPassword,
         #[\SensitiveParameter] string $confirmation,
     ): void {
+        // Livewire keeps the error bag across requests and addError() appends,
+        // while @error shows first() — reset this form's fields so retries
+        // report fresh messages (scoped so other profile forms keep theirs).
+        $this->resetErrorBag(['current_password', 'new_password', 'new_password_confirmation']);
+
         $v = Validator::make(
             ['current_password' => $currentPassword, 'new_password' => $newPassword, 'new_password_confirmation' => $confirmation],
             [
@@ -127,6 +132,8 @@ class ProfilePage extends Component
      */
     public function sendSetPasswordCode(): void
     {
+        $this->resetErrorBag('set_otp'); // stale-first()-message trap, see updatePassword()
+
         $user = Auth::user();
         if ($user->hasPassword()) {
             return; // already has one — the Change Password form applies instead
@@ -160,6 +167,8 @@ class ProfilePage extends Component
         #[\SensitiveParameter] string $newPassword,
         #[\SensitiveParameter] string $confirmation,
     ): void {
+        $this->resetErrorBag(['set_otp', 'set_new_password', 'set_new_password_confirmation']); // see updatePassword()
+
         $user = Auth::user();
         if ($user->hasPassword()) {
             return;
@@ -202,6 +211,8 @@ class ProfilePage extends Component
      */
     public function sendEnableTwoFactorCode(): void
     {
+        $this->resetErrorBag('two_factor_otp'); // see updatePassword()
+
         $user = Auth::user();
         if ($user->two_factor_enabled) {
             return;
@@ -230,6 +241,8 @@ class ProfilePage extends Component
      */
     public function confirmEnableTwoFactor(#[\SensitiveParameter] string $otp): void
     {
+        $this->resetErrorBag('two_factor_otp'); // see updatePassword()
+
         $user = Auth::user();
         if ($user->two_factor_enabled) {
             return;
@@ -270,6 +283,8 @@ class ProfilePage extends Component
      */
     public function disableTwoFactor(#[\SensitiveParameter] string $password): void
     {
+        $this->resetErrorBag('two_factor_password'); // see updatePassword()
+
         if (! Auth::user()->hasPassword()) {
             $this->addError('two_factor_password', __('Your account uses social sign-in. Please use the email code path to turn off verification.'));
             return;
@@ -297,6 +312,8 @@ class ProfilePage extends Component
      */
     public function sendDisableTwoFactorCode(): void
     {
+        $this->resetErrorBag('disable_two_factor_otp'); // see updatePassword()
+
         $user = Auth::user();
         if ($user->hasPassword() || ! $user->two_factor_enabled) {
             return;
@@ -325,6 +342,8 @@ class ProfilePage extends Component
      */
     public function confirmDisableTwoFactorViaOtp(#[\SensitiveParameter] string $otp): void
     {
+        $this->resetErrorBag('disable_two_factor_otp'); // see updatePassword()
+
         $user = Auth::user();
         if ($user->hasPassword() || ! $user->two_factor_enabled) {
             return;
@@ -361,6 +380,8 @@ class ProfilePage extends Component
      */
     public function deleteAccount(#[\SensitiveParameter] string $password = ''): void
     {
+        $this->resetErrorBag('delete_password'); // see updatePassword()
+
         if (! Auth::user()->hasPassword()) {
             $this->addError('delete_password', __('Your account uses social sign-in. Please use the email code path to delete your account.'));
             return;
@@ -387,6 +408,8 @@ class ProfilePage extends Component
      */
     public function sendDeleteAccountCode(): void
     {
+        $this->resetErrorBag('delete_otp'); // see updatePassword()
+
         $user = Auth::user();
         if ($user->hasPassword()) {
             return;
@@ -414,6 +437,8 @@ class ProfilePage extends Component
      */
     public function confirmDeleteAccountViaOtp(#[\SensitiveParameter] string $otp): void
     {
+        $this->resetErrorBag('delete_otp'); // see updatePassword()
+
         $user = Auth::user();
         if ($user->hasPassword()) {
             return;

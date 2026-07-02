@@ -53,6 +53,10 @@ class ForgotPassword extends Component
      */
     public function sendCode(): void
     {
+        // Livewire keeps the error bag across requests and addError() appends,
+        // while @error shows first() — reset so retries report fresh messages.
+        $this->resetErrorBag();
+
         // Honeypot (hidden field + submission time gate) — silently blocks bots.
         $this->protectAgainstSpam();
 
@@ -102,6 +106,8 @@ class ForgotPassword extends Component
      */
     public function resendCode(): void
     {
+        $this->resetErrorBag(); // same stale-first()-message trap as sendCode()
+
         // Resends count toward both the per-IP burst cap and the daily cap.
         $ip       = request()->ip();
         $key      = 'pwreset:' . $ip;
@@ -147,6 +153,8 @@ class ForgotPassword extends Component
         #[\SensitiveParameter] string $password = '',
         #[\SensitiveParameter] string $passwordConfirmation = '',
     ): void {
+        $this->resetErrorBag(); // same stale-first()-message trap as sendCode()
+
         $v = Validator::make(
             [
                 'otpCode'               => $this->otpCode,

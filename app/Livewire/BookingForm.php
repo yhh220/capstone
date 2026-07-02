@@ -266,6 +266,10 @@ class BookingForm extends Component
 
     public function submit(): void
     {
+        // Livewire keeps the error bag across requests and addError() appends,
+        // while @error shows first() — reset so retries report fresh messages.
+        $this->resetErrorBag();
+
         // Honeypot check (field + time gate) — silently rejects bot submissions.
         $this->protectAgainstSpam();
 
