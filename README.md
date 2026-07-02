@@ -74,3 +74,5 @@ The business itself — Win Win Car Studio — and all product data, images, and
 ## License
 
 Built for academic capstone submission. Not intended for commercial use.
+
+Copyright © 2026 INTI College. All rights reserved. This project was developed as part of an academic capstone requirement, and ownership of the work belongs to INTI College.
