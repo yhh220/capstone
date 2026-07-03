@@ -155,26 +155,32 @@ class SystemStatus extends Page
     public function clearCache(): void
     {
         try {
-            // Preserve the scheduler heartbeat so the System Status check
-            // doesn't flip to "Stopped" just because we flushed the cache.
-            $heartbeat = Cache::get('scheduler:last_run');
+            // Content caches ONLY — deliberately not Cache::flush(). The database
+            // cache store also holds every security counter: login-failure counts,
+            // per-email lockouts, IP blocks, live OTP codes + their attempt caps,
+            // every RateLimiter key (booking / contact / checkout / chatbot …), and
+            // chatbot abuse blocks. Flushing all of it would unlock an in-progress
+            // brute-forcer, invalidate codes for users mid-signup/reset, and reset
+            // every rate limit. This button's only job is to drop the app's own
+            // cached DB reads so an admin's content edit shows up immediately.
+            //
+            // Also no config:/route:/view:clear here: production boots with those
+            // caches built (docker-entrypoint), and clearing-without-rebuilding
+            // just slows every later request until the next deploy — and none of
+            // them hold the DB content this button is about anyway.
+            $keys = ['dashboard_stats', 'chatbot_faqs', 'chatbot_services', 'chatbot_brands', 'gmail_api_access_token'];
 
-            // Flush all Laravel cache entries
-            Cache::flush();
+            foreach (\App\Models\Setting::pluck('key') as $settingKey) {
+                $keys[] = 'setting_' . $settingKey;
+            }
 
-            // Clear configuration cache, route cache, view cache, and system cache using Artisan
-            \Illuminate\Support\Facades\Artisan::call('cache:clear');
-            \Illuminate\Support\Facades\Artisan::call('config:clear');
-            \Illuminate\Support\Facades\Artisan::call('view:clear');
-            \Illuminate\Support\Facades\Artisan::call('route:clear');
-
-            if ($heartbeat) {
-                Cache::forever('scheduler:last_run', $heartbeat);
+            foreach ($keys as $key) {
+                Cache::forget($key);
             }
 
             \Filament\Notifications\Notification::make()
-                ->title('System Cache Cleared')
-                ->body('All application settings, chatbot FAQs, dashboard aggregated stats, and view caches have been cleared successfully.')
+                ->title('Content cache cleared')
+                ->body('Settings, chatbot content, and dashboard statistics have been refreshed. Security counters and rate limits were left untouched.')
                 ->success()
                 ->send();
 

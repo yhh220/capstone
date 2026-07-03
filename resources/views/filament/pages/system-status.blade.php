@@ -94,7 +94,7 @@
         <x-filament::section heading="Cache Control">
             <div class="space-y-4">
                 <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                    Clear the application configuration, routes, settings, chatbot FAQs, and dashboard statistics caches if updates are not showing up.
+                    Refresh the settings, chatbot content, and dashboard statistics caches if an admin change isn't showing up on the site. Security counters and rate limits are not affected.
                 </p>
                 <div>
                     <x-filament::button
