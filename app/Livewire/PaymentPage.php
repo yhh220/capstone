@@ -145,7 +145,15 @@ class PaymentPage extends Component
                 ->where('user_id', Auth::id())
                 ->lockForUpdate()->with('items')->first();
 
-            if (! $order || ! $order->isAwaitingPayment()) {
+            // isPaymentExpired() too, not just awaiting-payment: expireOrder() is a
+            // public Livewire action, so without the time check a customer could
+            // invoke it early (browser console) and stamp their own cancellation
+            // as cancelled_by='system' / "payment not completed", polluting the
+            // audit trail. The on-page timer is server-seeded, so a legitimate
+            // call always arrives with expires_at already past; if a fast client
+            // clock fires a second early, the re-render re-seeds the timer and
+            // the next tick lands after expiry — it self-heals.
+            if (! $order || ! $order->isAwaitingPayment() || ! $order->isPaymentExpired()) {
                 return false;
             }
 
