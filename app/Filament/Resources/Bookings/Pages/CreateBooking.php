@@ -45,6 +45,23 @@ class CreateBooking extends CreateRecord
             $this->halt();
         }
 
+        // Same phantom-read gap as BookingForm::submit() and EditBooking —
+        // lockForUpdate() can't block on a row that doesn't exist yet, so two
+        // concurrent creates for the same never-before-booked slot could both
+        // pass isSlotAvailable(). Keyed identically to those two paths so an
+        // admin create and a customer booking for the same slot serialise.
+        $lock = $startAt ? \Illuminate\Support\Facades\Cache::lock('booking-slot:' . $startAt->toDateTimeString(), 10) : null;
+
+        if ($lock && ! $lock->get()) {
+            Notification::make()
+                ->title('That slot is already booked')
+                ->body('Please pick a different start time.')
+                ->danger()
+                ->send();
+
+            $this->halt();
+        }
+
         try {
             $booking = DB::transaction(function () use ($data, $startAt) {
                 if ($startAt && ! app(BookingService::class)->isSlotAvailable($startAt, lock: true)) {
@@ -65,6 +82,8 @@ class CreateBooking extends CreateRecord
             // $this->halt() throws internally — this line is unreachable, but
             // satisfies the method's non-nullable Booking return type.
             return new Booking();
+        } finally {
+            $lock?->release();
         }
 
         if ($booking->customer_email) {

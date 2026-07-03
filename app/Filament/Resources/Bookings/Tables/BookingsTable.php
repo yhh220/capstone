@@ -101,7 +101,23 @@ class BookingsTable
                     ->modalHeading('Confirm this booking?')
                     ->modalDescription('The customer will receive a confirmation email.')
                     ->action(function ($record): void {
-                        $record->update(['status' => 'confirmed']);
+                        // Atomic conditional flip — the customer may have cancelled
+                        // between the page render and this click; blindly updating
+                        // would resurrect a cancelled booking (whose slot could
+                        // already be re-booked) and email a confirmation for it.
+                        // Mirrors OrderResource markPaid's claim pattern.
+                        $claimed = \App\Models\Booking::whereKey($record->getKey())
+                            ->where('status', 'pending')
+                            ->update(['status' => 'confirmed']) === 1;
+
+                        if (! $claimed) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Booking was already confirmed or cancelled')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+
                         try {
                             if ($record->customer_email) {
                                 \Illuminate\Support\Facades\Mail::to($record->customer_email)
@@ -146,10 +162,17 @@ class BookingsTable
                         ->modalDescription('Each confirmed customer will receive a confirmation email.')
                         ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
                             $records->each(function ($b) {
-                                if ($b->status !== 'pending') {
+                                // Same atomic claim as the single Confirm action —
+                                // only a still-pending row flips, so a booking
+                                // cancelled mid-selection is never resurrected.
+                                $claimed = \App\Models\Booking::whereKey($b->getKey())
+                                    ->where('status', 'pending')
+                                    ->update(['status' => 'confirmed']) === 1;
+
+                                if (! $claimed) {
                                     return;
                                 }
-                                $b->update(['status' => 'confirmed']);
+
                                 try {
                                     if ($b->customer_email) {
                                         \Illuminate\Support\Facades\Mail::to($b->customer_email)

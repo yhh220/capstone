@@ -86,10 +86,13 @@ class ProductsPage extends Component
             // Escape '!' first, then the wildcards, so added markers aren't doubled.
             $escaped = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $this->search);
             $term = '%' . $escaped . '%';
+            // The translated columns must be searchable too: a MS/ZH visitor sees
+            // name_ms/name_zh on the cards, so searching by the very name they're
+            // looking at has to match — not just the English source columns.
             $query->where(function ($q) use ($term) {
-                $q->whereRaw("name LIKE ? ESCAPE '!'", [$term])
-                  ->orWhereRaw("short_description LIKE ? ESCAPE '!'", [$term])
-                  ->orWhereRaw("sku LIKE ? ESCAPE '!'", [$term]);
+                foreach (['name', 'name_ms', 'name_zh', 'short_description', 'short_description_ms', 'short_description_zh', 'sku'] as $column) {
+                    $q->orWhereRaw("{$column} LIKE ? ESCAPE '!'", [$term]);
+                }
             });
         }
 

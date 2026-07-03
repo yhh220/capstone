@@ -42,4 +42,25 @@ class ProductsPageSearchTest extends TestCase
             ->set('search', 'ABC_123')
             ->assertSee('Cable Set');
     }
+
+    public function test_search_matches_the_translated_name_a_zh_visitor_actually_sees(): void
+    {
+        // A ZH visitor's cards show name_zh — searching by that visible name has
+        // to match, not just the English source columns.
+        Product::create([
+            'name' => 'Sparko Silicone Wiper Blade Set',
+            'name_zh' => 'Sparko 硅胶雨刷套装',
+            'slug' => 'sparko-wiper',
+            'price' => 55,
+            'stock' => 10,
+            'is_active' => true,
+        ]);
+
+        session(['locale' => 'zh']);
+        app()->setLocale('zh');
+
+        Livewire::test(ProductsPage::class)
+            ->set('search', '雨刷')
+            ->assertSee('Sparko 硅胶雨刷套装');
+    }
 }
