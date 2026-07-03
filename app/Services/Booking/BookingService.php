@@ -43,11 +43,15 @@ class BookingService
             ->get(['start_at', 'end_at']);
 
         $slots = collect();
+        $now = now();
 
         while ($start->copy()->addMinutes($length) <= $end) {
             $slotEnd = $start->copy()->addMinutes($length);
 
-            $isAvailable = ! $dayBookings->contains(
+            // A slot must still be in the future — picking "today" used to list
+            // the whole day including hours already gone, and the customer only
+            // found out at the final submit step ("that time has already passed").
+            $isAvailable = $start->gt($now) && ! $dayBookings->contains(
                 fn (Booking $booking) => $booking->start_at->lt($slotEnd) && $booking->end_at->gt($start)
             );
 

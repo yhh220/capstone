@@ -320,8 +320,16 @@ class OrderResource extends Resource
                     ->modalDescription('The customer will get the same confirmation email as the online payment flow.')
                     ->action(function (Order $record): void {
                         $claimed = DB::transaction(function () use ($record) {
+                            // Both predicates re-checked under lock: the expiry
+                            // scheduler cancels unpaid orders while LEAVING
+                            // payment_status 'pending', so checking only that
+                            // column let a stale "Mark Paid" click turn a just-
+                            // cancelled (already restocked) order into a
+                            // cancelled-but-paid hybrid and email the customer
+                            // a confirmation. Mirrors PaymentPage::pay()'s guard.
                             $fresh = Order::where('id', $record->id)
                                 ->where('payment_status', 'pending')
+                                ->where('status', '!=', 'cancelled')
                                 ->lockForUpdate()
                                 ->first();
 
