@@ -51,7 +51,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    {{-- Leaflet CSS/JS are loaded only on the Contact page (the only page with a
+         map), via @push there — not globally — so every other page skips ~46 KB
+         of render-blocking CSS + script it never uses. --}}
     @vite('resources/css/app.css')
 
     <style>
@@ -579,8 +581,11 @@
                    class="flex flex-col items-center justify-center flex-shrink-0 group leading-none py-1"
                    aria-label="{{ $storeName }} - {{ __('Home') }}">
                     <div class="h-8 w-24 sm:h-10 sm:w-32 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-105 group-active:scale-95" aria-hidden="true">
-                        <img src="{{ asset('images/logo/logo-dark.svg') }}" alt="" class="h-full w-full object-contain block dark:hidden">
-                        <img src="{{ asset('images/logo/logo-light.svg') }}" alt="" class="h-full w-full object-contain hidden dark:block">
+                        {{-- fetchpriority=high: the logo is the LCP element on most
+                             pages; without it the browser deprioritises the SVG and
+                             LCP is delayed. Not lazy-loaded (it is above the fold). --}}
+                        <img src="{{ asset('images/logo/logo-dark.svg') }}" alt="" fetchpriority="high" class="h-full w-full object-contain block dark:hidden">
+                        <img src="{{ asset('images/logo/logo-light.svg') }}" alt="" fetchpriority="high" class="h-full w-full object-contain hidden dark:block">
                     </div>
                     <div class="mt-0.5 sm:mt-1 hidden sm:flex items-center gap-1.5 leading-none transition-opacity duration-300 group-hover:opacity-80">
                         <span class="font-black text-brand-black dark:text-white text-[11px] uppercase tracking-[0.15em]">{{ $storeShortName }}</span>
@@ -1390,7 +1395,7 @@
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script>document.addEventListener('DOMContentLoaded', () => lucide.createIcons()); document.addEventListener('livewire:navigated', () => lucide.createIcons());</script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    {{-- Leaflet JS moved to the Contact page (@push) — see the note in <head>. --}}
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
     <script>
         // ── AOS init ─────────────────────────────────────────

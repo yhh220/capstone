@@ -190,7 +190,16 @@
                 <div id="store-map" style="height: clamp(240px, 50vw, 420px); width: 100%;"></div>
             </div>
 
+            {{-- Leaflet is loaded here, only on the Contact page (the only page with
+                 a map), instead of globally in the layout — every other page skips
+                 it. CSS goes to <head> via the styles stack; JS is emitted before
+                 the init script below so `L` is defined by the time initMap runs. --}}
+            @push('styles')
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+            @endpush
+
             @push('scripts')
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
             <script>
             (function() {
                 function initMap() {
