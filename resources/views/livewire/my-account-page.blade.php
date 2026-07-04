@@ -105,7 +105,10 @@
                             @endif
                         </div>
                         <div class="flex items-center gap-4">
-                            @if($order->isAwaitingPayment())
+                            {{-- "Pay now" only while online shopping is on — otherwise the
+                                 /pay route is gated and unpaid orders have already been
+                                 cancelled + restocked, so the button would be a dead end. --}}
+                            @if($order->isAwaitingPayment() && $shoppingEnabled)
                             <a href="{{ route('payment', $order->order_number) }}" class="text-brand-red font-bold hover:underline">{{ __('Pay now') }} <span aria-hidden="true">→</span></a>
                             @endif
                             @if($order->payment_status === 'paid')
@@ -114,6 +117,16 @@
                             <a href="{{ route('track-order') }}" class="text-gray-500 dark:text-gray-400 hover:text-brand-red font-bold">{{ __('Track Order') }}</a>
                         </div>
                     </div>
+
+                    {{-- Reassurance while online shopping is paused: a paid order is real
+                         money owed, so it's fulfilled as usual regardless of shop mode.
+                         Kills the "I paid — what happens to my order now?" panic. --}}
+                    @if($order->payment_status === 'paid' && ! $shoppingEnabled)
+                    <div class="px-5 py-2.5 border-t border-gray-100 dark:border-gray-700 bg-green-50/60 dark:bg-green-900/10 flex items-center gap-2 text-xs text-green-700 dark:text-green-400">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-5"/></svg>
+                        <span>{{ __('Online shopping is under maintenance — your order is not affected. We will process and deliver it as usual.') }}</span>
+                    </div>
+                    @endif
 
                     {{-- Standing refund-eligibility status — visible before anyone opens a
                          cancel action, not just math hidden inside a confirm dialog. --}}

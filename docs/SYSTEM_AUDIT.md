@@ -803,10 +803,12 @@ Controlled by the `ONLINE_SHOPPING_ENABLED` setting (`true`/`false`), editable i
 |---|---|---|
 | 20.1 | Toggle source | `settings` table key `ONLINE_SHOPPING_ENABLED`; read via `setting()` helper |
 | 20.2 | Shop Mode ON | Cart + checkout routes enabled ([ShoppingEnabled.php](../app/Http/Middleware/ShoppingEnabled.php)), cart UI shown, add-to-cart active |
-| 20.3 | Shop Mode OFF | Shopping routes redirect home with "coming soon"; cart UI hidden in nav; storefront becomes WhatsApp/showroom-focused |
+| 20.3 | Shop Mode OFF (showroom) | Shopping routes redirect home with "coming soon"; cart UI hidden in nav; **new visitors see a pure showroom (no login/cart entry)**, while already-logged-in customers keep account access to view history — "soft showroom" |
 | 20.4 | Admin toggle | [SettingResource.php](../app/Filament/Resources/Settings/SettingResource.php) (validated `in:true,false`); also surfaced via the confirm-toggle on the Settings table |
+| 20.5 | **Graceful shutdown on close** | Turning shopping OFF fires [ShopModeService::cancelUnpaidOrders](../app/Services/ShopModeService.php) via the `Setting` model's `updated` event: every **unpaid** order is cancelled + restocked + the customer emailed, so nobody is stranded with a "pending payment" order they can no longer pay (the `/pay` route is gated). **Paid orders are never touched** — real money owed, fulfilled/refunded through the normal admin flow. Regression-guarded by [ShopModeCloseTest](../tests/Feature/ShopModeCloseTest.php) |
+| 20.6 | **Customer-facing signalling** | (a) Admin-controlled site-wide **announcement bar** (`SITE_ANNOUNCEMENT_ENABLED` + `SITE_ANNOUNCEMENT_TEXT`, dismissible per-visitor keyed by message text, responsive) tells customers shopping/sign-in is paused; (b) paid orders in My Account show a "your order is not affected" reassurance line while shopping is off; (c) the dead-end "Pay now" button is hidden in showroom mode. The `ONLINE_SHOPPING_ENABLED` helper text reminds the admin to enable the announcement bar when switching off |
 
-Consumed in: ShoppingEnabled middleware, HomePage, ProductsPage, ProductDetail, MyAccountPage, layout nav.
+Consumed in: ShoppingEnabled middleware, HomePage, ProductsPage, ProductDetail, MyAccountPage, layout nav + announcement bar, ShopModeService.
 
 ---
 

@@ -25,6 +25,23 @@ class Setting extends Model
             ->dontLogEmptyChanges();
     }
 
+    protected static function booted(): void
+    {
+        // When online shopping is switched OFF, clear the board: cancel + restock
+        // every unpaid order so no customer is left with a "pending payment" order
+        // they can no longer pay for (the /pay route is gated by ShoppingEnabled).
+        // Runs from any edit path — the table toggle or the edit form both save
+        // through here. Fires only on a real true→false change (wasChanged guard),
+        // so re-saving 'false' or the initial seed insert never triggers it.
+        static::updated(function (Setting $setting): void {
+            if ($setting->key === 'ONLINE_SHOPPING_ENABLED'
+                && $setting->wasChanged('value')
+                && $setting->value === 'false') {
+                app(\App\Services\ShopModeService::class)->cancelUnpaidOrders();
+            }
+        });
+    }
+
     /**
      * Get a setting value by key with optional default.
      */

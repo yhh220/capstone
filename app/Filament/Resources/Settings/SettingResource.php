@@ -44,6 +44,8 @@ class SettingResource extends Resource
                     'SHIPPING_FREE_THRESHOLD' => 'Free Shipping Threshold (RM)',
                     'CANCELLATION_FULL_REFUND_HOURS' => 'Full Refund Window (hours)',
                     'CANCELLATION_FEE_PERCENT'       => 'Cancellation Fee (%)',
+                    'SITE_ANNOUNCEMENT_ENABLED' => 'Site Announcement Bar',
+                    'SITE_ANNOUNCEMENT_TEXT'    => 'Site Announcement Text',
                     default                   => $state,
                 }),
             Forms\Components\TextInput::make('value')
@@ -56,6 +58,8 @@ class SettingResource extends Resource
                 // clear error instead of silently saving "abc" into a number field.
                 ->rules(fn (Setting $record): array => match ($record->key) {
                     'ONLINE_SHOPPING_ENABLED' => ['in:true,false'],
+                    'SITE_ANNOUNCEMENT_ENABLED' => ['in:true,false'],
+                    'SITE_ANNOUNCEMENT_TEXT'    => ['nullable', 'string', 'max:300'],
                     'BUSINESS_HOURS_START', 'BUSINESS_HOURS_END' => ['date_format:H:i'],
                     'BUSINESS_CLOSED_WEEKDAYS' => ['regex:/^\s*[0-6](\s*,\s*[0-6])*\s*$/'],
                     'BOOKING_SLOT_MINUTES' => ['integer', 'min:15'],
@@ -66,6 +70,8 @@ class SettingResource extends Resource
                     default => [],
                 })
                 ->placeholder(fn (Setting $record): string => match ($record->key) {
+                    'SITE_ANNOUNCEMENT_ENABLED' => 'true or false',
+                    'SITE_ANNOUNCEMENT_TEXT'    => 'e.g. Online shopping is under maintenance…',
                     'BUSINESS_HOURS_START', 'BUSINESS_HOURS_END' => 'e.g. 09:00',
                     'BUSINESS_CLOSED_WEEKDAYS' => 'e.g. 5 for Friday, or 0,5 for Sunday and Friday',
                     'ONLINE_SHOPPING_ENABLED' => 'true or false',
@@ -78,7 +84,9 @@ class SettingResource extends Resource
                     default => '',
                 })
                 ->helperText(fn (Setting $record): ?string => match ($record->key) {
-                    'ONLINE_SHOPPING_ENABLED' => 'Set to "true" to enable the cart and checkout features, or "false" to hide them.',
+                    'ONLINE_SHOPPING_ENABLED' => 'Set to "true" to enable cart & checkout, or "false" for showroom mode. Turning it OFF cancels & restocks all unpaid orders — remember to turn on the Site Announcement Bar so customers know shopping is paused.',
+                    'SITE_ANNOUNCEMENT_ENABLED' => 'Set to "true" to show a banner at the top of every page (e.g. to tell customers online shopping is temporarily under maintenance). "false" hides it.',
+                    'SITE_ANNOUNCEMENT_TEXT'    => 'The message shown in the announcement banner when it is turned on. Keep it short (max 300 characters).',
                     'BUSINESS_HOURS_START'    => 'The earliest time a customer can book a service (24h format, e.g., 09:00).',
                     'BUSINESS_HOURS_END'      => 'The latest time your shop accepts appointments (24h format, e.g., 18:00).',
                     'BUSINESS_CLOSED_WEEKDAYS'=> 'Comma-separated weekday numbers: 0=Sunday, 1=Monday, ... 5=Friday, 6=Saturday.',
@@ -113,6 +121,8 @@ class SettingResource extends Resource
                         'SHIPPING_FREE_THRESHOLD' => 'Free Shipping Threshold (RM)',
                         'CANCELLATION_FULL_REFUND_HOURS' => 'Full Refund Window (hours)',
                         'CANCELLATION_FEE_PERCENT'       => 'Cancellation Fee (%)',
+                        'SITE_ANNOUNCEMENT_ENABLED' => 'Site Announcement Bar',
+                        'SITE_ANNOUNCEMENT_TEXT'    => 'Site Announcement Text',
                         default                   => $state,
                     })
                     ->description(fn (Setting $record): string => match ($record->key) {
@@ -126,6 +136,8 @@ class SettingResource extends Resource
                         'SHIPPING_FREE_THRESHOLD' => 'Spend this much (RM) or more and shipping is free.',
                         'CANCELLATION_FULL_REFUND_HOURS' => 'Hours after payment a cancelled order still gets a 100% refund.',
                         'CANCELLATION_FEE_PERCENT'       => 'Fee deducted from the refund after the full-refund window passes.',
+                        'SITE_ANNOUNCEMENT_ENABLED' => 'Show/hide the site-wide announcement banner.',
+                        'SITE_ANNOUNCEMENT_TEXT'    => 'The message shown in the announcement banner.',
                         default                   => 'System configuration setting.',
                     }),
                 TextColumn::make('value')

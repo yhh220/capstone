@@ -993,6 +993,43 @@
         @endif
     </nav>
 
+    {{-- ── Site-wide announcement bar (admin-controlled) ──────────────────
+         Toggled by the SITE_ANNOUNCEMENT_ENABLED setting; text from
+         SITE_ANNOUNCEMENT_TEXT. Dismissible per-visitor, keyed by the message
+         text itself so editing the announcement re-shows it to everyone. --}}
+    @php
+        $announcementOn   = setting('SITE_ANNOUNCEMENT_ENABLED', 'false') === 'true';
+        $announcementText = trim((string) setting('SITE_ANNOUNCEMENT_TEXT', ''));
+    @endphp
+    @if($announcementOn && $announcementText !== '')
+    <div x-data="{
+             text: @js($announcementText),
+             show: false,
+             init() { this.show = localStorage.getItem('site-announce-dismissed') !== this.text; },
+             dismiss() { localStorage.setItem('site-announce-dismissed', this.text); this.show = false; }
+         }"
+         x-show="show"
+         x-cloak
+         role="status"
+         aria-live="polite"
+         class="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800/40">
+        <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-start sm:items-center gap-3">
+            <svg class="w-4 h-4 shrink-0 mt-0.5 sm:mt-0 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
+            </svg>
+            <p class="flex-1 min-w-0 text-sm text-amber-800 dark:text-amber-300 leading-snug break-words">{{ $announcementText }}</p>
+            <button @click="dismiss()"
+                    type="button"
+                    aria-label="{{ __('Dismiss announcement') }}"
+                    class="shrink-0 -mr-1 p-1 rounded-md text-amber-500 hover:text-amber-700 dark:hover:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors active:scale-90">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    @endif
+
     @if(session('success'))
     <div class="bg-green-50 dark:bg-green-900/30 border-l-4 border-green-500 text-green-700 dark:text-green-300 px-4 py-3 max-w-7xl mx-auto mt-4 rounded-r-lg" role="alert" aria-live="polite">
         {{ session('success') }}

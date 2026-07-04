@@ -116,6 +116,8 @@ class DatabaseSeeder extends Seeder
             ['key' => 'SHIPPING_FREE_THRESHOLD', 'value' => '300',   'created_at' => now(), 'updated_at' => now()],
             ['key' => 'CANCELLATION_FULL_REFUND_HOURS', 'value' => '24', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'CANCELLATION_FEE_PERCENT',       'value' => '10', 'created_at' => now(), 'updated_at' => now()],
+            ['key' => 'SITE_ANNOUNCEMENT_ENABLED',      'value' => 'false', 'created_at' => now(), 'updated_at' => now()],
+            ['key' => 'SITE_ANNOUNCEMENT_TEXT',         'value' => 'Online shopping and sign-in are temporarily under maintenance. You can still browse our products and book an in-store appointment.', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // Logo files live (committed) in storage/app/public/brand-logos/ — the

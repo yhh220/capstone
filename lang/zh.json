@@ -1099,5 +1099,8 @@
     "No matching order found. Please check your order number and email.": "没有找到匹配的订单，请核对订单编号和电子邮箱。",
     "No matching booking found. Please check your booking reference and email.": "没有找到匹配的预约，请核对预约编号和电子邮箱。",
     "Forbidden": "禁止访问",
-    "You don't have permission to view this page. If you think this is a mistake, please sign in with the right account.": "您没有权限查看此页面。如果您认为这是一个错误，请使用正确的账号登录。"
+    "You don't have permission to view this page. If you think this is a mistake, please sign in with the right account.": "您没有权限查看此页面。如果您认为这是一个错误，请使用正确的账号登录。",
+    "Online shopping and sign-in are temporarily under maintenance. You can still browse our products and book an in-store appointment.": "在线购物与登录功能正在维护中，暂时无法使用。您仍可浏览产品并预约到店服务。",
+    "Dismiss announcement": "关闭公告",
+    "Online shopping is under maintenance — your order is not affected. We will process and deliver it as usual.": "在线购物维护中——您的订单不受影响，我们会照常为您处理并发货。"
 }
