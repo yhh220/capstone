@@ -824,8 +824,9 @@ Powered by `artesaos/seotools` ([config/seotools.php](../config/seotools.php)), 
 | 21.4 | Twitter Card | `summary_large_image` meta |
 | 21.5 | meta robots | `index, follow` |
 | 21.6 | theme-color | `#C8413D` / `#0C0C0E` |
-| 21.7 | Structured data | `JsonLd::generate()` → `AutoPartsStore` / LocalBusiness schema |
-| 21.8 | robots.txt | [public/robots.txt](../public/robots.txt) — disallows `/admin` |
+| 21.7 | Structured data | `JsonLd::generate()` → `AutoPartsStore` schema enriched via [SetsSeo](../app/Livewire/Concerns/SetsSeo.php) with real local-business detail: `PostalAddress` (street/city/state/postcode/country), `telephone`, `email`, `priceRange`, `geo` (GeoCoordinates from config lat/lng), `sameAs` (Facebook), and `openingHoursSpecification` derived from the booking business-hours settings so structured hours can't drift; covered by [SeoStructuredDataTest](../tests/Feature/SeoStructuredDataTest.php) |
+| 21.8 | robots.txt | [public/robots.txt](../public/robots.txt) — disallows `/admin`, declares the `Sitemap:` URL |
+| — | Search Console | Ownership verified via the HTML-file method ([public/google6a58ace556856c6e.html](../public/google6a58ace556856c6e.html)); `GOOGLE_SITE_VERIFICATION` also supported as an optional meta-tag method |
 | 21.9 | sitemap.xml | **Dynamically generated** by [GenerateSitemap.php](../app/Console/Commands/GenerateSitemap.php) (daily): home (1.0), products (0.9), services (0.8), booking (0.8), about/contact (0.6) + per-product URLs (0.7, weekly) |
 | 21.10 | Semantic URLs | Slug-based product URLs (`/products/{slug}`), readable route names |
 

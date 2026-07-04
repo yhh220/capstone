@@ -50,6 +50,12 @@ return [
         'email' => env('STORE_EMAIL', 'winwincaraudio@gmail.com'),
         'facebook_url' => env('STORE_FACEBOOK_URL', 'https://www.facebook.com/winwincaraudio/'),
         'address' => env('STORE_ADDRESS', 'NO. 22, GROUND FLOOR, JALAN DINAR C U3/C, TAMAN SUBANG PERDANA, SEKSYEN U3., Shah Alam, Malaysia, 40150'),
+        // Structured address parts for the LocalBusiness (AutoPartsStore) JSON-LD
+        // so Google reads a proper PostalAddress, not just one free-text line.
+        'city' => env('STORE_CITY', 'Shah Alam'),
+        'state' => env('STORE_STATE', 'Selangor'),
+        'postcode' => env('STORE_POSTCODE', '40150'),
+        'country' => env('STORE_COUNTRY', 'MY'),
         'lat' => (float) env('STORE_LAT', 3.1491),
         'lng' => (float) env('STORE_LNG', 101.5465),
         // Free-text address search on Google Maps re-geocodes per viewer and isn't
