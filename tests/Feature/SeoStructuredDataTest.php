@@ -51,4 +51,19 @@ class SeoStructuredDataTest extends TestCase
         $this->assertStringContainsString('Sitemap:', $robots);
         $this->assertStringContainsString('sitemap.xml', $robots);
     }
+
+    public function test_sitemap_uses_the_production_url_not_the_local_domain(): void
+    {
+        // The canonical site URL must be an https production host, never the
+        // local .test domain — Google rejects a sitemap whose URLs don't match
+        // the domain it is served from ("URL not allowed").
+        $url = config('services.store.url');
+        $this->assertStringStartsWith('https://', $url);
+        $this->assertStringNotContainsString('.test', $url);
+
+        // The committed sitemap file must already be on that production host.
+        $sitemap = file_get_contents(public_path('sitemap.xml'));
+        $this->assertStringNotContainsString('.test', $sitemap);
+        $this->assertStringContainsString($url, $sitemap);
+    }
 }

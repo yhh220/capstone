@@ -49,6 +49,11 @@ return [
         'phone_raw' => env('STORE_PHONE_RAW', '60169150917'),
         'email' => env('STORE_EMAIL', 'winwincaraudio@gmail.com'),
         'facebook_url' => env('STORE_FACEBOOK_URL', 'https://www.facebook.com/winwincaraudio/'),
+        // Canonical public site URL. Used to generate sitemap.xml so its URLs
+        // always point at production, independent of the local APP_URL (which is
+        // the Herd/Valet .test domain in development) — Google rejects a sitemap
+        // whose URLs don't match the domain it is served from.
+        'url' => rtrim(env('STORE_URL', 'https://winwincaraudio.onrender.com'), '/'),
         'address' => env('STORE_ADDRESS', 'NO. 22, GROUND FLOOR, JALAN DINAR C U3/C, TAMAN SUBANG PERDANA, SEKSYEN U3., Shah Alam, Malaysia, 40150'),
         // Structured address parts for the LocalBusiness (AutoPartsStore) JSON-LD
         // so Google reads a proper PostalAddress, not just one free-text line.

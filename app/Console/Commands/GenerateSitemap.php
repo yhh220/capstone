@@ -15,6 +15,16 @@ class GenerateSitemap extends Command
 
     public function handle(): void
     {
+        // Force every route() below onto the canonical production host. The
+        // command runs from the CLI with no request, so route() would otherwise
+        // use APP_URL — which is the local .test domain in development, producing
+        // a sitemap Google rejects ("URL not allowed") because its URLs don't
+        // match the domain the sitemap is served from. (Facade referenced by its
+        // full path: the short name "URL" would collide with the Spatie "Url"
+        // import, since PHP class names are case-insensitive.)
+        \Illuminate\Support\Facades\URL::forceRootUrl(config('services.store.url'));
+        \Illuminate\Support\Facades\URL::forceScheme('https');
+
         $sitemap = Sitemap::create();
 
         // Static pages
