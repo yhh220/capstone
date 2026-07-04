@@ -590,7 +590,11 @@
 
                 <!-- Desktop Nav (7 links) — shows at lg+ so the longer BM labels
                      (Laman Utama, Perkhidmatan…) don't overflow at tablet widths -->
-                <div class="hidden lg:flex items-center gap-0.5" role="list">
+                {{-- No role="list" here: it requires role="listitem" children, but
+                     adding that to the <a> links would override their "link" role.
+                     These are nav links inside <nav>, so the list semantics are
+                     unnecessary — a broken list tree is worse than none. --}}
+                <div class="hidden lg:flex items-center gap-0.5">
                     @foreach([
                         [route('home'),     __('Home'),     request()->routeIs('home')],
                         [route('products'), __('Products'), request()->routeIs('products*')],
