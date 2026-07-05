@@ -1,0 +1,68 @@
+# Chapter 7: Limitations, Recommendations & Future Enhancement
+
+This chapter reflects honestly on the boundaries of what was built. It sets out the limitations of the current system, offers practical recommendations for the business and for any future development team, and describes the enhancements that would make the most natural next steps. Several of these limitations are deliberate scoping decisions already introduced in Section 1.6.3 rather than oversights; they are revisited here in the context of where the system could go next.
+
+## 7.1 Limitations of Current System
+
+The system meets the objectives set out in Section 1.5, but a number of limitations remain. Being clear about them is important both for setting expectations and for guiding future work.
+
+**Table 7.1: Limitations of the current system**
+
+| Limitation | Explanation |
+|---|---|
+| Simulated payment only | The checkout and payment flow (FPX, e-wallet, and card) is fully simulated with a 15-minute expiry, and does not process real money through a live payment gateway. This was a deliberate scope decision (Section 1.6.3), as the business currently completes sales through WhatsApp and the physical store. However, it means the platform cannot yet collect online revenue on its own. Real transactions are still reconciled manually by the administrator through the "mark paid" action. |
+| Email-only account verification | Account verification uses email OTP rather than SMS OTP, because SMS depends on a paid third-party gateway (Section 1.6.3). Customers who do not use email are therefore harder to onboard through self-service registration. |
+| Rule-based chatbot | The chatbot is a rule-based (retrieval-based) chatbot: it answers by matching keywords against a fixed, admin-managed knowledge base of priority-ranked rules, with typo tolerance. This makes it predictable and free of incorrect "made-up" answers (Section 2.2.4), but it cannot interpret genuinely novel or complex free-form questions; when nothing matches, it hands off to WhatsApp rather than attempting to answer. |
+| Dependence on an external scheduler | Because the Render hosting plan does not provide a native cron daemon, scheduled tasks (expiring unpaid orders, sending booking reminders) are triggered by an external pinger (cron-job.org) every ten minutes. This introduces a small dependency on a third-party service and a latency of up to ten minutes before a scheduled task runs. |
+| Hosting-tier constraints | On a low-cost hosting tier the application can spin down when idle and "cold start" on the next request, making the first visit after a quiet period noticeably slower. This is a property of the deployment environment rather than the application code. |
+| No field performance data yet | Because the site is newly deployed and has limited traffic, Google's field Core Web Vitals are not yet available (Section 6.10); performance is currently evidenced by lab data only. |
+| No automated browser (E2E) testing | Automated testing is manual plus a server-side PHPUnit suite (Chapter 6). There is no automated browser-level test layer, so client-side JavaScript behaviour is verified by manual re-testing rather than by an automated end-to-end tool. |
+| Configurator is enquiry-oriented | The 3D configurator covers a curated set of models and parts and produces a WhatsApp enquiry rather than a directly buildable, priced order, so it is a visualisation and lead-generation tool rather than a full commerce feature. |
+
+None of these limitations prevents the system from fulfilling its intended role as a showroom-and-management platform, but each marks a clear boundary of the current build.
+
+## 7.2 Recommendations
+
+Arising from those limitations, the following recommendations are offered to the business and to any team that continues the project:
+
+1. **Adopt online payment only when the business is ready to sell online.** The simulated flow was intentionally built to mirror a real one, so the recommendation is to keep the simulation until the owner decides to accept online payment, then integrate a real gateway (Section 7.3.1) together with the required merchant account.
+2. **Consider a paid hosting tier for production use.** Moving off a free/idle-prone tier would remove cold-start delays and, on a plan with a native scheduler, remove the dependency on the external cron pinger, improving both responsiveness and reliability.
+3. **Keep the chatbot knowledge base current.** Because the chatbot is admin-controlled, the simplest ongoing improvement is for staff to expand and refine its keyword answers as new common questions appear (Section 7.3.2).
+4. **Monitor real-user performance over time.** Once the site accumulates traffic, the field Core Web Vitals in Google Search Console should be reviewed periodically so that real-world performance can be tracked, not just lab scores.
+5. **Gather user feedback continuously.** The user-acceptance testing instrument (Section 6.12) can be reused after launch to collect ongoing feedback from real customers and staff, feeding an iterative improvement cycle rather than a one-off evaluation.
+
+## 7.3 Future Enhancement
+
+The system was architected so that the most valuable enhancements can be added without redesigning what already exists. The four below are the most natural next steps.
+
+### 7.3.1 Real Payment Gateway Integration
+
+The clearest future enhancement is to replace the simulated payment step with a real Malaysian payment gateway such as Billplz, ToyyibPay, iPay88, or Stripe, supporting FPX, e-wallet, and card payments. Because the simulated checkout was deliberately built to mirror a genuine one (orders, order items, payment status, the 15-minute expiry window, and invoice generation are all already in place), the bulk of the integration work is swapping the simulated confirmation for the gateway's redirect-and-callback cycle and reconciling its webhook against the existing order records. The main non-technical prerequisites are the ones noted in Section 1.6.3: a registered business merchant account and compliance with the provider's verification and security requirements. Once integrated, the existing "online shopping mode" toggle (Section 5.10.10) could switch the storefront from showroom-only to genuine online selling without further structural change.
+
+### 7.3.2 Expanded Keyword Chatbot Coverage
+
+The chatbot is a rule-based (retrieval-based) chatbot that answers by matching keywords against a fixed, admin-managed knowledge base of priority-ranked rules, with Levenshtein-distance typo tolerance (Section 5.12). A practical future enhancement, fully in keeping with this deliberate design, is to widen and sharpen that knowledge base rather than change its nature. This would include logging the questions the chatbot fails to match so that staff can see exactly which real questions need answers added, broadening keyword coverage and typo tolerance, and extending the trilingual answer set as new products and services are introduced. Because the knowledge base stays entirely admin-controlled, these improvements preserve the chatbot's core advantages identified in Section 2.2.4 (predictable, verifiable answers, with no risk of incorrect information and no running cost) while steadily increasing the proportion of questions it can answer directly before handing off to WhatsApp.
+
+### 7.3.3 Progressive Web App (PWA)
+
+The site already ships a web app manifest (`site.webmanifest`), so it is part-way to being a Progressive Web App. Completing the PWA would mean adding a service worker to enable installability (customers could add the storefront to their home screen like a native app), offline caching of key pages, and, most usefully for this business, push notifications for booking reminders and order-status updates, complementing the existing email notifications. This would strengthen the customer relationship on mobile, which is the primary device for this audience (Section 6.10.2), without the cost of building a separate native mobile app.
+
+### 7.3.4 Advanced Analytics & Reporting
+
+The Filament admin panel already surfaces operational data such as revenue and appointment summaries, and the system already captures rich underlying data through its orders, bookings, and activity log. A future enhancement would build on that foundation with deeper analytics and reporting: sales and booking trends over time, most-popular services and products, customer-retention and repeat-visit insights, low-stock alerts, and exportable PDF/Excel reports for the owner. Over a longer horizon, this historical data could support simple demand forecasting to help the shop schedule technicians and stock parts ahead of demand, directly addressing the "poor data management" problem identified in Section 1.3.
+
+## 7.4 Summary
+
+This chapter set out the current system's limitations honestly, ranging from deliberate scope decisions such as the simulated payment flow and email-only verification, through architectural trade-offs such as the external scheduler dependency, to the boundaries of the keyword chatbot and the absence of automated browser testing. From those limitations it drew practical recommendations and described four natural future enhancements: real payment integration, wider keyword-chatbot coverage, a full Progressive Web App extending the existing manifest, and richer analytics built on data the system already collects. A recurring theme is that the system was designed to be extended: in each case the groundwork already exists, so these enhancements are evolutions of the current architecture rather than rewrites of it.
+
+---
+
+# Conclusion
+
+This Capstone Project set out to move Win Win Car Audio Auto Accessories from a purely manual, WhatsApp-and-logbook operation toward a structured digital platform, without pushing the business away from the sales model that already works for it. Measured against the objectives defined in Section 1.5, the project achieved what it set out to do.
+
+A **customer-facing website** was delivered that gives the business a credible online presence, showcases its products and services, offers an interactive 3D configurator and a trilingual, accessible, dark-mode interface, and channels customer interest toward WhatsApp and the physical store, the business's proven conversion path. An **administrative dashboard** was built with Filament, giving the owner one secure, mobile-friendly place to manage the catalogue, brands, bookings, and orders, and to oversee operations through analytics, an activity audit trail, and error monitoring. **Strong security and account-protection mechanisms** were implemented and tested (honeypot spam protection, progressive login lockout, role-based access control, two-factor authentication, ownership checks, and concurrency-safe transactions), all layered so that the common, realistic attacks are closed without harming the user experience. Finally, the **optional online shopping mode** was delivered, letting the owner run the platform purely as a showroom or switch on a full simulated e-commerce experience, giving the business complete control over how the system is used.
+
+The system was verified through the two-layer testing approach described in Chapter 6: continuous manual, exploratory testing as the front line, backed by an automated PHPUnit regression suite, together with dedicated security, concurrency, performance, compatibility, and user-acceptance testing. This gives evidence-based confidence that the platform is functionally correct, secure, and safe under concurrent use.
+
+Beyond the software itself, the project demonstrated the value of combining different technical disciplines (modern web development, structured data management, and proactive cybersecurity) into a single coherent, user-centred product, and of doing so as a group. The limitations and future enhancements set out in this chapter show that the platform is not an endpoint but a foundation: built deliberately so that real payment, a broader chatbot knowledge base, a full Progressive Web App, and richer analytics can be added as the business grows. In closing the one clear gap where Win Win Car Audio Auto Accessories had fallen behind every competitor reviewed, namely the complete absence of any web presence, the project delivers immediate value today while leaving room to grow tomorrow.
