@@ -38,4 +38,21 @@ class AssetLoadingTest extends TestCase
 
         $this->assertStringNotContainsString('leaflet', $html, 'Pages without a map must not load Leaflet.');
     }
+
+    /**
+     * The page loader lives in an @persist block, so its DOM is never re-rendered
+     * across Livewire.navigate() soft-navigations (which is how the language
+     * switch works). If its caption were a single server-rendered __() string it
+     * would freeze on whatever locale rendered the first hard load — the "always
+     * shows Sedang dimuatkan" bug. It must instead ship all three translations so
+     * JS can pick the right one from <html lang> every time it is shown.
+     */
+    public function test_page_loader_ships_all_locale_captions(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringContainsString('data-en="Loading..."', $html);
+        $this->assertStringContainsString('data-ms="Sedang dimuatkan..."', $html);
+        $this->assertStringContainsString('data-zh="加载中..."', $html);
+    }
 }

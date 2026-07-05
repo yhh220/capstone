@@ -1239,7 +1239,7 @@
         // earlier request can't land after a later one — race guard), and
         // fail-fast with a hard reload if the request hangs past 5s.
         var langAbort = null;
-        function switchLang(url) {
+        function switchLang(url, code) {
             if (langAbort) langAbort.abort();
             var controller = new AbortController();
             langAbort = controller;
@@ -1250,6 +1250,10 @@
                 .then(function () {
                     clearTimeout(timer);
                     if (langAbort !== controller) return; // superseded by a newer switch
+                    // Keep <html lang> in sync with the just-selected locale so the
+                    // persisted page-loader shows the correct language during the
+                    // soft-navigation (it reads document.documentElement.lang).
+                    if (code) document.documentElement.lang = code;
                     if (window.Livewire && typeof Livewire.navigate === 'function') {
                         // Switching language only swaps text — keep the reader exactly
                         // where they are. Livewire's navigate supports this natively.
@@ -1281,7 +1285,7 @@
             if (langOpt) {
                 e.preventDefault();
                 closeLang();
-                switchLang(langOpt.dataset.langUrl);
+                switchLang(langOpt.dataset.langUrl, langOpt.dataset.langCode);
                 return;
             }
 

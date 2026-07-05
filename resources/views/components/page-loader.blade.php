@@ -38,7 +38,17 @@
         </svg>
     </div>
     <div class="text-center font-sans tracking-wide">
-        <h2 class="text-xl font-bold text-brand-red animate-pulse">{{ __('Loading...') }}</h2>
+        {{-- This loader lives in an @persist block, so its DOM is NOT re-rendered
+             across Livewire.navigate() soft-navigations (which is how the language
+             switch works). A server-rendered {{ __('Loading...') }} would therefore
+             freeze on whatever locale rendered the first hard page load. Instead we
+             ship all three translations as data-* attributes and pick the right one
+             in JS from <html lang> every time the loader is shown. --}}
+        <h2 x-ref="loaderText"
+            data-en="{{ __('Loading...', [], 'en') }}"
+            data-ms="{{ __('Loading...', [], 'ms') }}"
+            data-zh="{{ __('Loading...', [], 'zh') }}"
+            class="text-xl font-bold text-brand-red animate-pulse">{{ __('Loading...') }}</h2>
     </div>
 </div>
 
@@ -55,6 +65,17 @@
             trailSpan: 0.4,
             durationMs: 3000,
             
+            // Set the loader caption to the CURRENT locale. Read from <html lang>,
+            // which the language switcher keeps fresh, so the persisted (frozen) DOM
+            // never shows a stale language.
+            syncLang() {
+                const el = this.$refs.loaderText;
+                if (!el) return;
+                const lang = (document.documentElement.lang || 'en').slice(0, 2).toLowerCase();
+                const text = el.getAttribute('data-' + lang);
+                if (text) el.textContent = text;
+            },
+
             normalizeProgress(progress) {
                 return ((progress % 1) + 1) % 1;
             },
@@ -127,6 +148,7 @@
                 // If it loads faster than that, the user never sees it!
                 if (this.pendingTimeout) clearTimeout(this.pendingTimeout);
                 this.pendingTimeout = setTimeout(() => {
+                    this.syncLang(); // caption must match the current locale, not the frozen one
                     this.isLoading = true;
                     this.startedAt = performance.now();
                     if(this.animationFrame) cancelAnimationFrame(this.animationFrame);
