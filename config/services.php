@@ -35,10 +35,6 @@ return [
         ],
     ],
 
-    'anthropic' => [
-        'key' => env('ANTHROPIC_API_KEY'),
-    ],
-
     'store' => [
         'name' => env('STORE_NAME', 'Win Win Car Audio Auto Accessories'),
         // Brand name used in <title> / OG tags — matches the admin panel and webmanifest
