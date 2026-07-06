@@ -50,6 +50,8 @@ Each product has a dedicated detail page that presents its image gallery, locali
 
 The standout feature of the detail experience is the **three-dimensional product configurator**, built with **Three.js**. For products that support it, the customer can view and rotate a 3D model of the accessory directly in the browser. The models are loaded using Three.js's `GLTFLoader` and are compressed with **Draco** geometry compression, which dramatically reduces the download size of the 3D mesh so that the interactive model loads quickly even on a mobile connection. The configurator runs entirely client-side once loaded, giving the customer a smooth, immediate way to inspect a product from every angle before buying, a strong differentiator for a car-accessories showroom where fit and appearance matter.
 
+The 3D models used in the configurator are open-source assets obtained from external sources rather than modelled in-house. Each model, along with its author, source, and licence, is credited in the Media & Asset Credits appendix. *[to add: the specific open-source 3D models used, with their sources and licences]*
+
 Stock availability is surfaced honestly on this page: when an item is out of stock it is shown as backorderable with the lead time the owner configures (the `BACKORDER_DAYS` setting, Section 5.10.9), so the customer knows how long delivery will take rather than simply being blocked.
 
 *[Figure 5.6: The product detail page with its image gallery and add-to-cart panel.]*
