@@ -143,6 +143,13 @@ class SettingResource extends Resource
                 TextColumn::make('value')
                     ->searchable()
                     ->badge()
+                    // The announcement-text setting is a long sentence; without a
+                    // limit its non-wrapping badge stretches the whole column and
+                    // pushes the row actions off-screen. Truncate long values (full
+                    // text on hover); short values (true/false, numbers, times) are
+                    // unaffected.
+                    ->limit(45)
+                    ->tooltip(fn (string $state): ?string => mb_strlen($state) > 45 ? $state : null)
                     ->color(fn(string $state): string => match ($state) {
                         'true'  => 'success',
                         'false' => 'danger',
