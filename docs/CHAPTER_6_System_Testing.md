@@ -124,7 +124,7 @@ These tests verify quantity handling, subtotal calculation, and that **shipping 
 
 ### 6.6.3 Payment, Orders & Invoicing
 
-The most heavily tested area. Tests cover placing an order, confirming payment, the forward-only status transitions, tracking, admin editing, invoice generation, and importing orders. The **`OrderCancellation` suite alone contains 21 tests**, because the tiered refund policy (Section 5.6) has many boundaries: the refund amount is asserted for cancellations inside the window, just outside it, and after shipping, and every cancellation is checked to restock the items.
+The most heavily tested area. Tests cover placing an order, confirming payment, the forward-only status transitions, tracking, admin editing, invoice generation, and importing orders. The **`OrderCancellation` suite alone contains 21 tests**, because the tiered refund policy (Section 5.6) has many boundaries: the refund amount is asserted for cancellations inside the window, just outside it, and after shipping, and every cancellation is checked to restock the items. The suite also asserts the **paired notifications**: a customer cancellation must send both the customer's email and the internal owner/staff alert (Section 5.14.2), while marking an order refunded sends the customer's confirmation without a redundant internal alert.
 
 ### 6.6.4 Service Booking
 
