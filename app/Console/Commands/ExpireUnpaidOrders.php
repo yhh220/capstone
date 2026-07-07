@@ -60,7 +60,7 @@ class ExpireUnpaidOrders extends Command
                 }
             }
 
-            $ownerEmail = config('services.store.email');
+            $ownerEmail = OwnerAlertMail::recipient();
             if ($ownerEmail) {
                 try {
                     Mail::to($ownerEmail)->send(new OwnerAlertMail(

@@ -69,7 +69,7 @@ class ShopModeService
 
         // One summary alert to the owner rather than one per order.
         if ($cancelled !== []) {
-            $ownerEmail = config('services.store.email');
+            $ownerEmail = OwnerAlertMail::recipient();
             if ($ownerEmail) {
                 try {
                     Mail::to($ownerEmail)->send(new OwnerAlertMail(

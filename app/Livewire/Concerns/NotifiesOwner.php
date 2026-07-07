@@ -14,7 +14,7 @@ trait NotifiesOwner
      */
     protected function notifyOwner(string $heading, array $rows, ?string $actionUrl = null, ?string $actionLabel = null): void
     {
-        $email = config('services.store.email');
+        $email = OwnerAlertMail::recipient();
 
         if (! $email) {
             return;

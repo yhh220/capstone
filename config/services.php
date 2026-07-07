@@ -44,6 +44,10 @@ return [
         'phone_display' => env('STORE_PHONE_DISPLAY', '016-9150917'),
         'phone_raw' => env('STORE_PHONE_RAW', '60169150917'),
         'email' => env('STORE_EMAIL', 'winwincaraudio@gmail.com'),
+        // Owner-alert To address. Defaults to a "+alerts" alias of the store
+        // email (see OwnerAlertMail::recipient()); set this only to send the
+        // alerts somewhere else entirely.
+        'alert_email' => env('STORE_ALERT_EMAIL'),
         'facebook_url' => env('STORE_FACEBOOK_URL', 'https://www.facebook.com/winwincaraudio/'),
         // Canonical public site URL. Used to generate sitemap.xml so its URLs
         // always point at production, independent of the local APP_URL (which is

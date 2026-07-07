@@ -61,7 +61,7 @@ class OrderResource extends Resource
      */
     private static function notifyOwnerOfCancellation(Order $order, string $cancelledBy): void
     {
-        $email = config('services.store.email');
+        $email = OwnerAlertMail::recipient();
 
         if (! $email) {
             return;
