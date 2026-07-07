@@ -446,7 +446,7 @@
                 <div class="relative grid lg:grid-cols-[1.2fr_auto] gap-10 items-center text-center lg:text-left">
                     <div>
                         <h2 id="cta-heading" class="text-3xl sm:text-5xl text-white mb-4 leading-tight">
-                            {{ __('Ready to upgrade your car?') }}
+                            {{ __('Hear it for yourself.') }}
                         </h2>
                         <p class="text-white/70 text-base sm:text-lg max-w-xl mx-auto lg:mx-0">
                             {{ __('Use the website to explore our products, then visit our showroom in Shah Alam for expert installation.') }}

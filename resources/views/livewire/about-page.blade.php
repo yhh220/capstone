@@ -135,7 +135,7 @@
                 <div class="relative grid lg:grid-cols-[1.2fr_auto] gap-10 items-center text-center lg:text-left">
                     <div>
                         <h2 id="about-cta-heading" class="text-3xl sm:text-5xl text-white mb-4 leading-tight">
-                            {{ __('Ready to visit or enquire?') }}
+                            {{ __('Drop by, or drop us a message.') }}
                         </h2>
                         <p class="text-white/70 text-base sm:text-lg max-w-xl mx-auto lg:mx-0">
                             {{ __('See the products online first, then continue the conversation in store or on WhatsApp.') }}
