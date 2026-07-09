@@ -86,12 +86,25 @@ class StripeCheckoutService
      */
     public function createSession(Order $order): Session
     {
+        $unitAmount = (int) round(((float) $order->total_amount) * 100);
+
         if ($order->stripe_session_id) {
             try {
                 $existing = $this->retrieveSession($order->stripe_session_id);
 
                 if ($existing->status === 'open' && $existing->expires_at > time()) {
-                    return $existing;
+                    if ((int) $existing->amount_total === $unitAmount) {
+                        return $existing;
+                    }
+
+                    // The order total changed since this session was created
+                    // (admin edit while pending): kill the stale session so the
+                    // old amount can never be paid, then mint a correct one.
+                    try {
+                        $this->client()->checkout->sessions->expire($existing->id);
+                    } catch (ApiErrorException $e) {
+                        logger()->warning('Stripe stale-session expire failed for '.$order->order_number.': '.$e->getMessage());
+                    }
                 }
             } catch (ApiErrorException $e) {
                 logger()->warning('Stripe session reuse lookup failed, creating fresh: '.$e->getMessage());
@@ -108,7 +121,7 @@ class StripeCheckoutService
                 // settled and risk drifting a sen from total_amount.
                 'price_data' => [
                     'currency' => 'myr',
-                    'unit_amount' => (int) round(((float) $order->total_amount) * 100),
+                    'unit_amount' => $unitAmount,
                     'product_data' => ['name' => 'Order '.$order->order_number],
                 ],
             ]],

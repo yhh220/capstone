@@ -74,9 +74,13 @@
         </div>
         @endif
 
-        {{-- Stripe reported the payment still settling (FPX/GrabPay can lag the redirect) --}}
+        {{-- Stripe reported the payment still settling (FPX/GrabPay can lag the
+             redirect). wire:poll re-verifies the session every 10s so the page
+             flips to the success card by itself once the bank confirms — no
+             manual refresh, and no webhook required locally. --}}
         @if($paymentProcessing)
-        <div class="rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/40 px-4 py-3 text-sm text-blue-700 dark:text-blue-300">
+        <div wire:poll.10s="pollPaymentStatus" class="rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/40 px-4 py-3 text-sm text-blue-700 dark:text-blue-300 flex items-center gap-2">
+            <svg class="icon-sm icon-spin shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
             {{ __('Your payment is being confirmed by the bank. This page will update once it clears — you can also check My Account shortly.') }}
         </div>
         @endif

@@ -26,7 +26,11 @@ class OrderPaymentService
      * moved, an order past its payment window (but not yet cancelled by the
      * expiry job) must still settle rather than strand a real payment.
      *
-     * @return string 'paid' | 'already_paid' | 'cancelled' | 'expired'
+     * 'busy' means another request holds the settle lock right now (most
+     * likely settling this same payment) — callers should treat it as a
+     * benign no-op, not as proof the order was already paid.
+     *
+     * @return string 'paid' | 'already_paid' | 'busy' | 'cancelled' | 'expired'
      */
     public function markPaid(
         Order $order,
@@ -41,7 +45,7 @@ class OrderPaymentService
         $lock = Cache::lock('pay-order:'.$order->id, 10);
 
         if (! $lock->get()) {
-            return 'already_paid';
+            return 'busy';
         }
 
         try {

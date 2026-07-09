@@ -102,6 +102,27 @@ class StripeReturnVerificationTest extends TestCase
         Mail::assertNotSent(OrderConfirmationMail::class);
     }
 
+    public function test_polling_settles_the_order_once_the_bank_confirms(): void
+    {
+        $this->mock(StripeCheckoutService::class, function (MockInterface $mock) {
+            $mock->shouldReceive('enabled')->andReturn(true);
+            // First retrieval (mount): still settling. Second (wire:poll): paid.
+            $mock->shouldReceive('retrieveSession')->twice()->with('cs_test_1')->andReturn(
+                Session::constructFrom(['id' => 'cs_test_1', 'payment_status' => 'unpaid', 'payment_intent' => 'pi_test_1']),
+                Session::constructFrom(['id' => 'cs_test_1', 'payment_status' => 'paid', 'payment_intent' => 'pi_test_1']),
+            );
+        });
+
+        Livewire::withQueryParams(['session_id' => 'cs_test_1'])
+            ->actingAs($this->user)
+            ->test(PaymentPage::class, ['orderNumber' => $this->order->order_number])
+            ->assertSet('paymentProcessing', true)
+            ->call('pollPaymentStatus');
+
+        $this->assertSame('paid', $this->order->refresh()->payment_status);
+        Mail::assertSent(OrderConfirmationMail::class, 1);
+    }
+
     public function test_a_session_id_that_does_not_match_the_order_is_never_looked_up(): void
     {
         $this->mock(StripeCheckoutService::class, function (MockInterface $mock) {

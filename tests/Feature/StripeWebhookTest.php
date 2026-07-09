@@ -195,6 +195,41 @@ class StripeWebhookTest extends TestCase
         Mail::assertNothingSent();
     }
 
+    public function test_a_second_different_payment_for_a_paid_order_alerts_the_owner(): void
+    {
+        Mail::fake();
+        $order = $this->makeOrder();
+
+        // First payment settles the order with pi_test_1 (and sends the normal
+        // "New order paid" owner alert).
+        $this->postWebhook($this->sessionPayload($order))->assertOk();
+
+        // A second, different successful payment for the same order (session
+        // race / stale-session repay) must be flagged for a manual refund —
+        // silently returning 200 would leave the double charge invisible.
+        $this->postWebhook($this->sessionPayload($order, overrides: [
+            'id' => 'cs_test_2',
+            'payment_intent' => 'pi_test_2',
+        ]))->assertOk();
+
+        $order->refresh();
+        $this->assertSame('pi_test_1', $order->stripe_payment_intent_id, 'The first payment stays the order\'s payment of record.');
+        Mail::assertSent(OrderConfirmationMail::class, 1);
+        Mail::assertSent(OwnerAlertMail::class, 2); // paid alert + duplicate alert
+    }
+
+    public function test_rejects_outright_when_the_webhook_secret_is_not_configured(): void
+    {
+        Mail::fake();
+        $order = $this->makeOrder();
+        config(['services.stripe.webhook_secret' => '']);
+
+        $this->postWebhook($this->sessionPayload($order))->assertStatus(400);
+
+        $this->assertSame('pending', $order->refresh()->payment_status);
+        Mail::assertNothingSent();
+    }
+
     public function test_settles_an_order_past_its_window_but_not_yet_cancelled(): void
     {
         Mail::fake();

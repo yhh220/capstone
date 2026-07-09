@@ -10,6 +10,7 @@ use App\Services\Payments\OrderPaymentService;
 use App\Services\Payments\StripeCheckoutService;
 use App\Support\Breadcrumbs;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Locked;
@@ -88,7 +89,24 @@ class PaymentPage extends Component
                 return;
             }
 
+            // One live session per order: without this lock two concurrent
+            // clicks (double-tap, two tabs) could each mint a payable session
+            // and the customer could be charged twice.
+            $lock = Cache::lock('stripe-session:'.$this->order->id, 15);
+            if (! $lock->get()) {
+                return;
+            }
+
             try {
+                $this->order->refresh();
+
+                // A session this order already holds may have been paid (webhook
+                // lag, a second tab) or be mid-settlement (FPX) — never mint a
+                // new charge in either case.
+                if ($this->order->stripe_session_id && $this->checkExistingSession()) {
+                    return;
+                }
+
                 $session = $stripe->createSession($this->order);
             } catch (ApiErrorException $e) {
                 // Runtime API failure ≠ misconfiguration: don't silently fall
@@ -98,6 +116,8 @@ class PaymentPage extends Component
                 session()->flash('payment_error', __('Could not reach the payment provider. Please try again.'));
 
                 return;
+            } finally {
+                $lock->release();
             }
 
             Breadcrumbs::push('payment', 'Redirecting to Stripe Checkout', ['order' => $this->order->order_number]);
@@ -128,6 +148,65 @@ class PaymentPage extends Component
         // stays at its old scroll offset and the success card ends up off-screen
         // above the fold, looking like it landed in the footer.
         $this->dispatch('scroll-top');
+    }
+
+    /**
+     * Pre-flight for pay(): inspect the order's existing Stripe session and
+     * return true when no new session may be created — either the money has
+     * already arrived (settle + success) or an async payment is still
+     * settling (show the processing notice). Returns false when the session
+     * is stale/open and pay() should proceed to createSession(), which
+     * itself reuses a still-open session.
+     */
+    private function checkExistingSession(): bool
+    {
+        try {
+            $session = app(StripeCheckoutService::class)->retrieveSession($this->order->stripe_session_id);
+        } catch (ApiErrorException $e) {
+            // Unreadable stored session (deleted test data, corrupt id): fall
+            // through to createSession rather than dead-ending the payment.
+            logger()->warning('Stripe pre-pay session check failed for '.$this->order->order_number.': '.$e->getMessage());
+
+            return false;
+        }
+
+        if ($session->payment_status === 'paid') {
+            app(OrderPaymentService::class)->markPaid(
+                $this->order,
+                source: 'stripe_return',
+                paymentIntentId: is_string($session->payment_intent) ? $session->payment_intent : null,
+                causer: Auth::user(),
+                allowExpired: true,
+            );
+            $this->order->refresh();
+            session()->flash('payment_success', __('Payment successful! Your order is confirmed.'));
+            $this->dispatch('scroll-top');
+
+            return true;
+        }
+
+        if ($session->status === 'complete') {
+            // Completed checkout, money not confirmed yet (FPX settling): a new
+            // session here would invite a second charge — wait for the webhook
+            // or the poll below to finish the first one.
+            $this->paymentProcessing = true;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * wire:poll while the processing notice shows — re-verifies the session so
+     * an FPX payment settles on-page even without webhook delivery, instead of
+     * requiring a manual refresh.
+     */
+    public function pollPaymentStatus(): void
+    {
+        if ($this->paymentProcessing && $this->order->isAwaitingPayment() && $this->order->stripe_session_id) {
+            $this->settleFromStripeReturn($this->order->stripe_session_id);
+        }
     }
 
     /** Settle after returning from Stripe with ?session_id= (see mount()). */

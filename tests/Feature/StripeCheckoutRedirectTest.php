@@ -129,6 +129,57 @@ class StripeCheckoutRedirectTest extends TestCase
         $this->assertSame('paid', $order->refresh()->payment_status);
     }
 
+    public function test_an_already_paid_session_settles_instead_of_minting_a_new_charge(): void
+    {
+        Setting::setValue('PAYMENT_MODE', 'stripe');
+        $order = $this->makeOrder('Credit / Debit Card');
+        $order->update(['stripe_session_id' => 'cs_test_paid']);
+
+        $this->mock(StripeCheckoutService::class, function (MockInterface $mock) {
+            $mock->shouldReceive('enabled')->andReturn(true);
+            $mock->shouldReceive('retrieveSession')->once()->with('cs_test_paid')->andReturn(Session::constructFrom([
+                'id' => 'cs_test_paid',
+                'status' => 'complete',
+                'payment_status' => 'paid',
+                'payment_intent' => 'pi_test_9',
+            ]));
+            $mock->shouldReceive('createSession')->never();
+        });
+
+        Livewire::actingAs($this->user)
+            ->test(PaymentPage::class, ['orderNumber' => $order->order_number])
+            ->call('pay');
+
+        $order->refresh();
+        $this->assertSame('paid', $order->payment_status);
+        $this->assertSame('pi_test_9', $order->stripe_payment_intent_id);
+    }
+
+    public function test_a_completed_but_unsettled_session_shows_processing_instead_of_recharging(): void
+    {
+        Setting::setValue('PAYMENT_MODE', 'stripe');
+        $order = $this->makeOrder('FPX - Maybank2u');
+        $order->update(['stripe_session_id' => 'cs_test_settling']);
+
+        $this->mock(StripeCheckoutService::class, function (MockInterface $mock) {
+            $mock->shouldReceive('enabled')->andReturn(true);
+            $mock->shouldReceive('retrieveSession')->once()->with('cs_test_settling')->andReturn(Session::constructFrom([
+                'id' => 'cs_test_settling',
+                'status' => 'complete', // checkout finished…
+                'payment_status' => 'unpaid', // …but FPX hasn't settled yet
+                'payment_intent' => 'pi_test_9',
+            ]));
+            $mock->shouldReceive('createSession')->never(); // a new session here would invite a double charge
+        });
+
+        Livewire::actingAs($this->user)
+            ->test(PaymentPage::class, ['orderNumber' => $order->order_number])
+            ->call('pay')
+            ->assertSet('paymentProcessing', true);
+
+        $this->assertSame('pending', $order->refresh()->payment_status);
+    }
+
     public function test_a_live_secret_is_refused_by_design(): void
     {
         Setting::setValue('PAYMENT_MODE', 'stripe');

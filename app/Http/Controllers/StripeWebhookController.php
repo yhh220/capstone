@@ -22,6 +22,14 @@ class StripeWebhookController extends Controller
 {
     public function __invoke(Request $request, OrderPaymentService $payments): Response
     {
+        if (blank(config('services.stripe.webhook_secret'))) {
+            // Loud and specific: without this, a missing STRIPE_WEBHOOK_SECRET
+            // just looks like endless signature failures until Stripe silently
+            // disables the endpoint after days of retries.
+            logger()->error('Stripe webhook received but STRIPE_WEBHOOK_SECRET is not configured — rejecting.');
+            abort(400, 'Webhook secret not configured');
+        }
+
         try {
             $event = Webhook::constructEvent(
                 $request->getContent(),
@@ -80,6 +88,21 @@ class StripeWebhookController extends Controller
             // a manual refund in the Stripe test dashboard instead.
             logger()->warning("Stripe payment received for cancelled order {$order->order_number} (session {$session->id}) — manual refund needed");
             $this->alertOwner($order, $session, 'Payment received for a cancelled order — manual refund needed', 'The order was already cancelled (expired or shop closed) when Stripe confirmed payment. Refund it from the Stripe dashboard.');
+        }
+
+        if ($result === 'already_paid') {
+            // The order settled through some other payment. If THIS event's
+            // payment intent isn't the one recorded on the order, real money
+            // arrived twice (second session from a race, or a demo/admin settle
+            // beating a Stripe payment) — without this alert a double charge
+            // would only ever be found by scrolling the Stripe dashboard.
+            $intent = is_string($session->payment_intent) ? $session->payment_intent : null;
+            $order->refresh();
+
+            if ($intent !== null && $intent !== $order->stripe_payment_intent_id) {
+                logger()->warning("Duplicate Stripe payment for order {$order->order_number}: intent {$intent} vs recorded ".($order->stripe_payment_intent_id ?? 'none'));
+                $this->alertOwner($order, $session, 'Duplicate payment received — refund needed', 'This order was already paid, but Stripe confirmed a second, different payment for it. Refund the duplicate charge from the Stripe dashboard.');
+            }
         }
 
         return response('OK', 200);

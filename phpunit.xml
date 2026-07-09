@@ -18,6 +18,9 @@
         </include>
     </source>
     <php>
+        <!-- The dompdf invoice tests peak past the default CLI 128M limit;
+             set here so plain `php artisan test` works on any machine. -->
+        <ini name="memory_limit" value="1G"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
