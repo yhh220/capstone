@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Livewire\PaymentPage;
 use App\Mail\OrderConfirmationMail;
+use App\Mail\OwnerAlertMail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -78,6 +79,7 @@ class StripeReturnVerificationTest extends TestCase
         $this->assertSame('paid', $this->order->payment_status);
         $this->assertSame('pi_test_1', $this->order->stripe_payment_intent_id);
         Mail::assertSent(OrderConfirmationMail::class, 1);
+        Mail::assertSent(OwnerAlertMail::class, 1);
     }
 
     public function test_a_still_settling_session_shows_the_processing_notice(): void

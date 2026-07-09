@@ -3,6 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Mail\OrderConfirmationMail;
+use App\Mail\OwnerAlertMail;
 use App\Models\Order;
 use App\Support\Breadcrumbs;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -108,6 +109,29 @@ class OrderPaymentService
             Mail::to($order->customer_email)->send(new OrderConfirmationMail($order->fresh('items')));
         } catch (\Throwable $e) {
             logger()->error('Order confirmation email failed: '.$e->getMessage());
+        }
+
+        // Owner/staff alert lives here, in the single settle step, so every
+        // payment source (demo button, Stripe webhook, success-URL return)
+        // notifies the shop exactly once — the webhook controller only alerts
+        // on its failure cases.
+        $ownerEmail = OwnerAlertMail::recipient();
+        if ($ownerEmail) {
+            try {
+                Mail::to($ownerEmail)->send(new OwnerAlertMail(
+                    'New order paid',
+                    [
+                        'Order' => $order->order_number,
+                        'Customer' => $order->customer_name,
+                        'Total' => 'RM '.number_format((float) $order->total_amount, 2),
+                        'Payment method' => $order->payment_method,
+                    ],
+                    url('/admin/orders/'.$order->getKey().'/edit'),
+                    'View order',
+                ));
+            } catch (\Throwable $e) {
+                logger()->error("Paid-order owner alert failed for {$order->order_number}: ".$e->getMessage());
+            }
         }
 
         return 'paid';

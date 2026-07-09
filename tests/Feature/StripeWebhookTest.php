@@ -129,6 +129,7 @@ class StripeWebhookTest extends TestCase
         $this->postWebhook($payload)->assertOk();
 
         Mail::assertSent(OrderConfirmationMail::class, 1);
+        Mail::assertSent(OwnerAlertMail::class, 1);
     }
 
     public function test_completed_session_with_unpaid_status_waits_for_the_async_event(): void
