@@ -475,6 +475,18 @@
             transform: translateY(-4px);
             box-shadow: 0 10px 30px rgba(24, 119, 242, 0.45);
         }
+        /* Stripe blurple — the pay button wears Stripe's own brand colour so
+           customers recognise where the redirect is taking them. */
+        .btn-stripe {
+            background-color: #635BFF;
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(99, 91, 255, 0.30);
+        }
+        .btn-stripe:hover {
+            background-color: #5851ea;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(99, 91, 255, 0.45);
+        }
 
         /* Subtle outline button for dark surfaces (e.g. the dark CTA card) —
            muted by default so it sits behind the primary action, brightening
