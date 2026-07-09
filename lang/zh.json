@@ -1051,6 +1051,8 @@
     "You need to sign in to continue to checkout.": "您需要先登录才能继续结账。",
     "You signed in with Google, so your account has no password yet. Set one to also log in with your email and password.": "您是用 Google 登录的，所以账户还没有密码。设置一个后，也能用邮箱和密码登录。",
     "You will be redirected to Stripe to complete payment securely. Test payments only — no real money is charged.": "您将被跳转到 Stripe 安全完成付款。仅为测试付款——不会收取真实款项。",
+    "You will choose your bank on Stripe's secure page.": "您将在 Stripe 的安全页面上选择您的银行。",
+    "You will enter your card details on Stripe's secure page — nothing is typed or stored here.": "您将在 Stripe 的安全页面上输入卡片信息——本页不会输入或存储任何卡片资料。",
     "Your Booking Link": "您的预约链接",
     "Your Booking Reference": "您的预约编号",
     "Your Cart": "您的购物车",

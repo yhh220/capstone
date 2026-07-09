@@ -60,13 +60,15 @@ class StripeCheckoutService
     /**
      * Map an order's stored payment_method label to Stripe payment_method_types.
      * Labels come from CheckoutPage's server-side whitelist, so prefix/equality
-     * matching is reliable. null = not supported by Stripe MY (Touch 'n Go,
-     * ShopeePay, Boost, legacy labels) → the order stays on the demo flow.
+     * matching is reliable: plain 'FPX' (Stripe-mode orders — the bank is chosen
+     * on Stripe's page) and 'FPX - <bank>' (demo-mode orders) both map to fpx.
+     * null = not supported by Stripe MY (Touch 'n Go, ShopeePay, Boost, legacy
+     * labels) → the order stays on the demo flow.
      */
     public static function paymentMethodTypesFor(?string $label): ?array
     {
         return match (true) {
-            $label !== null && str_starts_with($label, 'FPX - ') => ['fpx'],
+            $label !== null && str_starts_with($label, 'FPX') => ['fpx'],
             $label === 'GrabPay' => ['grab_pay'],
             $label === 'Credit / Debit Card' => ['card'],
             default => null,

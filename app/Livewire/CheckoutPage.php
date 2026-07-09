@@ -198,8 +198,11 @@ class CheckoutPage extends Component
         }
 
         // Human-readable provider label stored on the order (e.g. "FPX - Maybank2u").
+        // In Stripe mode no bank suffix is recorded: the customer picks the bank
+        // on Stripe's hosted page, so any bank named here would be a guess.
+        $stripeCheckout = app(StripeCheckoutService::class)->enabled();
         $paymentLabel = match ($this->paymentMethod) {
-            'fpx' => 'FPX - '.$this->fpxBank,
+            'fpx' => $stripeCheckout ? 'FPX' : 'FPX - '.$this->fpxBank,
             'ewallet' => $this->ewallet,
             'card' => 'Credit / Debit Card',
             default => 'FPX',

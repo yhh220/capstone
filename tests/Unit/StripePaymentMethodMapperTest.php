@@ -19,10 +19,13 @@ class StripePaymentMethodMapperTest extends TestCase
         }
     }
 
-    public function test_grabpay_and_card_map_to_their_stripe_types(): void
+    public function test_grabpay_card_and_bare_fpx_map_to_their_stripe_types(): void
     {
         $this->assertSame(['grab_pay'], StripeCheckoutService::paymentMethodTypesFor('GrabPay'));
         $this->assertSame(['card'], StripeCheckoutService::paymentMethodTypesFor('Credit / Debit Card'));
+        // Stripe-mode FPX orders carry no bank suffix — the bank is chosen on
+        // Stripe's hosted page.
+        $this->assertSame(['fpx'], StripeCheckoutService::paymentMethodTypesFor('FPX'));
     }
 
     public function test_unsupported_wallets_and_legacy_labels_stay_on_the_demo_flow(): void
@@ -30,7 +33,6 @@ class StripePaymentMethodMapperTest extends TestCase
         $this->assertNull(StripeCheckoutService::paymentMethodTypesFor("Touch 'n Go eWallet"));
         $this->assertNull(StripeCheckoutService::paymentMethodTypesFor('ShopeePay'));
         $this->assertNull(StripeCheckoutService::paymentMethodTypesFor('Boost'));
-        $this->assertNull(StripeCheckoutService::paymentMethodTypesFor('FPX')); // legacy default label, no bank suffix
         $this->assertNull(StripeCheckoutService::paymentMethodTypesFor('online_banking')); // pre-migration default
         $this->assertNull(StripeCheckoutService::paymentMethodTypesFor(null));
         $this->assertNull(StripeCheckoutService::paymentMethodTypesFor(''));

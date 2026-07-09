@@ -181,12 +181,17 @@
                     </label>
                     @if($paymentMethod === 'fpx')
                     <div class="px-4 pb-4 sm:pl-[4.25rem]">
+                        @if($stripeEnabled)
+                        {{-- Stripe's hosted page asks for the bank itself — asking here too would make the customer pick twice. --}}
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __("You will choose your bank on Stripe's secure page.") }}</p>
+                        @else
                         <label for="fpx-bank" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">{{ __('Select your bank') }}</label>
                         <select wire:model="fpxBank" id="fpx-bank" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-red transition">
                             @foreach($fpxBanks as $bank)
                             <option value="{{ $bank }}">{{ $bank }}</option>
                             @endforeach
                         </select>
+                        @endif
                     </div>
                     @endif
                 </div>
@@ -241,6 +246,13 @@
                     </label>
                     @if($paymentMethod === 'card')
                     <div class="px-4 pb-4 sm:pl-[4.25rem] space-y-3">
+                        @if($stripeEnabled)
+                        {{-- Card details belong on Stripe's PCI-compliant page — a form here would make the customer type them twice (and we must never see them). --}}
+                        <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            {{ __("You will enter your card details on Stripe's secure page — nothing is typed or stored here.") }}
+                        </p>
+                        @else
                         <div>
                             <label for="card-number" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">{{ __('Card Number') }}</label>
                             <input id="card-number" type="text" inputmode="numeric" maxlength="19" autocomplete="cc-number" placeholder="1234 5678 9012 3456"
@@ -270,6 +282,7 @@
                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                             {{ __('Demo only — card details are not collected or stored.') }}
                         </p>
+                        @endif
                     </div>
                     @endif
                 </div>

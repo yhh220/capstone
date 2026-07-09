@@ -1051,6 +1051,8 @@
     "You need to sign in to continue to checkout.": "Anda perlu log masuk untuk meneruskan pembayaran.",
     "You signed in with Google, so your account has no password yet. Set one to also log in with your email and password.": "Anda log masuk dengan Google, jadi akaun anda belum mempunyai kata laluan. Tetapkan satu untuk turut log masuk dengan e-mel dan kata laluan anda.",
     "You will be redirected to Stripe to complete payment securely. Test payments only — no real money is charged.": "Anda akan dibawa ke Stripe untuk melengkapkan pembayaran dengan selamat. Pembayaran ujian sahaja — tiada wang sebenar dicaj.",
+    "You will choose your bank on Stripe's secure page.": "Anda akan memilih bank anda di halaman selamat Stripe.",
+    "You will enter your card details on Stripe's secure page — nothing is typed or stored here.": "Anda akan memasukkan maklumat kad anda di halaman selamat Stripe — tiada apa-apa dimasukkan atau disimpan di sini.",
     "Your Booking Link": "Pautan Tempahan Anda",
     "Your Booking Reference": "Rujukan Tempahan Anda",
     "Your Cart": "Troli Anda",
