@@ -7,8 +7,13 @@ use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\Payments\StripeCheckoutService;
+use App\Services\ShippingCalculator;
+use App\Support\Breadcrumbs;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 class CheckoutPage extends Component
@@ -34,7 +39,9 @@ class CheckoutPage extends Component
 
     public string $orderNotes = '';
 
-    // Step 2: Payment method (display-only demo — no real gateway)
+    // Step 2: Payment method. The choice is stored on the order as a label;
+    // whether it then pays via Stripe (card/FPX/GrabPay in stripe mode) or the
+    // demo flip is decided on the payment page.
     public string $paymentMethod = 'fpx';
 
     public string $fpxBank = 'Maybank2u';
@@ -87,10 +94,10 @@ class CheckoutPage extends Component
 
         // Pre-fill from user profile + last order's delivery address
         $user = Auth::user();
-        $this->customerName  = $user->name ?? '';
+        $this->customerName = $user->name ?? '';
         $this->customerEmail = $user->email ?? '';
 
-        $lastOrder = \App\Models\Order::where('user_id', $user->id)
+        $lastOrder = Order::where('user_id', $user->id)
             ->whereNotNull('shipping_address')
             ->latest()
             ->first();
@@ -98,10 +105,10 @@ class CheckoutPage extends Component
         if ($lastOrder) {
             $addr = $lastOrder->shipping_address;
             $this->customerPhone = $lastOrder->customer_phone ?? '';
-            $this->street        = $addr['street']   ?? '';
-            $this->city          = $addr['city']     ?? '';
-            $this->postcode      = $addr['postcode'] ?? '';
-            $this->state         = $addr['state']    ?? '';
+            $this->street = $addr['street'] ?? '';
+            $this->city = $addr['city'] ?? '';
+            $this->postcode = $addr['postcode'] ?? '';
+            $this->state = $addr['state'] ?? '';
         }
 
         // Redirect to cart if cart is empty
@@ -127,7 +134,7 @@ class CheckoutPage extends Component
 
     public function getShippingProperty(): float
     {
-        return app(\App\Services\ShippingCalculator::class)->fee($this->subtotal);
+        return app(ShippingCalculator::class)->fee($this->subtotal);
     }
 
     public function getTotalProperty(): float
@@ -164,14 +171,14 @@ class CheckoutPage extends Component
 
         // Throttle order creation — a scripted account shouldn't be able to
         // flood the orders table with junk.
-        $throttleKey = 'checkout:' . Auth::id();
-        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 5)) {
-            $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($throttleKey);
+        $throttleKey = 'checkout:'.Auth::id();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
             $this->addError('stock', __('Too many orders placed. Please try again in :seconds seconds.', ['seconds' => $seconds]));
 
             return;
         }
-        \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 3600);
+        RateLimiter::hit($throttleKey, 3600);
 
         if (CartItem::forCurrentOwner()->count() === 0) {
             $this->redirect(route('cart'));
@@ -192,13 +199,13 @@ class CheckoutPage extends Component
 
         // Human-readable provider label stored on the order (e.g. "FPX - Maybank2u").
         $paymentLabel = match ($this->paymentMethod) {
-            'fpx' => 'FPX - ' . $this->fpxBank,
+            'fpx' => 'FPX - '.$this->fpxBank,
             'ewallet' => $this->ewallet,
             'card' => 'Credit / Debit Card',
             default => 'FPX',
         };
 
-        \App\Support\Breadcrumbs::push('checkout', 'Placing order', ['method' => $this->paymentMethod]);
+        Breadcrumbs::push('checkout', 'Placing order', ['method' => $this->paymentMethod]);
 
         try {
             $order = DB::transaction(function () use ($paymentLabel) {
@@ -246,7 +253,7 @@ class CheckoutPage extends Component
                 });
 
                 $subtotal = round($lineItems->sum('subtotal'), 2);
-                $shippingFee = app(\App\Services\ShippingCalculator::class)->fee($subtotal);
+                $shippingFee = app(ShippingCalculator::class)->fee($subtotal);
 
                 $order = Order::create([
                     'user_id' => Auth::id(),
@@ -292,14 +299,14 @@ class CheckoutPage extends Component
 
                 return $order;
             });
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             // Order::generateOrderNumber() can't take a row lock on a number that
             // doesn't exist yet, so two checkouts racing for the year's very first
             // order number could both pass its collision check. The unique index
             // on order_number is the real guard — it rejects the duplicate insert,
             // but its raw SQL message (with column/table names) isn't fit to show
             // a customer, so it's logged and swapped for a friendly retry prompt.
-            logger()->error('Checkout order_number collision: ' . $e->getMessage());
+            logger()->error('Checkout order_number collision: '.$e->getMessage());
             $this->addError('stock', __('Something went wrong placing your order. Please try again.'));
             $this->step = 1;
 
@@ -320,6 +327,10 @@ class CheckoutPage extends Component
         return view('livewire.checkout-page', [
             'fpxBanks' => self::FPX_BANKS,
             'ewallets' => self::EWALLETS,
+            // Drives the payment-step notice + button copy (Stripe test mode vs
+            // pure demo). Whether a given order actually redirects to Stripe is
+            // decided per payment method on the payment page.
+            'stripeEnabled' => app(StripeCheckoutService::class)->enabled(),
         ])->layout('layouts.app');
     }
 }

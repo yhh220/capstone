@@ -149,7 +149,16 @@
             <h2 class="text-xl font-black text-gray-800 dark:text-white mb-1">{{ __('Payment Method') }}</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('Choose how you would like to pay') }}</p>
 
-            {{-- Demo notice --}}
+            {{-- Payment-mode notice: Stripe test mode vs pure demo --}}
+            @if($stripeEnabled)
+            <div class="mb-6 flex items-start gap-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700/60 rounded-xl p-4">
+                <svg class="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <div>
+                    <div class="text-indigo-700 dark:text-indigo-400 font-bold text-sm">{{ __('STRIPE TEST MODE') }}</div>
+                    <div class="text-indigo-700/80 dark:text-indigo-400/80 text-xs mt-0.5">{{ __('FPX, GrabPay and card payments are completed on Stripe, in test mode — no real money is charged.') }} {{ __("Touch 'n Go, ShopeePay and Boost stay simulated.") }}</div>
+                </div>
+            </div>
+            @else
             <div class="mb-6 flex items-start gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 rounded-xl p-4">
                 <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                 <div>
@@ -157,6 +166,7 @@
                     <div class="text-amber-700/80 dark:text-amber-400/80 text-xs mt-0.5">{{ __('No actual payment will be processed. This is a prototype demonstration.') }}</div>
                 </div>
             </div>
+            @endif
 
             <div class="space-y-3">
                 {{-- FPX Online Banking --}}
@@ -293,13 +303,13 @@
                     {{ __('← Back') }}
                 </button>
                 <button type="button"
-                        @click="$store.confirm.ask(@js(__('Demo mode — no real payment will be charged. Place this test order?')), () => $wire.placeOrder())"
+                        @click="$store.confirm.ask(@js($stripeEnabled ? __('Place this order? You will complete payment on the next page.') : __('Demo mode — no real payment will be charged. Place this test order?')), () => $wire.placeOrder())"
                         wire:loading.attr="disabled"
                         wire:target="placeOrder"
                         class="group relative inline-flex justify-center items-center gap-2 flex-1 bg-brand-red-solid text-white py-3 rounded-full font-black text-lg transition-all duration-300 shadow-[0_6px_20px_rgb(var(--brand-red-rgb)_/_0.35)] overflow-hidden hover:shadow-[0_10px_30px_rgb(var(--brand-red-rgb)_/_0.5)] hover:-translate-y-1 active:scale-95 disabled:opacity-50">
                     <span class="absolute inset-0 bg-white/25 skew-x-[45deg] -translate-x-full group-hover:translate-x-[150%] group-active:translate-x-[150%] transition-transform duration-700 ease-out" aria-hidden="true"></span>
                     <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110" wire:loading.remove wire:target="placeOrder" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span class="relative z-10" wire:loading.remove wire:target="placeOrder">{{ __('Place Order (Demo)') }}</span>
+                    <span class="relative z-10" wire:loading.remove wire:target="placeOrder">{{ $stripeEnabled ? __('Place Order') : __('Place Order (Demo)') }}</span>
                     <span class="relative z-10 hidden flex items-center justify-center gap-2" wire:loading.class.remove="hidden" wire:target="placeOrder">
                         <svg class="icon-spin w-5 h-5" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                         {{ __('Processing...') }}
