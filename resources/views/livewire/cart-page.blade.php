@@ -156,6 +156,12 @@
                         {{ __('Continue Shopping') }}
                     </a>
 
+                    @if($stripeEnabled)
+                    <div class="mt-4 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 text-xs p-3 rounded-xl text-center flex items-center justify-center gap-1.5">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        {{ __('STRIPE TEST MODE — test payments only, no real money is charged.') }}
+                    </div>
+                    @else
                     <div class="mt-4 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-xs p-3 rounded-xl text-center flex items-center justify-center gap-1.5">
                         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
                         {{ __('DEMO MODE — No actual payment will be processed.') }}

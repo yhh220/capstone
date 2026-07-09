@@ -168,19 +168,24 @@
             </div>
             @endif
 
-            <div class="space-y-3">
+            {{-- Selection state lives in Alpine (entangled, deferred) so picking a
+                 method highlights and expands instantly — wire:model.live made
+                 every click wait a full server round-trip before the UI moved.
+                 The value still syncs to Livewire and is re-whitelisted in
+                 placeOrder(), so nothing is trusted from the client. --}}
+            <div class="space-y-3" x-data="{ method: $wire.entangle('paymentMethod') }">
                 {{-- FPX Online Banking --}}
-                <div class="rounded-xl border-2 transition-colors {{ $paymentMethod === 'fpx' ? 'border-brand-red bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-600' }}">
+                <div class="rounded-xl border-2 transition-colors"
+                     :class="method === 'fpx' ? 'border-brand-red bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-600'">
                     <label class="flex items-center gap-3 p-4 cursor-pointer">
-                        <input type="radio" wire:model.live="paymentMethod" value="fpx" class="accent-brand-red w-4 h-4 shrink-0">
+                        <input type="radio" x-model="method" value="fpx" name="payment-method" class="accent-brand-red w-4 h-4 shrink-0">
                         <span class="w-11 h-9 rounded-md bg-blue-600 text-white flex items-center justify-center font-black text-[11px] tracking-wide shrink-0">FPX</span>
                         <span class="flex-1 min-w-0">
                             <span class="block font-semibold text-gray-800 dark:text-white">{{ __('FPX Online Banking') }}</span>
                             <span class="block text-xs text-gray-500">{{ __('Pay directly from your bank account') }}</span>
                         </span>
                     </label>
-                    @if($paymentMethod === 'fpx')
-                    <div class="px-4 pb-4 sm:pl-[4.25rem]">
+                    <div x-show="method === 'fpx'" x-cloak style="display:none;" class="px-4 pb-4 sm:pl-[4.25rem]">
                         @if($stripeEnabled)
                         {{-- Stripe's hosted page asks for the bank itself — asking here too would make the customer pick twice. --}}
                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ __("You will choose your bank on Stripe's secure page.") }}</p>
@@ -193,13 +198,13 @@
                         </select>
                         @endif
                     </div>
-                    @endif
                 </div>
 
                 {{-- E-Wallet --}}
-                <div class="rounded-xl border-2 transition-colors {{ $paymentMethod === 'ewallet' ? 'border-brand-red bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-600' }}">
+                <div class="rounded-xl border-2 transition-colors"
+                     :class="method === 'ewallet' ? 'border-brand-red bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-600'">
                     <label class="flex items-center gap-3 p-4 cursor-pointer">
-                        <input type="radio" wire:model.live="paymentMethod" value="ewallet" class="accent-brand-red w-4 h-4 shrink-0">
+                        <input type="radio" x-model="method" value="ewallet" name="payment-method" class="accent-brand-red w-4 h-4 shrink-0">
                         <span class="w-11 h-9 rounded-md bg-gradient-to-br from-teal-500 to-emerald-600 text-white flex items-center justify-center shrink-0" aria-hidden="true">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M16 14h2"/></svg>
                         </span>
@@ -208,12 +213,12 @@
                             <span class="block text-xs text-gray-500 truncate">Touch 'n Go &middot; GrabPay &middot; ShopeePay &middot; Boost</span>
                         </span>
                     </label>
-                    @if($paymentMethod === 'ewallet')
                     @php $ewalletLogos = ['GrabPay' => 'grabpay.svg', 'ShopeePay' => 'shopeepay.svg', 'Boost' => 'boost.svg']; @endphp
-                    <div class="px-4 pb-4 sm:pl-[4.25rem] grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div x-show="method === 'ewallet'" x-cloak style="display:none;" class="px-4 pb-4 sm:pl-[4.25rem] grid grid-cols-2 sm:grid-cols-4 gap-2">
                         @foreach($ewallets as $w)
                         <label class="cursor-pointer">
-                            <input type="radio" wire:model.live="ewallet" value="{{ $w }}" class="sr-only peer">
+                            {{-- Deferred wire:model — the selected style is pure CSS (peer-checked), so no round-trip is needed. --}}
+                            <input type="radio" wire:model="ewallet" value="{{ $w }}" class="sr-only peer">
                             <span class="flex flex-col items-center justify-center gap-1.5 text-center px-2 py-3 rounded-lg border-2 transition-colors h-full
                                         peer-checked:border-brand-red peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20
                                         border-gray-200 dark:border-gray-600">
@@ -228,13 +233,13 @@
                         </label>
                         @endforeach
                     </div>
-                    @endif
                 </div>
 
                 {{-- Credit / Debit Card --}}
-                <div class="rounded-xl border-2 transition-colors {{ $paymentMethod === 'card' ? 'border-brand-red bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-600' }}">
+                <div class="rounded-xl border-2 transition-colors"
+                     :class="method === 'card' ? 'border-brand-red bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-600'">
                     <label class="flex items-center gap-3 p-4 cursor-pointer">
-                        <input type="radio" wire:model.live="paymentMethod" value="card" class="accent-brand-red w-4 h-4 shrink-0">
+                        <input type="radio" x-model="method" value="card" name="payment-method" class="accent-brand-red w-4 h-4 shrink-0">
                         <span class="flex gap-1.5 shrink-0" aria-hidden="true">
                             <img src="{{ asset('images/payment/visa.svg') }}" alt="Visa" class="w-11 h-9 rounded-md bg-white border border-gray-200 object-contain p-1">
                             <img src="{{ asset('images/payment/mastercard.svg') }}" alt="Mastercard" class="w-11 h-9 rounded-md bg-white border border-gray-200 object-contain p-1">
@@ -244,8 +249,7 @@
                             <span class="block text-xs text-gray-500">Visa &middot; Mastercard</span>
                         </span>
                     </label>
-                    @if($paymentMethod === 'card')
-                    <div class="px-4 pb-4 sm:pl-[4.25rem] space-y-3">
+                    <div x-show="method === 'card'" x-cloak style="display:none;" class="px-4 pb-4 sm:pl-[4.25rem] space-y-3">
                         @if($stripeEnabled)
                         {{-- Card details belong on Stripe's PCI-compliant page — a form here would make the customer type them twice (and we must never see them). --}}
                         <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
@@ -284,7 +288,6 @@
                         </p>
                         @endif
                     </div>
-                    @endif
                 </div>
 
             </div>

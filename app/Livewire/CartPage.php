@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\CartItem;
 use App\Models\Product;
+use App\Services\Payments\StripeCheckoutService;
+use App\Services\ShippingCalculator;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -41,14 +43,13 @@ class CartPage extends Component
 
     public function getSubtotalProperty(): float
     {
-        return $this->cartItems->sum(fn($item) =>
-            ($item->product?->current_price ?? 0) * $item->quantity
+        return $this->cartItems->sum(fn ($item) => ($item->product?->current_price ?? 0) * $item->quantity
         );
     }
 
     public function getShippingProperty(): float
     {
-        return app(\App\Services\ShippingCalculator::class)->fee($this->subtotal);
+        return app(ShippingCalculator::class)->fee($this->subtotal);
     }
 
     public function getTotalProperty(): float
@@ -58,7 +59,7 @@ class CartPage extends Component
 
     public function getAmountToFreeShippingProperty(): float
     {
-        return app(\App\Services\ShippingCalculator::class)->amountToFreeShipping($this->subtotal);
+        return app(ShippingCalculator::class)->amountToFreeShipping($this->subtotal);
     }
 
     /**
@@ -67,8 +68,7 @@ class CartPage extends Component
      */
     public function getHasStockWarningsProperty(): bool
     {
-        return $this->cartItems->contains(fn ($item): bool =>
-            !$item->product || !$item->product->is_active
+        return $this->cartItems->contains(fn ($item): bool => ! $item->product || ! $item->product->is_active
         );
     }
 
@@ -126,7 +126,7 @@ class CartPage extends Component
     public static function addToCart(int $productId, int $quantity = 1): void
     {
         $product = Product::where('is_active', true)->find($productId);
-        if (!$product) {
+        if (! $product) {
             return;
         }
 
@@ -141,7 +141,7 @@ class CartPage extends Component
                 ->first();
 
             $currentQty = $existing?->quantity ?? 0;
-            $targetQty  = min($currentQty + $quantity, self::MAX_QTY);
+            $targetQty = min($currentQty + $quantity, self::MAX_QTY);
 
             if ($targetQty <= $currentQty) {
                 return; // already at the per-line cap
@@ -165,6 +165,9 @@ class CartPage extends Component
 
     public function render()
     {
-        return view('livewire.cart-page')->layout('layouts.app');
+        return view('livewire.cart-page', [
+            // Swaps the cart's demo-mode notice for the Stripe test-mode one.
+            'stripeEnabled' => app(StripeCheckoutService::class)->enabled(),
+        ])->layout('layouts.app');
     }
 }

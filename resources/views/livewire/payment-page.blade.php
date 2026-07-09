@@ -11,8 +11,8 @@
         <p class="font-mono font-bold text-gray-700 dark:text-gray-200 mb-6">{{ $order->order_number }}</p>
         <div class="inline-flex items-center gap-2 text-lg font-black text-brand-red mb-8">{{ __('Total') }}: RM {{ number_format($order->total_amount, 2) }}</div>
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href="{{ route('account') }}" wire:navigate class="btn btn-primary !rounded-xl uppercase tracking-widest font-black text-sm">{{ __('View My Orders') }}</a>
-            <a href="{{ route('products') }}" wire:navigate class="inline-flex items-center justify-center px-6 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 uppercase tracking-widest font-black text-sm hover:border-brand-red hover:text-brand-red transition-colors">{{ __('Continue Shopping') }}</a>
+            <a href="{{ route('account') }}" wire:navigate class="btn btn-primary btn-md btn-shine !rounded-xl uppercase tracking-widest font-black">{{ __('View My Orders') }}</a>
+            <a href="{{ route('products') }}" wire:navigate class="btn btn-secondary btn-md !rounded-xl uppercase tracking-widest font-black">{{ __('Continue Shopping') }}</a>
         </div>
     </div>
 
@@ -24,7 +24,7 @@
         </div>
         <h1 class="font-display text-3xl uppercase text-gray-900 dark:text-white mb-2">{{ __('Payment Time Expired') }}</h1>
         <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">{{ __('This order was cancelled because payment was not completed in time. The items have been released back to stock — please order again.') }}</p>
-        <a href="{{ route('products') }}" wire:navigate class="btn btn-primary !rounded-xl uppercase tracking-widest font-black text-sm">{{ __('Back to Products') }}</a>
+        <a href="{{ route('products') }}" wire:navigate class="btn btn-primary btn-md btn-shine !rounded-xl uppercase tracking-widest font-black">{{ __('Back to Products') }}</a>
     </div>
 
     {{-- ════════ AWAITING PAYMENT ════════ --}}
