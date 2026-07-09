@@ -162,8 +162,9 @@ class SettingResource extends Resource
                     ->limit(45)
                     ->tooltip(fn (string $state): ?string => mb_strlen($state) > 45 ? $state : null)
                     ->color(fn (string $state): string => match ($state) {
-                        'true' => 'success',
+                        'true', 'stripe' => 'success',
                         'false' => 'danger',
+                        'demo' => 'warning',
                         default => 'gray',
                     }),
                 TextColumn::make('updated_at')
@@ -176,15 +177,35 @@ class SettingResource extends Resource
                     ->label('Toggle')
                     ->icon(Heroicon::OutlinedArrowPath)
                     ->color('warning')
-                    ->visible(fn (Setting $record) => in_array($record->value, ['true', 'false']))
+                    ->visible(fn (Setting $record) => self::toggledValue($record) !== null)
                     ->requiresConfirmation()
                     ->modalHeading(fn (Setting $record) => "Toggle {$record->key}?")
-                    ->modalDescription(fn (Setting $record) => "Current: {$record->value} → ".($record->value === 'true' ? 'false' : 'true'))
+                    ->modalDescription(fn (Setting $record) => "Current: {$record->value} → ".self::toggledValue($record))
                     ->action(function (Setting $record) {
-                        $newValue = $record->value === 'true' ? 'false' : 'true';
-                        Setting::setValue($record->key, $newValue);
+                        if (($newValue = self::toggledValue($record)) !== null) {
+                            Setting::setValue($record->key, $newValue);
+                        }
                     }),
             ]);
+    }
+
+    /**
+     * The value the one-click Toggle action would switch this setting to
+     * (null = not a toggleable setting, so the action stays hidden).
+     * PAYMENT_MODE flips stripe ↔ demo; an unexpected value lands on the
+     * safe side ('demo'). Everything else toggles only between true/false.
+     */
+    private static function toggledValue(Setting $record): ?string
+    {
+        if ($record->key === 'PAYMENT_MODE') {
+            return $record->value === 'demo' ? 'stripe' : 'demo';
+        }
+
+        return match ($record->value) {
+            'true' => 'false',
+            'false' => 'true',
+            default => null,
+        };
     }
 
     public static function getPages(): array
