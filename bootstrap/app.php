@@ -1,9 +1,14 @@
 <?php
 
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\AssignTraceId;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SetLocale;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -29,28 +34,31 @@ return Application::configure(basePath: dirname(__DIR__))
         // still needed: the per-IP rate limits and login lockouts key on it.
         $middleware->trustProxies(
             at: env('TRUSTED_PROXIES', '*'),
-            headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR
-                | \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO
-                | \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT,
+            headers: Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_PROTO
+                | Request::HEADER_X_FORWARDED_PORT,
         );
         // Runs first so every log line in the request carries a trace id.
         $middleware->web(prepend: [
-            \App\Http\Middleware\AssignTraceId::class,
+            AssignTraceId::class,
         ]);
         $middleware->web(append: [
-            \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\SecurityHeaders::class,
+            SetLocale::class,
+            SecurityHeaders::class,
         ]);
         // The theme cookie is written by client JS (plaintext) and read in the
         // layout to render the right <html> class — exclude it from Laravel's
         // cookie encryption so the server can read it (prevents a light-mode
         // flash when switching language via Livewire.navigate).
         $middleware->encryptCookies(except: ['app_theme']);
+        // Stripe posts webhooks server-to-server with no session/CSRF token;
+        // the endpoint authenticates via the Stripe-Signature header instead.
+        $middleware->validateCsrfTokens(except: ['stripe/webhook']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (
-            \Illuminate\Auth\Access\AuthorizationException $e,
-            \Illuminate\Http\Request $request
+            AuthorizationException $e,
+            Request $request
         ) {
             if ($request->is('admin*') && auth()->check()) {
                 return redirect()->route('unauthorized');

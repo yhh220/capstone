@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -26,23 +25,24 @@ class Order extends Model
         'customer_name', 'customer_email', 'customer_phone',
         'shipping_address', 'subtotal', 'shipping_fee', 'total_amount',
         'status', 'payment_status', 'payment_method', 'notes', 'expires_at',
+        'stripe_session_id', 'stripe_payment_intent_id',
         'paid_at', 'shipped_at', 'delivered_at', 'cancelled_at',
         'cancellation_reason', 'refund_amount', 'refund_percentage', 'cancelled_by', 'refunded_at',
     ];
 
     protected $casts = [
         'shipping_address' => 'array',
-        'subtotal'         => 'decimal:2',
-        'shipping_fee'     => 'decimal:2',
-        'total_amount'     => 'decimal:2',
-        'expires_at'       => 'datetime',
-        'paid_at'          => 'datetime',
-        'shipped_at'       => 'datetime',
-        'delivered_at'     => 'datetime',
-        'cancelled_at'     => 'datetime',
-        'refund_amount'    => 'decimal:2',
-        'refund_percentage'=> 'decimal:2',
-        'refunded_at'      => 'datetime',
+        'subtotal' => 'decimal:2',
+        'shipping_fee' => 'decimal:2',
+        'total_amount' => 'decimal:2',
+        'expires_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'shipped_at' => 'datetime',
+        'delivered_at' => 'datetime',
+        'cancelled_at' => 'datetime',
+        'refund_amount' => 'decimal:2',
+        'refund_percentage' => 'decimal:2',
+        'refunded_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -88,7 +88,8 @@ class Order extends Model
             && $this->status !== 'cancelled';
     }
 
-    /** Awaiting payment but the 15-minute window has elapsed. */
+    /** Awaiting payment but the payment window has elapsed (15 min for demo
+     * orders; stretched to outlive the Stripe session when one is created). */
     public function isPaymentExpired(): bool
     {
         return $this->isAwaitingPayment()
@@ -141,7 +142,7 @@ class Order extends Model
             // Belt-and-suspenders: skip any number already taken (gaps / rare races)
             // so we never hand back a colliding order_number.
             do {
-                $number = 'ORD-' . $year . '-' . str_pad((string) $count, 5, '0', STR_PAD_LEFT);
+                $number = 'ORD-'.$year.'-'.str_pad((string) $count, 5, '0', STR_PAD_LEFT);
                 $count++;
             } while (static::withTrashed()->where('order_number', $number)->exists());
 
@@ -167,6 +168,7 @@ class Order extends Model
         if ($currentIndex === false || $currentIndex >= count($statuses) - 1) {
             return null;
         }
+
         return $statuses[$currentIndex + 1];
     }
 }

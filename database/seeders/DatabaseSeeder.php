@@ -3,9 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\Brand;
+use App\Models\Service;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -23,7 +25,7 @@ class DatabaseSeeder extends Seeder
         if (blank($email) || blank($password)) {
             throw new \RuntimeException(
                 'Set DEFAULT_ADMIN_EMAIL and DEFAULT_ADMIN_PASSWORD before seeding — '
-                . 'there is no default, to avoid a publicly-known owner account.'
+                .'there is no default, to avoid a publicly-known owner account.'
             );
         }
 
@@ -99,23 +101,24 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($services as $service) {
-            \App\Models\Service::firstOrCreate(
+            Service::firstOrCreate(
                 ['name' => $service['name']],
                 array_merge($service, ['is_active' => true])
             );
         }
 
-        \Illuminate\Support\Facades\DB::table('settings')->insertOrIgnore([
+        DB::table('settings')->insertOrIgnore([
             ['key' => 'ONLINE_SHOPPING_ENABLED', 'value' => 'false', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'BUSINESS_HOURS_START',    'value' => '09:00', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'BUSINESS_HOURS_END',      'value' => '18:00', 'created_at' => now(), 'updated_at' => now()],
-            ['key' => 'BUSINESS_CLOSED_WEEKDAYS','value' => '5',     'created_at' => now(), 'updated_at' => now()],
+            ['key' => 'BUSINESS_CLOSED_WEEKDAYS', 'value' => '5',     'created_at' => now(), 'updated_at' => now()],
             ['key' => 'BOOKING_SLOT_MINUTES',    'value' => '30',    'created_at' => now(), 'updated_at' => now()],
             ['key' => 'BACKORDER_DAYS',          'value' => '7',     'created_at' => now(), 'updated_at' => now()],
             ['key' => 'SHIPPING_FLAT_RATE',      'value' => '10',    'created_at' => now(), 'updated_at' => now()],
             ['key' => 'SHIPPING_FREE_THRESHOLD', 'value' => '300',   'created_at' => now(), 'updated_at' => now()],
             ['key' => 'CANCELLATION_FULL_REFUND_HOURS', 'value' => '24', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'CANCELLATION_FEE_PERCENT',       'value' => '10', 'created_at' => now(), 'updated_at' => now()],
+            ['key' => 'PAYMENT_MODE',                   'value' => 'demo',  'created_at' => now(), 'updated_at' => now()],
             ['key' => 'SITE_ANNOUNCEMENT_ENABLED',      'value' => 'false', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'SITE_ANNOUNCEMENT_TEXT',         'value' => 'Online shopping and sign-in are temporarily under maintenance. You can still browse our products and book an in-store appointment.', 'created_at' => now(), 'updated_at' => now()],
         ]);
@@ -139,10 +142,10 @@ class DatabaseSeeder extends Seeder
                 ['name' => $brand['name']],
                 [
                     'display_type' => $brand['logo'] ? 'image' : 'text',
-                    'logo'         => $brand['logo'],
-                    'website_url'  => $brand['website_url'],
-                    'sort_order'   => $brand['sort_order'],
-                    'is_active'    => true,
+                    'logo' => $brand['logo'],
+                    'website_url' => $brand['website_url'],
+                    'sort_order' => $brand['sort_order'],
+                    'is_active' => true,
                 ]
             );
         }

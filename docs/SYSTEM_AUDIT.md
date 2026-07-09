@@ -468,7 +468,7 @@ capstone/
 # 9. Known Gaps / TODO
 
 - **No `// TODO` / `// FIXME` / `// HACK` comments** found in `app/`, `resources/`, `config/`, `routes/` (clean scan).
-- **Payment gateway** — simulated only ([PaymentPage.php](../app/Livewire/PaymentPage.php)); no Stripe/iPay88/etc.
+- **Payment gateway** — hybrid: **Stripe Checkout in TEST mode** handles card / FPX / GrabPay behind the `PAYMENT_MODE` setting (default `demo` = fully simulated). Session creation + method mapping in [StripeCheckoutService](../app/Services/Payments/StripeCheckoutService.php); the idempotent settle step shared by all confirmation paths in [OrderPaymentService](../app/Services/Payments/OrderPaymentService.php); signature-verified webhook at `POST /stripe/webhook` ([StripeWebhookController](../app/Http/Controllers/StripeWebhookController.php), CSRF-exempt in `bootstrap/app.php`) plus a success-URL re-verification in [PaymentPage.php](../app/Livewire/PaymentPage.php). Touch 'n Go / ShopeePay / Boost stay simulated (unsupported by Stripe MY). Live keys are refused by design (`sk_test_` only) — production onboarding still outstanding.
 - **Chatbot** — rule-based (retrieval-based) knowledge-base matcher, not a live LLM.
 - **Microsoft OAuth** — code-complete but only enabled when keys are set; production uses Google only.
 - **File-storage persistence** — Render free tier has no persistent disk; admin-uploaded media after deploy must be committed to git to survive redeploys (mitigated by tracking `storage/app/public`).

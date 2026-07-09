@@ -82,9 +82,9 @@ return [
     // is set per-request in SocialAuthController via route(), so it always matches
     // the current host (register that exact URL in the provider's console).
     'google' => [
-        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect'      => env('GOOGLE_REDIRECT_URI'),
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
         // Refresh token for sending mail as winwincaraudio85@gmail.com via the
         // Gmail API — obtained once via /gmail-send/connect. Separate from the
         // login flow above; same OAuth client, different scope.
@@ -92,10 +92,21 @@ return [
     ],
 
     'microsoft' => [
-        'client_id'     => env('MICROSOFT_CLIENT_ID'),
+        'client_id' => env('MICROSOFT_CLIENT_ID'),
         'client_secret' => env('MICROSOFT_CLIENT_SECRET'),
-        'redirect'      => env('MICROSOFT_REDIRECT_URI'),
-        'tenant'        => env('MICROSOFT_TENANT', 'common'),
+        'redirect' => env('MICROSOFT_REDIRECT_URI'),
+        'tenant' => env('MICROSOFT_TENANT', 'common'),
+    ],
+
+    // ── Stripe (TEST mode) ────────────────────────────────────────────────
+    // Sandbox keys only — StripeCheckoutService::enabled() refuses any secret
+    // that is not an sk_test_ key, so a live key can never charge real money
+    // from this codebase. Whether Stripe is used at all is a runtime toggle:
+    // the PAYMENT_MODE setting ('demo' default / 'stripe') in the admin panel.
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
 ];

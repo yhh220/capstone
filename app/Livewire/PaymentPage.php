@@ -5,26 +5,35 @@ namespace App\Livewire;
 use App\Livewire\Concerns\NotifiesOwner;
 use App\Livewire\Concerns\SetsSeo;
 use App\Mail\OrderCancelledMail;
-use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
-use App\Models\Product;
+use App\Services\Payments\OrderPaymentService;
+use App\Services\Payments\StripeCheckoutService;
+use App\Support\Breadcrumbs;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
+use Stripe\Exception\ApiErrorException;
 
 class PaymentPage extends Component
 {
     use NotifiesOwner, SetsSeo;
 
-    #[\Livewire\Attributes\Locked]
+    #[Locked]
     public Order $order;
+
+    /**
+     * True while Stripe reports the session's payment still settling (FPX can
+     * confirm seconds after the success redirect). Display-only flag.
+     */
+    public bool $paymentProcessing = false;
 
     public function mount(string $orderNumber): void
     {
         if (! Auth::check()) {
             $this->redirect(route('login'), navigate: false);
+
             return;
         }
 
@@ -38,6 +47,18 @@ class PaymentPage extends Component
 
         $this->order = $found;
 
+        // Stripe success-URL return: verify the session server-side and settle
+        // if paid. This is what makes local demos work without webhook
+        // forwarding — the webhook remains the authoritative path in production.
+        // hash_equals against the STORED session id stops a customer from
+        // feeding someone else's (or a fabricated) session id into the lookup.
+        $sessionId = (string) request()->query('session_id', '');
+        if ($sessionId !== ''
+            && $this->order->isAwaitingPayment()
+            && hash_equals((string) $this->order->stripe_session_id, $sessionId)) {
+            $this->settleFromStripeReturn($sessionId);
+        }
+
         // Cancel + restock immediately if the window already lapsed.
         if ($this->order->isPaymentExpired()) {
             $this->expireOrder();
@@ -50,54 +71,47 @@ class PaymentPage extends Component
     }
 
     /**
-     * Demo payment — marks the order paid (no real money moves) and sends the
-     * confirmation email. Guarded against paying an expired/cancelled/paid order.
+     * Pay button. Stripe-eligible orders (PAYMENT_MODE=stripe + a card/FPX/
+     * GrabPay method) are redirected to a hosted Stripe Checkout session in
+     * test mode; everything else keeps the demo flip (no real money moves).
+     * Both paths settle through OrderPaymentService, so the paid transition
+     * and its confirmation email stay idempotent.
      */
     public function pay(): void
     {
-        // Layer 1 — atomic lock (works on the database cache store; Redis if set).
-        // If another in-flight request already holds it, this duplicate bails out.
-        $lock = Cache::lock('pay-order:' . $this->order->id, 10);
+        $stripe = app(StripeCheckoutService::class);
 
-        if (! $lock->get()) {
+        if ($stripe->enabled() && StripeCheckoutService::paymentMethodTypesFor($this->order->payment_method) !== null) {
+            if ($this->order->isPaymentExpired()) {
+                $this->expireOrder();
+
+                return;
+            }
+
+            try {
+                $session = $stripe->createSession($this->order);
+            } catch (ApiErrorException $e) {
+                // Runtime API failure ≠ misconfiguration: don't silently fall
+                // back to a demo flip (the customer believes they paid) — show
+                // an error and let them retry instead.
+                logger()->error('Stripe session creation failed for '.$this->order->order_number.': '.$e->getMessage());
+                session()->flash('payment_error', __('Could not reach the payment provider. Please try again.'));
+
+                return;
+            }
+
+            Breadcrumbs::push('payment', 'Redirecting to Stripe Checkout', ['order' => $this->order->order_number]);
+            $this->order->refresh(); // createSession stretched expires_at + stored the session id
+            $this->redirect($session->url); // server-driven redirect — CSP form-action 'self' stays intact
+
             return;
         }
 
-        try {
-            // Layer 2 — pessimistic row lock inside a transaction, and Layer 3 —
-            // an atomic conditional flip whose affected-row count is the single-
-            // winner / "unique-index" bottom guard: only the request that finds the
-            // order still 'pending' transitions it, so the email can fire only once.
-            $result = DB::transaction(function () {
-                $order = Order::where('id', $this->order->id)
-                    ->where('user_id', Auth::id())
-                    ->lockForUpdate()->first();
-
-                if (! $order || ! $order->isAwaitingPayment()) {
-                    return 'noop'; // already paid / cancelled
-                }
-                if ($order->isPaymentExpired()) {
-                    return 'expired';
-                }
-
-                $affected = Order::where('id', $order->id)
-                    ->where('payment_status', 'pending')
-                    ->where('status', '!=', 'cancelled')
-                    ->update([
-                        'payment_status' => 'paid',
-                        'status'         => 'processing',
-                        'expires_at'     => null,
-                        'paid_at'        => now(),
-                    ]);
-
-                return $affected === 1 ? 'paid' : 'noop';
-            });
-        } finally {
-            $lock->release();
-        }
+        $result = app(OrderPaymentService::class)->markPaid($this->order, 'demo', causer: Auth::user());
 
         if ($result === 'expired') {
             $this->expireOrder();
+
             return;
         }
 
@@ -107,24 +121,6 @@ class PaymentPage extends Component
             return; // a concurrent request already settled this order
         }
 
-        \App\Support\Breadcrumbs::push('payment', 'Order paid', ['order' => $this->order->order_number]);
-
-        // The atomic builder UPDATE bypasses Eloquent model events, so spatie/activitylog
-        // would not see this state change. Log it explicitly so the audit trail reflects
-        // the most security-sensitive transition in the system.
-        activity('order')
-            ->performedOn($this->order)
-            ->causedBy(Auth::user())
-            ->withProperties(['payment_status' => 'paid', 'status' => 'processing'])
-            ->log('paid');
-
-        try {
-            \App\Support\Breadcrumbs::push('mail', 'Sending order confirmation');
-            Mail::to($this->order->customer_email)->send(new OrderConfirmationMail($this->order->fresh('items')));
-        } catch (\Throwable $e) {
-            logger()->error('Order confirmation email failed: ' . $e->getMessage());
-        }
-
         session()->flash('payment_success', __('Payment successful! Your order is confirmed.'));
 
         // The awaiting-payment view (countdown + items + notice + button) is much
@@ -132,6 +128,39 @@ class PaymentPage extends Component
         // stays at its old scroll offset and the success card ends up off-screen
         // above the fold, looking like it landed in the footer.
         $this->dispatch('scroll-top');
+    }
+
+    /** Settle after returning from Stripe with ?session_id= (see mount()). */
+    private function settleFromStripeReturn(string $sessionId): void
+    {
+        try {
+            $session = app(StripeCheckoutService::class)->retrieveSession($sessionId);
+        } catch (\Throwable $e) {
+            logger()->error('Stripe return verification failed for '.$this->order->order_number.': '.$e->getMessage());
+
+            return; // leave the order pending — the webhook will settle it
+        }
+
+        if ($session->payment_status !== 'paid') {
+            // FPX/GrabPay can redirect back before the payment finishes settling.
+            $this->paymentProcessing = true;
+
+            return;
+        }
+
+        $result = app(OrderPaymentService::class)->markPaid(
+            $this->order,
+            source: 'stripe_return',
+            paymentIntentId: is_string($session->payment_intent) ? $session->payment_intent : null,
+            causer: Auth::user(),
+            allowExpired: true, // money has moved — settle even past the window
+        );
+
+        $this->order->refresh();
+
+        if ($result === 'paid') {
+            session()->flash('payment_success', __('Payment successful! Your order is confirmed.'));
+        }
     }
 
     /**
@@ -159,9 +188,9 @@ class PaymentPage extends Component
 
             $order->restockItems();
             $order->update([
-                'status'             => 'cancelled',
-                'cancelled_by'       => 'system',
-                'cancellation_reason'=> 'Order expired — payment not completed within 15 minutes',
+                'status' => 'cancelled',
+                'cancelled_by' => 'system',
+                'cancellation_reason' => 'Order expired — payment not completed in time',
             ]);
 
             return $order;
@@ -177,18 +206,18 @@ class PaymentPage extends Component
                     Mail::to($expired->customer_email)->send(new OrderCancelledMail($expired));
                 }
             } catch (\Throwable $e) {
-                logger()->error('Order expiry email failed: ' . $e->getMessage());
+                logger()->error('Order expiry email failed: '.$e->getMessage());
             }
 
             $this->notifyOwner(
                 'Order auto-expired (not paid)',
                 [
-                    'Order'    => $expired->order_number,
+                    'Order' => $expired->order_number,
                     'Customer' => $expired->customer_name,
-                    'Total'    => 'RM ' . number_format($expired->total_amount, 2),
-                    'Reason'   => 'Payment timer ran out',
+                    'Total' => 'RM '.number_format($expired->total_amount, 2),
+                    'Reason' => 'Payment timer ran out',
                 ],
-                url('/admin/orders/' . $expired->getKey() . '/edit'),
+                url('/admin/orders/'.$expired->getKey().'/edit'),
                 'View order',
             );
         }
@@ -196,6 +225,12 @@ class PaymentPage extends Component
 
     public function render()
     {
-        return view('livewire.payment-page')->layout('layouts.app');
+        $stripe = app(StripeCheckoutService::class);
+
+        return view('livewire.payment-page', [
+            // Drives the pay-button copy + notice: Stripe test-mode vs demo.
+            'isStripeCheckout' => $stripe->enabled()
+                && StripeCheckoutService::paymentMethodTypesFor($this->order->payment_method) !== null,
+        ])->layout('layouts.app');
     }
 }

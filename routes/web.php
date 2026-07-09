@@ -1,31 +1,34 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-use App\Livewire\HomePage;
-use App\Livewire\ProductsPage;
-use App\Livewire\ProductDetail;
-use App\Livewire\AboutPage;
-use App\Livewire\ContactPage;
-use App\Livewire\ServicesPage;
-use App\Livewire\BookingForm;
-use App\Livewire\BookingTracker;
-use App\Livewire\FaqPage;
-use App\Livewire\CartPage;
-use App\Livewire\CheckoutPage;
-use App\Livewire\OrderTracker;
-use App\Livewire\PrivacyPolicyPage;
-use App\Livewire\ProfilePage;
-use App\Livewire\TermsOfServicePage;
-use App\Livewire\CancellationRefundPolicyPage;
-use App\Livewire\MyAccountPage;
-use App\Livewire\PaymentPage;
-use App\Livewire\Auth\UserLogin;
-use App\Livewire\Auth\ForgotPassword;
+use App\Http\Controllers\GmailSendSetupController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\SocialAuthController;
-use App\Http\Controllers\GmailSendSetupController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Middleware\ShoppingEnabled;
+use App\Livewire\AboutPage;
+use App\Livewire\Auth\ForgotPassword;
+use App\Livewire\Auth\UserLogin;
+use App\Livewire\BookingForm;
+use App\Livewire\BookingTracker;
+use App\Livewire\CancellationRefundPolicyPage;
+use App\Livewire\CartPage;
+use App\Livewire\CheckoutPage;
+use App\Livewire\ContactPage;
+use App\Livewire\FaqPage;
+use App\Livewire\HomePage;
+use App\Livewire\MyAccountPage;
+use App\Livewire\OrderTracker;
+use App\Livewire\PaymentPage;
+use App\Livewire\PrivacyPolicyPage;
+use App\Livewire\ProductDetail;
+use App\Livewire\ProductsPage;
+use App\Livewire\ProfilePage;
+use App\Livewire\ServicesPage;
+use App\Livewire\TermsOfServicePage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes ─────────────────────────────────────────────
 Route::get('/', HomePage::class)->name('home');
@@ -64,7 +67,7 @@ Route::middleware(['auth', ShoppingEnabled::class])->group(function () {
 });
 
 // ─── Language Switcher ─────────────────────────────────────────
-Route::get('/lang/{locale}', function (string $locale, \Illuminate\Http\Request $request) {
+Route::get('/lang/{locale}', function (string $locale, Request $request) {
     if (in_array($locale, ['en', 'ms', 'zh'], true)) {
         session(['locale' => $locale]);
     }
@@ -110,9 +113,10 @@ Route::post('/logout', function () {
 // ─── Sitemap ───────────────────────────────────────────────────
 Route::get('/sitemap.xml', function () {
     $path = public_path('sitemap.xml');
-    if (!file_exists($path)) {
+    if (! file_exists($path)) {
         abort(404);
     }
+
     return response()->file($path, ['Content-Type' => 'application/xml']);
 })->name('sitemap');
 
@@ -123,6 +127,15 @@ Route::get('/unauthorized', fn () => view('errors.unauthorized'))->name('unautho
 // Admin dashboard is now powered by Filament and auto-registered
 // at /admin via AdminPanelProvider. No manual routes needed.
 
+// ─── Stripe webhook ────────────────────────────────────────────
+// Server-to-server payment confirmations from Stripe. Signature-verified in
+// the controller and CSRF-exempt (bootstrap/app.php). Deliberately OUTSIDE the
+// auth/ShoppingEnabled groups: a payment completing seconds after the owner
+// closes the shop must still reach us so the manual-refund alert can fire.
+Route::post('/stripe/webhook', StripeWebhookController::class)
+    ->middleware('throttle:60,1')
+    ->name('stripe.webhook');
+
 // ─── Scheduler trigger (for hosts with no native cron, e.g. Render free tier) ──
 // An external pinger (cron-job.org) hits this every minute instead of a real
 // crontab running `schedule:run`. Token-gated so it can't be used to spam-run
@@ -132,7 +145,7 @@ Route::get('/cron/run-schedule/{token}', function (string $token) {
         abort(403);
     }
 
-    \Illuminate\Support\Facades\Artisan::call('schedule:run');
+    Artisan::call('schedule:run');
 
     return response('OK', 200);
 })->name('cron.run-schedule');

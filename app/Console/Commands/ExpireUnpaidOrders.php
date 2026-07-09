@@ -37,9 +37,9 @@ class ExpireUnpaidOrders extends Command
 
                 $order->restockItems();
                 $order->update([
-                    'status'              => 'cancelled',
-                    'cancelled_by'        => 'system',
-                    'cancellation_reason' => 'Order expired — payment not completed within 15 minutes',
+                    'status' => 'cancelled',
+                    'cancelled_by' => 'system',
+                    'cancellation_reason' => 'Order expired — payment not completed in time',
                 ]);
                 $count++;
 
@@ -56,7 +56,7 @@ class ExpireUnpaidOrders extends Command
                 try {
                     Mail::to($expired->customer_email)->send(new OrderCancelledMail($expired));
                 } catch (\Throwable $e) {
-                    logger()->error("Order expiry email failed for {$expired->order_number}: " . $e->getMessage());
+                    logger()->error("Order expiry email failed for {$expired->order_number}: ".$e->getMessage());
                 }
             }
 
@@ -66,16 +66,16 @@ class ExpireUnpaidOrders extends Command
                     Mail::to($ownerEmail)->send(new OwnerAlertMail(
                         'Order auto-expired (not paid)',
                         [
-                            'Order'    => $expired->order_number,
+                            'Order' => $expired->order_number,
                             'Customer' => $expired->customer_name,
-                            'Total'    => 'RM ' . number_format((float) $expired->total_amount, 2),
-                            'Reason'   => 'Payment timer ran out',
+                            'Total' => 'RM '.number_format((float) $expired->total_amount, 2),
+                            'Reason' => 'Payment timer ran out',
                         ],
-                        url('/admin/orders/' . $expired->getKey() . '/edit'),
+                        url('/admin/orders/'.$expired->getKey().'/edit'),
                         'View order',
                     ));
                 } catch (\Throwable $e) {
-                    logger()->error("Order expiry owner alert failed for {$expired->order_number}: " . $e->getMessage());
+                    logger()->error("Order expiry owner alert failed for {$expired->order_number}: ".$e->getMessage());
                 }
             }
         }

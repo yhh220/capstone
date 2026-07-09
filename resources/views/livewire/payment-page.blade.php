@@ -55,7 +55,16 @@
             <div class="flex justify-between pt-2 mt-1 border-t border-gray-100 dark:border-gray-700 font-black text-lg"><span class="text-gray-800 dark:text-white">{{ __('Total') }}</span><span class="text-brand-red tabular-nums">RM {{ number_format($order->total_amount, 2) }}</span></div>
         </div>
 
-        {{-- Demo / testing notice --}}
+        {{-- Payment-mode notice: Stripe test mode vs pure demo --}}
+        @if($isStripeCheckout)
+        <div class="rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 px-4 py-3 text-indigo-700 dark:text-indigo-300">
+            <div class="flex items-center gap-2 text-sm font-bold">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                {{ __('STRIPE TEST MODE') }}
+            </div>
+            <div class="mt-1 text-xs text-indigo-700/80 dark:text-indigo-300/80">{{ __('You will be redirected to Stripe to complete payment securely. Test payments only — no real money is charged.') }}</div>
+        </div>
+        @else
         <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 px-4 py-3 text-amber-700 dark:text-amber-300">
             <div class="flex items-center gap-2 text-sm font-bold">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
@@ -63,6 +72,21 @@
             </div>
             <div class="mt-1 text-xs text-amber-700/80 dark:text-amber-300/80">{{ __('This is a prototype — no real payment is charged and no goods are shipped.') }}</div>
         </div>
+        @endif
+
+        {{-- Stripe reported the payment still settling (FPX/GrabPay can lag the redirect) --}}
+        @if($paymentProcessing)
+        <div class="rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/40 px-4 py-3 text-sm text-blue-700 dark:text-blue-300">
+            {{ __('Your payment is being confirmed by the bank. This page will update once it clears — you can also check My Account shortly.') }}
+        </div>
+        @endif
+
+        {{-- Stripe session creation failed --}}
+        @if(session('payment_error'))
+        <div class="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 px-4 py-3 text-sm font-semibold text-red-700 dark:text-red-300">
+            {{ session('payment_error') }}
+        </div>
+        @endif
 
         {{-- Pay — instant client-side submit lock (x-bind:disabled) on top of the
              wire:loading disable, so a double-click can't fire pay() twice even
@@ -72,7 +96,7 @@
                 class="btn btn-primary btn-shine w-full !py-4 !rounded-xl uppercase tracking-widest font-black disabled:opacity-80 disabled:cursor-not-allowed">
             <span x-show="!paying" class="flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                {{ __('Pay Now') }} · RM {{ number_format($order->total_amount, 2) }}
+                {{ $isStripeCheckout ? __('Pay with Stripe') : __('Pay Now') }} · RM {{ number_format($order->total_amount, 2) }}
             </span>
             <span x-show="paying" class="flex items-center justify-center gap-2">
                 <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
