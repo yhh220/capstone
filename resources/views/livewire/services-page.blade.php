@@ -229,6 +229,10 @@
                 Alpine.data('serviceRoad', () => ({
                     activeStep: 0,
                     len: 0,
+                    target: 0,   // arc length the scroll position asks for
+                    cur: -1,     // arc length the car is actually at (-1 = snap on first frame)
+                    rafId: null,
+                    lastTs: null,
 
                     init() {
                         // Layout must settle (fonts, AOS offsets, images) before the
@@ -239,11 +243,45 @@
                         window.addEventListener('load', this.onLoad);
                         this.ro = new ResizeObserver(() => this.build());
                         this.ro.observe(this.$refs.flowTrack);
+                        // Scroll events arrive in coarse steps (a mouse wheel moves
+                        // ~100px per notch), so writing the car's position straight
+                        // from them made it hop stop-motion-style. The scroll handler
+                        // only sets a target; this rAF loop eases the car toward it
+                        // every frame — smooth, and it reads like braking/accelerating.
+                        this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                        this.rafId = requestAnimationFrame((ts) => this.animate(ts));
                     },
 
                     destroy() {
                         window.removeEventListener('load', this.onLoad);
                         this.ro?.disconnect();
+                        if (this.rafId !== null) cancelAnimationFrame(this.rafId);
+                    },
+
+                    animate(ts) {
+                        if (!this.$refs.flowTrack.isConnected) { this.rafId = null; return; }
+                        this.rafId = requestAnimationFrame((t) => this.animate(t));
+                        if (!this.len) return;
+
+                        const dt = this.lastTs === null ? 0 : Math.min((ts - this.lastTs) / 1000, 0.1);
+                        this.lastTs = ts;
+
+                        if (this.cur < 0 || this.reduced) {
+                            this.cur = this.target; // first frame / reduced motion: no chase
+                        } else {
+                            this.cur += (this.target - this.cur) * Math.min(dt * 7, 1);
+                            if (Math.abs(this.target - this.cur) < 0.15) this.cur = this.target;
+                        }
+
+                        // Trail and car are driven by the SAME arc length — in lockstep.
+                        this.$refs.trail.style.strokeDashoffset = this.len - this.cur;
+                        const p = this.$refs.casing.getPointAtLength(this.cur);
+                        const q = this.$refs.casing.getPointAtLength(Math.min(this.len, this.cur + 1));
+                        // At the very end q ≈ p; keep the last heading (parked straight).
+                        const ang = (q.y === p.y && q.x === p.x) ? 0 : Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI - 90;
+                        // -15/-25 centres the 30x50 car on the path point; rotation then
+                        // spins around the element's own centre, i.e. that same point.
+                        this.$refs.car.style.transform = `translate(${p.x - 15}px, ${p.y - 25}px) rotate(${ang}deg)`;
                     },
 
                     // Build one smooth serpentine path THROUGH every stop, ending in
@@ -299,6 +337,7 @@
                         this.onScroll();
                     },
 
+                    // Scroll only sets the target — the rAF loop above does the driving.
                     onScroll() {
                         if (!this.len || !this.samples) return;
                         const track = this.$refs.flowTrack;
@@ -313,17 +352,7 @@
                             const m = (lo + hi) >> 1;
                             if (this.samples[m].y < yTarget) lo = m + 1; else hi = m;
                         }
-                        const at = this.samples[lo].l;
-
-                        // Trail and car are driven by the SAME arc length — in lockstep.
-                        this.$refs.trail.style.strokeDashoffset = this.len - at;
-                        const p = this.$refs.casing.getPointAtLength(at);
-                        const q = this.$refs.casing.getPointAtLength(Math.min(this.len, at + 1));
-                        // At the very end q ≈ p; keep the last heading (parked straight).
-                        const ang = (q.y === p.y && q.x === p.x) ? 0 : Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI - 90;
-                        // -15/-25 centres the 30x50 car on the path point; rotation then
-                        // spins around the element's own centre, i.e. that same point.
-                        this.$refs.car.style.transform = `translate(${p.x - 15}px, ${p.y - 25}px) rotate(${ang}deg)`;
+                        this.target = this.samples[lo].l;
 
                         // Stops light up as the car passes (same rule as before).
                         let cur = 0;
