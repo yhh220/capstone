@@ -68,27 +68,29 @@
                      with a car that follows it (and a brand-red trail) as you
                      scroll. The stops light up when the car passes them. --}}
                 {{-- pb reserves the tarmac at the end of the road for the parking bay --}}
-                <div class="relative pb-36 md:pb-40"
+                <div class="relative pb-44 md:pb-48"
                      x-data="serviceRoad"
                      x-ref="flowTrack"
                      @scroll.window.passive="onScroll()">
 
-                    {{-- The road: asphalt casing + dashed centre line + travelled trail + parking bay --}}
+                    {{-- The road: parking bay first so the tarmac and trail draw OVER
+                         its entrance — the bay must never cover the road's run-out. --}}
                     <svg class="absolute inset-0 w-full h-full z-0 pointer-events-none" aria-hidden="true">
-                        <path x-ref="casing" class="svc-road-casing" fill="none"/>
-                        <path x-ref="dash" class="svc-road-dash" fill="none"/>
-                        {{-- The journey's end: a marked parking bay the car pulls into --}}
                         <g x-ref="bay" style="display: none">
                             <rect x="-24" y="-38" width="48" height="76" rx="9" class="svc-park-bay"/>
                             <text x="0" y="27" text-anchor="middle" dominant-baseline="central" class="svc-park-p">P</text>
                         </g>
+                        <path x-ref="casing" class="svc-road-casing" fill="none"/>
+                        <path x-ref="dash" class="svc-road-dash" fill="none"/>
                         <path x-ref="trail" class="svc-road-trail" fill="none"/>
                     </svg>
 
-                    {{-- The car (top view, nose down the page) that drives the road --}}
-                    <div x-ref="car" class="absolute top-0 left-0 z-30 -ml-[15px] -mt-[25px] pointer-events-none"
-                         style="transform: translate(-9999px, -9999px); filter: drop-shadow(0 6px 8px rgba(0,0,0,0.35));">
-                        <svg width="30" height="50" viewBox="0 0 34 56" aria-hidden="true">
+                    {{-- The car (top view, nose down the page) that drives the road.
+                         Centring lives in the transform maths (not margin classes),
+                         so the anchor can never drift off the path. --}}
+                    <div x-ref="car" class="absolute top-0 left-0 z-30 pointer-events-none"
+                         style="width: 30px; height: 50px; transform: translate(-9999px, -9999px); filter: drop-shadow(0 6px 8px rgba(0,0,0,0.35));">
+                        <svg class="block" width="30" height="50" viewBox="0 0 34 56" aria-hidden="true">
                             <rect x="0.5" y="9" width="5" height="11" rx="2.5" fill="#111827" opacity="0.9"/>
                             <rect x="28.5" y="9" width="5" height="11" rx="2.5" fill="#111827" opacity="0.9"/>
                             <rect x="0.5" y="36" width="5" height="11" rx="2.5" fill="#111827" opacity="0.9"/>
@@ -260,14 +262,16 @@
                             return { x: r.left + r.width / 2 - box.left, y: r.top + r.height / 2 - box.top };
                         });
                         // The bay sits in the reserved bottom padding, on the centre axis.
-                        const bayAt = { x: stops[stops.length - 1].x, y: box.height - 52 };
+                        const bayAt = { x: stops[stops.length - 1].x, y: box.height - 60 };
                         const pts = [{ x: stops[0].x, y: 0 }, ...stops, bayAt];
 
                         const amp = window.innerWidth >= 768 ? 56 : 9;
                         let d = `M ${pts[0].x} ${pts[0].y}`;
                         for (let i = 1; i < pts.length; i++) {
                             const a = pts[i - 1], b = pts[i], dir = i % 2 ? 1 : -1;
-                            const bow = Math.min(amp, (b.y - a.y) * 0.35) * dir;
+                            // Gentler sweep into the bay so the car parks near-straight.
+                            const scale = i === pts.length - 1 ? 0.18 : 0.35;
+                            const bow = Math.min(amp, (b.y - a.y) * scale) * dir;
                             const my = (a.y + b.y) / 2;
                             d += ` C ${a.x + bow} ${my}, ${b.x + bow} ${my}, ${b.x} ${b.y}`;
                         }
@@ -317,7 +321,9 @@
                         const q = this.$refs.casing.getPointAtLength(Math.min(this.len, at + 1));
                         // At the very end q ≈ p; keep the last heading (parked straight).
                         const ang = (q.y === p.y && q.x === p.x) ? 0 : Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI - 90;
-                        this.$refs.car.style.transform = `translate(${p.x}px, ${p.y}px) rotate(${ang}deg)`;
+                        // -15/-25 centres the 30x50 car on the path point; rotation then
+                        // spins around the element's own centre, i.e. that same point.
+                        this.$refs.car.style.transform = `translate(${p.x - 15}px, ${p.y - 25}px) rotate(${ang}deg)`;
 
                         // Stops light up as the car passes (same rule as before).
                         let cur = 0;
