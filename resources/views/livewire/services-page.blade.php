@@ -67,15 +67,21 @@
                      S-curve built at runtime through the real node positions,
                      with a car that follows it (and a brand-red trail) as you
                      scroll. The stops light up when the car passes them. --}}
-                <div class="relative"
+                {{-- pb reserves the tarmac at the end of the road for the parking bay --}}
+                <div class="relative pb-36 md:pb-40"
                      x-data="serviceRoad"
                      x-ref="flowTrack"
                      @scroll.window.passive="onScroll()">
 
-                    {{-- The road: asphalt casing + dashed centre line + travelled trail --}}
+                    {{-- The road: asphalt casing + dashed centre line + travelled trail + parking bay --}}
                     <svg class="absolute inset-0 w-full h-full z-0 pointer-events-none" aria-hidden="true">
                         <path x-ref="casing" class="svc-road-casing" fill="none"/>
                         <path x-ref="dash" class="svc-road-dash" fill="none"/>
+                        {{-- The journey's end: a marked parking bay the car pulls into --}}
+                        <g x-ref="bay" style="display: none">
+                            <rect x="-24" y="-38" width="48" height="76" rx="9" class="svc-park-bay"/>
+                            <text x="0" y="27" text-anchor="middle" dominant-baseline="central" class="svc-park-p">P</text>
+                        </g>
                         <path x-ref="trail" class="svc-road-trail" fill="none"/>
                     </svg>
 
@@ -167,15 +173,32 @@
             }
             .dark .svc-road-dash { stroke: #d1d5db; }
             /* The travelled part of the route — same brand-red glow the old
-               straight track used, drawn over the centre line behind the car. */
+               straight track used, drawn over the centre line behind the car.
+               NO transition: the trail and the car share one arc length per
+               frame, and any easing here would visibly lag it off the car. */
             .svc-road-trail {
                 stroke: rgb(var(--brand-red-rgb));
                 stroke-width: 4;
                 stroke-linecap: round;
                 filter: drop-shadow(0 0 6px rgba(var(--brand-red-rgb), 0.5));
-                transition: stroke-dashoffset 0.12s ease-out;
                 will-change: stroke-dashoffset;
             }
+            /* Parking bay at the end of the road */
+            .svc-park-bay {
+                fill: #374151;
+                stroke: #f9fafb;
+                stroke-width: 2.5;
+                stroke-dasharray: 8 6;
+            }
+            .dark .svc-park-bay { fill: #4b5563; stroke: #d1d5db; }
+            .svc-park-p {
+                fill: #f9fafb;
+                font-family: ui-sans-serif, system-ui, sans-serif;
+                font-size: 17px;
+                font-weight: 900;
+                opacity: 0.9;
+            }
+            .dark .svc-park-p { fill: #d1d5db; }
             @media (max-width: 767px) {
                 .svc-road-casing { stroke-width: 15; }
                 .svc-road-dash { stroke-width: 2; stroke-dasharray: 7 10; }
@@ -195,7 +218,6 @@
             .svc-blob:hover, .svc-blob-alt:hover { animation-duration: 3s; filter: brightness(1.04); }
             @media (prefers-reduced-motion: reduce) {
                 .svc-blob, .svc-blob-alt { animation: none; border-radius: 1.75rem; }
-                .svc-road-trail { transition: none; }
             }
         </style>
 
@@ -222,10 +244,11 @@
                         this.ro?.disconnect();
                     },
 
-                    // Build one smooth serpentine path THROUGH every stop: cubic
-                    // segments whose control points bulge to alternating sides at
-                    // each gap's vertical midpoint. Mirrored control points give
-                    // tangent continuity, so the road never kinks at a stop.
+                    // Build one smooth serpentine path THROUGH every stop, ending in
+                    // the parking bay: cubic segments whose control points bulge to
+                    // alternating sides at each gap's vertical midpoint. The bulge is
+                    // capped relative to the gap's height so a short final gap can
+                    // never fold the road into a hairpin.
                     build() {
                         const track = this.$refs.flowTrack;
                         const nodes = track.querySelectorAll('.step-node');
@@ -236,41 +259,64 @@
                             const r = n.getBoundingClientRect();
                             return { x: r.left + r.width / 2 - box.left, y: r.top + r.height / 2 - box.top };
                         });
-                        const pts = [
-                            { x: stops[0].x, y: 0 },
-                            ...stops,
-                            { x: stops[stops.length - 1].x, y: box.height },
-                        ];
+                        // The bay sits in the reserved bottom padding, on the centre axis.
+                        const bayAt = { x: stops[stops.length - 1].x, y: box.height - 52 };
+                        const pts = [{ x: stops[0].x, y: 0 }, ...stops, bayAt];
 
                         const amp = window.innerWidth >= 768 ? 56 : 9;
                         let d = `M ${pts[0].x} ${pts[0].y}`;
                         for (let i = 1; i < pts.length; i++) {
                             const a = pts[i - 1], b = pts[i], dir = i % 2 ? 1 : -1;
+                            const bow = Math.min(amp, (b.y - a.y) * 0.35) * dir;
                             const my = (a.y + b.y) / 2;
-                            d += ` C ${a.x + amp * dir} ${my}, ${b.x + amp * dir} ${my}, ${b.x} ${b.y}`;
+                            d += ` C ${a.x + bow} ${my}, ${b.x + bow} ${my}, ${b.x} ${b.y}`;
                         }
 
                         ['casing', 'dash', 'trail'].forEach((k) => this.$refs[k].setAttribute('d', d));
-                        this.len = this.$refs.trail.getTotalLength();
+                        this.len = this.$refs.casing.getTotalLength();
                         this.$refs.trail.style.strokeDasharray = this.len;
+
+                        // Park the bay markings at the road's end.
+                        this.$refs.bay.setAttribute('transform', `translate(${bayAt.x}, ${bayAt.y})`);
+                        this.$refs.bay.style.display = 'block';
+
+                        // Pre-sample the path so the car can be placed by SCREEN HEIGHT.
+                        // Progress-by-arc-length drifted: curvy stretches pack more road
+                        // per pixel of page, so the car slid ahead of / behind the line
+                        // the stops light up on. Mapping the 60%-viewport line to the
+                        // path point AT that height keeps car, trail and stops in step.
+                        this.samples = [];
+                        const steps = Math.max(64, Math.round(this.len / 6));
+                        for (let i = 0; i <= steps; i++) {
+                            const l = (this.len * i) / steps;
+                            this.samples.push({ l, y: this.$refs.casing.getPointAtLength(l).y });
+                        }
+
                         this.onScroll();
                     },
 
                     onScroll() {
-                        if (!this.len) return;
+                        if (!this.len || !this.samples) return;
                         const track = this.$refs.flowTrack;
                         const r = track.getBoundingClientRect();
                         const mid = window.innerHeight * 0.6;
-                        const progress = Math.max(0, Math.min(1, (mid - r.top) / r.height));
+                        const yTarget = Math.max(0, Math.min(r.height, mid - r.top));
 
-                        // Red trail follows the car exactly (dashoffset trick).
-                        this.$refs.trail.style.strokeDashoffset = this.len * (1 - progress);
+                        // Binary-search the arc length whose road point sits at that
+                        // height (y grows monotonically down our path).
+                        let lo = 0, hi = this.samples.length - 1;
+                        while (lo < hi) {
+                            const m = (lo + hi) >> 1;
+                            if (this.samples[m].y < yTarget) lo = m + 1; else hi = m;
+                        }
+                        const at = this.samples[lo].l;
 
-                        // Car sits on the path, nose pointing along the tangent.
-                        const at = this.len * progress;
+                        // Trail and car are driven by the SAME arc length — in lockstep.
+                        this.$refs.trail.style.strokeDashoffset = this.len - at;
                         const p = this.$refs.casing.getPointAtLength(at);
                         const q = this.$refs.casing.getPointAtLength(Math.min(this.len, at + 1));
-                        const ang = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI - 90;
+                        // At the very end q ≈ p; keep the last heading (parked straight).
+                        const ang = (q.y === p.y && q.x === p.x) ? 0 : Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI - 90;
                         this.$refs.car.style.transform = `translate(${p.x}px, ${p.y}px) rotate(${ang}deg)`;
 
                         // Stops light up as the car passes (same rule as before).
