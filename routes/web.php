@@ -137,7 +137,7 @@ Route::post('/stripe/webhook', StripeWebhookController::class)
     ->name('stripe.webhook');
 
 // ─── Scheduler trigger (for hosts with no native cron, e.g. Render free tier) ──
-// An external pinger (cron-job.org) hits this every minute instead of a real
+// An external pinger (cron-job.org) hits this every ten minutes instead of a real
 // crontab running `schedule:run`. Token-gated so it can't be used to spam-run
 // scheduled jobs (order expiry, reminder emails) from a guessed public URL.
 Route::get('/cron/run-schedule/{token}', function (string $token) {
