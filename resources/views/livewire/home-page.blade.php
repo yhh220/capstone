@@ -522,7 +522,9 @@
             // px per SECOND, applied against real elapsed time — a per-frame
             // increment would tie the scroll speed to the display refresh rate
             // (a 120Hz iPhone scrolled exactly twice as fast as a 60Hz monitor).
-            const BASE_SPEED = 11;
+            // 22 matches what high-refresh displays showed before the fix — the
+            // pace the owner preferred — now identical on every screen.
+            const BASE_SPEED = 22;
             let pos = 0, speed = BASE_SPEED, target = BASE_SPEED, halfW = 0, lastTs = null;
             // Measure the width of one copy and (re)start one copy to the left so
             // the rightward scroll always has content to reveal. Logos are images
