@@ -620,7 +620,11 @@
                         [route('about'),    __('About'),    request()->routeIs('about')],
                         [route('contact'),  __('Contact'),  request()->routeIs('contact')],
                     ] as [$href, $label, $active])
-                    <a href="{{ $href }}"
+                    {{-- wire:navigate.hover: soft-morph instead of a full reload
+                         (the whole layout's JS re-inits off livewire:navigated
+                         already), and prefetch on hover so the click lands on an
+                         already-fetched page — the nav round-trip disappears. --}}
+                    <a href="{{ $href }}" wire:navigate.hover
                        class="relative px-2.5 py-1.5 lg:px-3 lg:py-2 xl:px-4 rounded-full text-xs lg:text-sm font-bold transition-all duration-300 ease-out whitespace-nowrap overflow-hidden
                               {{ $active ? 'text-brand-red bg-red-50 dark:bg-red-900/10' : 'text-gray-600 dark:text-gray-300 hover:text-brand-red after:content-[\'\'] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-0 hover:after:w-3/4 after:h-[2px] after:bg-brand-red after:transition-all after:duration-300' }}"
                        @if($active) aria-current="page" @endif>
@@ -853,7 +857,7 @@
                     [route('about'),    __('About'),    request()->routeIs('about')],
                     [route('contact'),  __('Contact'),  request()->routeIs('contact')],
                 ] as [$href, $label, $active])
-                <a href="{{ $href }}"
+                <a href="{{ $href }}" wire:navigate
                    role="menuitem"
                    class="block py-2.5 px-3 rounded-lg font-medium transition-colors {{ $active ? 'text-brand-red bg-red-50 dark:bg-red-900/20 active:bg-red-100 dark:active:bg-red-900/40' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-brand-red active:bg-gray-100 dark:active:bg-gray-600' }}"
                    @if($active) aria-current="page" @endif>
@@ -1104,12 +1108,12 @@
                 <div>
                     <h4 class="font-bold text-white mb-4 uppercase text-sm tracking-wider">{{ __('Quick Links') }}</h4>
                     <ul class="space-y-2 text-sm" role="list">
-                        <li><a href="{{ route('home') }}"     class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Home') }}</a></li>
-                        <li><a href="{{ route('products') }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Products') }}</a></li>
-                        <li><a href="{{ route('services') }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Services') }}</a></li>
-                        <li><a href="{{ route('booking') }}"  class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Book Appointment') }}</a></li>
-                        <li><a href="{{ route('about') }}"    class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('About Us') }}</a></li>
-                        <li><a href="{{ route('contact') }}"  class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Contact') }}</a></li>
+                        <li><a href="{{ route('home') }}" wire:navigate.hover     class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Home') }}</a></li>
+                        <li><a href="{{ route('products') }}" wire:navigate.hover class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Products') }}</a></li>
+                        <li><a href="{{ route('services') }}" wire:navigate.hover class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Services') }}</a></li>
+                        <li><a href="{{ route('booking') }}" wire:navigate.hover  class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Book Appointment') }}</a></li>
+                        <li><a href="{{ route('about') }}" wire:navigate.hover    class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('About Us') }}</a></li>
+                        <li><a href="{{ route('contact') }}" wire:navigate.hover  class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Contact') }}</a></li>
                     </ul>
                 </div>
 
@@ -1156,13 +1160,13 @@
             <div class="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-3">
                 <p>&copy; {{ $storeName }} {{ date('Y') }}. <span>{{ __('All rights reserved.') }}</span></p>
                 <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-                    <a href="{{ route('privacy-policy') }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Privacy Policy') }}</a>
+                    <a href="{{ route('privacy-policy') }}" wire:navigate.hover class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Privacy Policy') }}</a>
                     <span aria-hidden="true" class="hidden sm:inline">·</span>
-                    <a href="{{ route('terms-of-service') }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Terms of Service') }}</a>
+                    <a href="{{ route('terms-of-service') }}" wire:navigate.hover class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Terms of Service') }}</a>
                     <span aria-hidden="true" class="hidden sm:inline">·</span>
-                    <a href="{{ route('cancellation-refund-policy') }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Cancellation & Refund Policy') }}</a>
+                    <a href="{{ route('cancellation-refund-policy') }}" wire:navigate.hover class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Cancellation & Refund Policy') }}</a>
                     <span aria-hidden="true" class="hidden sm:inline">·</span>
-                    <a href="{{ route('faq') }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('FAQ') }}</a>
+                    <a href="{{ route('faq') }}" wire:navigate.hover class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('FAQ') }}</a>
                 </div>
             </div>
         </div>

@@ -36,8 +36,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libzip-dev libonig-dev libicu-dev ca-certificates \
         jpegoptim optipng pngquant gifsicle webp \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
-    && docker-php-ext-install -j$(nproc) pdo_mysql gd zip bcmath intl exif \
+    && docker-php-ext-install -j$(nproc) pdo_mysql gd zip bcmath intl exif opcache \
     && rm -rf /var/lib/apt/lists/*
+
+# OPcache: without it the built-in server re-parses the entire framework on
+# every request — on Render's 0.1-vCPU free tier that alone cost hundreds of
+# ms of TTFB. Timestamps are still validated (cheap stat) because the admin
+# "clear cache" action can regenerate compiled views at runtime.
+RUN { \
+        echo 'opcache.enable=1'; \
+        echo 'opcache.enable_cli=1'; \
+        echo 'opcache.validate_timestamps=1'; \
+        echo 'opcache.revalidate_freq=2'; \
+        echo 'opcache.memory_consumption=192'; \
+        echo 'opcache.interned_strings_buffer=16'; \
+        echo 'opcache.max_accelerated_files=20000'; \
+    } > /usr/local/etc/php/conf.d/zz-opcache.ini
 
 WORKDIR /var/www/html
 
