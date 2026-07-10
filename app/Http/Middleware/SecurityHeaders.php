@@ -62,7 +62,9 @@ class SecurityHeaders
                 "img-src 'self' data: blob: https:",
                 "connect-src 'self' blob:{$viteOrigins}",
                 "worker-src 'self' blob:",
-                "child-src 'self' blob:",
+                // www.google.com: the contact page's Google Maps embed iframe.
+                "child-src 'self' blob: https://www.google.com",
+                "frame-src 'self' blob: https://www.google.com",
                 "frame-ancestors 'self'",
                 "base-uri 'self'",
                 "form-action 'self'",

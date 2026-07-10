@@ -15,21 +15,17 @@ class AssetLoadingTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_contact_page_loads_leaflet_and_the_map(): void
+    public function test_contact_page_embeds_the_google_map_by_coordinates(): void
     {
         $html = $this->get('/contact')->assertOk()->getContent();
 
-        $this->assertStringContainsString('leaflet.js', $html, 'Contact needs Leaflet JS for its map.');
-        $this->assertStringContainsString('leaflet.css', $html, 'Contact needs Leaflet CSS for its map.');
-        $this->assertStringContainsString('store-map', $html);
-
-        // The map init must run after L is available: leaflet.js appears before
-        // the L.map( call in the document order.
-        $this->assertLessThan(
-            strpos($html, 'L.map('),
-            strpos($html, 'leaflet.js'),
-            'Leaflet JS must be emitted before the map initialisation script.'
-        );
+        $this->assertStringContainsString('https://www.google.com/maps/embed', $html, 'Contact needs the Google Maps embed iframe.');
+        // Pinned by coordinates, never by a text search: a name/address query
+        // re-geocodes per viewer and once resolved to a different business a
+        // few doors down (the documented place_cid incident).
+        $this->assertStringContainsString(config('services.store.lat').','.config('services.store.lng'), $html);
+        $this->assertStringContainsString('loading="lazy"', $html, 'The map iframe must not block first paint.');
+        $this->assertStringNotContainsString('leaflet', $html, 'Leaflet was replaced by the Google Maps embed.');
     }
 
     public function test_home_page_does_not_load_leaflet(): void

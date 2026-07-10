@@ -186,51 +186,20 @@
                 </h2>
             </div>
 
+            {{-- Google Maps embed (keyless classic form). Pinned by COORDINATES,
+                 not by a text search — a name/address query re-geocodes per
+                 viewer and once resolved to a different business a few doors
+                 down (see services.store.place_cid). The "Open in Google Maps"
+                 link above uses the cid, so it always opens the exact listing. --}}
             <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg" wire:ignore>
-                <div id="store-map" style="height: clamp(240px, 50vw, 420px); width: 100%;"></div>
+                <iframe
+                    src="https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1s{{ config('services.store.lat') }},{{ config('services.store.lng') }}!6i17"
+                    style="height: clamp(240px, 50vw, 420px); width: 100%; border: 0; display: block;"
+                    loading="lazy"
+                    allowfullscreen
+                    referrerpolicy="no-referrer-when-downgrade"
+                    title="{{ __('Map showing our showroom location') }}"></iframe>
             </div>
-
-            {{-- Leaflet is loaded here, only on the Contact page (the only page with
-                 a map), instead of globally in the layout — every other page skips
-                 it. CSS goes to <head> via the styles stack; JS is emitted before
-                 the init script below so `L` is defined by the time initMap runs. --}}
-            @push('styles')
-            <link rel="stylesheet" href="{{ asset('vendor/leaflet/leaflet.css') }}" />
-            @endpush
-
-            @push('scripts')
-            <script src="{{ asset('vendor/leaflet/leaflet.js') }}"></script>
-            <script>
-            (function() {
-                function initMap() {
-                    var el = document.getElementById('store-map');
-                    if (!el || el._leaflet_id) return;
-                    var lat = {{ config('services.store.lat') }}, lng = {{ config('services.store.lng') }};
-                    var map = L.map('store-map', { zoomControl: true, scrollWheelZoom: false }).setView([lat, lng], 17);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                        maxZoom: 19
-                    }).addTo(map);
-                    var icon = L.divIcon({
-                        html: '<div style="background:#C8413D;width:14px;height:14px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4);"></div>',
-                        iconSize: [14, 14], iconAnchor: [7, 7], className: ''
-                    });
-                    L.marker([lat, lng], { icon: icon })
-                        .addTo(map)
-                        .bindPopup('<strong>Win Win Car Audio</strong><br>No. 22, Jalan Dinar C U3/C<br>Taman Subang Perdana, Shah Alam')
-                        .openPopup();
-                }
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', initMap);
-                } else {
-                    initMap();
-                }
-                document.addEventListener('livewire:navigated', function() {
-                    setTimeout(initMap, 100);
-                });
-            })();
-            </script>
-            @endpush
         </div>
     </section>
 </div>

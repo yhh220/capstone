@@ -118,7 +118,7 @@ The automated functional tests verify the server-side behaviour of each feature 
 
 ### 6.6.1 Catalogue, Search & Storefront
 
-These tests confirm that product search returns the right products, that filtering and sorting narrow and order results correctly, and that search operates on the localised product name. Asset tests confirm the performance decisions of Section 5.13.5 are in force: `AssetLoadingTest` asserts that the contact page loads Leaflet *and initialises the map after the library is available*, that the homepage does **not** load Leaflet at all, and (the regression guard for the manually-found bug) that the page loader ships all three language captions rather than one.
+These tests confirm that product search returns the right products, that filtering and sorting narrow and order results correctly, and that search operates on the localised product name. Asset tests confirm the performance decisions of Section 5.13.5 are in force: `AssetLoadingTest` asserts that the contact page embeds the Google map **pinned by coordinates and lazily loaded**, that no storefront page pulls a script from a third-party CDN (the icon, animation and 3D-viewer libraries are self-hosted and version-pinned), and (the regression guard for the manually-found bug) that the page loader ships all three language captions rather than one.
 
 ### 6.6.2 Cart, Checkout & Shipping
 
@@ -233,7 +233,7 @@ From a lab run, LCP and CLS are reported directly, along with an overall Perform
 | **CLS**, Cumulative Layout Shift | Visual stability: how much the layout unexpectedly shifts | ≤ 0.1 | *[to fill]* |
 | **TBT**, Total Blocking Time *(lab proxy for INP)* | Responsiveness: how long the page is blocked from responding to input | ≤ 200 ms | *[to fill]* |
 
-Each metric maps onto a design decision in the system. **LCP** is improved by the `fetchpriority="high"` hero image and by keeping render-blocking assets (such as Leaflet) off pages that do not need them, so the main content paints sooner. **CLS** is kept low because images and layout regions have reserved dimensions, so content does not jump as the page loads. Interactivity (**TBT / INP**) benefits from the lightweight TALL-stack front end (Livewire performs small, targeted DOM updates and Alpine.js handles interactions client-side), so little JavaScript blocks the main thread. Once the site accumulates enough real-user traffic, the field-data Core Web Vitals (including INP) will become available in Search Console for ongoing monitoring.
+Each metric maps onto a design decision in the system. **LCP** is improved by the `fetchpriority="high"` hero image and by keeping render-blocking assets off pages that do not need them, so the main content paints sooner. **CLS** is kept low because images and layout regions have reserved dimensions, so content does not jump as the page loads. Interactivity (**TBT / INP**) benefits from the lightweight TALL-stack front end (Livewire performs small, targeted DOM updates and Alpine.js handles interactions client-side), so little JavaScript blocks the main thread. Once the site accumulates enough real-user traffic, the field-data Core Web Vitals (including INP) will become available in Search Console for ongoing monitoring.
 
 *[Figure 6.10: PageSpeed Insights lab-data report showing the Performance score and Core Web Vitals for the homepage.]*
 

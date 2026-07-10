@@ -20,7 +20,7 @@ The homepage is the first impression of the business and is implemented as a ded
 
 The page is structured as a sequence of clearly separated sections: a hero banner, a set of featured/newest products, a category grid that links into the filtered catalogue, a brand strip, a short "why choose us" trust section, and a footer with contact details and the store map link. Each product and category shown on the homepage links directly into the relevant filtered view of the catalogue, so the landing page functions as the primary navigation hub into the rest of the store.
 
-A deliberate performance decision was made on the homepage's hero image: it is marked with `fetchpriority="high"` so that the browser downloads it early as the **Largest Contentful Paint** element, which measurably improves the perceived load speed of the most visible part of the page. Conversely, heavier libraries that are *not* needed on the homepage (most notably the Leaflet mapping library) are deliberately *not* loaded here (see Section 5.13.5), keeping the landing page lean.
+A deliberate performance decision was made on the homepage's hero image: it is marked with `fetchpriority="high"` so that the browser downloads it early as the **Largest Contentful Paint** element, which measurably improves the perceived load speed of the most visible part of the page. Conversely, heavier assets that are *not* needed on the homepage (such as the contact page's map embed) are deliberately *not* loaded here (see Section 5.13.5), keeping the landing page lean.
 
 The homepage also respects the two global storefront modes. When the shop is placed in **showroom mode** (Section 5.10.10), the calls-to-action that would normally lead to the cart are suppressed for new visitors, turning the homepage into a pure catalogue showcase; and when the **site announcement bar** is enabled (Section 5.13.7), its message appears at the very top of the page above the hero.
 
@@ -118,7 +118,7 @@ The system includes the informational pages a real business needs, each implemen
 
 ### 5.8.1 Contact Page
 
-The contact page combines the shop's address, phone, email, and opening hours with an interactive map and a contact form. The map is rendered with the **Leaflet** library, centred on the shop's real coordinates. Crucially, Leaflet's CSS and JavaScript are loaded **only on this page** using Livewire's `@push` directive into the layout's style and script stacks, rather than globally. This keeps roughly 46 KB of render-blocking assets off every other page in the site (Section 5.13.5). The script that initialises the map is pushed *after* the Leaflet library itself so that the map object is only created once the library is available.
+The contact page combines the shop's address, phone, email, and opening hours with an interactive map and a contact form. The map is a **Google Maps embed** in a lazily-loaded iframe, so the page ships **no mapping library at all** and the map costs nothing until it scrolls into view. Two location details matter here. The embed is pinned by the shop's **coordinates rather than a text search**, because a name/address query is re-geocoded per viewer and, in one confirmed production case, resolved a visitor to a different business on a similarly-named street nearby. The accompanying "open in Google Maps" link goes further and uses the business listing's **`cid`** identifier, which always opens the shop's exact Google listing with its name, photos, and reviews.
 
 The contact form submits a message that is stored for the owner to review in the admin panel (Section 5.10.5), and it is protected against automated spam by a **honeypot** field (Section 5.9). Submissions are validated in the customer's language.
 
@@ -130,7 +130,7 @@ The FAQ page presents common questions grouped by category in an accordion. The 
 
 Supporting pages such as the "about" and policy content are presented consistently within the same responsive layout, dark-mode theme, and internationalised navigation as the rest of the site, so the informational pages feel like an integrated part of the store rather than bolt-ons.
 
-*[Figure 5.14: The contact page with the Leaflet store map and contact form.]*
+*[Figure 5.14: The contact page with the embedded Google store map and contact form.]*
 *[Figure 5.15: The FAQ accordion driven by admin-managed records.]*
 
 ---
@@ -300,7 +300,7 @@ As introduced in Section 5.3, the catalogue's search term, filters, and sort ord
 
 ### 5.13.5 Front-End Performance
 
-Guided by **Google PageSpeed Insights / Lighthouse** audits, several targeted performance fixes were made without altering functionality. The Leaflet mapping library (around 46 KB of render-blocking CSS and JavaScript) was moved off every page and loaded only on the contact page where the map actually appears (Section 5.8.1). The homepage's hero image was given `fetchpriority="high"` so it loads as the Largest Contentful Paint element as early as possible. These changes reduced the render-blocking payload on the pages customers land on most, improving load times while leaving every feature intact.
+Guided by **Google PageSpeed Insights / Lighthouse** audits, several targeted performance fixes were made without altering functionality. The contact map's library (originally Leaflet, around 46 KB of render-blocking CSS and JavaScript) was first confined to the contact page, and later replaced by a lazily-loaded Google Maps embed — removing the mapping-library cost from the site entirely (Section 5.8.1). All remaining front-end libraries (icons, scroll animations, the 3D viewer) are **self-hosted and version-pinned** under the application's own origin, so no page waits on a third-party CDN and the Content-Security-Policy allows no external script origin at all. The homepage's hero image was given `fetchpriority="high"` so it loads as the Largest Contentful Paint element as early as possible. These changes reduced the render-blocking payload on the pages customers land on most, improving load times while leaving every feature intact.
 
 ### 5.13.6 Caching & Cache Invalidation
 

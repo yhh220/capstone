@@ -398,7 +398,7 @@ Source: [database/migrations/](../database/migrations/) (67 migration files). Pr
 | axios | ^1.15.0 | HTTP client |
 | concurrently | ^9.0.1 | Run dev processes together |
 
-External CDN libs (loaded in layout, not npm): **AOS 2.3.4**, **Leaflet 1.9.4** (map).
+Front-end libs **self-hosted + version-pinned** under `public/vendor/` (no third-party CDN at runtime): **AOS 2.3.4**, **lucide 1.24.0**, **model-viewer 4.3.1**. The contact map is a Google Maps embed iframe (no map library shipped).
 
 ## 6.3 Dev tools
 | Package | Purpose |
@@ -420,7 +420,7 @@ External CDN libs (loaded in layout, not npm): **AOS 2.3.4**, **Leaflet 1.9.4** 
 - **3D Viewer** — Custom Three.js implementation (GLTFLoader + DRACOLoader + OrbitControls). **No** model-viewer / Tripo / Babylon.
 - **Payment gateway** — **Simulated, no real gateway.** The checkout/payment flow mimics Malaysian methods: **FPX** (with a participating-bank picker — Maybank2u, CIMB Clicks, Public Bank PBe, RHB Now, Hong Leong Connect…), **e-wallet** (Touch 'n Go eWallet etc.), and **card** ([CheckoutPage.php](../app/Livewire/CheckoutPage.php), [PaymentPage.php](../app/Livewire/PaymentPage.php)). No funds move; the order is marked paid on confirmation.
 - **Email** — Custom **Gmail API transport** ([GmailApiTransport.php](../app/Mail/Transport/GmailApiTransport.php)) sending as the store Gmail via an OAuth refresh token obtained through `/gmail-send/connect`. SMTP config also present as fallback.
-- **Maps** — Google Maps `cid` deep link + Leaflet interactive map on contact page.
+- **Maps** — Google Maps `cid` deep link + coordinate-pinned Google Maps embed iframe on contact page.
 
 ---
 
@@ -756,7 +756,7 @@ The inline head script in [layouts/app.blade.php](../resources/views/layouts/app
 | # | Page | File | Notes |
 |---|---|---|---|
 | 18.1 | About Us | [AboutPage.php](../app/Livewire/AboutPage.php) | Company intro |
-| 18.2 | Contact | [ContactPage.php](../app/Livewire/ContactPage.php) | Form + Leaflet map + business info; submissions → `contacts` |
+| 18.2 | Contact | [ContactPage.php](../app/Livewire/ContactPage.php) | Form + Google Maps embed + business info; submissions → `contacts` |
 | 18.3 | Privacy Policy | [PrivacyPolicyPage.php](../app/Livewire/PrivacyPolicyPage.php) | Self-authored legal text |
 | 18.4 | Terms of Service | [TermsOfServicePage.php](../app/Livewire/TermsOfServicePage.php) | Self-authored |
 | 18.5 | Cancellation & Refund | [CancellationRefundPolicyPage.php](../app/Livewire/CancellationRefundPolicyPage.php) | Refund window/fee driven by settings + [RefundCalculator](../app/Services/RefundCalculator.php) |
@@ -785,7 +785,7 @@ The inline head script in [layouts/app.blade.php](../resources/views/layouts/app
 | Transactional emails | Every order/booking email includes a "WhatsApp us" contact link |
 | 19.3 | Phone call | `tel:` links using `phone_display` (016-9150917) |
 | 19.4 | Email | Store email `winwincaraudio@gmail.com` (config) |
-| 19.5 | Google Maps | `cid=5750306395518804732` deep link + Leaflet map (lat 3.1491 / lng 101.5465) |
+| 19.5 | Google Maps | `cid=5750306395518804732` deep link + coordinate-pinned embed iframe (lat 3.1491 / lng 101.5465) |
 | 19.6 | Facebook | `https://www.facebook.com/winwincaraudio/` (config + [btn/facebook.blade.php](../resources/views/components/btn/facebook.blade.php)) |
 | 19.7 | Contact form | `contacts` table; name/email/phone/subject/message + honeypot |
 | 19.8 | Newsletter signup | ❌ Not implemented |
@@ -1296,7 +1296,7 @@ Scan of [app/](../app/) subfolders:
 | 36.8 | Compression | Handled by Render/Cloudflare edge (gzip/brotli), not app-level |
 | 36.9 | Browser caching | Asset hashing by Vite; icon cache-busting by mtime |
 | 36.10 | Query optimization | Dedicated index migrations; eager loading; cached settings/stats; `lockForUpdate` for concurrency. No slow-query log shipped |
-| 36.11 | Load-path fixes (from the PageSpeed audit) | **Leaflet** (map library, ~46 KB CSS+JS) is loaded **only on the Contact page** via `@push` ([contact-page.blade.php](../resources/views/livewire/contact-page.blade.php)) instead of globally — every other page now skips it (it was render-blocking on all pages). The **LCP logo** carries `fetchpriority="high"` so the browser fetches it first. Covered by [AssetLoadingTest](../tests/Feature/AssetLoadingTest.php) |
+| 36.11 | Load-path fixes (from the PageSpeed audit) | **Leaflet** (map library, ~46 KB CSS+JS) was first confined to the Contact page via `@push`, then replaced entirely by a lazily-loaded **Google Maps embed iframe** ([contact-page.blade.php](../resources/views/livewire/contact-page.blade.php)) — no map library ships at all now. The **LCP logo** carries `fetchpriority="high"` so the browser fetches it first. Covered by [AssetLoadingTest](../tests/Feature/AssetLoadingTest.php) |
 | 36.12 | Known limits (from the PageSpeed audit) | Documented as accepted rather than changed: (a) static assets are served by `php artisan serve` (the Render Docker entrypoint), which sets no `Cache-Control` — so repeat visits re-download assets ("Cache TTL: None" in the audit); production would front this with nginx/caddy + cache headers. (b) The hero background video is ~5.2 MB uncompressed; further wins would come from transcoding it or a poster-image + lazy-load strategy. (c) Several third-party libs (AOS, lucide, model-viewer) still load from the unpkg CDN |
 
 ---
