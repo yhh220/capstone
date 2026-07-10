@@ -205,7 +205,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-5 border-b border-gray-100 dark:border-gray-700">
                         <div>
                             <div class="font-black text-gray-800 dark:text-white text-lg">{{ $booking->reference }}</div>
-                            <div class="text-xs text-gray-400 mt-0.5">{{ $booking->service ? __($booking->service->name) : __('Service') }}</div>
+                            <div class="text-xs text-gray-400 mt-0.5">{{ $booking->service ? $booking->service->localized_name : __('Service') }}</div>
                         </div>
                         <span class="px-3 py-1 rounded-full text-xs font-bold
                             {{ $booking->status === 'completed' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :

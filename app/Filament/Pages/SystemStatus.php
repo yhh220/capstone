@@ -45,7 +45,7 @@ class SystemStatus extends Page
     public function getChecks(): array
     {
         return $this->checksCache ??= [
-            $this->check('Your data', function () {
+            $this->check('Database', function () {
                 DB::select('select 1');
                 $size = '';
                 $db = config('database.connections.'.config('database.default').'.database');
@@ -53,25 +53,51 @@ class SystemStatus extends Page
                     $size = ' ('.$this->humanSize((int) filesize($db)).' stored)';
                 }
 
-                return ['ok', 'Saved and reachable'.$size];
+                return ['ok', 'Orders, bookings and products are saved and reachable'.$size];
             }),
-            $this->check('Website speed', function () {
+            // Named for what it actually probes (a cache write + read), not
+            // "website speed" — that label made a cache failure read like a
+            // network problem and a pass claim more than it proved.
+            $this->check('Content cache', function () {
                 $key = 'status:ping:'.uniqid();
                 Cache::put($key, '1', 5);
                 $ok = Cache::get($key) === '1';
                 Cache::forget($key);
 
-                return $ok ? ['ok', 'Fast — caching is working'] : ['fail', 'Caching is not working'];
+                return $ok ? ['ok', 'Working — pages reuse saved content'] : ['fail', 'Not working — pages rebuild everything on each visit'];
             }),
-            $this->check('Background tasks', function () {
-                $n = DB::table('jobs')->count();
+            $this->check('Payments', function () {
+                if (setting('PAYMENT_MODE', 'demo') !== 'stripe') {
+                    return ['ok', 'Demo mode — payments are simulated'];
+                }
+                if (! app(\App\Services\Payments\StripeCheckoutService::class)->enabled()) {
+                    // enabled() already logged the specifics; the admin-facing
+                    // story is that the switch says Stripe but demo is running.
+                    return ['fail', 'Set to Stripe, but the test key is missing — taking demo payments instead'];
+                }
+                if (blank(config('services.stripe.webhook_secret'))) {
+                    return ['warn', 'Stripe test mode is on, but the webhook secret is missing — payment confirmations rely on the customer returning to the site'];
+                }
 
-                return [$n > 50 ? 'warn' : 'ok', $n === 0 ? 'Nothing waiting' : $n.' waiting to run'];
+                return ['ok', 'Stripe Checkout (test mode) is active'];
             }),
-            $this->check('Failed tasks', function () {
-                $n = DB::table('failed_jobs')->count();
+            // One card for the whole queue: nothing in this app queues work
+            // today (mail is sent inline, imports run sync), so two separate
+            // always-zero cards ("Background tasks" / "Failed tasks") implied
+            // machinery that wasn't there. Failures still surface if a queue
+            // is ever introduced.
+            $this->check('Task queue', function () {
+                $waiting = DB::table('jobs')->count();
+                $failed = DB::table('failed_jobs')->count();
 
-                return [$n > 0 ? 'warn' : 'ok', $n === 0 ? 'None failed' : $n.' failed — worth a look'];
+                if ($failed > 0) {
+                    return ['warn', $failed.' task(s) failed — worth a look'];
+                }
+                if ($waiting > 50) {
+                    return ['warn', $waiting.' tasks waiting — the worker may be stuck'];
+                }
+
+                return ['ok', $waiting === 0 ? 'Empty — everything runs instantly' : $waiting.' waiting to run'];
             }),
             $this->check('Automatic tasks', function () {
                 $last = Cache::get('scheduler:last_run');
@@ -87,9 +113,24 @@ class SystemStatus extends Page
 
                 return [$stale ? 'fail' : 'ok', $stale ? 'Stopped — needs the cron set up' : 'Running normally'];
             }),
-            $this->check('Email sending', fn () => filled(config('mail.mailers.smtp.username'))
-                ? ['ok', 'Ready · '.config('mail.from.address')]
-                : ['warn', 'Not set up — customers will not get emails']),
+            // Judged against the mailer that is actually selected — production
+            // sends through the Gmail API transport, so checking only the SMTP
+            // username (as this used to) reported "not set up" on a perfectly
+            // working install, and "ready" when the active mailer was the log.
+            $this->check('Email sending', function () {
+                $from = config('mail.from.address');
+
+                return match ($mailer = config('mail.default')) {
+                    'gmail_api' => filled(config('services.google.gmail_send_refresh_token'))
+                        ? ['ok', 'Ready via Gmail · '.$from]
+                        : ['fail', 'Gmail sending is not connected — visit /gmail-send/connect'],
+                    'smtp' => filled(config('mail.mailers.smtp.username'))
+                        ? ['ok', 'Ready via SMTP · '.$from]
+                        : ['warn', 'SMTP is not set up — customers will not get emails'],
+                    'log', 'array' => ['warn', 'Test mode — emails are written to the log, not sent'],
+                    default => ['ok', 'Ready via '.$mailer.' · '.$from],
+                };
+            }),
             $this->check('Server space', function () {
                 $writable = is_writable(storage_path('logs'));
                 $freeGb = round((disk_free_space(base_path()) ?: 0) / 1_000_000_000, 1);

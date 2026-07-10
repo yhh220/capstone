@@ -66,7 +66,24 @@ class ObservabilityTest extends TestCase
     {
         $checks = collect(app(SystemStatus::class)->getChecks())->keyBy('name');
 
-        $this->assertSame('ok', $checks['Your data']['status']);
-        $this->assertSame('ok', $checks['Website speed']['status']);
+        $this->assertSame('ok', $checks['Database']['status']);
+        $this->assertSame('ok', $checks['Content cache']['status']);
+    }
+
+    public function test_status_page_reports_the_active_payment_mode(): void
+    {
+        $checks = collect(app(SystemStatus::class)->getChecks())->keyBy('name');
+
+        // Default mode is demo — simulated payments are a healthy state, not a fault.
+        $this->assertSame('ok', $checks['Payments']['status']);
+        $this->assertStringContainsString('Demo', $checks['Payments']['value']);
+
+        // Stripe selected but no usable test key: the silent fallback to demo
+        // must surface as a problem, not hide behind a green card.
+        \App\Models\Setting::setValue('PAYMENT_MODE', 'stripe');
+        config(['services.stripe.secret' => '']);
+        $checks = collect(app(SystemStatus::class)->getChecks())->keyBy('name');
+
+        $this->assertSame('fail', $checks['Payments']['status']);
     }
 }

@@ -22,9 +22,12 @@ class BookingPolicy
         return $user->isAdmin();
     }
 
+    // Staff handle bookings day-to-day (reschedule, fix details) — the same
+    // operational tier that already lets them confirm/complete from the table.
+    // Delete/restore below stay admin-only.
     public function update(User $user, Booking $booking): bool
     {
-        return $user->isAdmin();
+        return $user->isStaffMember();
     }
 
     public function delete(User $user, Booking $booking): bool

@@ -23,12 +23,14 @@ class LocalizedPagesTest extends TestCase
     {
         Service::create([
             'name' => 'Car Audio Installation',
+            'name_zh' => '汽车音响安装',
             'description' => 'Professional installation of head units, speakers, and complete sound systems.',
             'is_active' => true,
             'sort_order' => 1,
         ]);
 
-        // Step 1: service cards translate via __($svc->name).
+        // Step 1: service cards translate via the service's own name_zh column
+        // (admin-editable, backfilled from the old lang-JSON keys by migration).
         $this->withSession(['locale' => 'zh'])
             ->get('/booking')
             ->assertOk()

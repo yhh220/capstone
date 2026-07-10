@@ -881,9 +881,11 @@ class MockDriver implements ChatServiceInterface
         // Cache plain arrays (not Eloquent models) so any cache store can
         // serialise them safely.
         $services = collect(Cache::remember('chatbot_services', 600, fn () => Service::where('is_active', true)
-            ->get(['name', 'price', 'duration_minutes'])
+            ->get(['name', 'name_ms', 'name_zh', 'price', 'duration_minutes'])
             ->map(fn (Service $s) => [
                 'name' => $s->name,
+                'name_ms' => $s->name_ms,
+                'name_zh' => $s->name_zh,
                 'price' => $s->price,
                 'duration_label' => $s->duration_label,
             ])
@@ -918,7 +920,12 @@ class MockDriver implements ChatServiceInterface
         }
 
         $lines = $matched->take(3)->map(function (array $service) use ($lang) {
-            $name = in_array($lang, ['ms', 'zh'], true) ? __($service['name'], [], $lang) : $service['name'];
+            // Localised names now live on the service row itself (admin-editable),
+            // not in the lang JSON. `?? null` tolerates a stale cache entry from
+            // before the columns existed; blank falls back to the English name.
+            $name = in_array($lang, ['ms', 'zh'], true)
+                ? (($service['name_'.$lang] ?? null) ?: $service['name'])
+                : $service['name'];
             $price = $service['price'] ? 'RM ' . number_format((float) $service['price'], 0) : null;
 
             return '• ' . $name

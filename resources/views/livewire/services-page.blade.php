@@ -117,10 +117,10 @@
                                 <div class="w-full md:w-1/2 pl-14 md:pl-0 text-left {{ $odd ? 'md:order-1 md:pr-14 md:text-right' : 'md:order-2 md:pl-14' }}"
                                      data-aos="{{ $odd ? 'fade-right' : 'fade-left' }}">
                                     <h3 class="text-2xl sm:text-3xl font-black text-brand-black dark:text-white uppercase tracking-tight leading-tight mb-4">
-                                        {{ __($service->name) }}
+                                        {{ $service->localized_name }}
                                     </h3>
                                     <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base font-medium leading-relaxed max-w-sm {{ $odd ? 'md:ml-auto' : '' }}">
-                                        {{ __($service->description) }}
+                                        {{ $service->localized_description }}
                                     </p>
                                     <a href="{{ route('booking', ['service' => $service->id]) }}"
                                        class="inline-flex items-center gap-1.5 mt-4 text-sm font-bold text-brand-red hover:underline underline-offset-2">
@@ -139,7 +139,7 @@
                                 <div class="hidden md:flex md:w-1/2 justify-center {{ $odd ? 'md:order-2 md:pl-14' : 'md:order-1 md:pr-14' }}" data-aos="zoom-in">
                                     <div class="{{ $blobAnim }} w-28 h-28 lg:w-36 lg:h-36 flex items-center justify-center overflow-hidden shadow-lg {{ $img ? '' : $blobClass }}">
                                         @if($img)
-                                            <img src="{{ $img }}" alt="{{ __($service->name) }}" class="w-full h-full object-cover" loading="lazy">
+                                            <img src="{{ $img }}" alt="{{ $service->localized_name }}" class="w-full h-full object-cover" loading="lazy">
                                         @else
                                             <div class="drop-shadow-sm">{!! str_replace('w-6 h-6', 'w-10 h-10 lg:w-12 lg:h-12', $iconFor($service->name)) !!}</div>
                                         @endif

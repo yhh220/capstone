@@ -17,9 +17,13 @@ class ServicePolicy
         return $user->isAdmin() || $user->isStaff();
     }
 
+    // The service menu is a FIXED set (owner decision, Jul 2026): the shop
+    // will not add or remove services, and the public Services page's curated
+    // keyword-matched icons assume the existing names. Admins edit the rows
+    // (copy, translations, photos, duration, visibility) — nothing more.
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+        return false;
     }
 
     public function update(User $user, Service $service): bool
@@ -29,16 +33,16 @@ class ServicePolicy
 
     public function delete(User $user, Service $service): bool
     {
-        return $user->isAdmin();
+        return false;
     }
 
     public function restore(User $user, Service $service): bool
     {
-        return $user->isAdmin();
+        return false;
     }
 
     public function forceDelete(User $user, Service $service): bool
     {
-        return $user->isOwner();
+        return false;
     }
 }

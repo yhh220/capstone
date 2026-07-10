@@ -99,7 +99,7 @@
                 </div>
 
                 <div class="mb-4">
-                    <div class="font-bold text-gray-800 dark:text-white">{{ $booking->service ? __($booking->service->name) : __('General visit') }}</div>
+                    <div class="font-bold text-gray-800 dark:text-white">{{ $booking->service ? $booking->service->localized_name : __('General visit') }}</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                         {{ optional($booking->preferred_date)->translatedFormat('D, d M Y') }}{{ $booking->start_at ? ' • ' . $booking->start_at->format('h:i A') : '' }}
                     </div>

@@ -57,7 +57,8 @@ class Service extends Model implements HasMedia
     }
 
     protected $fillable = [
-        'name', 'description', 'price', 'duration', 'duration_minutes', 'buffer_after', 'image', 'is_active', 'sort_order',
+        'name', 'name_ms', 'name_zh', 'description', 'description_ms', 'description_zh',
+        'price', 'duration', 'duration_minutes', 'buffer_after', 'image', 'is_active', 'sort_order',
     ];
 
     protected $casts = [
@@ -70,6 +71,32 @@ class Service extends Model implements HasMedia
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * Name/description in the visitor's language, falling back to English.
+     * Services used to translate through lang JSON __() keys; DB columns
+     * (same pattern as Product) keep translations intact when an admin
+     * renames or creates a service from the panel.
+     */
+    public function getLocalizedNameAttribute(): string
+    {
+        return $this->translatedField('name') ?? $this->name;
+    }
+
+    public function getLocalizedDescriptionAttribute(): string
+    {
+        return $this->translatedField('description') ?? $this->description;
+    }
+
+    /** Locale variant of a *_ms / *_zh column pair, null when empty. */
+    private function translatedField(string $field): ?string
+    {
+        return match (app()->getLocale()) {
+            'ms' => $this->{$field.'_ms'} ?: null,
+            'zh' => $this->{$field.'_zh'} ?: null,
+            default => null,
+        };
     }
 
     public function getDurationLabelAttribute(): string
