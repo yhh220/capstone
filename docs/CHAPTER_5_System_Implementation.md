@@ -92,12 +92,15 @@ Order **cancellation and refunds** follow a configurable, tiered policy. A custo
 
 *[Figure 5.10: The order status/lifecycle as seen by the customer.]*
 *[Figure 5.11: The payment step and order confirmation.]*
+*[Figure 5.12: The Stripe test-mode hosted checkout page for a card / FPX online-banking / GrabPay payment.]*
 
 ---
 
 ## 5.7 Service Booking System
 
 The services page presents the shop's offerings along a themed piece of interaction design: a **winding road** drawn at runtime as a smooth SVG curve through every service "stop", with a **top-view car that drives the route as the visitor scrolls** — easing frame-by-frame rather than jumping with each wheel notch, leaving a brand-red trail, lighting up each stop it passes, and finally pulling into a marked **parking bay** at the end of the page. The road rebuilds itself on resize so it always passes exactly through the real position of each service, and reduced-motion users receive instant positioning instead of the animation. It is a small feature, but it ties the storefront's visual identity directly to the business's subject matter.
+
+*[Figure 5.13: The services page's animated winding road, with the scroll-driven top-view car, brand-red trail, and parking bay.]*
 
 Beyond selling products, the shop offers installation and service appointments, and the booking system lets customers reserve a time slot online. The booking calendar is generated dynamically from the owner's configuration rather than a fixed timetable, which keeps the shop in full control of its own availability.
 
@@ -107,8 +110,8 @@ Two correctness issues received particular attention. The first is **time zones*
 
 Finally, confirming a booking is implemented as an **atomic pending-to-confirmed claim** (Section 5.9.8): the transition only succeeds if the booking is still pending, which prevents a race where a just-cancelled or already-confirmed booking could be confirmed a second time. Customers receive an email confirmation, and an automated reminder is sent ahead of the appointment (Section 5.14).
 
-*[Figure 5.12: The booking page showing available appointment slots derived from business-hours settings.]*
-*[Figure 5.13: A confirmed booking and its confirmation email.]*
+*[Figure 5.14: The booking page showing available appointment slots derived from business-hours settings.]*
+*[Figure 5.15: A confirmed booking and its confirmation email.]*
 
 ---
 
@@ -130,8 +133,8 @@ The FAQ page presents common questions grouped by category in an accordion. The 
 
 Supporting pages such as the "about" and policy content are presented consistently within the same responsive layout, dark-mode theme, and internationalised navigation as the rest of the site, so the informational pages feel like an integrated part of the store rather than bolt-ons.
 
-*[Figure 5.14: The contact page with the embedded Google store map and contact form.]*
-*[Figure 5.15: The FAQ accordion driven by admin-managed records.]*
+*[Figure 5.16: The contact page with the embedded Google store map and contact form.]*
+*[Figure 5.17: The FAQ accordion driven by admin-managed records.]*
 
 ---
 
@@ -161,8 +164,8 @@ It is worth stating plainly, as was discussed during development, that these mea
 
 Several sensitive actions (confirming a booking, marking an order paid, cancelling) are implemented as **atomic conditional updates** that only take effect if the record is still in the expected starting state, with the outcome decided by the number of rows the update affected. This is the same defensive pattern used at checkout (Section 5.5) and for order expiry (Section 5.6), applied consistently so that two users, or a user and a background job, acting at the same moment can never drive a record into a contradictory state; the loser of the race receives a harmless "already done" notice.
 
-*[Figure 5.16: The login screen showing the progressive-lockout messaging.]*
-*[Figure 5.17: The customer account area with order and booking history.]*
+*[Figure 5.18: The login screen showing the progressive-lockout messaging.]*
+*[Figure 5.19: The customer account area with order and booking history.]*
 
 ---
 
@@ -254,11 +257,11 @@ The **User** resource manages the accounts that can access the panel, implementi
 
 Every rule exists twice: once in the UI (locked selects, hidden actions) and once server-side (policies and explicit guards on the handlers), so a crafted request that bypasses the form is coerced or rejected — behaviour locked down by a dedicated authorization test suite covering crafted role-escalation payloads, peer-deletion attempts, and the customer-role hard block on the panel itself.
 
-*[Figure 5.18: The Filament admin dashboard with the responsive sidebar.]*
-*[Figure 5.19: The Product resource edit form with localised fields and media upload.]*
-*[Figure 5.20: The Orders table with the guarded processing actions.]*
-*[Figure 5.21: The Settings resource with per-setting validation and help text.]*
-*[Figure 5.22: The Application Log resource grouping errors by fingerprint.]*
+*[Figure 5.20: The Filament admin dashboard with the responsive sidebar.]*
+*[Figure 5.21: The Product resource edit form with localised fields and media upload.]*
+*[Figure 5.22: The Orders table with the guarded processing actions.]*
+*[Figure 5.23: The Settings resource with per-setting validation and help text.]*
+*[Figure 5.24: The Application Log resource grouping errors by fingerprint.]*
 
 ---
 
@@ -272,7 +275,7 @@ The storefront is fully trilingual (**English**, **Bahasa Melayu**, and **Chines
 
 Dates and times are localised as well: a listener responds to the application's locale changing and updates **Carbon's** locale accordingly, so a date rendered with `translatedFormat` appears in the correct language. A small, pragmatic decision was made to keep **outgoing emails pinned to English** and to leave the **admin panel untranslated**, since the recipients and operators of those are consistent, which kept the translation effort focused where it benefits customers most.
 
-*[Figure 5.23: The same product page shown in English, Bahasa Melayu, and Chinese via the language switcher.]*
+*[Figure 5.25: The same product page shown in English, Bahasa Melayu, and Chinese via the language switcher.]*
 
 ---
 
@@ -280,7 +283,7 @@ Dates and times are localised as well: a listener responds to the application's 
 
 A lightweight customer-support **chatbot** is available across the storefront as a floating widget. It answers common questions from a keyword-matched knowledge base managed by the owner (the `ChatbotFaq` resource, Section 5.10.6). When a customer's message matches a rule's keywords, the widget replies with that rule's answer in the customer's current language; where several rules match, the **priority** field decides which answer is returned. Because the knowledge base is owner-editable and multilingual, the shop can extend the bot's coverage over time without any development work, giving customers instant answers to routine questions without waiting for staff.
 
-*[Figure 5.24: The chatbot widget answering a customer question.]*
+*[Figure 5.26: The chatbot widget answering a customer question.]*
 
 ---
 
@@ -320,10 +323,10 @@ A dismissible **announcement bar** can be shown at the top of every page, contro
 
 Accessibility was considered throughout (semantic markup, keyboard-navigable controls, and appropriate ARIA roles) and specific issues surfaced by automated audits were corrected (for example, removing an invalid list role that had been misapplied to the desktop navigation), so the markup is both valid and friendlier to assistive technology.
 
-*[Figure 5.25: The storefront in dark mode.]*
-*[Figure 5.26: A rich Google search result produced by the AutoPartsStore structured data.]*
-*[Figure 5.27: Google Search Console showing the verified property and accepted sitemap.]*
-*[Figure 5.28: The site announcement bar in use.]*
+*[Figure 5.27: The storefront in dark mode.]*
+*[Figure 5.28: A rich Google search result produced by the AutoPartsStore structured data.]*
+*[Figure 5.29: Google Search Console showing the verified property and accepted sitemap.]*
+*[Figure 5.30: The site announcement bar in use.]*
 
 ---
 
@@ -335,8 +338,8 @@ The system keeps customers informed through transactional email at every meaning
 
 Rather than sending through a traditional SMTP relay, the application delivers mail through the **Gmail API**, so email is sent as the shop's own Gmail account with strong deliverability. Setting this up is a **one-time administrator action**: a token-gated setup route (`/gmail-send/connect`, restricted to the admin guard) walks the owner through Google's OAuth consent screen, and the resulting **refresh token** is stored so the application can thereafter send mail as the shop's account indefinitely, without any password being kept. This authorisation flow is deliberately admin-only, because it grants the application the ability to send email as the business.
 
-*[Figure 5.29: An order confirmation email.]*
-*[Figure 5.30: The one-time Gmail API authorisation (OAuth consent) setup.]*
+*[Figure 5.31: An order confirmation email.]*
+*[Figure 5.32: The one-time Gmail API authorisation (OAuth consent) setup.]*
 
 ### 5.14.2 Owner & Staff Alert Notifications
 
@@ -344,7 +347,7 @@ Alongside the customer-facing mail, the system sends an **internal alert** to th
 
 Getting these alerts to actually *reach* staff surfaced a non-obvious production issue. Because the application sends mail **as** the shop's own Gmail account (Section 5.14.1), and the alerts were addressed **to** that same account, Gmail treated them as self-sent mail: it keeps a single copy under "Sent" and never delivers it to the inbox, so alerts were effectively invisible unless someone thought to check the Sent folder. Two complementary measures fixed this. First, every user with the *admin* role is **CC'd** on each alert — the recipient list is read from the user table at send time, so hiring or removing staff changes who is notified without touching code — and because those are separate mailboxes, the alerts arrive in the staff's own inboxes normally. Second, the alert's To address uses Gmail's **plus-alias** form (`…+alerts@gmail.com`), which delivers to the same shop mailbox but gives Gmail's filters something to match: a one-time filter applies a dedicated **"Shop Alerts" label**, marks the mail important, and exempts it from spam, turning that label into a reliable notification tray inside the shop's own account.
 
-*[Figure 5.31: An owner-alert email in a staff inbox, and the "Shop Alerts" label in the shop's Gmail.]*
+*[Figure 5.33: An owner-alert email in a staff inbox, and the "Shop Alerts" label in the shop's Gmail.]*
 
 ---
 
@@ -354,7 +357,7 @@ Some work must happen on a schedule rather than in response to a customer action
 
 Because the Render hosting plan does not provide an always-running system cron daemon, the schedule is driven **externally**: the free service **cron-job.org** is configured to call a dedicated, **token-protected** endpoint (`/cron/run-schedule/{token}`) every ten minutes, and that endpoint runs Laravel's `schedule:run`. The token means only the configured pinger can trigger the scheduler, and running every ten minutes is frequent enough to expire stale orders and dispatch reminders promptly. The same pings also serve a **second purpose**: Render's free tier spins an instance down after roughly fifteen minutes without traffic, so a request arriving every ten minutes keeps the application warm and largely prevents the slow "cold start" a visitor would otherwise experience after a quiet period. This gives the deployed application reliable background processing — and, as a side benefit, better perceived availability — on a platform that offers neither cron nor an always-on instance natively, which is a genuinely important detail for the system to function in production.
 
-*[Figure 5.32: The cron-job.org job configured to ping the schedule endpoint every ten minutes.]*
+*[Figure 5.34: The cron-job.org job configured to ping the schedule endpoint every ten minutes.]*
 
 ---
 
@@ -364,5 +367,5 @@ This chapter has documented the implementation of the Win Win Car Audio Auto Acc
 
 Throughout, particular care was taken over the concerns that separate a demonstration from a deployable system: **correctness under concurrency** (transactions, row locks, and atomic guarded updates protecting stock, orders, and bookings), **security in depth** (progressive lockout, honeypot spam protection, ownership/IDOR checks, constant-time token comparison, and security headers), **operability by a non-technical owner** (owner-configurable settings with validation, an actionable error-log view, and a graceful showroom-mode shutdown), and **production realities** (Gmail API delivery, externally-driven scheduling on a cron-less host, SEO with verified Search Console registration, and performance tuning guided by PageSpeed Insights). Several non-obvious bugs discovered during implementation (the persistent-error-bag login message, the sitemap's local-domain URLs, the over-broad cache clear, and the self-addressed owner alerts that Gmail never delivered to the inbox among them) were diagnosed and fixed rather than worked around. The result is a complete, coherent, and deployed system that meets the objectives set out in the earlier chapters. The verification of that system is the subject of Chapter 6.
 
-*[Figure 5.32: The deployed application running at winwincaraudio.onrender.com.]*
-*[Figure 5.33: End-to-end overview: a customer journey from catalogue to confirmed order and the corresponding admin view.]*
+*[Figure 5.35: The deployed application running at winwincaraudio.onrender.com.]*
+*[Figure 5.36: End-to-end overview: a customer journey from catalogue to confirmed order and the corresponding admin view.]*
