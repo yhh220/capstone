@@ -227,7 +227,7 @@ The visual language is sourced from a fixed set of reference libraries (kept con
 | Image optimizers installed | [Dockerfile](../Dockerfile) installs `jpegoptim optipng pngquant gifsicle webp` for Spatie MediaLibrary |
 | Asset bundling | Vite 8 + `@tailwindcss/vite` + `laravel-vite-plugin` ([vite.config.js](../vite.config.js)) |
 | 3D bundle lazy-load | Three.js (~640 KB) dynamic-imported only on configurator open ([configurator-loader.js](../resources/js/configurator-loader.js)) |
-| DRACO mesh compression | `car-draco.glb` (24.5 MB) / `city-draco.glb` (1.9 MB) compressed models used in prod |
+| DRACO mesh compression | `car-draco.glb` (**3.0 MB** — was 24.5 MB: textures ≤1024px + WebP, conservative meshopt simplify, Draco requantise; names/animations verified intact) / `city-draco.glb` (1.9 MB) |
 | DB indexing | Dedicated index migrations: [add_performance_indexes_to_core_tables](../database/migrations/2026_04_29_174552_add_performance_indexes_to_core_tables.php), [add_performance_indexes_to_orders_table](../database/migrations/2026_06_20_113634_add_performance_indexes_to_orders_table.php), [add_index_to_app_logs_user_id](../database/migrations/2026_06_21_000002_add_index_to_app_logs_user_id.php) |
 | Settings caching | [Setting::getValue()](../app/Models/Setting.php) caches each key for 1 hour |
 | Cache/route/view caching | `config:cache`, `route:cache`, `view:cache` run on container boot ([docker-entrypoint.sh](../docker-entrypoint.sh)) |
@@ -688,7 +688,7 @@ Stock badges via colored Filament columns admin-side; storefront shows in-stock/
 
 | # | Feature | Implementation |
 |---|---|---|
-| 14.1 | Services page | Lists active services with price/duration. **6 seeded services:** Car Audio Installation · Subwoofer & Amplifier Setup · Window Tinting · Dashcam Installation · Car Alarm & Security System · DSP Tuning & Sound Calibration ([DatabaseSeeder.php](../database/seeders/DatabaseSeeder.php)) |
+| 14.1 | Services page | Lists active services with price/duration along a scroll-driven SVG road: a car drives through every service stop and parks in a marked bay at the end. **6 seeded services:** Car Audio Installation · Subwoofer & Amplifier Setup · Window Tinting · Dashcam Installation · Car Alarm & Security System · DSP Tuning & Sound Calibration ([DatabaseSeeder.php](../database/seeders/DatabaseSeeder.php)) |
 | 14.2 | Booking form fields | Multi-step: customer name, phone, email, service, date, time slot, notes, optional car model |
 | 14.3 | Date/time picker | Custom calendar (month nav, closed-weekday + past-date guards) + generated time slots from business hours |
 | 14.4 | Service categories | Services are flat (no separate category table) |
@@ -948,19 +948,19 @@ Custom [Dashboard.php](../app/Filament/Pages/Dashboard.php) overrides `getWidget
 - Form: name, email (unique), phone (tel), role Select, etc., in Sections. Admin/staff account management. Nav group: System Settings.
 
 ### FAQ Page — [FaqResource.php](../app/Filament/Resources/Faqs/FaqResource.php)
-- Public FAQ content CRUD (question/answer + translations, sort_order, is_published). Nav group: System.
+- Public FAQ content CRUD (question/answer + translations, sort_order, is_published). Nav group: FAQs.
 
 ### Chatbot FAQs — [ChatbotFaqResource.php](../app/Filament/Resources/ChatbotFaqs/ChatbotFaqResource.php)
-- Chatbot knowledge base (question/answer/keywords/priority/is_active) — the live source of truth for the assistant. Nav group: System.
+- Chatbot knowledge base (question/answer/keywords/priority/is_active) — the live source of truth for the assistant. Nav group: FAQs.
 
 ### Activity Log — [ActivityResource.php](../app/Filament/Resources/Activities/ActivityResource.php)
 - Read-only audit trail (`canCreate=false`) of who-did-what (Spatie ActivityLog). View/infolist pages.
 
 ### Logs — [LogResource.php](../app/Filament/Resources/Logs/LogResource.php)
-- Application error log viewer (`app_logs`); "Check for recurrence" / "Mark fixed" actions; nav badge (unresolved count). Nav group: System.
+- Application error log viewer (`app_logs`); "Check for recurrence" / "Mark fixed" actions; nav badge (unresolved count). Nav group: System Settings.
 
 ### Settings — [SettingResource.php](../app/Filament/Resources/Settings/SettingResource.php)
-- Key-value editor with per-key labels, validation, placeholders, helper text. **Keys:** ONLINE_SHOPPING_ENABLED, BUSINESS_HOURS_START/END, BUSINESS_CLOSED_WEEKDAYS, BOOKING_SLOT_MINUTES, BACKORDER_DAYS, SHIPPING_FLAT_RATE, SHIPPING_FREE_THRESHOLD, CANCELLATION_FULL_REFUND_HOURS, CANCELLATION_FEE_PERCENT. Nav group: System.
+- Key-value editor with per-key labels, validation, placeholders, helper text. **Keys:** ONLINE_SHOPPING_ENABLED, BUSINESS_HOURS_START/END, BUSINESS_CLOSED_WEEKDAYS, BOOKING_SLOT_MINUTES, BACKORDER_DAYS, SHIPPING_FLAT_RATE, SHIPPING_FREE_THRESHOLD, CANCELLATION_FULL_REFUND_HOURS, CANCELLATION_FEE_PERCENT, SITE_ANNOUNCEMENT_ENABLED, SITE_ANNOUNCEMENT_TEXT, PAYMENT_MODE. Nav group: System Settings.
 
 ### 3D Configurator options
 **Hardcoded** in [configurator.js](../resources/js/configurator.js) — **not** admin-manageable.
@@ -1027,7 +1027,7 @@ Admin UI uses Filament's English plus `__()`-wrapped custom strings (some widget
 
 ## 25.11 Admin UI/UX
 - Custom branding: brand name "Win Win Car Audio", light/dark logos, Ember-red primary ramp, DM Sans font, `admin.css` responsive overrides.
-- Navigation groups: **Sales · Store Products · Customer Interactions · System Settings (collapsed) · System (collapsed)**.
+- Navigation groups: **Sales · Store Products · Customer Interactions · FAQs · System Settings (collapsed)**.
 - Heroicon navigation icons; nav badges (pending bookings/orders, unread contacts, unresolved logs).
 - Dark/light mode enabled; SPA navigation with skeleton loaders; scroll-to-top button; mobile-responsive collapsible sidebar.
 

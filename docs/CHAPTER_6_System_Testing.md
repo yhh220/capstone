@@ -62,6 +62,8 @@ Most of the bugs fixed during the project were first noticed through this manual
 | Sitemap rejected by Google ("URL not allowed") | Submitting the sitemap in Google Search Console | Deployment / SEO |
 | Map library slowing every page | Running a Google PageSpeed Insights audit on live pages | Front-end performance |
 | Invalid list role on the desktop navigation | An automated accessibility audit of the rendered page | Accessibility / markup |
+| Login button showed its spinner stacked above the label | A user-testing screenshot of the broken button (Livewire reveals loading elements as `inline-block`, overriding the flex classes) | Client-side rendering |
+| Brand marquee scrolled twice as fast on some devices | A tester comparing a 120Hz phone against a 60Hz monitor — the animation advanced per frame instead of per second | Client-side JavaScript |
 
 The workflow that followed each discovery was consistent and is the link between this section and Section 6.9: a bug found by hand was **fixed**, and then (wherever the behaviour could be checked from the server) an **automated regression test was written to lock the fix in place**, so the same problem could not silently reappear.
 
