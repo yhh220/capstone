@@ -196,6 +196,14 @@ class StripeCheckoutRedirectTest extends TestCase
 
         $this->mock(StripeCheckoutService::class, function (MockInterface $mock) {
             $mock->shouldReceive('enabled')->andReturn(true);
+            // The switcher first triages the stored session (an OPEN one is
+            // safe to drop; a completed one blocks the switch — see the
+            // settling-session test below).
+            $mock->shouldReceive('retrieveSession')->once()->with('cs_test_1')->andReturn(Session::constructFrom([
+                'id' => 'cs_test_1',
+                'status' => 'open',
+                'payment_status' => 'unpaid',
+            ]));
             // The old method's live session must die with the switch, or it
             // could still be paid alongside a new one.
             $mock->shouldReceive('expireSession')->once()->with('cs_test_1');
@@ -225,5 +233,60 @@ class StripeCheckoutRedirectTest extends TestCase
             ->call('changePaymentMethod', 'Bitcoin');
 
         $this->assertSame('GrabPay', $order->refresh()->payment_method);
+    }
+
+    public function test_the_method_switcher_refuses_to_drop_a_settling_session(): void
+    {
+        Setting::setValue('PAYMENT_MODE', 'stripe');
+        $order = $this->makeOrder('FPX');
+        $order->update(['stripe_session_id' => 'cs_test_settling']);
+
+        $this->mock(StripeCheckoutService::class, function (MockInterface $mock) {
+            $mock->shouldReceive('enabled')->andReturn(true);
+            $mock->shouldReceive('retrieveSession')->once()->with('cs_test_settling')->andReturn(Session::constructFrom([
+                'id' => 'cs_test_settling',
+                'status' => 'complete',  // checkout finished…
+                'payment_status' => 'unpaid', // …but the FPX payment is still settling
+            ]));
+            // Dropping this session and switching methods would invite a second
+            // charge while the first payment is mid-flight.
+            $mock->shouldReceive('expireSession')->never();
+        });
+
+        Livewire::actingAs($this->user)
+            ->test(PaymentPage::class, ['orderNumber' => $order->order_number])
+            ->call('changePaymentMethod', 'Credit / Debit Card')
+            ->assertSet('paymentProcessing', true);
+
+        $order->refresh();
+        $this->assertSame('FPX', $order->payment_method);
+        $this->assertSame('cs_test_settling', $order->stripe_session_id);
+    }
+
+    public function test_pay_refuses_to_mint_a_session_for_a_cancelled_order(): void
+    {
+        Setting::setValue('PAYMENT_MODE', 'stripe');
+        $order = $this->makeOrder('Credit / Debit Card');
+
+        $this->mock(StripeCheckoutService::class, function (MockInterface $mock) {
+            $mock->shouldReceive('enabled')->andReturn(true);
+            // The whole point: no payable session may ever exist for an order
+            // whose stock was already released back to the shelf.
+            $mock->shouldReceive('createSession')->never();
+        });
+
+        $component = Livewire::actingAs($this->user)
+            ->test(PaymentPage::class, ['orderNumber' => $order->order_number]);
+
+        // Admin cancel / shop-close / expiry job lands between the page render
+        // and the customer's Pay click (the stale-tab scenario).
+        $order->update(['status' => 'cancelled', 'cancelled_by' => 'admin', 'cancellation_reason' => 'Cancelled by admin']);
+
+        $component->call('pay');
+
+        $order->refresh();
+        $this->assertSame('cancelled', $order->status);
+        $this->assertSame('pending', $order->payment_status);
+        $this->assertNull($order->stripe_session_id);
     }
 }

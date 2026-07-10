@@ -368,6 +368,11 @@ class OrderResource extends Resource
                             return;
                         }
 
+                        // Void any open Stripe session so the customer can't ALSO pay
+                        // online after this manual settle (double charge → manual refund).
+                        app(\App\Services\Payments\StripeCheckoutService::class)
+                            ->expireSessionQuietly($claimed->stripe_session_id);
+
                         // Online payment (PaymentPage::pay()) emails the customer on
                         // success; this manual path (e.g. reconciling a bank transfer)
                         // skipped that entirely, so the customer never heard back.
@@ -544,6 +549,11 @@ class OrderResource extends Resource
 
                             return;
                         }
+
+                        // Void any open Stripe session: the stock was just released, so
+                        // a customer still on Stripe's page must not be able to pay.
+                        app(\App\Services\Payments\StripeCheckoutService::class)
+                            ->expireSessionQuietly($order->stripe_session_id);
 
                         $order = $order->fresh('items');
 

@@ -18,12 +18,28 @@
 
     {{-- ════════ EXPIRED / CANCELLED ════════ --}}
     @elseif($order->status === 'cancelled')
+    @php
+        // Only a timer expiry gets the "time expired" story; every other
+        // cancellation (admin cancel, shop closed, customer cancel) would be
+        // lied about by that copy, so it gets an honest generic card instead.
+        $wasExpired = $order->cancelled_by === 'system'
+            && str_contains($order->cancellation_reason ?? '', 'expired');
+    @endphp
     <div class="text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-8 sm:p-12">
         <div class="mx-auto mb-6 flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-500/15 text-red-500">
+            @if($wasExpired)
             <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            @else
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+            @endif
         </div>
+        @if($wasExpired)
         <h1 class="font-display text-3xl uppercase text-gray-900 dark:text-white mb-2">{{ __('Payment Time Expired') }}</h1>
         <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">{{ __('This order was cancelled because payment was not completed in time. The items have been released back to stock — please order again.') }}</p>
+        @else
+        <h1 class="font-display text-3xl uppercase text-gray-900 dark:text-white mb-2">{{ __('Order Cancelled') }}</h1>
+        <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">{{ __('This order has been cancelled and its items returned to stock. If you still want these products, simply place a new order.') }}</p>
+        @endif
         <a href="{{ route('products') }}" wire:navigate class="btn btn-primary btn-md btn-shine !rounded-xl uppercase tracking-widest font-black">{{ __('Back to Products') }}</a>
     </div>
 
@@ -44,11 +60,13 @@
                 <h2 class="font-black text-gray-800 dark:text-white">{{ __('Order') }} <span class="font-mono">{{ $order->order_number }}</span></h2>
                 <div class="flex items-center gap-2">
                     <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">{{ $order->payment_method }}</span>
-                    @if($stripeEnabled)
+                    {{-- No switching while a completed session's payment is settling —
+                         the server guards it too, but don't offer a dead-end button. --}}
+                    @if($stripeEnabled && ! $paymentProcessing)
                     <button type="button" x-on:click="changing = !changing" class="text-xs font-bold text-brand-red hover:underline">{{ __('Change') }}</button>
                     @endif
                 </div>
-                @if($stripeEnabled)
+                @if($stripeEnabled && ! $paymentProcessing)
                 {{-- Escape hatch when the chosen method fails on Stripe's side:
                      switch without cancelling the order or losing the timer. --}}
                 <div x-show="changing" x-cloak style="display:none;" class="w-full flex flex-wrap gap-2 pt-1">
@@ -114,7 +132,11 @@
              it is morph-safe, resets itself when the request settles, and can't
              be left stuck by bfcache when the browser navigates back from
              Stripe. wire:loading.attr disables at request start, and the
-             server-side settle step is idempotent against double-clicks anyway. --}}
+             server-side settle step is idempotent against double-clicks anyway.
+             Hidden while an async payment is settling: the money is already on
+             its way, so offering "Pay" next to "being confirmed" reads like the
+             customer should pay twice. --}}
+        @unless($paymentProcessing)
         <button wire:click="pay" wire:loading.attr="disabled" wire:target="pay"
                 class="btn {{ $isStripeCheckout ? 'btn-stripe' : 'btn-primary' }} btn-shine w-full !py-4 !rounded-xl uppercase tracking-widest font-black disabled:opacity-80 disabled:cursor-not-allowed">
             <span wire:loading.remove wire:target="pay" class="flex items-center justify-center gap-2">
@@ -134,12 +156,15 @@
                 {{ $isStripeCheckout ? __('Redirecting to Stripe...') : __('Processing payment...') }}
             </span>
         </button>
+        @endunless
         <a href="{{ route('account') }}" wire:navigate class="block text-center text-sm text-gray-500 dark:text-gray-400 hover:text-brand-red transition-colors">{{ __('Pay later from My Account') }}</a>
 
+        {{-- Single wrapping span (not loose flex items) so the sentence, link and
+             full stop flow as one line of text instead of wrapping as separate
+             flex chunks on narrow screens. --}}
         <p class="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-1.5">
             <svg class="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
-            {{ __('Paid orders can be cancelled before shipping under our') }}
-            <a href="{{ route('cancellation-refund-policy') }}" target="_blank" class="text-brand-red font-semibold hover:underline">{{ __('Cancellation & Refund Policy') }}</a>.
+            <span>{{ __('Paid orders can be cancelled before shipping under our') }} <a href="{{ route('cancellation-refund-policy') }}" target="_blank" class="text-brand-red font-semibold hover:underline">{{ __('Cancellation & Refund Policy') }}</a>.</span>
         </p>
     </div>
 

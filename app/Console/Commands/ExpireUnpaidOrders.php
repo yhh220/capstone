@@ -31,7 +31,12 @@ class ExpireUnpaidOrders extends Command
 
                 // Re-check under lock so we never double-restock (the on-page
                 // timer may have expired it already via PaymentPage::expireOrder()).
-                if (! $order || $order->payment_status !== 'pending' || $order->status === 'cancelled') {
+                // isPaymentExpired() too: between the pluck above and this lock,
+                // pay() may have created a Stripe session and stretched expires_at
+                // — cancelling then would restock an order whose customer is on
+                // Stripe's checkout page right now.
+                if (! $order || $order->payment_status !== 'pending' || $order->status === 'cancelled'
+                    || ! $order->isPaymentExpired()) {
                     return null;
                 }
 

@@ -166,6 +166,31 @@ class StripeCheckoutService
         $this->client()->checkout->sessions->expire($sessionId);
     }
 
+    /**
+     * Best-effort session void for the paths that take an order out of play
+     * outside the payment page — admin cancel, customer cancel, shop-close,
+     * and manual "Mark Paid". Without it, a customer still sitting on Stripe's
+     * hosted checkout could pay an order that was just cancelled (or already
+     * settled by hand), forcing a manual refund. Deliberately quiet: a
+     * completed/expired session can't be expired (that's fine — the webhook's
+     * duplicate/cancelled alerts cover money that has already moved), and a
+     * Stripe hiccup must never block the cancellation itself. Gated on the
+     * key, not PAYMENT_MODE, so sessions minted before an admin flipped the
+     * mode back to demo still get voided.
+     */
+    public function expireSessionQuietly(?string $sessionId): void
+    {
+        if (blank($sessionId) || ! str_starts_with((string) config('services.stripe.secret'), 'sk_test_')) {
+            return;
+        }
+
+        try {
+            $this->expireSession($sessionId);
+        } catch (ApiErrorException $e) {
+            logger()->info("Stripe session void skipped for {$sessionId}: ".$e->getMessage());
+        }
+    }
+
     private function client(): StripeClient
     {
         return $this->client ??= new StripeClient(config('services.stripe.secret'));

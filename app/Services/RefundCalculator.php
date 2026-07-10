@@ -74,6 +74,13 @@ class RefundCalculator
 
         $refund = $this->calculate($order);
 
+        // Defensive: paid orders always get paid_at stamped by every code path,
+        // but a row edited outside the app (import, manual SQL) without one
+        // must degrade to a neutral label, not crash the whole orders table.
+        if ($refund === null) {
+            return 'Refund window unknown — no payment date recorded.';
+        }
+
         return $refund['tier'] === 'full'
             ? 'Eligible for full refund if cancelled now.'
             : "Eligible for a {$refund['percentage']}% refund if cancelled now ({$this->feePercent()}% fee applies).";

@@ -177,7 +177,10 @@ class CheckoutPage extends Component
         $this->validate();
 
         // Throttle order creation — a scripted account shouldn't be able to
-        // flood the orders table with junk.
+        // flood the orders table with junk. The hit is recorded only after the
+        // order actually commits (below): a failed attempt (stock conflict,
+        // deactivated product) creates no order, so it must not eat into the
+        // 5-orders-per-hour budget of a customer who is just retrying.
         $throttleKey = 'checkout:'.Auth::id();
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
@@ -185,7 +188,6 @@ class CheckoutPage extends Component
 
             return;
         }
-        RateLimiter::hit($throttleKey, 3600);
 
         if (CartItem::forCurrentOwner()->count() === 0) {
             $this->redirect(route('cart'));
@@ -327,6 +329,8 @@ class CheckoutPage extends Component
 
             return;
         }
+
+        RateLimiter::hit($throttleKey, 3600);
 
         // Redirect to the payment page; confirmation email is sent once payment succeeds.
         $this->redirect(route('payment', $order->order_number), navigate: false);

@@ -154,9 +154,30 @@ class StripeWebhookTest extends TestCase
 
         $this->postWebhook($this->sessionPayload($order, type: 'checkout.session.async_payment_failed', overrides: ['payment_status' => 'unpaid']))->assertOk();
 
-        $this->assertSame('pending', $order->refresh()->payment_status);
+        $order->refresh();
+        $this->assertSame('pending', $order->payment_status);
+        // The dead session must be detached: while it stayed recorded, the
+        // payment page kept reporting "still being confirmed" and refused to
+        // mint a fresh session — the customer could never retry.
+        $this->assertNull($order->stripe_session_id);
         Mail::assertSent(OwnerAlertMail::class, 1);
         Mail::assertNotSent(OrderConfirmationMail::class);
+    }
+
+    public function test_async_payment_failure_of_an_old_session_never_drops_a_newer_one(): void
+    {
+        Mail::fake();
+        $order = $this->makeOrder();
+        // The customer already switched methods / retried: the order now holds
+        // a NEWER session than the one this failure event is about.
+        $order->update(['stripe_session_id' => 'cs_test_newer']);
+
+        $this->postWebhook($this->sessionPayload($order, type: 'checkout.session.async_payment_failed', overrides: [
+            'id' => 'cs_test_1', // the old, failed session
+            'payment_status' => 'unpaid',
+        ]))->assertOk();
+
+        $this->assertSame('cs_test_newer', $order->refresh()->stripe_session_id);
     }
 
     public function test_payment_for_a_cancelled_order_never_uncancels_and_flags_a_manual_refund(): void

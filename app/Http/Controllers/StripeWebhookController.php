@@ -63,7 +63,17 @@ class StripeWebhookController extends Controller
 
         if ($event->type === 'checkout.session.async_payment_failed') {
             logger()->warning("Stripe async payment failed for order {$order->order_number} (session {$session->id})");
-            $this->alertOwner($order, $session, 'Stripe payment failed', 'The customer\'s bank/wallet payment did not complete. The order stays pending and will auto-expire as usual.');
+
+            // Detach the dead session from the order — a completed-but-failed
+            // session can never be paid or reused, and while it stayed recorded
+            // the payment page kept showing "still being confirmed" and refused
+            // to mint a fresh session, dead-ending the customer until expiry.
+            // Guarded to THIS session id so a newer live session is never dropped.
+            Order::where('id', $order->id)
+                ->where('stripe_session_id', $session->id)
+                ->update(['stripe_session_id' => null]);
+
+            $this->alertOwner($order, $session, 'Stripe payment failed', 'The customer\'s bank/wallet payment did not complete. They can retry from the payment page; the order auto-expires as usual if unpaid.');
 
             return response('OK', 200);
         }

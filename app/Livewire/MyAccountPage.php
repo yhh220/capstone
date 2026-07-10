@@ -152,6 +152,11 @@ class MyAccountPage extends Component
             return;
         }
 
+        // Void any open Stripe session for the cancelled order — a still-open
+        // checkout tab must not be able to pay for stock that was just released.
+        app(\App\Services\Payments\StripeCheckoutService::class)
+            ->expireSessionQuietly($order->stripe_session_id);
+
         $order = $order->fresh('items');
 
         try {

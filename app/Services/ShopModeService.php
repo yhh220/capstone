@@ -51,6 +51,12 @@ class ShopModeService
             });
 
             if ($order) {
+                // Void any open Stripe session — closing the shop released this
+                // order's stock, so a customer mid-checkout on Stripe's page
+                // must not be able to complete the payment.
+                app(Payments\StripeCheckoutService::class)
+                    ->expireSessionQuietly($order->stripe_session_id);
+
                 $cancelled[] = $order;
             }
         }

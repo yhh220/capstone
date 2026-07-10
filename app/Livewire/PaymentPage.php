@@ -110,6 +110,16 @@ class PaymentPage extends Component
             try {
                 $this->order->refresh();
 
+                // Re-check the order is still payable under the lock: an admin
+                // cancel, shop-close, or the expiry job may have cancelled it
+                // since this page rendered (a stale tab's Pay click). Without
+                // this, a brand-new payable session would be minted for a
+                // cancelled, already-restocked order. Mirrors the demo path,
+                // where markPaid() re-checks awaiting-payment under its lock.
+                if (! $this->order->isAwaitingPayment()) {
+                    return;
+                }
+
                 // A session this order already holds may have been paid (webhook
                 // lag, a second tab) or be mid-settlement (FPX) — never mint a
                 // new charge in either case.
@@ -190,9 +200,17 @@ class PaymentPage extends Component
             }
 
             // Kill any live session for the old method so it can't be paid
-            // later alongside a new one. An already-completed session can't be
-            // expired — that's fine, the webhook/duplicate alert covers it.
+            // later alongside a new one. But NEVER switch away from a session
+            // the customer already completed: its money may have arrived
+            // (settle it) or its async FPX/GrabPay payment may still be
+            // settling (show the processing notice) — in both cases switching
+            // methods now would invite a second charge on the new method.
+            // checkExistingSession() does exactly that triage.
             if ($this->order->stripe_session_id) {
+                if ($this->checkExistingSession()) {
+                    return;
+                }
+
                 try {
                     $stripe->expireSession($this->order->stripe_session_id);
                 } catch (ApiErrorException $e) {
