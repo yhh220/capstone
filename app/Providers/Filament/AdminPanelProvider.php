@@ -2,6 +2,16 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
+use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Dashboard;
+use App\Filament\Widgets\RecentActivityWidget;
+use App\Filament\Widgets\RevenueChart;
+use App\Filament\Widgets\StatsOverview;
+use App\Filament\Widgets\TopProductsChart;
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\LogoutAdminGuardOnly;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -28,7 +38,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->authGuard('admin')
-            ->login(\App\Filament\Pages\Auth\Login::class)
+            ->login(Login::class)
             // Without this, Filament links carry no wire:navigate attribute at all —
             // every sidebar click was a full hard page reload (re-running the whole
             // Laravel + Filament bootstrap), which is what made navigation feel slow
@@ -36,11 +46,11 @@ class AdminPanelProvider extends PanelProvider
             ->spa()
             // Profile page lets admins manage their account + set up 2FA.
             // Custom subclass adds a confirmation step before the post-password-change logout.
-            ->profile(\App\Filament\Pages\Auth\EditProfile::class)
+            ->profile(EditProfile::class)
             // Optional app (TOTP) two-factor auth with recovery codes. Admins
             // opt in from their profile; not forced, so no one gets locked out.
             ->multiFactorAuthentication([
-                \Filament\Auth\MultiFactor\App\AppAuthentication::make()->recoverable(),
+                AppAuthentication::make()->recoverable(),
             ])
 
             // ── Branding ──────────────────────────────────────────────
@@ -63,7 +73,7 @@ class AdminPanelProvider extends PanelProvider
                 // explicit palette because Color::hex() only keeps the hue and forces
                 // its own lightness ramp, which washes the brand red out to salmon.
                 'primary' => [
-                    50  => '#fdf3f2',
+                    50 => '#fdf3f2',
                     100 => '#fbe4e3',
                     200 => '#f7cdcb',
                     300 => '#efa9a5',
@@ -75,8 +85,8 @@ class AdminPanelProvider extends PanelProvider
                     900 => '#722827',
                     950 => '#3e110f',
                 ],
-                'danger'  => [
-                    50  => '#fdf3f2',
+                'danger' => [
+                    50 => '#fdf3f2',
                     100 => '#fbe4e3',
                     200 => '#f7cdcb',
                     300 => '#efa9a5',
@@ -88,10 +98,10 @@ class AdminPanelProvider extends PanelProvider
                     900 => '#722827',
                     950 => '#3e110f',
                 ],
-                'info'    => Color::Sky,
+                'info' => Color::Sky,
                 'success' => Color::Emerald,
                 'warning' => Color::Amber,
-                'gray'    => Color::Zinc,
+                'gray' => Color::Zinc,
             ])
 
             // ── Notifications ─────────────────────────────────────────
@@ -125,9 +135,8 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Sales'),
                 NavigationGroup::make('Store Products'),
                 NavigationGroup::make('Customer Interactions'),
+                NavigationGroup::make('FAQs'),
                 NavigationGroup::make('System Settings')
-                    ->collapsed(),
-                NavigationGroup::make('System')
                     ->collapsed(),
             ])
 
@@ -135,15 +144,15 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
-                \App\Filament\Pages\Dashboard::class,
+                Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
-                \App\Filament\Widgets\StatsOverview::class,
-                \App\Filament\Widgets\RevenueChart::class,
-                \App\Filament\Widgets\TopProductsChart::class,
-                \App\Filament\Widgets\RecentActivityWidget::class,
+                StatsOverview::class,
+                RevenueChart::class,
+                TopProductsChart::class,
+                RecentActivityWidget::class,
             ])
 
             // ── Middleware ────────────────────────────────────────────
@@ -160,8 +169,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                \App\Http\Middleware\LogoutAdminGuardOnly::class,
-                \App\Http\Middleware\AdminMiddleware::class,
+                LogoutAdminGuardOnly::class,
+                AdminMiddleware::class,
             ]);
     }
 }

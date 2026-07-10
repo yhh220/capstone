@@ -18,14 +18,20 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\HtmlString;
 
 class LogResource extends Resource
 {
     protected static ?string $model = AppLog::class;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
-    protected static \UnitEnum|string|null $navigationGroup = 'System';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'System Settings';
+
     protected static ?int $navigationSort = 93;
+
     protected static ?string $navigationLabel = 'Logs';
+
     protected static ?string $modelLabel = 'log entry';
 
     public static function canViewAny(): bool
@@ -56,10 +62,10 @@ class LogResource extends Resource
         return $table
             ->defaultSort('id', 'desc')
             ->description(fn (): ?\Illuminate\Contracts\Support\Htmlable => request()->query('trace_id')
-                ? new \Illuminate\Support\HtmlString(
+                ? new HtmlString(
                     '<span class="text-sm">Showing only the log lines from one request (trace <code class="font-mono">'
-                    . e(request()->query('trace_id'))
-                    . '</code>). <a href="' . static::getUrl('index') . '" class="underline font-semibold">Clear</a></span>'
+                    .e(request()->query('trace_id'))
+                    .'</code>). <a href="'.static::getUrl('index').'" class="underline font-semibold">Clear</a></span>'
                 )
                 : null)
             // "View trace" links here with ?trace_id=... . Table filters are a
@@ -90,7 +96,7 @@ class LogResource extends Resource
                     ->trueColor('success')
                     ->falseColor('gray')
                     ->tooltip(fn (AppLog $record): string => $record->resolved_at
-                        ? 'Marked fixed ' . $record->resolved_at->diffForHumans()
+                        ? 'Marked fixed '.$record->resolved_at->diffForHumans()
                         : 'Not marked fixed'),
             ])
             ->filters([
@@ -108,7 +114,7 @@ class LogResource extends Resource
                 Filter::make('trace')
                     ->schema([Forms\Components\TextInput::make('trace_id')->label('Trace ID')])
                     ->query(fn ($query, array $data) => $query->when($data['trace_id'] ?? null, fn ($q, $t) => $q->where('trace_id', $t)))
-                    ->indicateUsing(fn (array $data): ?string => ($data['trace_id'] ?? null) ? 'Trace: ' . $data['trace_id'] : null),
+                    ->indicateUsing(fn (array $data): ?string => ($data['trace_id'] ?? null) ? 'Trace: '.$data['trace_id'] : null),
                 Filter::make('logged_at')
                     ->schema([
                         Forms\Components\DatePicker::make('from')->label('From'),
@@ -120,7 +126,7 @@ class LogResource extends Resource
             ])
             ->recordActions([
                 Action::make('details')->label('Details')->icon(Heroicon::OutlinedEye)
-                    ->modalHeading(fn (AppLog $record): string => strtoupper($record->level_name) . ' · ' . $record->logged_at->format('d M Y H:i:s'))
+                    ->modalHeading(fn (AppLog $record): string => strtoupper($record->level_name).' · '.$record->logged_at->format('d M Y H:i:s'))
                     ->modalContent(fn (AppLog $record) => view('filament.logs.detail', ['log' => $record]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close'),
@@ -141,18 +147,20 @@ class LogResource extends Resource
                         if ($state === 'active') {
                             Notification::make()
                                 ->title('Still happening')
-                                ->body('This error last occurred ' . $lastSeen->diffForHumans() . ' — too recent to call fixed. Leaving it open.')
+                                ->body('This error last occurred '.$lastSeen->diffForHumans().' — too recent to call fixed. Leaving it open.')
                                 ->warning()
                                 ->send();
+
                             return;
                         }
 
                         if ($state === 'recurred') {
                             Notification::make()
                                 ->title('Still recurring')
-                                ->body('This error happened again after this entry (last seen ' . $lastSeen->diffForHumans() . ') — leaving it open.')
+                                ->body('This error happened again after this entry (last seen '.$lastSeen->diffForHumans().') — leaving it open.')
                                 ->warning()
                                 ->send();
+
                             return;
                         }
 
@@ -161,7 +169,7 @@ class LogResource extends Resource
 
                         Notification::make()
                             ->title('No recurrence found')
-                            ->body('Last seen ' . $lastSeen->diffForHumans() . ", so {$resolved} log " . str('entry')->plural($resolved) . ' marked resolved. This only reflects log history — it has not re-tested the underlying code.')
+                            ->body('Last seen '.$lastSeen->diffForHumans().", so {$resolved} log ".str('entry')->plural($resolved).' marked resolved. This only reflects log history — it has not re-tested the underlying code.')
                             ->success()
                             ->send();
                     }),
@@ -177,7 +185,7 @@ class LogResource extends Resource
                     BulkAction::make('markFixedBulk')->label('Mark fixed')->icon(Heroicon::OutlinedCheckCircle)->color('success')
                         ->action(function (Collection $records): void {
                             $records->each(fn (AppLog $log) => $log->resolved_at ?? $log->update(['resolved_at' => now()]));
-                            Notification::make()->title('Marked ' . $records->count() . ' log entr' . ($records->count() === 1 ? 'y' : 'ies') . ' fixed')->success()->send();
+                            Notification::make()->title('Marked '.$records->count().' log entr'.($records->count() === 1 ? 'y' : 'ies').' fixed')->success()->send();
                         })
                         ->deselectRecordsAfterCompletion(),
                 ]),

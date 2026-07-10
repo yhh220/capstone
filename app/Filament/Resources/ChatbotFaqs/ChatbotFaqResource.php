@@ -6,6 +6,7 @@ use App\Models\ChatbotFaq;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -17,14 +18,18 @@ use Filament\Tables\Table;
 class ChatbotFaqResource extends Resource
 {
     protected static ?string $model = ChatbotFaq::class;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
-    protected static \UnitEnum|string|null $navigationGroup = 'System';
-    protected static ?int $navigationSort = 90;
+
+    protected static \UnitEnum|string|null $navigationGroup = 'FAQs';
+
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $navigationLabel = 'Chatbot FAQs';
 
     public static function canViewAny(): bool
     {
-        return \Filament\Facades\Filament::auth()->user()?->isAdmin() ?? false;
+        return Filament::auth()->user()?->isAdmin() ?? false;
     }
 
     public static function form(Schema $schema): Schema
@@ -38,9 +43,9 @@ class ChatbotFaqResource extends Resource
             Forms\Components\Select::make('priority')
                 ->label('Answer priority')
                 ->options([
-                    15  => 'Low — only if nothing better matches',
-                    50  => 'Normal (default)',
-                    75  => 'High — prefer this answer',
+                    15 => 'Low — only if nothing better matches',
+                    50 => 'Normal (default)',
+                    75 => 'High — prefer this answer',
                     100 => 'Highest — always answer this first',
                 ])
                 ->default(50)
@@ -73,7 +78,7 @@ class ChatbotFaqResource extends Resource
                 ->helperText('Optional — falls back to the English reply when empty.')
                 ->columnSpanFull(),
         ])
-        ->columns(['default' => 1, 'sm' => 2]);
+            ->columns(['default' => 1, 'sm' => 2]);
     }
 
     public static function table(Table $table): Table
@@ -89,22 +94,22 @@ class ChatbotFaqResource extends Resource
                     ->badge()
                     ->limitList(4)
                     ->separator(',')
-                    ->tooltip(fn ($record) => 'Triggers on: ' . (is_array($record->keywords) ? implode(', ', $record->keywords) : $record->keywords)),
+                    ->tooltip(fn ($record) => 'Triggers on: '.(is_array($record->keywords) ? implode(', ', $record->keywords) : $record->keywords)),
                 TextColumn::make('priority')
                     ->label('Priority')
                     ->sortable()
                     ->badge()
                     ->formatStateUsing(fn (int $state): string => match (true) {
                         $state >= 100 => 'Highest',
-                        $state >= 75  => 'High',
-                        $state >= 40  => 'Normal',
-                        default       => 'Low',
+                        $state >= 75 => 'High',
+                        $state >= 40 => 'Normal',
+                        default => 'Low',
                     })
                     ->color(fn (int $state): string => match (true) {
                         $state >= 100 => 'danger',
-                        $state >= 75  => 'warning',
-                        $state >= 40  => 'gray',
-                        default       => 'gray',
+                        $state >= 75 => 'warning',
+                        $state >= 40 => 'gray',
+                        default => 'gray',
                     })
                     ->tooltip('Determines priority order when multiple triggering keywords match'),
                 IconColumn::make('is_active')
@@ -127,9 +132,9 @@ class ChatbotFaqResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListChatbotFaqs::route('/'),
+            'index' => Pages\ListChatbotFaqs::route('/'),
             'create' => Pages\CreateChatbotFaq::route('/create'),
-            'edit'   => Pages\EditChatbotFaq::route('/{record}/edit'),
+            'edit' => Pages\EditChatbotFaq::route('/{record}/edit'),
         ];
     }
 }

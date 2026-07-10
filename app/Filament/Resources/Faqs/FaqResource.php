@@ -6,6 +6,7 @@ use App\Models\Faq;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -17,14 +18,18 @@ use Filament\Tables\Table;
 class FaqResource extends Resource
 {
     protected static ?string $model = Faq::class;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQuestionMarkCircle;
-    protected static \UnitEnum|string|null $navigationGroup = 'System';
-    protected static ?int $navigationSort = 89;
+
+    protected static \UnitEnum|string|null $navigationGroup = 'FAQs';
+
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $navigationLabel = 'FAQ Page';
 
     public static function canViewAny(): bool
     {
-        return \Filament\Facades\Filament::auth()->user()?->isAdmin() ?? false;
+        return Filament::auth()->user()?->isAdmin() ?? false;
     }
 
     public static function form(Schema $schema): Schema
@@ -33,9 +38,9 @@ class FaqResource extends Resource
             Forms\Components\Select::make('category')
                 ->label('Category')
                 ->options([
-                    'Orders & Payment'    => 'Orders & Payment',
+                    'Orders & Payment' => 'Orders & Payment',
                     'Bookings & Showroom' => 'Bookings & Showroom',
-                    'Products & Support'  => 'Products & Support',
+                    'Products & Support' => 'Products & Support',
                 ])
                 ->native(false)
                 ->searchable()
@@ -100,9 +105,9 @@ class FaqResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListFaqs::route('/'),
+            'index' => Pages\ListFaqs::route('/'),
             'create' => Pages\CreateFaq::route('/create'),
-            'edit'   => Pages\EditFaq::route('/{record}/edit'),
+            'edit' => Pages\EditFaq::route('/{record}/edit'),
         ];
     }
 }
