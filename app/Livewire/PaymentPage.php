@@ -30,6 +30,16 @@ class PaymentPage extends Component
      */
     public bool $paymentProcessing = false;
 
+    /**
+     * Labels the on-page method switcher may set. Bare 'FPX' (no bank suffix)
+     * because the switcher only exists in Stripe mode, where the bank is
+     * chosen on Stripe's hosted page.
+     */
+    public const SWITCHABLE_METHODS = [
+        'FPX', 'GrabPay', 'Credit / Debit Card',
+        "Touch 'n Go eWallet", 'ShopeePay', 'Boost',
+    ];
+
     public function mount(string $orderNumber): void
     {
         if (! Auth::check()) {
@@ -148,6 +158,57 @@ class PaymentPage extends Component
         // stays at its old scroll offset and the success card ends up off-screen
         // above the fold, looking like it landed in the footer.
         $this->dispatch('scroll-top');
+    }
+
+    /**
+     * Switch a pending order's payment method from the payment page — the
+     * escape hatch for a method that fails on Stripe's side (e.g. a wallet the
+     * account has not activated). Stripe mode only: in demo mode the method is
+     * cosmetic and the demo flip succeeds regardless.
+     */
+    public function changePaymentMethod(string $method): void
+    {
+        $stripe = app(StripeCheckoutService::class);
+
+        if (! $stripe->enabled() || ! in_array($method, self::SWITCHABLE_METHODS, true)) {
+            return;
+        }
+
+        // Same lock as pay(): a method change must not race session creation.
+        $lock = Cache::lock('stripe-session:'.$this->order->id, 15);
+        if (! $lock->get()) {
+            return;
+        }
+
+        try {
+            $this->order->refresh();
+
+            if (! $this->order->isAwaitingPayment()
+                || $this->order->isPaymentExpired()
+                || $method === $this->order->payment_method) {
+                return;
+            }
+
+            // Kill any live session for the old method so it can't be paid
+            // later alongside a new one. An already-completed session can't be
+            // expired — that's fine, the webhook/duplicate alert covers it.
+            if ($this->order->stripe_session_id) {
+                try {
+                    $stripe->expireSession($this->order->stripe_session_id);
+                } catch (ApiErrorException $e) {
+                    logger()->warning('Stripe session expire on method change failed for '.$this->order->order_number.': '.$e->getMessage());
+                }
+            }
+
+            // Eloquent update so activitylog records the method change.
+            $this->order->update([
+                'payment_method' => $method,
+                'stripe_session_id' => null,
+            ]);
+            $this->order->refresh();
+        } finally {
+            $lock->release();
+        }
     }
 
     /**
@@ -305,11 +366,23 @@ class PaymentPage extends Component
     public function render()
     {
         $stripe = app(StripeCheckoutService::class);
+        $stripeEnabled = $stripe->enabled();
 
         return view('livewire.payment-page', [
             // Drives the pay-button copy + notice: Stripe test-mode vs demo.
-            'isStripeCheckout' => $stripe->enabled()
+            'isStripeCheckout' => $stripeEnabled
                 && StripeCheckoutService::paymentMethodTypesFor($this->order->payment_method) !== null,
+            // The method switcher shows for ANY pending order in Stripe mode —
+            // including one currently on a demo wallet, so it can switch back.
+            'stripeEnabled' => $stripeEnabled,
+            'methodOptions' => [
+                'FPX' => __('FPX Online Banking'),
+                'GrabPay' => 'GrabPay',
+                'Credit / Debit Card' => __('Credit / Debit Card'),
+                "Touch 'n Go eWallet" => "Touch 'n Go eWallet",
+                'ShopeePay' => 'ShopeePay',
+                'Boost' => 'Boost',
+            ],
         ])->layout('layouts.app');
     }
 }

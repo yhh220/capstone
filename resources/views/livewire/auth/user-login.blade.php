@@ -113,7 +113,7 @@
                                     {{ __('Verify & Continue') }}
                                     <svg class="icon-sm icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                                 </span>
-                                <span wire:loading wire:target="verifyLoginOtp" class="inline-flex items-center gap-2">
+                                <span wire:loading.inline-flex wire:target="verifyLoginOtp" class="inline-flex items-center gap-2">
                                     <svg class="icon-sm icon-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                                     {{ __('Verifying...') }}
                                 </span>
@@ -168,7 +168,7 @@
                                     {{ __('Verify & Continue') }}
                                     <svg class="icon-sm icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                                 </span>
-                                <span wire:loading wire:target="verifyRegistrationOtp" class="inline-flex items-center gap-2">
+                                <span wire:loading.inline-flex wire:target="verifyRegistrationOtp" class="inline-flex items-center gap-2">
                                     <svg class="icon-sm icon-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                                     {{ __('Verifying...') }}
                                 </span>
@@ -281,7 +281,7 @@
                                     {{ __('Sign In') }}
                                     <svg class="icon-sm icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                                 </span>
-                                <span wire:loading wire:target="login" class="inline-flex items-center gap-2">
+                                <span wire:loading.inline-flex wire:target="login" class="inline-flex items-center gap-2">
                                     <svg class="icon-sm icon-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                                     {{ __('Signing in...') }}
                                 </span>
@@ -411,7 +411,7 @@
                                     {{ __('Create Account') }}
                                     <svg class="icon-sm btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
                                 </span>
-                                <span wire:loading wire:target="register" class="inline-flex items-center gap-2">
+                                <span wire:loading.inline-flex wire:target="register" class="inline-flex items-center gap-2">
                                     <svg class="icon-sm icon-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                                     {{ __('Creating account...') }}
                                 </span>

@@ -91,10 +91,12 @@
                 <div>
                     <label for="co-state" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('State') }} *</label>
                     <select wire:model="state" id="co-state" autocomplete="address-level1" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
-                        @foreach(['Selangor','Kuala Lumpur','Johor','Penang','Perak','Pahang','Negeri Sembilan','Melaka','Kedah','Kelantan','Terengganu','Perlis','Sabah','Sarawak','Putrajaya','Labuan'] as $s)
+                        @foreach(\App\Support\DeliveryArea::STATES as $s)
                             <option value="{{ $s }}">{{ $s }}</option>
                         @endforeach
                     </select>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('Delivery to Sabah, Sarawak and Labuan is currently unavailable.') }}</p>
+                    @error('state') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label for="co-notes" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Order Notes') }}</label>

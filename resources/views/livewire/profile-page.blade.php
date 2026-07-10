@@ -73,10 +73,16 @@
                         <label for="pf-state" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('State') }}</label>
                         <select wire:model="state" id="pf-state" autocomplete="address-level1" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                             <option value="">{{ __('Select State') }}</option>
-                            @foreach(['Selangor','Kuala Lumpur','Johor','Penang','Perak','Pahang','Negeri Sembilan','Melaka','Kedah','Kelantan','Terengganu','Perlis','Sabah','Sarawak','Putrajaya','Labuan'] as $s)
+                            @foreach(\App\Support\DeliveryArea::STATES as $s)
                                 <option value="{{ $s }}">{{ $s }}</option>
                             @endforeach
+                            {{-- A legacy East-Malaysia address stays selectable so the
+                                 saved value still displays; new picks are West MY only. --}}
+                            @if(in_array($state, ['Sabah', 'Sarawak', 'Labuan'], true))
+                                <option value="{{ $state }}">{{ $state }}</option>
+                            @endif
                         </select>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('Delivery to Sabah, Sarawak and Labuan is currently unavailable.') }}</p>
                     </div>
                 </div>
             </div>

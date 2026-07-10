@@ -10,10 +10,12 @@ use App\Models\Product;
 use App\Services\Payments\StripeCheckoutService;
 use App\Services\ShippingCalculator;
 use App\Support\Breadcrumbs;
+use App\Support\DeliveryArea;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class CheckoutPage extends Component
@@ -63,16 +65,21 @@ class CheckoutPage extends Component
     /** Max units of any single product per order (backorder sanity cap). */
     public const MAX_QTY_PER_ITEM = 99;
 
-    protected $rules = [
-        'customerName' => 'required|string|max:255',
-        'customerEmail' => 'required|email|max:255',
-        'customerPhone' => 'required|string|regex:/^[0-9]{8,15}$/',
-        'street' => 'required|string|max:500',
-        'city' => 'required|string|max:255',
-        'postcode' => 'required|digits:5',
-        'state' => 'required|string|max:100',
-        'orderNotes' => 'nullable|string|max:1000',
-    ];
+    protected function rules(): array
+    {
+        return [
+            'customerName' => 'required|string|max:255',
+            'customerEmail' => 'required|email|max:255',
+            'customerPhone' => 'required|string|regex:/^[0-9]{8,15}$/',
+            'street' => 'required|string|max:500',
+            'city' => 'required|string|max:255',
+            'postcode' => 'required|digits:5',
+            // Whitelisted to deliverable states — East Malaysia is not served,
+            // so a crafted request can't order to an address we can't ship to.
+            'state' => ['required', 'string', Rule::in(DeliveryArea::STATES)],
+            'orderNotes' => 'nullable|string|max:1000',
+        ];
+    }
 
     public function mount(): void
     {

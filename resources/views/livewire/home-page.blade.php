@@ -515,8 +515,11 @@
             // Kill any loop left over from a previous page before starting one.
             if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
 
-            const BASE_SPEED = 0.18; // px per frame (~11px/s at 60fps)
-            let pos = 0, speed = BASE_SPEED, target = BASE_SPEED, halfW = 0;
+            // px per SECOND, applied against real elapsed time — a per-frame
+            // increment would tie the scroll speed to the display refresh rate
+            // (a 120Hz iPhone scrolled exactly twice as fast as a 60Hz monitor).
+            const BASE_SPEED = 11;
+            let pos = 0, speed = BASE_SPEED, target = BASE_SPEED, halfW = 0, lastTs = null;
             // Measure the width of one copy and (re)start one copy to the left so
             // the rightward scroll always has content to reveal. Logos are images
             // that load after first paint and change the track width, so we
@@ -544,12 +547,15 @@
             wrapper.addEventListener('mouseenter', () => { target = 0; });
             wrapper.addEventListener('mouseleave', () => { target = BASE_SPEED; });
 
-            function tick() {
+            function tick(ts) {
                 // Stop once the track is gone (navigated away) instead of
                 // burning frames forever on a detached element.
                 if (!track.isConnected) { rafId = null; return; }
-                speed += (target - speed) * 0.1;
-                pos   += speed;                          // move the track right
+                // Clamp dt so a background-tab pause can't teleport the strip.
+                const dt = lastTs === null ? 0 : Math.min((ts - lastTs) / 1000, 0.1);
+                lastTs = ts;
+                speed += (target - speed) * Math.min(dt * 6, 1); // ease over ~⅙s, rate-independent
+                pos   += speed * dt;                     // move the track right
                 // Seamless wrap — keep pos within one copy width either way, so a
                 // re-measure that changed halfW can never cause a visible jump.
                 if (halfW > 0) {

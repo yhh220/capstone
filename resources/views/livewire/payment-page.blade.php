@@ -40,9 +40,27 @@
 
         {{-- Order summary --}}
         <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4" x-data="{ changing: false }">
                 <h2 class="font-black text-gray-800 dark:text-white">{{ __('Order') }} <span class="font-mono">{{ $order->order_number }}</span></h2>
-                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">{{ $order->payment_method }}</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">{{ $order->payment_method }}</span>
+                    @if($stripeEnabled)
+                    <button type="button" x-on:click="changing = !changing" class="text-xs font-bold text-brand-red hover:underline">{{ __('Change') }}</button>
+                    @endif
+                </div>
+                @if($stripeEnabled)
+                {{-- Escape hatch when the chosen method fails on Stripe's side:
+                     switch without cancelling the order or losing the timer. --}}
+                <div x-show="changing" x-cloak style="display:none;" class="w-full flex flex-wrap gap-2 pt-1">
+                    @foreach($methodOptions as $value => $label)
+                    <button type="button" wire:click="changePaymentMethod({{ Js::from($value) }})" x-on:click="changing = false"
+                            wire:loading.attr="disabled"
+                            class="px-3 py-1.5 rounded-lg border-2 text-xs font-bold transition-colors {{ $order->payment_method === $value ? 'border-brand-red text-brand-red bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-brand-red hover:text-brand-red' }}">
+                        {{ $label }}
+                    </button>
+                    @endforeach
+                </div>
+                @endif
             </div>
             @foreach($order->items as $item)
             <div class="flex justify-between items-center py-2 text-sm border-b border-gray-50 dark:border-gray-700/50">

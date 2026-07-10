@@ -187,4 +187,43 @@ class StripeCheckoutRedirectTest extends TestCase
 
         $this->assertFalse(app(StripeCheckoutService::class)->enabled());
     }
+
+    public function test_the_method_switcher_updates_the_order_and_kills_the_old_session(): void
+    {
+        Setting::setValue('PAYMENT_MODE', 'stripe');
+        $order = $this->makeOrder('GrabPay');
+        $order->update(['stripe_session_id' => 'cs_test_1']);
+
+        $this->mock(StripeCheckoutService::class, function (MockInterface $mock) {
+            $mock->shouldReceive('enabled')->andReturn(true);
+            // The old method's live session must die with the switch, or it
+            // could still be paid alongside a new one.
+            $mock->shouldReceive('expireSession')->once()->with('cs_test_1');
+        });
+
+        Livewire::actingAs($this->user)
+            ->test(PaymentPage::class, ['orderNumber' => $order->order_number])
+            ->call('changePaymentMethod', 'Credit / Debit Card');
+
+        $order->refresh();
+        $this->assertSame('Credit / Debit Card', $order->payment_method);
+        $this->assertNull($order->stripe_session_id);
+    }
+
+    public function test_the_method_switcher_rejects_labels_outside_the_whitelist(): void
+    {
+        Setting::setValue('PAYMENT_MODE', 'stripe');
+        $order = $this->makeOrder('GrabPay');
+
+        $this->mock(StripeCheckoutService::class, function (MockInterface $mock) {
+            $mock->shouldReceive('enabled')->andReturn(true);
+            $mock->shouldReceive('expireSession')->never();
+        });
+
+        Livewire::actingAs($this->user)
+            ->test(PaymentPage::class, ['orderNumber' => $order->order_number])
+            ->call('changePaymentMethod', 'Bitcoin');
+
+        $this->assertSame('GrabPay', $order->refresh()->payment_method);
+    }
 }

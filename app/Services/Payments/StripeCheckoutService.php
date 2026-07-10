@@ -101,7 +101,7 @@ class StripeCheckoutService
                     // (admin edit while pending): kill the stale session so the
                     // old amount can never be paid, then mint a correct one.
                     try {
-                        $this->client()->checkout->sessions->expire($existing->id);
+                        $this->expireSession($existing->id);
                     } catch (ApiErrorException $e) {
                         logger()->warning('Stripe stale-session expire failed for '.$order->order_number.': '.$e->getMessage());
                     }
@@ -153,6 +153,17 @@ class StripeCheckoutService
     public function retrieveSession(string $sessionId): Session
     {
         return $this->client()->checkout->sessions->retrieve($sessionId);
+    }
+
+    /**
+     * Invalidate an open session so it can never be paid (throws if the
+     * session is not open — completed/expired sessions can't be expired).
+     *
+     * @throws ApiErrorException
+     */
+    public function expireSession(string $sessionId): void
+    {
+        $this->client()->checkout->sessions->expire($sessionId);
     }
 
     private function client(): StripeClient
