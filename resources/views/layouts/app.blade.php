@@ -389,6 +389,10 @@
             text-decoration: none;
             white-space: normal;
             overflow-wrap: anywhere;
+            /* justify-content centres the icon+label row, but once the label
+               wraps to two lines the text itself was left-ragged and the whole
+               button read lopsided (narrow contact-page quick actions). */
+            text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease,
                         background-color 0.3s ease, border-color 0.3s ease,
                         color 0.3s ease;

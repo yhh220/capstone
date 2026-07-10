@@ -41,7 +41,7 @@
 
             <section>
                 <h2 class="text-xl font-black text-gray-900 dark:text-white mb-3">{{ __('5. How Refunds Are Sent') }}</h2>
-                <p>{{ __("When you cancel a paid order, the refund amount is recorded immediately and you'll get an email confirming it. Because our online checkout is a demo payment flow (no live payment gateway is connected), the actual transfer back to you is handled manually by our team — you'll receive a second, separate email once that refund has actually been sent.") }}</p>
+                <p>{{ __("When you cancel a paid order, the refund amount is recorded immediately and you'll get an email confirming it. Refunds are returned to your original payment method by our team, typically within 3 to 7 working days — you'll receive a second, separate email once the refund has been sent.") }}</p>
             </section>
 
             <section>

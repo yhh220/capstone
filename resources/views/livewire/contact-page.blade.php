@@ -66,14 +66,19 @@
 
                 <div class="pt-6 border-t border-gray-100 dark:border-gray-700">
                     <h3 class="font-bold text-gray-800 dark:text-gray-200 mb-3 text-sm">{{ __('Quick actions') }}</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {{-- Column count follows the CONTAINER, not just the viewport:
+                         from md up this sits in a 1/3-width sidebar where two-up
+                         buttons are ~110px wide and the labels wrap into cramped,
+                         lopsided pills — so stack them full-width there and only
+                         go two-up again once the sidebar is wide enough (xl). --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2 gap-3">
                         <x-btn.whatsapp :href="$whatsAppUrl">{{ __('Chat on WhatsApp') }}</x-btn.whatsapp>
                         <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-md">
                             <svg class="icon-sm btn-ico" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                             {{ __('Get directions') }}
                         </a>
                         @if($storeFacebookUrl)
-                        <x-btn.facebook :href="$storeFacebookUrl" class="sm:col-span-2">Facebook</x-btn.facebook>
+                        <x-btn.facebook :href="$storeFacebookUrl" class="sm:col-span-2 md:col-span-1 xl:col-span-2">Facebook</x-btn.facebook>
                         @endif
                     </div>
                 </div>
