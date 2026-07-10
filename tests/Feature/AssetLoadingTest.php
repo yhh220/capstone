@@ -40,6 +40,19 @@ class AssetLoadingTest extends TestCase
     }
 
     /**
+     * model-viewer must come from our own origin: the unversioned unpkg URL
+     * went through a cold third-party CDN redirect on every visit, leaving the
+     * homepage 3D card stuck on its spinner (and unpkg in the CSP allowlist).
+     */
+    public function test_home_page_serves_model_viewer_from_our_own_origin(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringContainsString('vendor/model-viewer/model-viewer', $html, 'The homepage 3D card needs the self-hosted model-viewer bundle.');
+        $this->assertStringNotContainsString('unpkg.com', $html, 'No third-party CDN scripts on the storefront.');
+    }
+
+    /**
      * The page loader lives in an @persist block, so its DOM is never re-rendered
      * across Livewire.navigate() soft-navigations (which is how the language
      * switch works). If its caption were a single server-rendered __() string it

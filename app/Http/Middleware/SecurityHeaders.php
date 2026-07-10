@@ -47,18 +47,20 @@ class SecurityHeaders
                 $hotFile = public_path('hot');
                 if (file_exists($hotFile)) {
                     $viteUrl = rtrim(file_get_contents($hotFile));
-                    $wsUrl   = str_replace('http://', 'ws://', $viteUrl);
+                    $wsUrl = str_replace('http://', 'ws://', $viteUrl);
                     $viteOrigins = " {$viteUrl} {$wsUrl}";
                 }
             }
 
             $csp = implode('; ', [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com{$viteOrigins}",
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com{$viteOrigins}",
+                // unpkg was allowlisted for model-viewer; it is self-hosted now
+                // (public/vendor/model-viewer), so no third-party script origin remains.
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval'{$viteOrigins}",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com{$viteOrigins}",
                 "font-src 'self' https://fonts.gstatic.com data:",
                 "img-src 'self' data: blob: https:",
-                "connect-src 'self' https://unpkg.com blob:{$viteOrigins}",
+                "connect-src 'self' blob:{$viteOrigins}",
                 "worker-src 'self' blob:",
                 "child-src 'self' blob:",
                 "frame-ancestors 'self'",

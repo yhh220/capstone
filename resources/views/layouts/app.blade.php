@@ -50,7 +50,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+    <link rel="stylesheet" href="{{ asset('vendor/aos/aos.css') }}">
     {{-- Leaflet CSS/JS are loaded only on the Contact page (the only page with a
          map), via @push there — not globally — so every other page skips ~46 KB
          of render-blocking CSS + script it never uses. --}}
@@ -1409,10 +1409,13 @@
 
     @stack('scripts')
 
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    {{-- Self-hosted + version-pinned (was unpkg lucide@latest: an unversioned
+         third-party redirect on every page load, and a broken page if unpkg
+         is down or a breaking major ships). --}}
+    <script src="{{ asset('vendor/lucide/lucide-1.24.0.min.js') }}"></script>
     <script>document.addEventListener('DOMContentLoaded', () => lucide.createIcons()); document.addEventListener('livewire:navigated', () => lucide.createIcons());</script>
     {{-- Leaflet JS moved to the Contact page (@push) — see the note in <head>. --}}
-    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script src="{{ asset('vendor/aos/aos.js') }}"></script>
     <script>
         // ── AOS init ─────────────────────────────────────────
         AOS.init({

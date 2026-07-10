@@ -217,7 +217,11 @@
         {{-- Draco decoder must be configured before model-viewer loads; the local
              path keeps it inside our CSP (Google's CDN is not allowlisted). --}}
         <script>self.ModelViewerElement = self.ModelViewerElement || {}; self.ModelViewerElement.dracoDecoderLocation = '{{ asset('draco') }}/';</script>
-        <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+        {{-- Self-hosted, version-pinned model-viewer: the unversioned unpkg URL
+             resolved through a redirect on a cold third-party CDN on every
+             visit — the whole 3D card sat on its spinner until that arrived.
+             Same-origin + hashed filename = cached with the rest of our assets. --}}
+        <script type="module" src="{{ asset('vendor/model-viewer/model-viewer-4.3.1.min.js') }}"></script>
         <div class="max-w-7xl mx-auto px-4">
             <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[2rem] p-6 sm:p-10 lg:p-14">
                 <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">

@@ -195,11 +195,11 @@
                  it. CSS goes to <head> via the styles stack; JS is emitted before
                  the init script below so `L` is defined by the time initMap runs. --}}
             @push('styles')
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+            <link rel="stylesheet" href="{{ asset('vendor/leaflet/leaflet.css') }}" />
             @endpush
 
             @push('scripts')
-            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+            <script src="{{ asset('vendor/leaflet/leaflet.js') }}"></script>
             <script>
             (function() {
                 function initMap() {
