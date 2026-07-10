@@ -945,7 +945,7 @@ Custom [Dashboard.php](../app/Filament/Pages/Dashboard.php) overrides `getWidget
 - Read-oriented client directory (`canCreate`/`canDelete` controlled). Nav group: Customer Interactions.
 
 ### Users — [UserResource.php](../app/Filament/Resources/Users/UserResource.php)
-- Form: name, email (unique), phone (tel), role Select (locked for non-owners — role changes are owner-exclusive), etc., in Sections. Hierarchy: owner manages admins; admins manage staff only (create forced to Staff server-side, no peer edit/delete); staff = operational only (confirm bookings, mark paid/shipped/delivered, import, manage products/testimonials/contact inbox — no deletes, no exports). Nav group: System Settings.
+- Form: name, email (unique), phone (tel), role Select (locked for non-owners — role changes are owner-exclusive), etc., in Sections. Hierarchy: owner manages admins; admins manage staff only (create forced to Staff server-side, no peer edit/delete); staff = operational only (confirm bookings, mark paid/shipped/delivered, cancel + refund orders, import, manage products/testimonials/contact inbox — no deletes, no exports). Nav group: System Settings.
 
 ### FAQ Page — [FaqResource.php](../app/Filament/Resources/Faqs/FaqResource.php)
 - Public FAQ content CRUD (question/answer + translations, sort_order, is_published). Nav group: FAQs.

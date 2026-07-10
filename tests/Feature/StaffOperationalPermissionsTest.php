@@ -139,13 +139,20 @@ class StaffOperationalPermissionsTest extends TestCase
         $this->assertFalse($staff->can('delete', $product));
     }
 
-    public function test_staff_cannot_cancel_or_refund_orders(): void
+    public function test_staff_can_cancel_and_refund_orders(): void
     {
-        $order = $this->makeOrder();
+        $pending = $this->makeOrder();
+        $refundable = $this->makeOrder();
+        $refundable->update([
+            'payment_status' => 'paid',
+            'status' => 'cancelled',
+            'refund_amount' => 100,
+        ]);
         $this->actingAs($this->staff(), 'admin');
 
         Livewire::test(ListOrders::class)
-            ->assertTableActionHidden('cancelOrder', $order);
+            ->assertTableActionVisible('cancelOrder', $pending)
+            ->assertTableActionVisible('markRefunded', $refundable);
     }
 
     public function test_staff_can_read_the_contact_inbox_and_mark_messages_read(): void

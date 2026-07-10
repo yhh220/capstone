@@ -500,7 +500,7 @@ class OrderResource extends Resource
                     ->icon(Heroicon::OutlinedXCircle)
                     ->color('danger')
                     ->tooltip('Cancel this order and restock its items')
-                    ->authorize(fn () => auth()->user()?->isAdmin())
+                    ->authorize(fn () => auth()->user()?->isStaffMember())
                     // Only before the goods leave the warehouse — shipped/delivered
                     // orders return stock through a manual returns process instead.
                     ->visible(fn (Order $record) => in_array($record->status, ['pending', 'processing'], true))
@@ -565,7 +565,7 @@ class OrderResource extends Resource
                     ->icon(Heroicon::OutlinedBanknotes)
                     ->color('success')
                     ->tooltip('Confirm the recorded refund has actually been sent to the customer')
-                    ->authorize(fn () => auth()->user()?->isAdmin())
+                    ->authorize(fn () => auth()->user()?->isStaffMember())
                     ->visible(fn (Order $record) => $record->status === 'cancelled' && $record->refund_amount !== null && $record->refunded_at === null)
                     ->requiresConfirmation()
                     ->modalHeading('Mark this refund as sent?')
