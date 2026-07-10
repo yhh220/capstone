@@ -1104,12 +1104,12 @@
                 <div>
                     <h4 class="font-bold text-white mb-4 uppercase text-sm tracking-wider">{{ __('Quick Links') }}</h4>
                     <ul class="space-y-2 text-sm" role="list">
-                        <li><a href="{{ route('home') }}"     class="hover:text-brand-yellow transition-colors">{{ __('Home') }}</a></li>
-                        <li><a href="{{ route('products') }}" class="hover:text-brand-yellow transition-colors">{{ __('Products') }}</a></li>
-                        <li><a href="{{ route('services') }}" class="hover:text-brand-yellow transition-colors">{{ __('Services') }}</a></li>
-                        <li><a href="{{ route('booking') }}"  class="hover:text-brand-yellow transition-colors">{{ __('Book Appointment') }}</a></li>
-                        <li><a href="{{ route('about') }}"    class="hover:text-brand-yellow transition-colors">{{ __('About Us') }}</a></li>
-                        <li><a href="{{ route('contact') }}"  class="hover:text-brand-yellow transition-colors">{{ __('Contact') }}</a></li>
+                        <li><a href="{{ route('home') }}"     class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Home') }}</a></li>
+                        <li><a href="{{ route('products') }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Products') }}</a></li>
+                        <li><a href="{{ route('services') }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Services') }}</a></li>
+                        <li><a href="{{ route('booking') }}"  class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Book Appointment') }}</a></li>
+                        <li><a href="{{ route('about') }}"    class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('About Us') }}</a></li>
+                        <li><a href="{{ route('contact') }}"  class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Contact') }}</a></li>
                     </ul>
                 </div>
 
@@ -1119,28 +1119,28 @@
                         <div class="flex items-start gap-2 group">
                             <!-- Premium Map Pin -->
                             <svg class="w-4 h-4 text-brand-yellow mt-0.5 flex-shrink-0 group-hover:-translate-y-1 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                            <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow transition-colors">{{ $storeAddress }}</a>
+                            <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ $storeAddress }}</a>
                         </div>
                         <div class="flex items-center gap-2 group">
                             <!-- Premium Phone -->
                             <svg class="w-4 h-4 text-brand-yellow flex-shrink-0 group-hover:-translate-y-1 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                            <a href="{{ $telLink }}" class="hover:text-brand-yellow transition-colors">{{ $storePhoneDisplay }}</a>
+                            <a href="{{ $telLink }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ $storePhoneDisplay }}</a>
                         </div>
                         <div class="flex items-center gap-2 group">
                             <!-- Premium Mail -->
                             <svg class="w-4 h-4 text-brand-yellow flex-shrink-0 group-hover:-translate-y-1 group-hover:-rotate-6 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
-                            <a href="mailto:{{ $storeEmail }}" class="hover:text-brand-yellow transition-colors break-all">{{ $storeEmail }}</a>
+                            <a href="mailto:{{ $storeEmail }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors break-all">{{ $storeEmail }}</a>
                         </div>
                         <div class="flex items-center gap-2 group">
                             <!-- Premium WhatsApp Outline -->
                             <x-icon.whatsapp class="w-4 h-4 text-[#25D366] flex-shrink-0 group-hover:-translate-y-1 group-hover:scale-110 group-hover:rotate-[15deg] transition-transform duration-300" />
-                            <a href="{{ $whatsAppUrl }}" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow transition-colors">{{ __('WhatsApp us') }}</a>
+                            <a href="{{ $whatsAppUrl }}" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('WhatsApp us') }}</a>
                         </div>
                         @if($storeFacebookUrl)
                         <div class="flex items-center gap-2 group">
                             <!-- Premium Facebook SVGL outline icon -->
                             <x-icon.facebook class="w-4 h-4 text-[#1877F2] group-hover:-translate-y-1 group-hover:scale-110 transition-transform duration-300" />
-                            <a href="{{ $storeFacebookUrl }}" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow transition-colors group-hover:tracking-wider duration-300">Facebook</a>
+                            <a href="{{ $storeFacebookUrl }}" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow active:text-brand-yellow transition-colors group-hover:tracking-wider duration-300">Facebook</a>
                         </div>
                         @endif
                         @if($storeHours)
@@ -1156,13 +1156,13 @@
             <div class="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-3">
                 <p>&copy; {{ $storeName }} {{ date('Y') }}. <span>{{ __('All rights reserved.') }}</span></p>
                 <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-                    <a href="{{ route('privacy-policy') }}" class="hover:text-brand-yellow transition-colors">{{ __('Privacy Policy') }}</a>
+                    <a href="{{ route('privacy-policy') }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Privacy Policy') }}</a>
                     <span aria-hidden="true" class="hidden sm:inline">·</span>
-                    <a href="{{ route('terms-of-service') }}" class="hover:text-brand-yellow transition-colors">{{ __('Terms of Service') }}</a>
+                    <a href="{{ route('terms-of-service') }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Terms of Service') }}</a>
                     <span aria-hidden="true" class="hidden sm:inline">·</span>
-                    <a href="{{ route('cancellation-refund-policy') }}" class="hover:text-brand-yellow transition-colors">{{ __('Cancellation & Refund Policy') }}</a>
+                    <a href="{{ route('cancellation-refund-policy') }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Cancellation & Refund Policy') }}</a>
                     <span aria-hidden="true" class="hidden sm:inline">·</span>
-                    <a href="{{ route('faq') }}" class="hover:text-brand-yellow transition-colors">{{ __('FAQ') }}</a>
+                    <a href="{{ route('faq') }}" class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('FAQ') }}</a>
                 </div>
             </div>
         </div>
