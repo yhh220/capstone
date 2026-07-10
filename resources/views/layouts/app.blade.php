@@ -1479,7 +1479,10 @@
     <!-- Scroll to Top Button -->
     <button id="scroll-to-top"
             aria-label="{{ __('Scroll to top') }}"
-            class="fixed bottom-6 left-1/2 -translate-x-1/2 sm:bottom-8 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-brand-red text-white shadow-2xl transition-all duration-500 translate-y-20 opacity-0 pointer-events-none hover:bg-brand-red/90 hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-4 focus:ring-brand-red/30 group">
+            {{-- Bottom-LEFT: the right corner belongs to the chatbot launcher, and
+                 the centre would sit on top of mid-page content (e.g. the services
+                 road) — the left corner is the one consistently free lane. --}}
+            class="fixed bottom-6 left-5 sm:bottom-8 sm:left-8 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-brand-red text-white shadow-2xl transition-all duration-500 translate-y-20 opacity-0 pointer-events-none hover:bg-brand-red/90 hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-4 focus:ring-brand-red/30 group">
         <svg class="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
         </svg>

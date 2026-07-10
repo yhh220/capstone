@@ -63,22 +63,37 @@
                     ];
                 @endphp
 
-                {{-- Vertical track that fills as you scroll (no step numbers) --}}
+                {{-- A winding road that drives through every service "stop": an
+                     S-curve built at runtime through the real node positions,
+                     with a car that follows it (and a brand-red trail) as you
+                     scroll. The stops light up when the car passes them. --}}
                 <div class="relative"
-                     x-data="{ scrollProgress: 0, activeStep: 0 }"
+                     x-data="serviceRoad"
                      x-ref="flowTrack"
-                     @scroll.window="
-                        let c = $refs.flowTrack; let r = c.getBoundingClientRect();
-                        let mid = window.innerHeight * 0.6;
-                        scrollProgress = Math.max(0, Math.min(100, ((mid - r.top) / r.height) * 100));
-                        let nodes = c.querySelectorAll('.step-node'); let cur = 0;
-                        nodes.forEach((n, i) => { if (n.getBoundingClientRect().top < mid + 20) cur = i + 1; });
-                        activeStep = cur;
-                     ">
+                     @scroll.window.passive="onScroll()">
 
-                    {{-- The line + its fill --}}
-                    <div class="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700 md:-translate-x-1/2 z-0">
-                        <div class="w-full flow-path" :style="`height: ${scrollProgress}%`"></div>
+                    {{-- The road: asphalt casing + dashed centre line + travelled trail --}}
+                    <svg class="absolute inset-0 w-full h-full z-0 pointer-events-none" aria-hidden="true">
+                        <path x-ref="casing" class="svc-road-casing" fill="none"/>
+                        <path x-ref="dash" class="svc-road-dash" fill="none"/>
+                        <path x-ref="trail" class="svc-road-trail" fill="none"/>
+                    </svg>
+
+                    {{-- The car (top view, nose down the page) that drives the road --}}
+                    <div x-ref="car" class="absolute top-0 left-0 z-30 -ml-[15px] -mt-[25px] pointer-events-none"
+                         style="transform: translate(-9999px, -9999px); filter: drop-shadow(0 6px 8px rgba(0,0,0,0.35));">
+                        <svg width="30" height="50" viewBox="0 0 34 56" aria-hidden="true">
+                            <rect x="0.5" y="9" width="5" height="11" rx="2.5" fill="#111827" opacity="0.9"/>
+                            <rect x="28.5" y="9" width="5" height="11" rx="2.5" fill="#111827" opacity="0.9"/>
+                            <rect x="0.5" y="36" width="5" height="11" rx="2.5" fill="#111827" opacity="0.9"/>
+                            <rect x="28.5" y="36" width="5" height="11" rx="2.5" fill="#111827" opacity="0.9"/>
+                            <path d="M 9 2 H 25 Q 29.5 2 29.5 8 V 48 Q 29.5 54 24 54 H 10 Q 4.5 54 4.5 48 V 8 Q 4.5 2 9 2 Z" fill="rgb(var(--brand-red-rgb))"/>
+                            <path d="M 9 10 Q 17 7 25 10 L 23.5 16 Q 17 13.5 10.5 16 Z" fill="#0f172a" opacity="0.8"/>
+                            <rect x="8.5" y="18" width="17" height="14" rx="4" fill="#000000" opacity="0.15"/>
+                            <path d="M 10.5 34 Q 17 36.5 23.5 34 L 25 41 Q 17 44.5 9 41 Z" fill="#0f172a" opacity="0.85"/>
+                            <circle cx="8.5" cy="51.5" r="1.8" fill="#fef3c7" opacity="0.95"/>
+                            <circle cx="25.5" cy="51.5" r="1.8" fill="#fef3c7" opacity="0.95"/>
+                        </svg>
                     </div>
 
                     <div class="relative space-y-16 md:space-y-24">
@@ -134,14 +149,36 @@
             @endif
         </div>
 
-        {{-- Track fill + organic blob shapes --}}
+        {{-- Road styling + organic blob shapes --}}
         <style>
-            .flow-path {
-                background: linear-gradient(to bottom, rgba(var(--brand-red-rgb), 0.6), rgb(var(--brand-red-rgb)));
-                border-radius: 9999px;
-                box-shadow: 0 0 12px rgba(var(--brand-red-rgb), 0.45);
-                transition: height 0.12s ease-out;
-                will-change: height;
+            .svc-road-casing {
+                stroke: #374151;
+                stroke-width: 22;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
+            .dark .svc-road-casing { stroke: #4b5563; }
+            .svc-road-dash {
+                stroke: #f9fafb;
+                stroke-width: 2.5;
+                stroke-dasharray: 10 14;
+                stroke-linecap: round;
+                opacity: 0.95;
+            }
+            .dark .svc-road-dash { stroke: #d1d5db; }
+            /* The travelled part of the route — same brand-red glow the old
+               straight track used, drawn over the centre line behind the car. */
+            .svc-road-trail {
+                stroke: rgb(var(--brand-red-rgb));
+                stroke-width: 4;
+                stroke-linecap: round;
+                filter: drop-shadow(0 0 6px rgba(var(--brand-red-rgb), 0.5));
+                transition: stroke-dashoffset 0.12s ease-out;
+                will-change: stroke-dashoffset;
+            }
+            @media (max-width: 767px) {
+                .svc-road-casing { stroke-width: 15; }
+                .svc-road-dash { stroke-width: 2; stroke-dasharray: 7 10; }
             }
             @keyframes svcBlob {
                 0%   { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
@@ -158,8 +195,95 @@
             .svc-blob:hover, .svc-blob-alt:hover { animation-duration: 3s; filter: brightness(1.04); }
             @media (prefers-reduced-motion: reduce) {
                 .svc-blob, .svc-blob-alt { animation: none; border-radius: 1.75rem; }
+                .svc-road-trail { transition: none; }
             }
         </style>
+
+        @assets
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.data('serviceRoad', () => ({
+                    activeStep: 0,
+                    len: 0,
+
+                    init() {
+                        // Layout must settle (fonts, AOS offsets, images) before the
+                        // node positions are worth measuring; the ResizeObserver
+                        // then keeps the road glued to the rows as they reflow.
+                        this.$nextTick(() => this.build());
+                        this.onLoad = () => this.build();
+                        window.addEventListener('load', this.onLoad);
+                        this.ro = new ResizeObserver(() => this.build());
+                        this.ro.observe(this.$refs.flowTrack);
+                    },
+
+                    destroy() {
+                        window.removeEventListener('load', this.onLoad);
+                        this.ro?.disconnect();
+                    },
+
+                    // Build one smooth serpentine path THROUGH every stop: cubic
+                    // segments whose control points bulge to alternating sides at
+                    // each gap's vertical midpoint. Mirrored control points give
+                    // tangent continuity, so the road never kinks at a stop.
+                    build() {
+                        const track = this.$refs.flowTrack;
+                        const nodes = track.querySelectorAll('.step-node');
+                        if (!nodes.length) return;
+
+                        const box = track.getBoundingClientRect();
+                        const stops = [...nodes].map((n) => {
+                            const r = n.getBoundingClientRect();
+                            return { x: r.left + r.width / 2 - box.left, y: r.top + r.height / 2 - box.top };
+                        });
+                        const pts = [
+                            { x: stops[0].x, y: 0 },
+                            ...stops,
+                            { x: stops[stops.length - 1].x, y: box.height },
+                        ];
+
+                        const amp = window.innerWidth >= 768 ? 56 : 9;
+                        let d = `M ${pts[0].x} ${pts[0].y}`;
+                        for (let i = 1; i < pts.length; i++) {
+                            const a = pts[i - 1], b = pts[i], dir = i % 2 ? 1 : -1;
+                            const my = (a.y + b.y) / 2;
+                            d += ` C ${a.x + amp * dir} ${my}, ${b.x + amp * dir} ${my}, ${b.x} ${b.y}`;
+                        }
+
+                        ['casing', 'dash', 'trail'].forEach((k) => this.$refs[k].setAttribute('d', d));
+                        this.len = this.$refs.trail.getTotalLength();
+                        this.$refs.trail.style.strokeDasharray = this.len;
+                        this.onScroll();
+                    },
+
+                    onScroll() {
+                        if (!this.len) return;
+                        const track = this.$refs.flowTrack;
+                        const r = track.getBoundingClientRect();
+                        const mid = window.innerHeight * 0.6;
+                        const progress = Math.max(0, Math.min(1, (mid - r.top) / r.height));
+
+                        // Red trail follows the car exactly (dashoffset trick).
+                        this.$refs.trail.style.strokeDashoffset = this.len * (1 - progress);
+
+                        // Car sits on the path, nose pointing along the tangent.
+                        const at = this.len * progress;
+                        const p = this.$refs.casing.getPointAtLength(at);
+                        const q = this.$refs.casing.getPointAtLength(Math.min(this.len, at + 1));
+                        const ang = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI - 90;
+                        this.$refs.car.style.transform = `translate(${p.x}px, ${p.y}px) rotate(${ang}deg)`;
+
+                        // Stops light up as the car passes (same rule as before).
+                        let cur = 0;
+                        track.querySelectorAll('.step-node').forEach((n, i) => {
+                            if (n.getBoundingClientRect().top < mid + 20) cur = i + 1;
+                        });
+                        this.activeStep = cur;
+                    },
+                }));
+            });
+        </script>
+        @endassets
     </section>
 
     <section class="py-14 sm:py-20" aria-labelledby="service-cta-heading">
