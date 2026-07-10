@@ -227,7 +227,7 @@ The visual language is sourced from a fixed set of reference libraries (kept con
 | Image optimizers installed | [Dockerfile](../Dockerfile) installs `jpegoptim optipng pngquant gifsicle webp` for Spatie MediaLibrary |
 | Asset bundling | Vite 8 + `@tailwindcss/vite` + `laravel-vite-plugin` ([vite.config.js](../vite.config.js)) |
 | 3D bundle lazy-load | Three.js (~640 KB) dynamic-imported only on configurator open ([configurator-loader.js](../resources/js/configurator-loader.js)) |
-| DRACO mesh compression | `car-draco.glb` (**3.0 MB** — was 24.5 MB: textures ≤1024px + WebP, conservative meshopt simplify, Draco requantise; names/animations verified intact) / `city-draco.glb` (1.9 MB) |
+| DRACO mesh compression | `car-draco.glb` (24.5 MB) / `city-draco.glb` (1.9 MB) compressed models used in prod |
 | DB indexing | Dedicated index migrations: [add_performance_indexes_to_core_tables](../database/migrations/2026_04_29_174552_add_performance_indexes_to_core_tables.php), [add_performance_indexes_to_orders_table](../database/migrations/2026_06_20_113634_add_performance_indexes_to_orders_table.php), [add_index_to_app_logs_user_id](../database/migrations/2026_06_21_000002_add_index_to_app_logs_user_id.php) |
 | Settings caching | [Setting::getValue()](../app/Models/Setting.php) caches each key for 1 hour |
 | Cache/route/view caching | `config:cache`, `route:cache`, `view:cache` run on container boot ([docker-entrypoint.sh](../docker-entrypoint.sh)) |
