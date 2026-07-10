@@ -12,14 +12,15 @@ class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
-    // 'role' is not mass-assignable; forceFill so trusted admins can update it
+    // 'role' is not mass-assignable; forceFill so the owner can update it
     // (this page is restricted to admins by UserResource::canAccess()). The
-    // form's Select already hides 'owner' from non-owners, but that's a UI
-    // convenience, not a security boundary — guard explicitly here too, in
-    // case the form is ever refactored to omit the options() restriction.
+    // form locks the role Select for non-owners, but that's a UI convenience,
+    // not a security boundary — guard explicitly here too: role changes are
+    // owner-exclusive, so a crafted payload from anyone else always keeps the
+    // record's current role.
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        if (($data['role'] ?? null) === 'owner' && ! Filament::auth()->user()?->isOwner()) {
+        if (! Filament::auth()->user()?->isOwner()) {
             $data['role'] = $record->role;
         }
 

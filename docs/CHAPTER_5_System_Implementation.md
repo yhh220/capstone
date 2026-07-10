@@ -246,7 +246,13 @@ Turning shopping **off** also performs a **graceful shutdown** of pending busine
 
 ### 5.10.11 User & Role Management
 
-The **User** resource manages the staff accounts that can access the panel, supporting the role-based access control that separates administrators from customers. This keeps administrative capability restricted to authorised staff.
+The **User** resource manages the accounts that can access the panel, implementing a strict **three-tier role hierarchy** in which each tier administers only the tier below it — the "no peer administration" principle:
+
+- **Owner (superadmin)** — the only role that manages roles: creating admins, promoting or demoting anyone, and deleting or restoring admin accounts. The owner account itself is untouchable — no one, including the owner, can delete it, and only the owner can edit it.
+- **Admin (manager)** — runs the business: full catalogue, order and booking lifecycles (including cancellation and refunds), settings, logs, imports **and exports**, and staff administration — creating staff accounts (the assigned role is forced to Staff server-side, whatever the request payload claims), editing their details, and deleting them. An admin can never create, edit, delete, or restore another admin, and can never change **any** account's role — not a staff member's, not their own.
+- **Staff (operational worker)** — the day-to-day floor role: confirming bookings, marking orders paid, shipped, and delivered, importing product and order data, creating and editing products, curating homepage testimonials, and working the contact-message inbox. Staff can never **delete anything**, never **export** data (bulk exfiltration stays admin-only), never cancel or refund orders, and never manage user accounts.
+
+Every rule exists twice: once in the UI (locked selects, hidden actions) and once server-side (policies and explicit guards on the handlers), so a crafted request that bypasses the form is coerced or rejected — behaviour locked down by a dedicated authorization test suite covering crafted role-escalation payloads, peer-deletion attempts, and the customer-role hard block on the panel itself.
 
 *[Figure 5.18: The Filament admin dashboard with the responsive sidebar.]*
 *[Figure 5.19: The Product resource edit form with localised fields and media upload.]*

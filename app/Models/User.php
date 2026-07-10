@@ -4,18 +4,18 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthentication;
 use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthenticationRecovery;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -27,8 +27,8 @@ use Spatie\Activitylog\Support\LogOptions;
 class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, LogsActivity, SoftDeletes,
-        InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery;
+    use HasFactory, InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery, LogsActivity,
+        Notifiable, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -64,6 +64,16 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
      * Owner, admin, and staff can access.
      */
     public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->isAdmin() || $this->isStaff();
+    }
+
+    /**
+     * Operational panel roles (owner, admin, staff) — the audience for
+     * day-to-day actions like confirming bookings, marking orders paid or
+     * shipped, importing data, and managing products.
+     */
+    public function isStaffMember(): bool
     {
         return $this->isAdmin() || $this->isStaff();
     }

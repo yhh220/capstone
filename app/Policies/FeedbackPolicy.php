@@ -17,14 +17,15 @@ class FeedbackPolicy
         return $user->isAdmin() || $user->isStaff();
     }
 
+    // Staff curate testimonials day-to-day (add/edit); deletion stays admin-only.
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isStaffMember();
     }
 
     public function update(User $user, Feedback $feedback): bool
     {
-        return $user->isAdmin();
+        return $user->isStaffMember();
     }
 
     public function delete(User $user, Feedback $feedback): bool

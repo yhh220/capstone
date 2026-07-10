@@ -945,7 +945,7 @@ Custom [Dashboard.php](../app/Filament/Pages/Dashboard.php) overrides `getWidget
 - Read-oriented client directory (`canCreate`/`canDelete` controlled). Nav group: Customer Interactions.
 
 ### Users — [UserResource.php](../app/Filament/Resources/Users/UserResource.php)
-- Form: name, email (unique), phone (tel), role Select, etc., in Sections. Admin/staff account management. Nav group: System Settings.
+- Form: name, email (unique), phone (tel), role Select (locked for non-owners — role changes are owner-exclusive), etc., in Sections. Hierarchy: owner manages admins; admins manage staff only (create forced to Staff server-side, no peer edit/delete); staff = operational only (confirm bookings, mark paid/shipped/delivered, import, manage products/testimonials/contact inbox — no deletes, no exports). Nav group: System Settings.
 
 ### FAQ Page — [FaqResource.php](../app/Filament/Resources/Faqs/FaqResource.php)
 - Public FAQ content CRUD (question/answer + translations, sort_order, is_published). Nav group: FAQs.
@@ -1352,7 +1352,7 @@ Scan of [app/](../app/) subfolders:
 
 | # | Aspect | Detail |
 |---|---|---|
-| 40.1 | PHPUnit tests | **189 Feature tests + 4 Unit** (193 total, 637 assertions) in [tests/](../tests/): Auth flow, login lockout, booking (email/reminder/service/slot-availability/slot-race/confirm-guard/admin-edit), cart, guest-cart-claim, checkout, shipping, payment (flow/hardening/expiry-guard), Stripe (webhook/checkout-redirect/return-verification/method-mapper), order (cancellation/mark-paid-guard/admin/importer/tracker), invoice, products search, services, set-password, settings, shop-mode close, SEO structured data, asset loading (incl. page-loader i18n), localized pages, localization coverage, social login, staff bulk-delete auth, user admin auth, observability, error-log lifecycle, log resolved/resource, activity resource, system-status clear-cache |
+| 40.1 | PHPUnit tests | **210 Feature tests + 4 Unit** (214 total, 691 assertions) in [tests/](../tests/): Auth flow, login lockout, booking (email/reminder/service/slot-availability/slot-race/confirm-guard/admin-edit), cart, guest-cart-claim, checkout, shipping, payment (flow/hardening/expiry-guard), Stripe (webhook/checkout-redirect/return-verification/method-mapper), order (cancellation/mark-paid-guard/admin/importer/tracker), invoice, products search, services, set-password, settings, shop-mode close, SEO structured data, asset loading (incl. page-loader i18n), localized pages, localization coverage, social login, staff bulk-delete auth, user admin auth, observability, error-log lifecycle, log resolved/resource, activity resource, system-status clear-cache |
 | 40.2 | Browser / E2E tests | **None** — no Dusk or Playwright; feature behaviour is covered by the PHPUnit suite, and UI/JS is verified manually |
 | 40.3 | Code style | **Laravel Pint** (`laravel/pint`) |
 | 40.4 | Static analysis | **None** (no Larastan/PHPStan/Psalm) |

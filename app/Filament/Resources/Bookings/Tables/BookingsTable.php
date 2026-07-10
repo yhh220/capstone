@@ -2,13 +2,22 @@
 
 namespace App\Filament\Resources\Bookings\Tables;
 
+use App\Mail\BookingConfirmedMail;
+use App\Mail\BookingReminderMail;
+use App\Models\Booking;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\BadgeColumn;
+use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Mail;
 
 class BookingsTable
 {
@@ -32,7 +41,7 @@ class BookingsTable
                     ->badge()
                     ->color(fn ($state) => $state ? 'gray' : 'warning')
                     ->formatStateUsing(fn ($state) => $state ?: 'General visit')
-                    ->tooltip(fn ($record) => $record->service ? "Service: {$record->service->name}" : "General visit (unspecified service)")
+                    ->tooltip(fn ($record) => $record->service ? "Service: {$record->service->name}" : 'General visit (unspecified service)')
                     ->sortable(),
                 TextColumn::make('preferred_date')
                     ->date('D, d M Y')
@@ -47,13 +56,13 @@ class BookingsTable
                         'confirmed' => 'success',
                         'cancelled' => 'danger',
                         'completed' => 'info',
-                        default     => 'warning',
+                        default => 'warning',
                     })
                     ->tooltip(fn (string $state): string => match ($state) {
                         'confirmed' => 'Booking has been confirmed',
                         'cancelled' => 'Booking was cancelled',
                         'completed' => 'Service has been completed',
-                        default     => 'Awaiting action/confirmation',
+                        default => 'Awaiting action/confirmation',
                     })
                     ->sortable(),
                 TextColumn::make('reminder_sent_at')
@@ -61,7 +70,7 @@ class BookingsTable
                     ->badge()
                     ->state(fn ($record) => $record->reminder_sent_at ? 'Sent' : 'Not sent')
                     ->color(fn ($record) => $record->reminder_sent_at ? 'success' : 'gray')
-                    ->tooltip(fn ($record) => $record->reminder_sent_at ? 'Sent at: ' . $record->reminder_sent_at->format('d M Y, H:i') : 'No reminder sent yet')
+                    ->tooltip(fn ($record) => $record->reminder_sent_at ? 'Sent at: '.$record->reminder_sent_at->format('d M Y, H:i') : 'No reminder sent yet')
                     ->toggleable(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -72,7 +81,7 @@ class BookingsTable
                 SelectFilter::make('status')
                     ->multiple()
                     ->options([
-                        'pending'   => 'Pending',
+                        'pending' => 'Pending',
                         'confirmed' => 'Confirmed',
                         'cancelled' => 'Cancelled',
                         'completed' => 'Completed',
@@ -81,7 +90,7 @@ class BookingsTable
                     ->relationship('service', 'name')
                     ->multiple()
                     ->preload(),
-                \Filament\Tables\Filters\Filter::make('upcoming')
+                Filter::make('upcoming')
                     ->label('Upcoming only')
                     ->toggle()
                     ->query(fn ($query) => $query->whereDate('preferred_date', '>=', today())),
@@ -90,12 +99,12 @@ class BookingsTable
             ->recordActions([
                 EditAction::make()
                     ->tooltip('Edit booking details'),
-                \Filament\Actions\Action::make('confirmBooking')
+                Action::make('confirmBooking')
                     ->label('Confirm')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->tooltip('Confirm this booking and email the customer')
-                    ->authorize(fn () => auth()->user()?->isAdmin())
+                    ->authorize(fn () => auth()->user()?->isStaffMember())
                     ->visible(fn ($record) => $record->status === 'pending')
                     ->requiresConfirmation()
                     ->modalHeading('Confirm this booking?')
@@ -106,32 +115,33 @@ class BookingsTable
                         // would resurrect a cancelled booking (whose slot could
                         // already be re-booked) and email a confirmation for it.
                         // Mirrors OrderResource markPaid's claim pattern.
-                        $claimed = \App\Models\Booking::whereKey($record->getKey())
+                        $claimed = Booking::whereKey($record->getKey())
                             ->where('status', 'pending')
                             ->update(['status' => 'confirmed']) === 1;
 
                         if (! $claimed) {
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Booking was already confirmed or cancelled')
                                 ->warning()
                                 ->send();
+
                             return;
                         }
 
                         try {
                             if ($record->customer_email) {
-                                \Illuminate\Support\Facades\Mail::to($record->customer_email)
-                                    ->send(new \App\Mail\BookingConfirmedMail($record->fresh('service')));
+                                Mail::to($record->customer_email)
+                                    ->send(new BookingConfirmedMail($record->fresh('service')));
                             }
-                            \Filament\Notifications\Notification::make()->title('Booking confirmed')->success()->send();
+                            Notification::make()->title('Booking confirmed')->success()->send();
                         } catch (\Throwable $e) {
-                            logger()->error('BookingConfirmedMail failed: ' . $e->getMessage());
-                            \Filament\Notifications\Notification::make()->title('Confirmed, but the email failed to send')->warning()->send();
+                            logger()->error('BookingConfirmedMail failed: '.$e->getMessage());
+                            Notification::make()->title('Confirmed, but the email failed to send')->warning()->send();
                         }
                     }),
-                \Filament\Actions\Action::make('sendReminder')
+                Action::make('sendReminder')
                     ->label('Send reminder')
-                    ->icon(\Filament\Support\Icons\Heroicon::OutlinedBell)
+                    ->icon(Heroicon::OutlinedBell)
                     ->color('warning')
                     ->tooltip('Send a reminder email to customer now')
                     ->authorize(fn () => auth()->user()?->isAdmin())
@@ -140,32 +150,32 @@ class BookingsTable
                     ->modalHeading('Send a reminder email now?')
                     ->action(function ($record): void {
                         try {
-                            \Illuminate\Support\Facades\Mail::to($record->customer_email)
-                                ->send(new \App\Mail\BookingReminderMail($record->load('service')));
+                            Mail::to($record->customer_email)
+                                ->send(new BookingReminderMail($record->load('service')));
                             $record->forceFill(['reminder_sent_at' => now()])->save();
-                            \Filament\Notifications\Notification::make()->title('Reminder sent')->success()->send();
+                            Notification::make()->title('Reminder sent')->success()->send();
                         } catch (\Throwable $e) {
-                            logger()->error('Manual booking reminder failed: ' . $e->getMessage());
-                            \Filament\Notifications\Notification::make()->title('Reminder failed to send')->danger()->send();
+                            logger()->error('Manual booking reminder failed: '.$e->getMessage());
+                            Notification::make()->title('Reminder failed to send')->danger()->send();
                         }
                     }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    \Filament\Actions\BulkAction::make('confirm')
+                    BulkAction::make('confirm')
                         ->label('Confirm selected')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->tooltip('Confirm all selected pending bookings and email each customer')
-                        ->authorize(fn () => auth()->user()?->isAdmin())
+                        ->authorize(fn () => auth()->user()?->isStaffMember())
                         ->requiresConfirmation()
                         ->modalDescription('Each confirmed customer will receive a confirmation email.')
-                        ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
+                        ->action(function (Collection $records): void {
                             $records->each(function ($b) {
                                 // Same atomic claim as the single Confirm action —
                                 // only a still-pending row flips, so a booking
                                 // cancelled mid-selection is never resurrected.
-                                $claimed = \App\Models\Booking::whereKey($b->getKey())
+                                $claimed = Booking::whereKey($b->getKey())
                                     ->where('status', 'pending')
                                     ->update(['status' => 'confirmed']) === 1;
 
@@ -175,11 +185,11 @@ class BookingsTable
 
                                 try {
                                     if ($b->customer_email) {
-                                        \Illuminate\Support\Facades\Mail::to($b->customer_email)
-                                            ->send(new \App\Mail\BookingConfirmedMail($b->fresh('service')));
+                                        Mail::to($b->customer_email)
+                                            ->send(new BookingConfirmedMail($b->fresh('service')));
                                     }
                                 } catch (\Throwable $e) {
-                                    logger()->error('Bulk BookingConfirmedMail failed: ' . $e->getMessage());
+                                    logger()->error('Bulk BookingConfirmedMail failed: '.$e->getMessage());
                                 }
                             });
                         })

@@ -14,11 +14,12 @@ class CreateUser extends CreateRecord
     // 'role' is not mass-assignable; forceFill so trusted admins can set it here
     // (this page is restricted to admins by UserResource::canAccess()). Same
     // explicit guard as EditUser — don't rely solely on the form hiding
-    // 'owner' from non-owners.
+    // roles from non-owners: only the owner may mint admins (or another
+    // owner); an admin can only ever create staff, whatever the payload says.
     protected function handleRecordCreation(array $data): Model
     {
-        if (($data['role'] ?? null) === 'owner' && ! Filament::auth()->user()?->isOwner()) {
-            $data['role'] = 'admin';
+        if (! Filament::auth()->user()?->isOwner()) {
+            $data['role'] = 'staff';
         }
 
         $user = new (static::getModel());

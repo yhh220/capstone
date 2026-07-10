@@ -22,9 +22,10 @@ class ContactPolicy
         return $user->isAdmin();
     }
 
+    // Staff work the inbox: reading includes flipping is_read. Deletion stays admin-only.
     public function update(User $user, Contact $contact): bool
     {
-        return $user->isAdmin();
+        return $user->isStaffMember();
     }
 
     public function delete(User $user, Contact $contact): bool

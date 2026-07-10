@@ -22,7 +22,7 @@ class ListProducts extends ListRecords
                 ->authorize(fn () => auth()->user()?->isAdmin()),
             ImportAction::make()
                 ->importer(ProductImporter::class)
-                ->authorize(fn () => auth()->user()?->isAdmin()),
+                ->authorize(fn () => auth()->user()?->isStaffMember()),
             CreateAction::make(),
         ];
     }

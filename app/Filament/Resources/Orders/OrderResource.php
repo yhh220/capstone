@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Orders;
 
+use App\Filament\Exports\OrderExporter;
 use App\Mail\OrderCancelledMail;
 use App\Mail\OrderConfirmationMail;
+use App\Mail\OrderDeliveredMail;
 use App\Mail\OrderRefundProcessedMail;
 use App\Mail\OrderShippedMail;
 use App\Mail\OwnerAlertMail;
@@ -11,30 +13,36 @@ use App\Models\Order;
 use App\Services\RefundCalculator;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use App\Filament\Exports\OrderExporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportBulkAction;
-use Filament\Resources\Resource;
-use Filament\Tables\Columns\BadgeColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
 use Filament\Forms;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\HtmlString;
 
 class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingBag;
+
     protected static \UnitEnum|string|null $navigationGroup = 'Sales';
+
     protected static ?int $navigationSort = 1;
 
     /** Badge = paid/confirmed orders still awaiting fulfilment (same idea as Bookings). */
@@ -72,17 +80,17 @@ class OrderResource extends Resource
                 'Order cancelled',
                 [
                     'Order Number' => $order->order_number,
-                    'Customer'     => $order->customer_name,
+                    'Customer' => $order->customer_name,
                     'Cancelled By' => $cancelledBy,
-                    'Reason'       => $order->cancellation_reason,
-                    'Refund'       => $order->refund_amount !== null
-                        ? 'RM ' . number_format($order->refund_amount, 2) . ' (' . $order->refund_percentage . '%)'
+                    'Reason' => $order->cancellation_reason,
+                    'Refund' => $order->refund_amount !== null
+                        ? 'RM '.number_format($order->refund_amount, 2).' ('.$order->refund_percentage.'%)'
                         : null,
                 ],
-                url('/admin/orders/' . $order->getKey() . '/edit'),
+                url('/admin/orders/'.$order->getKey().'/edit'),
             ));
         } catch (\Throwable $e) {
-            logger()->error('Owner cancellation alert failed: ' . $e->getMessage());
+            logger()->error('Owner cancellation alert failed: '.$e->getMessage());
         }
     }
 
@@ -107,28 +115,28 @@ class OrderResource extends Resource
             Section::make('Order Items')->schema([
                 Forms\Components\Placeholder::make('items_list')
                     ->label('')
-                    ->content(function ($record): \Illuminate\Support\HtmlString {
+                    ->content(function ($record): HtmlString {
                         if (! $record) {
-                            return new \Illuminate\Support\HtmlString('<p class="text-sm text-gray-400">Save the order first to see items.</p>');
+                            return new HtmlString('<p class="text-sm text-gray-400">Save the order first to see items.</p>');
                         }
                         $items = $record->items()->with('product')->get();
                         if ($items->isEmpty()) {
-                            return new \Illuminate\Support\HtmlString('<p class="text-sm text-gray-400">No items found.</p>');
+                            return new HtmlString('<p class="text-sm text-gray-400">No items found.</p>');
                         }
                         // Inline styles (not Tailwind classes) — the Filament admin
                         // CSS bundle doesn't ship the app's utility classes, so class
                         // names here render unstyled (columns collapse together).
                         $cell = 'padding:8px 12px;font-size:13px;border-bottom:1px solid rgba(128,128,128,0.15);white-space:nowrap;';
-                        $rows = $items->map(fn ($item) =>
-                            "<tr>
-                                <td style='padding:8px 16px 8px 0;font-size:13px;border-bottom:1px solid rgba(128,128,128,0.15);white-space:normal;'>" . e($item->product_name) . "</td>
+                        $rows = $items->map(fn ($item) => "<tr>
+                                <td style='padding:8px 16px 8px 0;font-size:13px;border-bottom:1px solid rgba(128,128,128,0.15);white-space:normal;'>".e($item->product_name)."</td>
                                 <td style='{$cell}text-align:center;'>{$item->quantity}</td>
-                                <td style='{$cell}text-align:right;'>RM " . number_format($item->unit_price, 2) . "</td>
-                                <td style='{$cell}padding-right:0;text-align:right;font-weight:600;'>RM " . number_format($item->subtotal, 2) . "</td>
-                            </tr>"
+                                <td style='{$cell}text-align:right;'>RM ".number_format($item->unit_price, 2)."</td>
+                                <td style='{$cell}padding-right:0;text-align:right;font-weight:600;'>RM ".number_format($item->subtotal, 2).'</td>
+                            </tr>'
                         )->implode('');
                         $th = 'padding:0 12px 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#9ca3af;border-bottom:2px solid rgba(128,128,128,0.25);';
-                        return new \Illuminate\Support\HtmlString("
+
+                        return new HtmlString("
                             <div style='overflow-x:auto;'>
                             <table style='width:100%;border-collapse:collapse;min-width:420px;'>
                                 <thead><tr>
@@ -155,30 +163,31 @@ class OrderResource extends Resource
                             return '—';
                         }
                         $a = $record->shipping_address;
+
                         return implode(', ', array_filter([
-                            $a['street']   ?? null,
-                            $a['city']     ?? null,
+                            $a['street'] ?? null,
+                            $a['city'] ?? null,
                             $a['postcode'] ?? null,
-                            $a['state']    ?? null,
+                            $a['state'] ?? null,
                         ]));
                     }),
             ])->columns(['default' => 1, 'sm' => 2])->visibleOn('edit'),
 
             Section::make('Lifecycle Timestamps')->schema([
                 Forms\Components\TextInput::make('paid_at')->label('Paid At')
-                    ->formatStateUsing(fn ($state) => $state ? \Illuminate\Support\Carbon::parse($state)->format('d M Y, h:i A') : '—')
+                    ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('d M Y, h:i A') : '—')
                     ->disabled(),
                 Forms\Components\TextInput::make('shipped_at')->label('Shipped At')
-                    ->formatStateUsing(fn ($state) => $state ? \Illuminate\Support\Carbon::parse($state)->format('d M Y, h:i A') : '—')
+                    ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('d M Y, h:i A') : '—')
                     ->disabled(),
                 Forms\Components\TextInput::make('delivered_at')->label('Delivered At')
-                    ->formatStateUsing(fn ($state) => $state ? \Illuminate\Support\Carbon::parse($state)->format('d M Y, h:i A') : '—')
+                    ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('d M Y, h:i A') : '—')
                     ->disabled(),
                 Forms\Components\TextInput::make('cancelled_at')->label('Cancelled At')
-                    ->formatStateUsing(fn ($state) => $state ? \Illuminate\Support\Carbon::parse($state)->format('d M Y, h:i A') : '—')
+                    ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('d M Y, h:i A') : '—')
                     ->disabled(),
             ])->columns(['default' => 1, 'sm' => 2])->visibleOn('edit')
-              ->collapsed(fn ($record) => $record?->paid_at === null),
+                ->collapsed(fn ($record) => $record?->paid_at === null),
 
             Section::make('Order Notes')->schema([
                 Forms\Components\Textarea::make('notes')
@@ -206,11 +215,11 @@ class OrderResource extends Resource
                     ->disabled(),
                 Forms\Components\TextInput::make('refunded_at')
                     ->label('Refund sent on')
-                    ->formatStateUsing(fn (?string $state): string => $state ? \Illuminate\Support\Carbon::parse($state)->format('d M Y, h:i A') : 'Not yet sent')
+                    ->formatStateUsing(fn (?string $state): string => $state ? Carbon::parse($state)->format('d M Y, h:i A') : 'Not yet sent')
                     ->disabled(),
             ])->columns(['default' => 1, 'sm' => 2])
-              ->visible(fn (?Order $record) => $record?->status === 'cancelled')
-              ->visibleOn('edit'),
+                ->visible(fn (?Order $record) => $record?->status === 'cancelled')
+                ->visibleOn('edit'),
         ]);
     }
 
@@ -237,20 +246,20 @@ class OrderResource extends Resource
                     ->sortable(),
                 BadgeColumn::make('status')
                     ->colors([
-                        'warning'   => 'pending',
-                        'info'      => 'processing',
-                        'primary'   => 'shipped',
-                        'success'   => 'delivered',
-                        'danger'    => 'cancelled',
+                        'warning' => 'pending',
+                        'info' => 'processing',
+                        'primary' => 'shipped',
+                        'success' => 'delivered',
+                        'danger' => 'cancelled',
                     ])
-                    ->tooltip(fn (string $state): string => 'Order status is ' . $state),
+                    ->tooltip(fn (string $state): string => 'Order status is '.$state),
                 BadgeColumn::make('payment_status')
                     ->label('Payment')
                     ->colors([
                         'warning' => 'pending',
                         'success' => 'paid',
                     ])
-                    ->tooltip(fn (string $state): string => 'Payment is ' . $state),
+                    ->tooltip(fn (string $state): string => 'Payment is '.$state),
                 TextColumn::make('refund_status')
                     ->label('Refund if cancelled')
                     ->toggleable()
@@ -260,11 +269,13 @@ class OrderResource extends Resource
                             if ($record->refund_amount === null) {
                                 return 'Not eligible for refund';
                             }
+
                             return $record->refunded_at !== null
-                                ? 'Sent RM ' . number_format($record->refund_amount, 2)
-                                : 'Pending RM ' . number_format($record->refund_amount, 2);
+                                ? 'Sent RM '.number_format($record->refund_amount, 2)
+                                : 'Pending RM '.number_format($record->refund_amount, 2);
                         }
-                        return (new RefundCalculator())->eligibilityLabel($record);
+
+                        return (new RefundCalculator)->eligibilityLabel($record);
                     })
                     ->wrap(),
                 TextColumn::make('created_at')
@@ -276,20 +287,20 @@ class OrderResource extends Resource
                 SelectFilter::make('status')
                     ->multiple()
                     ->options([
-                        'pending'    => 'Pending',
+                        'pending' => 'Pending',
                         'processing' => 'Processing',
-                        'shipped'    => 'Shipped',
-                        'delivered'  => 'Delivered',
-                        'cancelled'  => 'Cancelled',
+                        'shipped' => 'Shipped',
+                        'delivered' => 'Delivered',
+                        'cancelled' => 'Cancelled',
                     ]),
                 SelectFilter::make('payment_status')
                     ->label('Payment')
                     ->multiple()
                     ->options([
                         'pending' => 'Pending',
-                        'paid'    => 'Paid',
+                        'paid' => 'Paid',
                     ]),
-                \Filament\Tables\Filters\Filter::make('created_at')
+                Filter::make('created_at')
                     ->schema([
                         Forms\Components\DatePicker::make('from')->label('Ordered from'),
                         Forms\Components\DatePicker::make('until')->label('Ordered until'),
@@ -299,8 +310,13 @@ class OrderResource extends Resource
                         ->when($data['until'] ?? null, fn ($q, $d) => $q->whereDate('created_at', '<=', $d)))
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
-                        if ($data['from'] ?? null) $indicators[] = 'From ' . $data['from'];
-                        if ($data['until'] ?? null) $indicators[] = 'Until ' . $data['until'];
+                        if ($data['from'] ?? null) {
+                            $indicators[] = 'From '.$data['from'];
+                        }
+                        if ($data['until'] ?? null) {
+                            $indicators[] = 'Until '.$data['until'];
+                        }
+
                         return $indicators;
                     }),
             ])
@@ -313,7 +329,7 @@ class OrderResource extends Resource
                     ->icon(Heroicon::OutlinedCheckCircle)
                     ->color('success')
                     ->tooltip('Mark order as fully paid')
-                    ->authorize(fn () => auth()->user()?->isAdmin())
+                    ->authorize(fn () => auth()->user()?->isStaffMember())
                     ->visible(fn (Order $record) => $record->payment_status === 'pending' && $record->status !== 'cancelled')
                     ->requiresConfirmation()
                     ->modalHeading('Mark this order as paid?')
@@ -339,8 +355,8 @@ class OrderResource extends Resource
 
                             $fresh->update([
                                 'payment_status' => 'paid',
-                                'status'         => $fresh->status === 'pending' ? 'processing' : $fresh->status,
-                                'expires_at'     => null,
+                                'status' => $fresh->status === 'pending' ? 'processing' : $fresh->status,
+                                'expires_at' => null,
                             ]);
 
                             return $fresh;
@@ -348,6 +364,7 @@ class OrderResource extends Resource
 
                         if (! $claimed) {
                             Notification::make()->title('Order was already marked paid')->warning()->send();
+
                             return;
                         }
 
@@ -358,7 +375,7 @@ class OrderResource extends Resource
                             Mail::to($claimed->customer_email)->send(new OrderConfirmationMail($claimed->fresh('items')));
                             Notification::make()->title('Marked paid — customer notified')->success()->send();
                         } catch (\Throwable $e) {
-                            logger()->error('Mark-paid confirmation email failed: ' . $e->getMessage());
+                            logger()->error('Mark-paid confirmation email failed: '.$e->getMessage());
                             Notification::make()->title('Marked paid, but the email failed to send')->warning()->send();
                         }
                     }),
@@ -367,7 +384,7 @@ class OrderResource extends Resource
                     ->icon(Heroicon::OutlinedTruck)
                     ->color('primary')
                     ->tooltip('Mark order as shipped and enter tracking number')
-                    ->authorize(fn () => auth()->user()?->isAdmin())
+                    ->authorize(fn () => auth()->user()?->isStaffMember())
                     ->visible(fn (Order $record) => in_array($record->status, ['processing'], true))
                     ->schema([
                         Forms\Components\TextInput::make('tracking_number')
@@ -391,7 +408,7 @@ class OrderResource extends Resource
                             }
 
                             $fresh->update([
-                                'status'          => 'shipped',
+                                'status' => 'shipped',
                                 'tracking_number' => $data['tracking_number'],
                             ]);
 
@@ -400,6 +417,7 @@ class OrderResource extends Resource
 
                         if (! $claimed) {
                             Notification::make()->title('Order was already marked shipped')->warning()->send();
+
                             return;
                         }
 
@@ -407,7 +425,7 @@ class OrderResource extends Resource
                             Mail::to($claimed->customer_email)->send(new OrderShippedMail($claimed->fresh()));
                             Notification::make()->title('Marked shipped — customer notified')->success()->send();
                         } catch (\Throwable $e) {
-                            logger()->error('Shipped email failed: ' . $e->getMessage());
+                            logger()->error('Shipped email failed: '.$e->getMessage());
                             Notification::make()->title('Marked shipped, but the email failed to send')->warning()->send();
                         }
                     }),
@@ -416,7 +434,7 @@ class OrderResource extends Resource
                     ->icon(Heroicon::OutlinedCheckCircle)
                     ->color('success')
                     ->tooltip('Mark order as delivered')
-                    ->authorize(fn () => auth()->user()?->isAdmin())
+                    ->authorize(fn () => auth()->user()?->isStaffMember())
                     ->visible(fn (Order $record) => $record->status === 'shipped')
                     ->requiresConfirmation()
                     ->modalHeading('Mark as delivered?')
@@ -439,15 +457,16 @@ class OrderResource extends Resource
 
                         if (! $claimed) {
                             Notification::make()->title('Order was already marked delivered')->warning()->send();
+
                             return;
                         }
 
                         try {
-                            \Illuminate\Support\Facades\Mail::to($claimed->customer_email)
-                                ->send(new \App\Mail\OrderDeliveredMail($claimed));
+                            Mail::to($claimed->customer_email)
+                                ->send(new OrderDeliveredMail($claimed));
                             Notification::make()->title('Order marked as delivered — confirmation email sent')->success()->send();
                         } catch (\Throwable $e) {
-                            logger()->error('OrderDeliveredMail failed: ' . $e->getMessage());
+                            logger()->error('OrderDeliveredMail failed: '.$e->getMessage());
                             Notification::make()->title('Marked delivered, but the email failed to send')->warning()->send();
                         }
                     }),
@@ -472,7 +491,7 @@ class OrderResource extends Resource
                             Mail::to($record->customer_email)->send(new OrderConfirmationMail($record->fresh('items')));
                             Notification::make()->title('Confirmation email resent')->success()->send();
                         } catch (\Throwable $e) {
-                            logger()->error('Resend confirmation failed: ' . $e->getMessage());
+                            logger()->error('Resend confirmation failed: '.$e->getMessage());
                             Notification::make()->title('Failed to resend the email')->danger()->send();
                         }
                     }),
@@ -491,13 +510,14 @@ class OrderResource extends Resource
                         if ($record->payment_status !== 'paid') {
                             return 'The items go back into inventory and the order is marked cancelled. No payment was taken, so no refund applies.';
                         }
-                        $refund = (new RefundCalculator())->calculate($record);
+                        $refund = (new RefundCalculator)->calculate($record);
+
                         return $refund
-                            ? 'The items go back into inventory and the order is marked cancelled. Recorded refund: RM ' . number_format($refund['amount'], 2) . ' (' . $refund['percentage'] . '%).'
+                            ? 'The items go back into inventory and the order is marked cancelled. Recorded refund: RM '.number_format($refund['amount'], 2).' ('.$refund['percentage'].'%).'
                             : 'The items go back into inventory and the order is marked cancelled.';
                     })
                     ->action(function (Order $record): void {
-                        $calculator = new RefundCalculator();
+                        $calculator = new RefundCalculator;
 
                         $order = DB::transaction(function () use ($record, $calculator) {
                             $order = Order::where('id', $record->id)->lockForUpdate()->with('items')->first();
@@ -509,11 +529,11 @@ class OrderResource extends Resource
 
                             $order->restockItems();
                             $order->update([
-                                'status'              => 'cancelled', // event stamps cancelled_at
-                                'cancelled_by'        => 'admin',
+                                'status' => 'cancelled', // event stamps cancelled_at
+                                'cancelled_by' => 'admin',
                                 'cancellation_reason' => 'Cancelled by admin',
-                                'refund_amount'       => $refund['amount'] ?? null,
-                                'refund_percentage'   => $refund['percentage'] ?? null,
+                                'refund_amount' => $refund['amount'] ?? null,
+                                'refund_percentage' => $refund['percentage'] ?? null,
                             ]);
 
                             return $order;
@@ -521,6 +541,7 @@ class OrderResource extends Resource
 
                         if ($order === null) {
                             Notification::make()->title('Order was already cancelled')->warning()->send();
+
                             return;
                         }
 
@@ -529,7 +550,7 @@ class OrderResource extends Resource
                         try {
                             Mail::to($order->customer_email)->send(new OrderCancelledMail($order));
                         } catch (\Throwable $e) {
-                            logger()->error('Order cancellation email failed: ' . $e->getMessage());
+                            logger()->error('Order cancellation email failed: '.$e->getMessage());
                         }
 
                         // Both sides get an email on every cancellation, regardless of who
@@ -548,7 +569,7 @@ class OrderResource extends Resource
                     ->visible(fn (Order $record) => $record->status === 'cancelled' && $record->refund_amount !== null && $record->refunded_at === null)
                     ->requiresConfirmation()
                     ->modalHeading('Mark this refund as sent?')
-                    ->modalDescription(fn (Order $record) => 'Confirms RM ' . number_format($record->refund_amount, 2) . ' has actually been transferred to the customer (e.g. bank transfer/e-wallet outside this system) and emails them that confirmation.')
+                    ->modalDescription(fn (Order $record) => 'Confirms RM '.number_format($record->refund_amount, 2).' has actually been transferred to the customer (e.g. bank transfer/e-wallet outside this system) and emails them that confirmation.')
                     ->action(function (Order $record): void {
                         $claimed = DB::transaction(function () use ($record) {
                             $fresh = Order::where('id', $record->id)
@@ -568,6 +589,7 @@ class OrderResource extends Resource
 
                         if (! $claimed) {
                             Notification::make()->title('Refund was already marked as sent')->warning()->send();
+
                             return;
                         }
 
@@ -575,7 +597,7 @@ class OrderResource extends Resource
                             Mail::to($claimed->customer_email)->send(new OrderRefundProcessedMail($claimed->fresh()));
                             Notification::make()->title('Refund marked as sent — customer notified')->success()->send();
                         } catch (\Throwable $e) {
-                            logger()->error('Refund-sent email failed: ' . $e->getMessage());
+                            logger()->error('Refund-sent email failed: '.$e->getMessage());
                             Notification::make()->title('Marked as sent, but the email failed to send')->warning()->send();
                         }
                     }),
@@ -590,7 +612,7 @@ class OrderResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->visible(fn () => auth()->user()?->isAdmin() ?? false)
-                        ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
+                        ->action(function (Collection $records): void {
                             [$protected, $deletable] = $records->partition(
                                 fn (Order $order) => in_array($order->status, ['pending', 'processing'], true)
                             );
@@ -598,13 +620,14 @@ class OrderResource extends Resource
                             $deletable->each(fn (Order $order) => $order->delete());
 
                             if ($protected->isEmpty()) {
-                                Notification::make()->title('Deleted ' . $deletable->count() . ' order(s)')->success()->send();
+                                Notification::make()->title('Deleted '.$deletable->count().' order(s)')->success()->send();
+
                                 return;
                             }
 
                             Notification::make()
-                                ->title('Deleted ' . $deletable->count() . ' order(s)')
-                                ->body($protected->count() . ' order(s) skipped — "Cancel & restock" first, their stock is still reserved.')
+                                ->title('Deleted '.$deletable->count().' order(s)')
+                                ->body($protected->count().' order(s) skipped — "Cancel & restock" first, their stock is still reserved.')
                                 ->warning()
                                 ->send();
                         }),
@@ -619,7 +642,7 @@ class OrderResource extends Resource
     {
         return [
             'index' => Pages\ListOrders::route('/'),
-            'edit'  => Pages\EditOrder::route('/{record}/edit'),
+            'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
     }
 }

@@ -4,9 +4,9 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use App\Models\User;
 use Filament\Facades\Filament;
-use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rules\Password;
 
@@ -48,19 +48,19 @@ class UserForm
                             ->required(fn (string $context): bool => $context === 'create')
                             ->hiddenOn('view'),
                         Select::make('role')
-                            ->options(function () {
-                                if (Filament::auth()->user()?->isOwner()) {
-                                    return [
-                                        'owner' => 'Owner (Superadmin)',
-                                        'admin' => 'Admin',
-                                        'staff' => 'Staff',
-                                    ];
-                                }
-                                return [
-                                    'admin' => 'Admin',
-                                    'staff' => 'Staff',
-                                ];
-                            })
+                            // Role assignment is owner-exclusive. Admins see the
+                            // field locked: they can create accounts (forced to
+                            // Staff server-side) and edit staff details, but they
+                            // can never re-role anyone — not staff, not peers,
+                            // not themselves.
+                            ->options([
+                                'owner' => 'Owner (Superadmin)',
+                                'admin' => 'Admin',
+                                'staff' => 'Staff',
+                            ])
+                            ->disabled(fn (): bool => ! (Filament::auth()->user()?->isOwner() ?? false))
+                            ->dehydrated(fn (): bool => Filament::auth()->user()?->isOwner() ?? false)
+                            ->helperText(fn (): ?string => (Filament::auth()->user()?->isOwner() ?? false) ? null : 'Only the owner can assign roles.')
                             ->required()
                             ->default('staff'),
                     ])->columns(['default' => 1, 'sm' => 2]),

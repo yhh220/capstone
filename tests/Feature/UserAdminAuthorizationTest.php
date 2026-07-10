@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\UserResource;
@@ -116,17 +117,45 @@ class UserAdminAuthorizationTest extends TestCase
         $this->assertNotSoftDeleted($admin);
     }
 
-    public function test_admin_can_demote_their_own_role_to_staff(): void
+    public function test_admin_cannot_change_any_role_not_even_their_own(): void
     {
+        // Role changes are owner-exclusive: an admin saving their own record
+        // with a crafted role keeps their current role.
         $admin = User::factory()->create(['role' => 'admin']);
         $this->actingAs($admin, 'admin');
 
         Livewire::test(EditUser::class, ['record' => $admin->getRouteKey()])
             ->fillForm(['role' => 'staff'])
+            ->call('save');
+
+        $this->assertSame('admin', $admin->refresh()->role);
+    }
+
+    public function test_admin_cannot_change_a_staff_members_role(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $staff = User::factory()->create(['role' => 'staff']);
+        $this->actingAs($admin, 'admin');
+
+        Livewire::test(EditUser::class, ['record' => $staff->getRouteKey()])
+            ->fillForm(['role' => 'admin'])
+            ->call('save');
+
+        $this->assertSame('staff', $staff->refresh()->role);
+    }
+
+    public function test_owner_can_promote_a_staff_member_to_admin(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $staff = User::factory()->create(['role' => 'staff']);
+        $this->actingAs($owner, 'admin');
+
+        Livewire::test(EditUser::class, ['record' => $staff->getRouteKey()])
+            ->fillForm(['role' => 'admin'])
             ->call('save')
             ->assertHasNoFormErrors();
 
-        $this->assertSame('staff', $admin->refresh()->role);
+        $this->assertSame('admin', $staff->refresh()->role);
     }
 
     /**
@@ -145,5 +174,116 @@ class UserAdminAuthorizationTest extends TestCase
             ->call('save');
 
         $this->assertSame('admin', $admin->refresh()->role);
+    }
+
+    /*
+     * Role hierarchy: admins manage subordinates (staff), never their peers.
+     * Only the owner creates, edits, deletes, or restores admins.
+     */
+
+    public function test_admin_cannot_delete_another_admin(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $peer = User::factory()->create(['role' => 'admin']);
+
+        $this->assertFalse($admin->can('delete', $peer));
+    }
+
+    public function test_owner_can_delete_an_admin(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->assertTrue($owner->can('delete', $admin));
+    }
+
+    public function test_admin_cannot_restore_a_soft_deleted_admin(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $peer = User::factory()->create(['role' => 'admin']);
+        $peer->delete();
+
+        $this->assertFalse($admin->can('restore', $peer));
+    }
+
+    public function test_admin_cannot_open_another_admins_edit_page(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $peer = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin, 'admin');
+
+        $this->get(UserResource::getUrl('edit', ['record' => $peer]))
+            ->assertForbidden();
+    }
+
+    public function test_owner_can_open_an_admins_edit_page(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($owner, 'admin');
+
+        $this->get(UserResource::getUrl('edit', ['record' => $admin]))
+            ->assertOk();
+    }
+
+    /**
+     * The role Select only offers Staff to a non-owner, but that's UI-only.
+     * A crafted payload must never let an admin mint a peer.
+     */
+    public function test_admin_cannot_create_an_admin_via_a_crafted_request(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin, 'admin');
+
+        Livewire::test(CreateUser::class)
+            ->fillForm([
+                'name' => 'Crafted Admin',
+                'email' => 'crafted-admin@example.test',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+                'role' => 'admin',
+            ])
+            ->call('create');
+
+        $created = User::where('email', 'crafted-admin@example.test')->first();
+        $this->assertTrue($created === null || $created->role === 'staff', 'A crafted payload must never mint an admin.');
+    }
+
+    public function test_owner_can_create_an_admin(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $this->actingAs($owner, 'admin');
+
+        Livewire::test(CreateUser::class)
+            ->fillForm([
+                'name' => 'New Admin',
+                'email' => 'new-admin@example.test',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+                'role' => 'admin',
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame('admin', User::where('email', 'new-admin@example.test')->first()->role);
+    }
+
+    /**
+     * A customer (client role) must never reach the Filament panel: the web
+     * guard doesn't carry over, and even a client session forced onto the
+     * admin guard is logged out and bounced by AdminMiddleware +
+     * canAccessPanel().
+     */
+    public function test_a_customer_cannot_access_the_admin_panel(): void
+    {
+        $client = User::factory()->create(['role' => 'client']);
+
+        // Logged in as a normal shopper (web guard): /admin is not authenticated.
+        $this->actingAs($client)->get('/admin')->assertRedirect();
+
+        // Even forced onto the admin guard, Filament's canAccessPanel()
+        // hard-rejects the client role with a 403.
+        $this->actingAs($client, 'admin');
+        $this->get('/admin')->assertForbidden();
     }
 }
