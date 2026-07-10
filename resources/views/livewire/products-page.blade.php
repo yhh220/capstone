@@ -143,6 +143,12 @@
                     </p>
                 </div>
 
+                {{-- Stable scroll anchor for pagination. The grid below carries
+                     wire:loading.remove, so it is briefly detached while a page
+                     loads and scrolling to it lands at the wrong spot on mobile;
+                     this always-present anchor is the reliable scroll target. --}}
+                <div id="products-top" class="scroll-mt-24" aria-hidden="true"></div>
+
                 {{-- Skeleton cards shown only during filter/search/pagination loading --}}
                 <div wire:loading.grid wire:target="search,category,minPrice,maxPrice,nextPage,previousPage,gotoPage"
                      class="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" style="display: none;" aria-hidden="true">
@@ -266,7 +272,7 @@
                     {{-- Override Livewire's default scrollTo ('body') — scrolling the whole
                          <body> into view lands somewhere unpredictable on long pages; scroll
                          to the top of the grid itself so the new page's results are visible. --}}
-                    {{ $products->links(data: ['scrollTo' => '#products-grid']) }}
+                    {{ $products->links(data: ['scrollTo' => '#products-top']) }}
                 </div>
                 @else
                 <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 group">

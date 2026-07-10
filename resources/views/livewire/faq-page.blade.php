@@ -9,7 +9,7 @@
     <div class="max-w-5xl mx-auto px-4 py-10 sm:py-12" x-data="{ active: null }">
         @forelse($faqGroups as $category => $faqs)
             @if($category !== '')
-            <h2 class="text-xs font-black uppercase tracking-[0.2em] text-brand-red mt-8 mb-3 first:mt-0">{{ $category }}</h2>
+            <h2 class="text-xs font-black uppercase tracking-[0.2em] text-brand-red mt-8 mb-3 first:mt-0">{{ __($category) }}</h2>
             @endif
 
             <div class="space-y-3 sm:space-y-4">

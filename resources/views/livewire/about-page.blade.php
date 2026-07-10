@@ -96,30 +96,30 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {{-- Quality First --}}
-                <div class="group bg-red-700 rounded-2xl p-6 text-center hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]" data-aos="fade-up" data-aos-delay="0">
+                <div class="group bg-white/10 ring-1 ring-white/15 rounded-2xl p-6 text-center hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]" data-aos="fade-up" data-aos-delay="0">
                     <div class="flex justify-center mb-4 text-brand-yellow" aria-hidden="true">
                         <svg class="w-14 h-14 group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 drop-shadow-sm" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
                     </div>
                     <h3 class="text-xl font-bold text-brand-yellow mb-2">{{ __('Quality First') }}</h3>
-                    <p class="text-red-100 text-sm leading-relaxed">{{ __('We highlight products we are confident showing customers in person.') }}</p>
+                    <p class="text-white/90 text-sm leading-relaxed">{{ __('We highlight products we are confident showing customers in person.') }}</p>
                 </div>
 
                 {{-- Customer Trust --}}
-                <div class="group bg-red-700 rounded-2xl p-6 text-center hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]" data-aos="fade-up" data-aos-delay="100">
+                <div class="group bg-white/10 ring-1 ring-white/15 rounded-2xl p-6 text-center hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]" data-aos="fade-up" data-aos-delay="100">
                     <div class="flex justify-center mb-4 text-brand-yellow" aria-hidden="true">
                         <svg class="w-14 h-14 group-hover:-rotate-6 group-hover:scale-110 transition-all duration-500 drop-shadow-sm" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m11 17 2 2a1 1 0 1 0 3-3"></path><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"></path><path d="m21 3 1 11h-1"></path><path d="M2 3 1 14l6.5 6.5a1 1 0 1 0 3-3"></path><path d="M3 4 2 3"></path></svg>
                     </div>
                     <h3 class="text-xl font-bold text-brand-yellow mb-2">{{ __('Customer Trust') }}</h3>
-                    <p class="text-red-100 text-sm leading-relaxed">{{ __('We build confidence through clear advice, real conversations, and showroom transparency.') }}</p>
+                    <p class="text-white/90 text-sm leading-relaxed">{{ __('We build confidence through clear advice, real conversations, and showroom transparency.') }}</p>
                 </div>
 
                 {{-- Practical Guidance --}}
-                <div class="group bg-red-700 rounded-2xl p-6 text-center hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]" data-aos="fade-up" data-aos-delay="200">
+                <div class="group bg-white/10 ring-1 ring-white/15 rounded-2xl p-6 text-center hover:-translate-y-2 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]" data-aos="fade-up" data-aos-delay="200">
                     <div class="flex justify-center mb-4 text-brand-yellow" aria-hidden="true">
                         <svg class="w-14 h-14 group-hover:rotate-[20deg] group-hover:scale-110 transition-all duration-500 drop-shadow-sm" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg>
                     </div>
                     <h3 class="text-xl font-bold text-brand-yellow mb-2">{{ __('Practical Guidance') }}</h3>
-                    <p class="text-red-100 text-sm leading-relaxed">{{ __('We focus on helping customers choose what suits their vehicle and usage.') }}</p>
+                    <p class="text-white/90 text-sm leading-relaxed">{{ __('We focus on helping customers choose what suits their vehicle and usage.') }}</p>
                 </div>
             </div>
         </div>

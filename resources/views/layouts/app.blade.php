@@ -1498,8 +1498,19 @@
             const btn = document.getElementById('scroll-to-top');
             if (!btn) return;
 
+            // Hide the button once the footer is in view, so it never sits on top of
+            // the footer's centre-aligned links (the button is pinned bottom-centre).
+            let footerVisible = false;
+            const footer = document.querySelector('footer');
+            if (footer && 'IntersectionObserver' in window) {
+                new IntersectionObserver((entries) => {
+                    footerVisible = entries[0].isIntersecting;
+                    toggleBtn();
+                }, { rootMargin: '0px 0px -10% 0px' }).observe(footer);
+            }
+
             function toggleBtn() {
-                if (window.scrollY > 400) {
+                if (window.scrollY > 400 && !footerVisible) {
                     btn.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
                 } else {
                     btn.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');

@@ -6,7 +6,7 @@
      x-transition:leave-start="opacity-100"
      x-transition:leave-end="opacity-0 backdrop-blur-none"
      style="display: none;"
-     class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#0C0C0E]/95 backdrop-blur-md">
+     class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white/95 dark:bg-[#0C0C0E]/95 backdrop-blur-md">
     
     <div class="w-[min(72vmin,240px)] aspect-[1.5] relative grid place-items-center mb-6">
         <svg viewBox="0 0 300 150" fill="none" aria-hidden="true" class="w-full h-full overflow-visible">
