@@ -68,7 +68,10 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-5 border-b border-gray-100 dark:border-gray-700">
                         <div>
-                            <div class="font-black text-gray-800 dark:text-white text-lg">{{ $order->order_number }}</div>
+                            <div class="font-black text-gray-800 dark:text-white text-lg flex items-center gap-0.5">
+                                {{ $order->order_number }}
+                                <x-copy-button :text="$order->order_number" :label="__('Copy order number')" />
+                            </div>
                             <div class="text-xs text-gray-400 mt-0.5">{{ $order->created_at->translatedFormat('d M Y, h:i A') }}</div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -110,6 +113,12 @@
                                 · <span class="text-green-600 dark:text-green-400 font-bold">{{ __('Paid') }}</span>
                             @elseif($order->isAwaitingPayment())
                                 · <span class="text-amber-600 dark:text-amber-400 font-bold">{{ __('Awaiting payment') }}</span>
+                            @endif
+                            @if($order->tracking_number)
+                                <span class="block sm:inline sm:ml-1">
+                                    · {{ __('Tracking Number') }}: <span class="font-mono font-bold text-gray-700 dark:text-gray-300">{{ $order->tracking_number }}</span>
+                                    <x-copy-button :text="$order->tracking_number" :label="__('Copy tracking number')" />
+                                </span>
                             @endif
                         </div>
                         <div class="flex items-center gap-4">
@@ -212,7 +221,10 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-5 border-b border-gray-100 dark:border-gray-700">
                         <div>
-                            <div class="font-black text-gray-800 dark:text-white text-lg">{{ $booking->reference }}</div>
+                            <div class="font-black text-gray-800 dark:text-white text-lg flex items-center gap-0.5">
+                                {{ $booking->reference }}
+                                <x-copy-button :text="$booking->reference" :label="__('Copy booking reference')" />
+                            </div>
                             <div class="text-xs text-gray-400 mt-0.5">{{ $booking->service ? $booking->service->localized_name : __('Service') }}</div>
                         </div>
                         <span class="px-3 py-1 rounded-full text-xs font-bold

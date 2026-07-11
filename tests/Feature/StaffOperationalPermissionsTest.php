@@ -81,6 +81,27 @@ class StaffOperationalPermissionsTest extends TestCase
         $this->assertSame('shipped', $order->refresh()->status);
     }
 
+    public function test_ready_for_pickup_emails_the_customer_with_collection_wording(): void
+    {
+        Mail::fake();
+        $order = $this->makeOrder();
+        $order->update(['payment_status' => 'paid', 'status' => 'processing', 'delivery_method' => 'pickup']);
+        $this->actingAs($this->staff(), 'admin');
+
+        // Same action as shipping, but a pickup order needs no tracking number.
+        Livewire::test(ListOrders::class)
+            ->callTableAction('markShipped', $order);
+
+        $this->assertSame('shipped', $order->refresh()->status);
+
+        // The customer must actually be told to come and collect — with the
+        // pickup subject line, not the courier "has shipped" one.
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\OrderShippedMail::class, function ($mail) use ($order) {
+            return $mail->hasTo($order->customer_email)
+                && str_contains($mail->envelope()->subject, 'ready for pickup');
+        });
+    }
+
     public function test_staff_can_confirm_a_booking(): void
     {
         Mail::fake();
