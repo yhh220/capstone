@@ -243,7 +243,7 @@ Placing an order does not immediately take payment. It creates the order with a 
 | Step | Actor | Action |
 |---|---|---|
 | 1 | System | Checks the customer is logged in, has a password set (social login accounts must set one first), and has items in the cart. Missing any of these redirects the customer elsewhere before checkout even starts |
-| 2 | System | Pre-fills the customer's name, email, and the shipping address used on their last delivery order, to save re-typing |
+| 2 | System | Pre-fills the customer name, email, phone, and address: the last delivery order wins, and a first-time buyer falls back to the address saved on their profile |
 | 3 | Customer | Step 1 of the wizard: chooses how to receive the order, courier delivery or free store pickup. Delivery asks for a full West Malaysia address; pickup removes the address fields entirely (a card shows the showroom address instead) and waives the shipping fee. The choice switches instantly on the page and is re-validated server-side |
 | 4 | Customer | Step 2 of the wizard: chooses a payment method (FPX, e-wallet, or card) and places the order |
 | 5 | System | Checks the rate limit (max 5 successful orders per hour per account), then locks the cart items and the affected product rows for the duration of the transaction |

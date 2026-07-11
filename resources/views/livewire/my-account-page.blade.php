@@ -115,10 +115,14 @@
                                 · <span class="text-amber-600 dark:text-amber-400 font-bold">{{ __('Awaiting payment') }}</span>
                             @endif
                             @if($order->tracking_number)
+                                {{-- The courier's own number (GDEX, Ninja Van, …), NOT this
+                                     site's order number — labelled as such so customers know
+                                     to paste it into the courier's tracking site. --}}
                                 <span class="block sm:inline sm:ml-1">
-                                    · {{ __('Tracking Number') }}: <span class="font-mono font-bold text-gray-700 dark:text-gray-300">{{ $order->tracking_number }}</span>
+                                    · {{ __('Courier tracking number') }}: <span class="font-mono font-bold text-gray-700 dark:text-gray-300">{{ $order->tracking_number }}</span>
                                     <x-copy-button :text="$order->tracking_number" :label="__('Copy tracking number')" />
                                 </span>
+                                <span class="block text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{{ __("This is the courier company's number — use it on their website (e.g. GDEX, Ninja Van) to follow the parcel.") }}</span>
                             @endif
                         </div>
                         <div class="flex items-center gap-4">

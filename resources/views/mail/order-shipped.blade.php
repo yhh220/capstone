@@ -21,11 +21,19 @@
         </tr>
         @elseif($order->tracking_number)
         <tr>
-            <td style="padding:8px 0;color:#71717a;">{{ __('Tracking Number') }}</td>
+            <td style="padding:8px 0;color:#71717a;">{{ __('Courier tracking number') }}</td>
             <td style="padding:8px 0;text-align:right;font-weight:bold;color:#C8413D;">{{ $order->tracking_number }}</td>
         </tr>
         @endif
     </table>
+
+    @unless($order->isPickup())
+    @if($order->tracking_number)
+    <p style="margin:12px 0 0;font-size:12px;line-height:1.6;color:#a1a1aa;">
+        {{ __("This is the courier company's number — use it on their website (e.g. GDEX, Ninja Van) to follow the parcel.") }}
+    </p>
+    @endif
+    @endunless
 
     @if($order->isPickup())
     <p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#71717a;">

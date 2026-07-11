@@ -44,6 +44,8 @@
     "We will email you as soon as your order is ready for collection.": "订单备好后我们会立即发邮件通知您。",
     "Your order is ready for pickup!": "您的订单可以取货了！",
     "Copy booking reference": "复制预约编号",
+    "Courier tracking number": "快递运单号",
+    "This is the courier company's number — use it on their website (e.g. GDEX, Ninja Van) to follow the parcel.": "这是快递公司的单号——请到对应快递官网（如 GDEX、Ninja Van）查询包裹进度。",
     "Copy order number": "复制订单编号",
     "Copy tracking number": "复制运单号",
     "Pause testimonials auto-scroll": "暂停评价自动滚动",

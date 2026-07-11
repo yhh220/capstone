@@ -124,6 +124,10 @@ class CheckoutPage extends Component
         $this->customerName = $user->name ?? '';
         $this->customerEmail = $user->email ?? '';
 
+        // Address prefill priority: the last delivery order (most recent intent)
+        // wins; a first-time buyer falls back to the address saved on their
+        // profile — before this fallback, a profile address was silently
+        // ignored and every field started blank.
         $lastOrder = Order::where('user_id', $user->id)
             ->whereNotNull('shipping_address')
             ->latest()
@@ -136,6 +140,16 @@ class CheckoutPage extends Component
             $this->city = $addr['city'] ?? '';
             $this->postcode = $addr['postcode'] ?? '';
             $this->state = $addr['state'] ?? '';
+        } elseif (filled($user->address_line)) {
+            $this->customerPhone = $user->phone ?? '';
+            $this->street = $user->address_line;
+            $this->city = $user->city ?? '';
+            $this->postcode = $user->postcode ?? '';
+            // Only a deliverable state may seed the whitelist-validated picker;
+            // anything else keeps the default rather than failing validation.
+            $this->state = in_array($user->state, DeliveryArea::STATES, true) ? $user->state : $this->state;
+        } elseif (filled($user->phone)) {
+            $this->customerPhone = $user->phone;
         }
 
         // Redirect to cart if cart is empty

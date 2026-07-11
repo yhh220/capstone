@@ -258,6 +258,28 @@ class CheckoutPageTest extends TestCase
         $this->assertDatabaseMissing('orders', ['user_id' => $user->id]);
     }
 
+    public function test_profile_address_prefills_checkout_for_a_first_time_buyer(): void
+    {
+        // No previous orders: the address saved on the profile must seed the
+        // form (it used to be silently ignored — only a past order's address
+        // was ever prefilled).
+        $user = User::create([
+            'name' => 'Fresh Buyer', 'email' => 'fresh@example.test', 'password' => 'password', 'role' => 'client',
+            'phone' => '0129998888', 'address_line' => '88 Jalan Profile', 'city' => 'Shah Alam',
+            'postcode' => '40150', 'state' => 'Selangor',
+        ]);
+        $product = Product::create(['name' => 'Tint', 'slug' => 'tint', 'price' => 80, 'stock' => 3, 'is_active' => true]);
+        CartItem::create(['user_id' => $user->id, 'product_id' => $product->id, 'quantity' => 1]);
+
+        Livewire::actingAs($user)
+            ->test(CheckoutPage::class)
+            ->assertSet('street', '88 Jalan Profile')
+            ->assertSet('city', 'Shah Alam')
+            ->assertSet('postcode', '40150')
+            ->assertSet('state', 'Selangor')
+            ->assertSet('customerPhone', '0129998888');
+    }
+
     public function test_a_forged_delivery_method_falls_back_to_delivery(): void
     {
         $user = User::create(['name' => 'Forger', 'email' => 'forge@example.test', 'password' => 'password', 'role' => 'client']);
