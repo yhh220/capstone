@@ -53,7 +53,9 @@
 </div>
 
 <script>
-    document.addEventListener('alpine:init', () => {
+    function registerCarLoader() {
+        if (!window.Alpine || window.__wwCarLoaderRegistered) return;
+        window.__wwCarLoaderRegistered = true;
         Alpine.data('carLoader', () => ({
             isLoading: false, // Default is false so it doesn't flash instantly
             startedAt: null,
@@ -166,7 +168,10 @@
                 }
                 this.isLoading = false;
             }
-        }))
-    })
+        }));
+    }
+
+    if (window.Alpine) registerCarLoader();
+    else document.addEventListener('alpine:init', registerCarLoader, { once: true });
 </script>
 @endpersist

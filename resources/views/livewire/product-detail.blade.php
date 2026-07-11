@@ -10,11 +10,11 @@
         <div class="max-w-7xl mx-auto px-4 text-sm text-gray-500 dark:text-gray-400" aria-label="{{ __('Breadcrumb') }}" role="navigation">
             <ol class="flex items-center flex-wrap gap-1" role="list">
                 <li role="listitem">
-                    <a href="{{ route('home') }}" class="hover:text-brand-red transition-colors">{{ __('Home') }}</a>
+                    <a href="{{ route('home') }}" wire:navigate class="hover:text-brand-red transition-colors">{{ __('Home') }}</a>
                 </li>
                 <li role="listitem" aria-hidden="true"><span class="mx-1">/</span></li>
                 <li role="listitem">
-                    <a href="{{ route('products') }}" class="hover:text-brand-red transition-colors">{{ __('Products') }}</a>
+                    <a href="{{ route('products') }}" wire:navigate class="hover:text-brand-red transition-colors">{{ __('Products') }}</a>
                 </li>
                 <li role="listitem" aria-hidden="true"><span class="mx-1">/</span></li>
                 <li role="listitem" class="text-gray-800 dark:text-gray-200 font-medium truncate max-w-xs" aria-current="page">
@@ -235,7 +235,7 @@
             </h2>
             <div class="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-4">
                 @foreach($related as $i => $item)
-                <a href="{{ route('product.show', $item->slug) }}"
+                <a href="{{ route('product.show', $item->slug) }}" wire:navigate
                    class="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700"
                    data-aos="fade-up" data-aos-delay="{{ $i * 80 }}">
                     <div class="bg-gray-100 dark:bg-gray-700 h-40 flex items-center justify-center overflow-hidden">

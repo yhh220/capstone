@@ -130,7 +130,7 @@
             </div>
 
             <div class="flex gap-3 mt-6">
-                <a href="{{ route('cart') }}" class="group flex items-center px-6 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-full font-semibold text-gray-600 dark:text-gray-300 hover:border-brand-red hover:text-brand-red hover:bg-red-50 dark:hover:bg-red-900/10 transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
+                <a href="{{ route('cart') }}" wire:navigate class="group flex items-center px-6 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-full font-semibold text-gray-600 dark:text-gray-300 hover:border-brand-red hover:text-brand-red hover:bg-red-50 dark:hover:bg-red-900/10 transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
                     {{ __('← Back to Cart') }}
                 </a>
                 <button wire:click="goToStep2"

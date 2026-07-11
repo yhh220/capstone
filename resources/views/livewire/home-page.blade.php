@@ -73,7 +73,7 @@
                     </p>
                     <div class="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4">
                         @if($shoppingEnabled)
-                        <a href="{{ route('products') }}" class="btn btn-primary btn-lg btn-shine w-full sm:w-auto">
+                        <a href="{{ route('products') }}" wire:navigate class="btn btn-primary btn-lg btn-shine w-full sm:w-auto">
                             <span class="relative z-10">{{ __('Browse Products') }}</span>
                             <i data-lucide="arrow-right" class="icon-sm icon-arrow relative z-10"></i>
                         </a>
@@ -103,7 +103,7 @@
                         {{ __('Browse Categories') }}
                     </h2>
                 </div>
-                <a href="{{ route('products') }}"
+                <a href="{{ route('products') }}" wire:navigate
                    class="group inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-red transition-colors">
                     {{ __('View all products') }}
                     {!! $icon('arrow-right', 'w-4 h-4 transition-transform duration-300 group-hover:translate-x-1') !!}
@@ -113,7 +113,7 @@
             @if($categories->count() > 0)
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                 @foreach($categories as $i => $category)
-                <a href="{{ route('products', ['category' => $category->id]) }}"
+                <a href="{{ route('products', ['category' => $category->id]) }}" wire:navigate
                    data-aos="fade-up" data-aos-delay="{{ $i * 50 }}"
                    class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 transition-all duration-300 hover:border-brand-red/50 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]">
                     <div class="w-10 h-10 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center mb-4 transition-colors duration-300 group-hover:bg-brand-red-solid group-hover:text-white" aria-hidden="true">
@@ -141,7 +141,7 @@
                         {{ __('Featured Products') }}
                     </h2>
                 </div>
-                <a href="{{ route('products') }}"
+                <a href="{{ route('products') }}" wire:navigate
                    class="group inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-red transition-colors">
                     {{ __('View all products') }}
                     {!! $icon('arrow-right', 'w-4 h-4 transition-transform duration-300 group-hover:translate-x-1') !!}
@@ -150,7 +150,7 @@
 
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 @foreach($featuredProducts as $i => $product)
-                <a href="{{ route('product.show', $product->slug) }}"
+                <a href="{{ route('product.show', $product->slug) }}" wire:navigate
                    data-aos="fade-up" data-aos-delay="{{ $i % 4 * 60 }}"
                    class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden transition-all duration-300 hover:border-brand-red/50 hover:shadow-md hover:-translate-y-0.5 flex flex-col">
                     <div class="relative aspect-square bg-gray-100 dark:bg-gray-900 overflow-hidden">
@@ -288,7 +288,7 @@
                                 {{ __('Pinch to zoom on mobile') }}
                             </li>
                         </ul>
-                        <a href="{{ route('products') }}#car-configurator" class="btn btn-primary btn-md btn-shine">
+                        <a href="{{ route('products') }}#car-configurator" wire:navigate class="btn btn-primary btn-md btn-shine">
                             {{ __('Try Our 3D Configurator') }}
                             {!! $icon('arrow-right', 'icon-md') !!}
                         </a>
@@ -549,6 +549,12 @@
     @push('scripts')
     <script>
     (function () {
+        // This body script is evaluated again after every wire:navigate. Keep
+        // one controller alive so revisiting the homepage cannot stack another
+        // requestAnimationFrame loop or another set of hover listeners.
+        if (window.__wwHomeMarqueeInit) return;
+        window.__wwHomeMarqueeInit = true;
+
         // Hoisted so each (re)init can cancel the previous loop. Livewire
         // navigations re-run this script; without cancelling, every visit to
         // the homepage stacked another rAF loop (all mutating the same

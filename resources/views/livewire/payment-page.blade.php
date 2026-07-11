@@ -174,7 +174,9 @@
          (the "have to scroll before the UI appears" glitch). --}}
     @assets
     <script>
-        document.addEventListener('alpine:init', () => {
+        function registerPaymentTimer() {
+            if (!window.Alpine || window.__wwPaymentTimerRegistered) return;
+            window.__wwPaymentTimerRegistered = true;
             Alpine.data('paymentTimer', (seconds) => ({
                 left: seconds,
                 display: '',
@@ -192,12 +194,19 @@
                         this.tick();
                     }, 1000);
                 },
+                destroy() {
+                    if (this.timer) clearInterval(this.timer);
+                    this.timer = null;
+                },
                 tick() {
                     const m = Math.floor(this.left / 60), s = this.left % 60;
                     this.display = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
                 },
             }));
-        });
+        }
+
+        if (window.Alpine) registerPaymentTimer();
+        else document.addEventListener('alpine:init', registerPaymentTimer, { once: true });
     </script>
     @endassets
     @endif

@@ -595,7 +595,7 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex items-center justify-between h-14 sm:h-20 gap-1.5 sm:gap-2">
                 <!-- Brand Identity -->
-                <a href="{{ route('home') }}"
+                <a href="{{ route('home') }}" wire:navigate.hover
                    class="flex flex-col items-center justify-center flex-shrink-0 group leading-none py-1"
                    aria-label="{{ $storeName }} - {{ __('Home') }}">
                     <div class="h-8 w-24 sm:h-10 sm:w-32 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-105 group-active:scale-95" aria-hidden="true">
@@ -751,21 +751,21 @@
                                     <div class="text-xs text-brand-red font-semibold mt-0.5">{{ ucfirst(Auth::user()->role) }}</div>
                                 </div>
                                 <div class="py-1">
-                                    <a href="{{ route('profile') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    <a href="{{ route('profile') }}" wire:navigate.hover class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                         {{ __('My Profile') }}
                                     </a>
-                                    <a href="{{ route('account') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    <a href="{{ route('account') }}" wire:navigate.hover class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                                         {{ __('My Account') }}
                                     </a>
                                     @if($shoppingEnabled)
-                                    <a href="{{ route('track-order') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    <a href="{{ route('track-order') }}" wire:navigate.hover class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                                         {{ __('Track Order') }}
                                     </a>
                                     @endif
-                                    <a href="{{ route('booking.track') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    <a href="{{ route('booking.track') }}" wire:navigate.hover class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                         {{ __('Track Booking') }}
                                     </a>
@@ -863,7 +863,7 @@
                     [route('about'),    __('About'),    request()->routeIs('about')],
                     [route('contact'),  __('Contact'),  request()->routeIs('contact')],
                 ] as [$href, $label, $active])
-                <a href="{{ $href }}" wire:navigate
+                <a href="{{ $href }}" wire:navigate.hover
                    role="menuitem"
                    class="block py-2.5 px-3 rounded-lg font-medium transition-colors {{ $active ? 'text-brand-red bg-red-50 dark:bg-red-900/20 active:bg-red-100 dark:active:bg-red-900/40' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-brand-red active:bg-gray-100 dark:active:bg-gray-600' }}"
                    @if($active) aria-current="page" @endif>
@@ -885,21 +885,21 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="{{ route('profile') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 transition-colors">
+                        <a href="{{ route('profile') }}" wire:navigate.hover class="flex items-center gap-3 py-2.5 px-3 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 transition-colors">
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                             {{ __('My Profile') }}
                         </a>
-                        <a href="{{ route('account') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 transition-colors">
+                        <a href="{{ route('account') }}" wire:navigate.hover class="flex items-center gap-3 py-2.5 px-3 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 transition-colors">
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                             {{ __('My Account') }}
                         </a>
                         @if($shoppingEnabled)
-                        <a href="{{ route('track-order') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 transition-colors">
+                        <a href="{{ route('track-order') }}" wire:navigate.hover class="flex items-center gap-3 py-2.5 px-3 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 transition-colors">
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                             {{ __('Track Order') }}
                         </a>
                         @endif
-                        <a href="{{ route('booking.track') }}" class="flex items-center gap-3 py-2.5 px-3 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 transition-colors">
+                        <a href="{{ route('booking.track') }}" wire:navigate.hover class="flex items-center gap-3 py-2.5 px-3 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 transition-colors">
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             {{ __('Track Booking') }}
                         </a>
@@ -1006,7 +1006,7 @@
                 </div>
                 <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">{{ __('Please sign in first') }}</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('You need to sign in to continue to checkout.') }}</p>
-                <a href="{{ route('checkout') }}" class="btn btn-primary btn-md btn-shine w-full !rounded-xl">
+                <a href="{{ route('checkout') }}" wire:navigate class="btn btn-primary btn-md btn-shine w-full !rounded-xl">
                     {{ __('Sign In') }}
                 </a>
                 <button type="button" @click="show = false" class="block w-full text-sm text-gray-500 dark:text-gray-400 hover:text-brand-red transition-colors py-2.5 mt-1 font-semibold">
@@ -1270,40 +1270,18 @@
             if (btn) btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
         }
 
-        // Set the session locale, then soft-navigate (no full reload).
-        // Guards: abort an in-flight switch if a newer one starts (so a slow
-        // earlier request can't land after a later one — race guard), and
-        // fail-fast with a hard reload if the request hangs past 5s.
-        var langAbort = null;
+        // The language endpoint stores the locale and redirects back to the
+        // current page. Let Livewire follow that redirect in one navigation;
+        // doing a separate fetch first made every switch wait for two requests.
         function switchLang(url, code) {
-            if (langAbort) langAbort.abort();
-            var controller = new AbortController();
-            langAbort = controller;
-            var timedOut = false;
-            var timer = setTimeout(function () { timedOut = true; controller.abort(); }, 5000);
-
-            fetch(url, { redirect: 'follow', credentials: 'same-origin', signal: controller.signal })
-                .then(function () {
-                    clearTimeout(timer);
-                    if (langAbort !== controller) return; // superseded by a newer switch
-                    // Keep <html lang> in sync with the just-selected locale so the
-                    // persisted page-loader shows the correct language during the
-                    // soft-navigation (it reads document.documentElement.lang).
-                    if (code) document.documentElement.lang = code;
-                    if (window.Livewire && typeof Livewire.navigate === 'function') {
-                        // Switching language only swaps text — keep the reader exactly
-                        // where they are. Livewire's navigate supports this natively.
-                        Livewire.navigate(location.href, { preserveScroll: true });
-                    } else {
-                        location.reload();
-                    }
-                })
-                .catch(function () {
-                    clearTimeout(timer);
-                    // Only recover if THIS is still the latest attempt and it timed
-                    // out; an abort from a newer click is handled by that click.
-                    if (langAbort === controller && timedOut) location.reload();
-                });
+            // Keep the persisted loader caption and accessibility metadata in
+            // sync while the response is being swapped.
+            if (code) document.documentElement.lang = code;
+            if (window.Livewire && typeof Livewire.navigate === 'function') {
+                Livewire.navigate(url, { preserveScroll: true });
+            } else {
+                window.location.href = url;
+            }
         }
 
         document.addEventListener('click', function (e) {
@@ -1412,7 +1390,9 @@
         </div>
     </div>
     <script>
-        document.addEventListener('alpine:init', () => {
+        function registerConfirmStore() {
+            if (!window.Alpine || window.__wwConfirmStoreRegistered) return;
+            window.__wwConfirmStoreRegistered = true;
             Alpine.store('confirm', {
                 show: false,
                 message: '',
@@ -1428,7 +1408,10 @@
                 accept() { const cb = this._cb; this.show = false; this._cb = null; if (cb) cb(); },
                 cancel() { this.show = false; this._cb = null; },
             });
-        });
+        }
+
+        if (window.Alpine) registerConfirmStore();
+        else document.addEventListener('alpine:init', registerConfirmStore, { once: true });
     </script>
 
     @stack('scripts')

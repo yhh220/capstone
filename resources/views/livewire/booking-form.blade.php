@@ -59,7 +59,7 @@
                 </div>
                 <p x-show="copied" x-cloak class="text-xs text-green-600 dark:text-green-400 font-semibold mt-1" role="status">{{ __('Copied!') }}</p>
             </div>
-            <a href="{{ route('booking.track') }}" class="block text-brand-red font-semibold text-sm mb-6 hover:underline">
+            <a href="{{ route('booking.track') }}" wire:navigate class="block text-brand-red font-semibold text-sm mb-6 hover:underline">
                 {{ __('Track or cancel this booking') }} <span aria-hidden="true">&rarr;</span>
             </a>
             <button wire:click="$set('submitted', false)"
@@ -166,7 +166,7 @@
                     <div class="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700">
                         <p class="text-xs text-gray-400 text-center">
                             {{ __('Existing booking?') }}
-                            <a href="{{ route('booking.track') }}" class="text-brand-red font-semibold hover:underline ml-1">{{ __('Track it') }}</a>
+                            <a href="{{ route('booking.track') }}" wire:navigate class="text-brand-red font-semibold hover:underline ml-1">{{ __('Track it') }}</a>
                         </p>
                     </div>
                 </div>

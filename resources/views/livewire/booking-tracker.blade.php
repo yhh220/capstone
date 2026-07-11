@@ -75,7 +75,7 @@
                     <svg class="w-12 h-12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 11H9m8 4H9m4 4H9M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path></svg>
                 </div>
                 <p class="text-gray-600 dark:text-gray-400">{{ $errorMsg }}</p>
-                <a href="{{ route('booking') }}" class="inline-block mt-4 text-brand-red font-semibold hover:underline">
+                <a href="{{ route('booking') }}" wire:navigate class="inline-block mt-4 text-brand-red font-semibold hover:underline">
                     {{ __('Make a Booking') }}
                 </a>
             </div>

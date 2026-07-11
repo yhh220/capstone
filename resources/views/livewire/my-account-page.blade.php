@@ -109,12 +109,12 @@
                                  /pay route is gated and unpaid orders have already been
                                  cancelled + restocked, so the button would be a dead end. --}}
                             @if($order->isAwaitingPayment() && $shoppingEnabled)
-                            <a href="{{ route('payment', $order->order_number) }}" class="text-brand-red font-bold hover:underline">{{ __('Pay now') }} <span aria-hidden="true">→</span></a>
+                            <a href="{{ route('payment', $order->order_number) }}" wire:navigate class="text-brand-red font-bold hover:underline">{{ __('Pay now') }} <span aria-hidden="true">→</span></a>
                             @endif
                             @if($order->payment_status === 'paid')
                             <a href="{{ route('invoice.show', $order->order_number) }}" class="text-brand-red font-bold hover:underline">{{ __('Invoice') }}</a>
                             @endif
-                            <a href="{{ route('track-order') }}" class="text-gray-500 dark:text-gray-400 hover:text-brand-red font-bold">{{ __('Track Order') }}</a>
+                            <a href="{{ route('track-order') }}" wire:navigate class="text-gray-500 dark:text-gray-400 hover:text-brand-red font-bold">{{ __('Track Order') }}</a>
                         </div>
                     </div>
 
@@ -181,7 +181,7 @@
                 </div>
                 <h2 class="text-2xl font-black text-gray-700 dark:text-gray-200 mb-2">{{ __('No orders yet') }}</h2>
                 <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('Start shopping and your orders will appear here!') }}</p>
-                <a href="{{ route('products') }}" class="group relative inline-flex items-center gap-2 bg-brand-red-solid text-white px-8 py-3 rounded-full font-bold transition-all duration-300 overflow-hidden hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 active:scale-95">
+                <a href="{{ route('products') }}" wire:navigate class="group relative inline-flex items-center gap-2 bg-brand-red-solid text-white px-8 py-3 rounded-full font-bold transition-all duration-300 overflow-hidden hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 active:scale-95">
                     <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 group-active:translate-x-0 transition-transform duration-500 ease-out"></span>
                     <span class="relative z-10">{{ __('Browse Products') }}</span>
                 </a>
@@ -252,7 +252,7 @@
                 </div>
                 <h2 class="text-2xl font-black text-gray-700 dark:text-gray-200 mb-2">{{ __('No bookings yet') }}</h2>
                 <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('Book a service and it will show up here.') }}</p>
-                <a href="{{ route('booking') }}" class="group relative inline-flex items-center gap-2 bg-brand-red-solid text-white px-8 py-3 rounded-full font-bold transition-all duration-300 overflow-hidden hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 active:scale-95">
+                <a href="{{ route('booking') }}" wire:navigate class="group relative inline-flex items-center gap-2 bg-brand-red-solid text-white px-8 py-3 rounded-full font-bold transition-all duration-300 overflow-hidden hover:shadow-[0_4px_15px_rgba(232,100,96,0.4)] hover:-translate-y-1 active:scale-95">
                     <span class="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 group-active:translate-x-0 transition-transform duration-500 ease-out"></span>
                     <span class="relative z-10">{{ __('Book a Service') }}</span>
                 </a>

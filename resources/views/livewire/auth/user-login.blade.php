@@ -452,7 +452,9 @@
          the Livewire view — same pattern as paymentTimer in payment-page.blade.php. --}}
     @assets
     <script>
-        document.addEventListener('alpine:init', () => {
+        function registerPasswordStrength() {
+            if (!window.Alpine || window.__wwPasswordStrengthRegistered) return;
+            window.__wwPasswordStrengthRegistered = true;
             const strengthLabels = @js([__('Very Weak'), __('Weak'), __('Medium'), __('Strong'), __('Very Strong')]);
             const strengthColors = ['bg-red-500', 'bg-red-400', 'bg-orange-400', 'bg-green-500', 'bg-emerald-500'];
 
@@ -475,7 +477,10 @@
                     return strengthColors[Math.max(0, this.strength - 1)];
                 },
             }));
-        });
+        }
+
+        if (window.Alpine) registerPasswordStrength();
+        else document.addEventListener('alpine:init', registerPasswordStrength, { once: true });
     </script>
     @endassets
 </div>

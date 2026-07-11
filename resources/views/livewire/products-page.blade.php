@@ -187,7 +187,7 @@
                         $productWaUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode(__("Hi Win Win Car Studio! I'm interested in :product. Can you provide more details?", ['product' => $product->translated_name]));
                     @endphp
                     <div wire:key="product-{{ $product->id }}" class="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-shadow overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col">
-                        <a href="{{ route('product.show', $product->slug) }}" class="block flex-1">
+                        <a href="{{ route('product.show', $product->slug) }}" wire:navigate class="block flex-1">
                             <div class="relative bg-gray-100 dark:bg-gray-700 h-52 overflow-hidden">
                                 @if($product->getImageUrl('thumb'))
                                 <img src="{{ $product->getImageUrl('thumb') }}"
@@ -245,12 +245,12 @@
                                     <svg wire:loading wire:target="addToCart({{ $product->id }})" class="icon-sm animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                                     {{ __('Add to Cart') }}
                                 </button>
-                                <a href="{{ route('product.show', $product->slug) }}"
+                                <a href="{{ route('product.show', $product->slug) }}" wire:navigate
                                    class="btn btn-secondary btn-sm flex-1">
                                     {{ __('Details') }}
                                 </a>
                             @else
-                                <a href="{{ route('product.show', $product->slug) }}"
+                                <a href="{{ route('product.show', $product->slug) }}" wire:navigate
                                    class="btn btn-secondary btn-sm flex-1">
                                     {{ __('Details') }}
                                 </a>
