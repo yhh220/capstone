@@ -225,7 +225,15 @@
 
         @assets
         <script>
-            document.addEventListener('alpine:init', () => {
+            // This asset block is injected into <head> and runs only once per
+            // page. On a
+            // Livewire soft-navigation Alpine already exists, so waiting only
+            // for alpine:init leaves x-data="serviceRoad" unregistered until a
+            // hard refresh. Register immediately when Alpine is ready, while
+            // keeping the alpine:init path for the first full page load.
+            function registerServiceRoad() {
+                if (!window.Alpine || window.__wwServiceRoadRegistered) return;
+                window.__wwServiceRoadRegistered = true;
                 Alpine.data('serviceRoad', () => ({
                     activeStep: 0,
                     len: 0,
@@ -260,8 +268,10 @@
 
                     animate(ts) {
                         if (!this.$refs.flowTrack.isConnected) { this.rafId = null; return; }
-                        this.rafId = requestAnimationFrame((t) => this.animate(t));
-                        if (!this.len) return;
+                        // The first frame can run before build() has measured the
+                        // SVG. Clear the handle so build/onScroll can schedule the
+                        // real animation once the path exists.
+                        if (!this.len) { this.rafId = null; return; }
 
                         const dt = this.lastTs === null ? 0 : Math.min((ts - this.lastTs) / 1000, 0.1);
                         this.lastTs = ts;
@@ -282,6 +292,15 @@
                         // -15/-25 centres the 30x50 car on the path point; rotation then
                         // spins around the element's own centre, i.e. that same point.
                         this.$refs.car.style.transform = `translate(${p.x - 15}px, ${p.y - 25}px) rotate(${ang}deg)`;
+
+                        // Do not keep a permanent 60fps loop alive once the car
+                        // has caught up. Scroll/resize/build will restart it.
+                        if (this.reduced || Math.abs(this.target - this.cur) < 0.15) {
+                            this.cur = this.target;
+                            this.rafId = null;
+                            return;
+                        }
+                        this.rafId = requestAnimationFrame((t) => this.animate(t));
                     },
 
                     // Build one smooth serpentine path THROUGH every stop, ending in
@@ -334,6 +353,11 @@
                             this.samples.push({ l, y: this.$refs.casing.getPointAtLength(l).y });
                         }
 
+                        // A resize/reflow changes the SVG coordinate system. Force
+                        // one placement on the new path instead of leaving the car
+                        // at coordinates measured against the old layout.
+                        this.cur = -1;
+                        this.lastTs = null;
                         this.onScroll();
                     },
 
@@ -354,6 +378,11 @@
                         }
                         this.target = this.samples[lo].l;
 
+                        if (this.rafId === null && !this.reduced && Math.abs(this.target - this.cur) >= 0.15) {
+                            this.lastTs = null;
+                            this.rafId = requestAnimationFrame((ts) => this.animate(ts));
+                        }
+
                         // Stops light up as the car passes (same rule as before).
                         let cur = 0;
                         track.querySelectorAll('.step-node').forEach((n, i) => {
@@ -362,7 +391,13 @@
                         this.activeStep = cur;
                     },
                 }));
-            });
+            }
+
+            if (window.Alpine) {
+                registerServiceRoad();
+            } else {
+                document.addEventListener('alpine:init', registerServiceRoad, { once: true });
+            }
         </script>
         @endassets
     </section>

@@ -705,15 +705,44 @@
 
     {{-- Lucide lives HERE, not in the layout: the homepage is the only page
          with data-lucide markup, so the 411KB bundle no longer ships on every
-         page of the site. The once-guard stops the navigated listener from
-         stacking a copy per soft navigation. --}}
-    <script src="{{ asset('vendor/lucide/lucide-1.24.0.min.js') }}"></script>
+         page of the site. The shared promise and once-guard keep loading and
+         navigation initialization idempotent. --}}
     <script>
-        window.lucide?.createIcons();
-        if (!window.__wwLucideNavInit) {
-            window.__wwLucideNavInit = true;
-            document.addEventListener('livewire:navigated', () => window.lucide?.createIcons());
-        }
+        (() => {
+            const src = @js(asset('vendor/lucide/lucide-1.24.0.min.js'));
+
+            if (!window.__wwLucidePromise) {
+                window.__wwLucidePromise = new Promise((resolve, reject) => {
+                    if (window.lucide) {
+                        resolve();
+                        return;
+                    }
+
+                    let script = document.querySelector('script[data-ww-lucide]');
+                    if (!script) {
+                        script = document.createElement('script');
+                        script.dataset.wwLucide = '1';
+                        script.src = src;
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    } else {
+                        script.addEventListener('load', resolve, { once: true });
+                        script.addEventListener('error', reject, { once: true });
+                    }
+                });
+            }
+
+            const init = () => window.__wwLucidePromise
+                .then(() => window.lucide?.createIcons())
+                .catch(() => {});
+
+            init();
+            if (!window.__wwLucideNavInit) {
+                window.__wwLucideNavInit = true;
+                document.addEventListener('livewire:navigated', init);
+            }
+        })();
     </script>
     @endpush
 </div>

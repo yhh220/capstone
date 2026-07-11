@@ -133,7 +133,10 @@
                 
                 // Event Listeners for Page and Livewire routing
                 window.addEventListener('load', () => this.stopLoader());
-                document.addEventListener('livewire:navigate', () => this.startLoader());
+                // Livewire already exposes navigation progress. Starting a
+                // full-screen overlay for every soft navigation made fast and
+                // slow routes look inconsistent and added a visible lag.
+                // Keep the full loader for the initial page load only.
                 document.addEventListener('livewire:navigated', () => this.stopLoader());
                 
                 // Fallback failsafe
