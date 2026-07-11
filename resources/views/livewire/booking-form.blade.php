@@ -40,9 +40,24 @@
             </div>
             <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-2">{{ __('Booking Confirmed!') }}</h2>
             <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('Thank you! Save your booking reference below. To check or cancel your booking later, use it together with your phone number.') }}</p>
-            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6">
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6"
+                 x-data="{ copied: false, copy() {
+                     navigator.clipboard?.writeText('{{ $reference }}').then(() => {
+                         this.copied = true;
+                         setTimeout(() => this.copied = false, 2000);
+                     });
+                 } }">
                 <p class="text-xs text-gray-400 uppercase tracking-wider mb-2 font-semibold">{{ __('Your Booking Reference') }}</p>
-                <p class="text-2xl font-black text-brand-red tracking-wider select-all">{{ $reference }}</p>
+                <div class="flex items-center justify-center gap-2">
+                    <p class="text-2xl font-black text-brand-red tracking-wider select-all">{{ $reference }}</p>
+                    <button type="button" @click="copy()"
+                            aria-label="{{ __('Copy booking reference') }}"
+                            class="p-2 rounded-lg text-gray-400 hover:text-brand-red hover:bg-brand-red/10 active:scale-90 transition-all">
+                        <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <svg x-show="copied" x-cloak class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                    </button>
+                </div>
+                <p x-show="copied" x-cloak class="text-xs text-green-600 dark:text-green-400 font-semibold mt-1" role="status">{{ __('Copied!') }}</p>
             </div>
             <a href="{{ route('booking.track') }}" class="block text-brand-red font-semibold text-sm mb-6 hover:underline">
                 {{ __('Track or cancel this booking') }} <span aria-hidden="true">&rarr;</span>
@@ -197,8 +212,12 @@
                              time-slot fix below). --}}
                         <div x-data="{ selected: $wire.entangle('service_id') }" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {{-- General visit — the default, no specific service --}}
+                            {{-- aria-pressed on every card announces the current choice
+                                 to screen readers — the selection used to exist only as a
+                                 visual border/checkmark. --}}
                             <button @click="selected = ''"
                                     type="button"
+                                    :aria-pressed="selected === '' ? 'true' : 'false'"
                                     class="group relative text-left p-5 rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
                                     :class="selected === ''
                                         ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10 shadow-[0_4px_20px_rgba(220,38,38,0.15)]'
@@ -217,6 +236,7 @@
                             @foreach($services as $svc)
                             <button @click="selected = '{{ $svc->id }}'"
                                     type="button"
+                                    :aria-pressed="selected == '{{ $svc->id }}' ? 'true' : 'false'"
                                     class="group relative text-left p-5 rounded-xl border-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
                                     :class="selected == '{{ $svc->id }}'
                                         ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10 shadow-[0_4px_20px_rgba(220,38,38,0.15)]'
@@ -292,7 +312,12 @@
                                     <div x-data="{ selectedDate: $wire.entangle('preferred_date') }" class="grid grid-cols-7 gap-1">
                                         @foreach($this->calendarDays as $cell)
                                             @if($cell['selectable'])
+                                            {{-- aria-label carries the FULL localised date (the visible
+                                                 text is just a bare day number) and aria-pressed announces
+                                                 which day is currently chosen. --}}
                                             <button type="button" @click="selectedDate = '{{ $cell['date'] }}'" wire:click="selectDate('{{ $cell['date'] }}')"
+                                                    aria-label="{{ \Illuminate\Support\Carbon::parse($cell['date'])->translatedFormat('l, j F Y') }}"
+                                                    :aria-pressed="selectedDate === '{{ $cell['date'] }}' ? 'true' : 'false'"
                                                     class="aspect-square flex items-center justify-center rounded-lg text-sm font-semibold transition-all active:scale-90"
                                                     :class="selectedDate === '{{ $cell['date'] }}'
                                                         ? 'bg-brand-red-solid text-white shadow-[0_4px_12px_rgba(200,65,61,0.35)]'
@@ -335,6 +360,7 @@
                                     @foreach($this->availableTimes as $time)
                                     <button @click="selected = '{{ $time }}'"
                                             type="button"
+                                            :aria-pressed="selected === '{{ $time }}' ? 'true' : 'false'"
                                             class="px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all duration-150 active:scale-95"
                                             :class="selected === '{{ $time }}'
                                                 ? 'border-brand-red bg-brand-red-solid text-white shadow-[0_4px_12px_rgba(220,38,38,0.3)]'

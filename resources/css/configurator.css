@@ -12,13 +12,20 @@
     font-family: 'DM Sans', sans-serif;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    /* visibility (not just opacity) so the closed modal's ~50 controls leave
+       the tab order and the accessibility tree entirely; the 0.4s delay lets
+       the fade-out finish before the element disappears. */
+    visibility: hidden;
+    transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                visibility 0s linear 0.4s;
     overflow: hidden;
 }
 
 #configurator-modal.active {
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
+    transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* 3D Canvas Area */

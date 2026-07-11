@@ -31,10 +31,26 @@
              video first so the wash reads as clean silver; dark mode keeps the
              original colours under a dark gradient. --}}
         <div class="absolute inset-0 z-0 pointer-events-none">
-            <video autoplay loop muted playsinline
+            {{-- The 5.5MB background video is decorative, so it must yield to the
+                 visitor: reduced-motion users and data-saver connections never
+                 download it at all (src attaches only after both checks pass),
+                 and the layered gradients beneath keep the hero presentable
+                 without it. preload="metadata" keeps the initial fetch small
+                 until autoplay actually starts pulling frames. --}}
+            <video autoplay loop muted playsinline preload="metadata"
+                   data-src="{{ asset('images/videos/hero-bg.mp4') }}"
                    class="absolute inset-0 w-full h-full object-cover [filter:grayscale(1)_brightness(1.05)_contrast(1.05)] dark:[filter:none]">
-                <source src="{{ asset('images/videos/hero-bg.mp4') }}" type="video/mp4">
             </video>
+            <script>
+                (function () {
+                    const video = document.currentScript.previousElementSibling;
+                    if (!video || video.src) return;
+                    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    const saveData = navigator.connection?.saveData === true;
+                    if (reduced || saveData) { video.removeAttribute('autoplay'); return; }
+                    video.src = video.dataset.src;
+                })();
+            </script>
             <div class="absolute inset-0 bg-white/20 dark:bg-[#0C0C0E]/55"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-white via-white/45 to-transparent dark:from-[#0C0C0E]/90 dark:via-[#0C0C0E]/40 dark:to-transparent"></div>
         </div>
@@ -217,11 +233,32 @@
         {{-- Draco decoder must be configured before model-viewer loads; the local
              path keeps it inside our CSP (Google's CDN is not allowlisted). --}}
         <script>self.ModelViewerElement = self.ModelViewerElement || {}; self.ModelViewerElement.dracoDecoderLocation = '{{ asset('draco') }}/';</script>
-        {{-- Self-hosted, version-pinned model-viewer: the unversioned unpkg URL
-             resolved through a redirect on a cold third-party CDN on every
-             visit — the whole 3D card sat on its spinner until that arrived.
-             Same-origin + hashed filename = cached with the rest of our assets. --}}
-        <script type="module" src="{{ asset('vendor/model-viewer/model-viewer-4.3.1.min.js') }}"></script>
+        {{-- Self-hosted, version-pinned model-viewer, injected only when the 3D
+             section approaches the viewport: the 1.07MB module used to download
+             on every homepage visit even for visitors who never scrolled this
+             far (the <model-viewer> element's loading="lazy" defers the MODEL,
+             not the script). The custom element upgrades in place once the
+             script lands, so nothing else changes. --}}
+        <script>
+            (function () {
+                if (window.__wwModelViewerRequested) return;
+                const src = '{{ asset('vendor/model-viewer/model-viewer-4.3.1.min.js') }}';
+                const inject = () => {
+                    if (window.__wwModelViewerRequested) return;
+                    window.__wwModelViewerRequested = true;
+                    const s = document.createElement('script');
+                    s.type = 'module';
+                    s.src = src;
+                    document.head.appendChild(s);
+                };
+                const section = document.currentScript.closest('section');
+                if (!section || !('IntersectionObserver' in window)) { inject(); return; }
+                const io = new IntersectionObserver((entries) => {
+                    if (entries[0].isIntersecting) { io.disconnect(); inject(); }
+                }, { rootMargin: '600px 0px' });
+                io.observe(section);
+            })();
+        </script>
         <div class="max-w-7xl mx-auto px-4">
             <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[2rem] p-6 sm:p-10 lg:p-14">
                 <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
@@ -336,8 +373,20 @@
                  stepped with the arrows. Respects prefers-reduced-motion. --}}
             @if($testimonials->count() > 1)
             @php $cards = $testimonials->skip(1); @endphp
+            {{-- Keyboard/AT parity with the hover-pause: focusing anything inside
+                 (arrows, links) pauses the auto-advance, and an explicit toggle
+                 gives everyone a persistent stop control (WCAG 2.2.2). --}}
             <div x-data="testimonialSlider()" class="relative" data-aos="fade-up"
-                 @mouseenter="pause()" @mouseleave="resume()">
+                 @mouseenter="pause()" @mouseleave="userPaused || resume()"
+                 @focusin="pause()" @focusout="userPaused || resume()">
+                <button type="button"
+                        @click="userPaused = !userPaused; userPaused ? pause() : resume()"
+                        :aria-pressed="userPaused ? 'true' : 'false'"
+                        :aria-label="userPaused ? '{{ __('Resume testimonials auto-scroll') }}' : '{{ __('Pause testimonials auto-scroll') }}'"
+                        class="absolute -top-10 right-0 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-brand-red transition-colors">
+                    <svg x-show="!userPaused" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+                    <svg x-show="userPaused" x-cloak class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                </button>
                 <div x-ref="track"
                      @pointerdown="dragStart($event)"
                      @pointermove="dragMove($event)"
@@ -592,6 +641,7 @@
         return {
             timer: null,
             reduced: false,
+            userPaused: false, // explicit pause button — survives hover/focus changes
             dragging: false,
             startX: 0,
             startScroll: 0,
@@ -618,7 +668,9 @@
             next() { this.step(1); this.resume(); },
             prev() { this.step(-1); this.resume(); },
             resume() {
-                if (this.reduced || this.dragging) return;
+                // userPaused: the explicit pause button outranks every implicit
+                // resume (hover-out, focus-out, arrow clicks).
+                if (this.reduced || this.dragging || this.userPaused) return;
                 this.pause();
                 this.timer = setInterval(() => this.step(1), 4500);
             },
@@ -649,6 +701,19 @@
             },
         };
     }
+    </script>
+
+    {{-- Lucide lives HERE, not in the layout: the homepage is the only page
+         with data-lucide markup, so the 411KB bundle no longer ships on every
+         page of the site. The once-guard stops the navigated listener from
+         stacking a copy per soft navigation. --}}
+    <script src="{{ asset('vendor/lucide/lucide-1.24.0.min.js') }}"></script>
+    <script>
+        window.lucide?.createIcons();
+        if (!window.__wwLucideNavInit) {
+            window.__wwLucideNavInit = true;
+            document.addEventListener('livewire:navigated', () => window.lucide?.createIcons());
+        }
     </script>
     @endpush
 </div>

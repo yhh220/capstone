@@ -42,7 +42,7 @@
                     </div>
                     <div>
                         <div class="font-semibold text-gray-800 dark:text-gray-200 mb-1 text-sm">{{ __('Phone') }}</div>
-                        <div class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{{ $storePhoneDisplay }}</div>
+                        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $storePhoneDisplay) }}" class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed hover:text-brand-red transition-colors">{{ $storePhoneDisplay }}</a>
                     </div>
                 </div>
                 <div class="flex items-start gap-4 group">

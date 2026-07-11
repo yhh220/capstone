@@ -928,7 +928,21 @@
 
         <!-- Cart Drawer (slide-out from right) -->
         @if($shoppingEnabled)
-        <div x-show="cartOpen" x-cloak class="fixed inset-0 z-[60]" style="display:none;" @keydown.escape.window="cartOpen = false">
+        {{-- Focus contract for the drawer: opening moves focus to its first
+             control (the close button) and closing returns it to whatever
+             opened it — without this, keyboard focus stayed stranded behind
+             the overlay when the drawer opened. --}}
+        <div x-show="cartOpen" x-cloak class="fixed inset-0 z-[60]" style="display:none;" @keydown.escape.window="cartOpen = false"
+             x-data="{ prevFocus: null }"
+             x-effect="
+                if (cartOpen && !prevFocus) {
+                    prevFocus = document.activeElement;
+                    $nextTick(() => $el.querySelector('aside button, aside a, aside input')?.focus());
+                } else if (!cartOpen && prevFocus) {
+                    prevFocus.focus?.();
+                    prevFocus = null;
+                }
+             ">
             <!-- Overlay -->
             <div x-show="cartOpen"
                  x-transition:enter="transition ease-out duration-200"
@@ -1419,14 +1433,19 @@
 
     @stack('scripts')
 
-    {{-- Self-hosted + version-pinned (was unpkg lucide@latest: an unversioned
-         third-party redirect on every page load, and a broken page if unpkg
-         is down or a breaking major ships). --}}
-    <script src="{{ asset('vendor/lucide/lucide-1.24.0.min.js') }}"></script>
-    <script>document.addEventListener('DOMContentLoaded', () => lucide.createIcons()); document.addEventListener('livewire:navigated', () => lucide.createIcons());</script>
+    {{-- Lucide moved to the homepage @push('scripts') — it is the only page
+         with data-lucide markup, so the 411KB bundle no longer ships site-wide. --}}
     {{-- Leaflet JS moved to the Contact page (@push) — see the note in <head>. --}}
     <script src="{{ asset('vendor/aos/aos.js') }}"></script>
     <script>
+        // Body scripts re-execute after EVERY wire:navigate, so everything in
+        // this block must register its document/window listeners exactly once
+        // — otherwise each navigation stacked another copy of each handler
+        // (AOS refresh, video restarts, counters all ran N times after N
+        // navigations, growing jank with every page switch).
+        if (!window.__wwLayoutFxInit) {
+        window.__wwLayoutFxInit = true;
+
         // ── AOS init ─────────────────────────────────────────
         AOS.init({
             duration: 650,
@@ -1436,8 +1455,10 @@
             delay: 0,
         });
 
-        // Re-init after Livewire navigations keep animations fresh
-        document.addEventListener('livewire:navigated', () => AOS.refresh());
+        // refreshHard (not refresh): after a soft navigation the page's
+        // data-aos elements are brand-new nodes, so AOS must re-collect them,
+        // not just recalculate positions of the ones it already knew.
+        document.addEventListener('livewire:navigated', () => AOS.refreshHard());
 
         // Restart autoplay videos after a soft navigation. `autoplay` is a
         // one-shot attribute that only fires on the initial page parse, so the
@@ -1488,6 +1509,8 @@
 
         // Re-run after Livewire re-renders
         document.addEventListener('livewire:navigated', () => animateCounters());
+
+        } // end __wwLayoutFxInit once-guard
     </script>
     <!-- Scroll to Top Button -->
     <button id="scroll-to-top"
@@ -1500,22 +1523,21 @@
 
     <script>
         // ── Scroll to Top Logic ──────────────────────────────
+        // Registered once (body scripts re-run per wire:navigate); handlers
+        // look nodes up at event time and the footer observer re-attaches on
+        // every navigation because the morph replaces the footer element —
+        // the old version leaked one scroll listener + one dead observer per
+        // page switch.
         (function() {
-            const btn = document.getElementById('scroll-to-top');
-            if (!btn) return;
+            if (window.__wwScrollTopInit) return;
+            window.__wwScrollTopInit = true;
 
-            // Hide the button once the footer is in view, so it never sits on top of
-            // the footer's centre-aligned links (the button is pinned bottom-centre).
             let footerVisible = false;
-            const footer = document.querySelector('footer');
-            if (footer && 'IntersectionObserver' in window) {
-                new IntersectionObserver((entries) => {
-                    footerVisible = entries[0].isIntersecting;
-                    toggleBtn();
-                }, { rootMargin: '0px 0px -10% 0px' }).observe(footer);
-            }
+            let footerObserver = null;
 
             function toggleBtn() {
+                const btn = document.getElementById('scroll-to-top');
+                if (!btn) return;
                 if (window.scrollY > 400 && !footerVisible) {
                     btn.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
                 } else {
@@ -1523,13 +1545,32 @@
                 }
             }
 
-            window.addEventListener('scroll', toggleBtn);
-            btn.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Hide the button once the footer is in view, so it never sits on
+            // top of the footer's centre-aligned links (button is bottom-centre).
+            function watchFooter() {
+                footerObserver?.disconnect();
+                footerVisible = false;
+                const footer = document.querySelector('footer');
+                if (footer && 'IntersectionObserver' in window) {
+                    footerObserver = new IntersectionObserver((entries) => {
+                        footerVisible = entries[0].isIntersecting;
+                        toggleBtn();
+                    }, { rootMargin: '0px 0px -10% 0px' });
+                    footerObserver.observe(footer);
+                }
+            }
+
+            window.addEventListener('scroll', toggleBtn, { passive: true });
+            // Delegated: the button node itself is replaced by each navigation.
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#scroll-to-top')) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             });
-            
-            // Re-check on navigation
-            document.addEventListener('livewire:navigated', toggleBtn);
+            document.addEventListener('livewire:navigated', () => { watchFooter(); toggleBtn(); });
+
+            watchFooter();
+            toggleBtn();
         })();
     </script>
 </body>

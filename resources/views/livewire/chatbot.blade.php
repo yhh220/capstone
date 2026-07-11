@@ -57,8 +57,10 @@
               resolves and yanks it out of the DOM with zero visual feedback. --}}
          :class="closing ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'"
          wire:key="chatbot-window"
+         {{-- Non-modal dialog, honestly labelled: on desktop this is a corner
+              panel the visitor browses alongside, so aria-modal="true" (which
+              tells AT the rest of the page is inert) contradicted reality. --}}
          role="dialog"
-         aria-modal="true"
          aria-label="{{ $ui['title'] }}"
          x-data="{ langOpen: false, closing: false }"
          x-init="$nextTick(() => { let m = document.getElementById('chatbot-messages'); if (m) m.scrollTop = m.scrollHeight; if (window.matchMedia('(min-width: 768px)').matches) document.getElementById('chatbot-input')?.focus() })"
@@ -234,6 +236,7 @@
                        id="chatbot-input"
                        maxlength="500"
                        autocomplete="off"
+                       aria-label="{{ $ui['placeholder'] }}"
                        placeholder="{{ $ui['placeholder'] }}"
                        class="flex-1 bg-transparent border-none outline-none text-[15px] text-gray-800 dark:text-gray-200 placeholder-gray-400 disabled:opacity-50 focus:ring-0 focus-visible:outline-none px-2.5 py-1.5">
 

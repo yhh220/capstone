@@ -441,6 +441,43 @@ if (document.readyState === 'loading') {
 // Let the loader shim open the modal right after the module finishes loading.
 export { openConfigurator };
 
+// ── Modal accessibility state ─────────────────────────────────────────────
+// The element that opened the modal (focus returns to it on close) and the
+// keydown handler that provides Esc-to-close plus a Tab focus trap. Without
+// these, keyboard and screen-reader users could Tab straight out into the
+// page behind the dialog and had no way to dismiss it.
+let configuratorOpener = null;
+let configuratorKeydownHandler = null;
+
+function trapConfiguratorKeydown(e) {
+    const modal = document.getElementById('configurator-modal');
+    if (!modal || !modal.classList.contains('active')) return;
+
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        closeConfigurator();
+        return;
+    }
+
+    if (e.key !== 'Tab') return;
+
+    const focusables = [...modal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )].filter((el) => el.offsetParent !== null || el === document.activeElement);
+    if (focusables.length === 0) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+        e.preventDefault();
+        last.focus();
+    } else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) {
+        e.preventDefault();
+        first.focus();
+    }
+}
+
 /**
  * Open the configurator popup modal and load/run Three.js
  * 打开3D看车模态框并加载运行Three.js
@@ -450,6 +487,13 @@ function openConfigurator() {
     if (!modal) return;
     modal.classList.add('active');
     document.body.classList.add('overflow-hidden');
+
+    // Dialog keyboard contract: initial focus on the close button, Esc closes,
+    // Tab cycles inside the modal, and focus returns to the opener on close.
+    configuratorOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    configuratorKeydownHandler = trapConfiguratorKeydown;
+    document.addEventListener('keydown', configuratorKeydownHandler, true);
+    document.getElementById('close-configurator-btn')?.focus();
 
     // Mark the configurator as open in the URL so a refresh re-opens it here
     // instead of dropping the user back to the plain products page.
@@ -514,6 +558,17 @@ function closeConfigurator() {
     if (!modal) return;
     modal.classList.remove('active');
     document.body.classList.remove('overflow-hidden');
+
+    // Tear down the dialog keyboard contract and hand focus back to whatever
+    // opened the modal.
+    if (configuratorKeydownHandler) {
+        document.removeEventListener('keydown', configuratorKeydownHandler, true);
+        configuratorKeydownHandler = null;
+    }
+    if (configuratorOpener && document.contains(configuratorOpener)) {
+        configuratorOpener.focus();
+    }
+    configuratorOpener = null;
 
     // Drop the #car-configurator marker so a later refresh stays on the page.
     if (window.location.hash === '#car-configurator') {
