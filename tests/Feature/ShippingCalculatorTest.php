@@ -29,6 +29,9 @@ class ShippingCalculatorTest extends TestCase
 
     public function test_no_settings_means_no_shipping_charge(): void
     {
+        // The shipping rows are seeded by migration now — remove them so this
+        // still exercises the calculator's missing-row fallback path.
+        Setting::whereIn('key', ['SHIPPING_FLAT_RATE', 'SHIPPING_FREE_THRESHOLD'])->delete();
         cache()->flush();
         $calc = app(ShippingCalculator::class);
 

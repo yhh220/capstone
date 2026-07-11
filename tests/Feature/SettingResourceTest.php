@@ -57,7 +57,9 @@ class SettingResourceTest extends TestCase
 
     public function test_cancellation_fee_above_100_percent_is_rejected(): void
     {
-        $setting = Setting::create(['key' => 'CANCELLATION_FEE_PERCENT', 'value' => '10']);
+        // updateOrCreate: this row is now guaranteed by migration, so a bare
+        // create() would collide with the seeded key.
+        $setting = Setting::updateOrCreate(['key' => 'CANCELLATION_FEE_PERCENT'], ['value' => '10']);
         $this->actingAs($this->admin(), 'admin');
 
         Livewire::test(EditSetting::class, ['record' => $setting->getRouteKey()])
