@@ -65,4 +65,22 @@ class OrderAdminEditTest extends TestCase
         Livewire::test(EditOrder::class, ['record' => $order->getRouteKey()])
             ->assertActionVisible('delete');
     }
+
+    public function test_owner_alert_view_order_link_opens_the_edit_page(): void
+    {
+        // Every owner-alert email deep-links to url('/admin/orders/{id}/edit').
+        // This pins that URL shape to a real 200 for an existing order — and
+        // documents that a DELETED order's link 404s (the email outlives the
+        // record), which is expected, not a routing bug.
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin, 'admin');
+
+        $order = $this->order(['status' => 'delivered']);
+        $link = url('/admin/orders/'.$order->getKey().'/edit');
+
+        $this->get($link)->assertOk();
+
+        $order->delete(); // soft delete — what admin cleanup does
+        $this->get($link)->assertNotFound();
+    }
 }
