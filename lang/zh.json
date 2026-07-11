@@ -608,6 +608,8 @@
     "Pay with Stripe": "通过 Stripe 付款",
     "Payment": "付款",
     "Payment Method": "支付方式",
+    "Open :start – :end, closed on :days": "营业时间 :start – :end（:days 休息）",
+    "Open daily, :start – :end": "每日营业 :start – :end",
     "Order Cancelled": "订单已取消",
     "Payment Successful!": "付款成功！",
     "Payment Time Expired": "付款时间已过期",

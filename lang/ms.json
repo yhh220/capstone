@@ -608,6 +608,8 @@
     "Pay with Stripe": "Bayar dengan Stripe",
     "Payment": "Pembayaran",
     "Payment Method": "Kaedah Pembayaran",
+    "Open :start – :end, closed on :days": "Buka :start – :end, tutup pada hari :days",
+    "Open daily, :start – :end": "Buka setiap hari, :start – :end",
     "Order Cancelled": "Pesanan Dibatalkan",
     "Payment Successful!": "Pembayaran Berjaya!",
     "Payment Time Expired": "Masa Pembayaran Tamat",

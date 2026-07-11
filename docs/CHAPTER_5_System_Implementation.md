@@ -243,7 +243,7 @@ A dedicated **Settings** resource lets the owner adjust the shop's operating par
 | Site Announcement Bar (on/off) | Whether the site-wide announcement banner is shown. |
 | Site Announcement Text | The message displayed in that banner. |
 
-Because every value is read through a **cached accessor that is explicitly invalidated when the setting is saved** (Section 5.13.6), a change takes effect on the storefront immediately without a redeploy. The same settings feed multiple parts of the system from a single source of truth. The business hours, for example, drive both the booking calendar (Section 5.7) and the opening-hours entry in the site's structured data (Section 5.13.2), so the shop's configuration can never contradict itself across features.
+Because every value is read through a **cached accessor that is explicitly invalidated when the setting is saved** (Section 5.13.6), a change takes effect on the storefront immediately without a redeploy. The same settings feed multiple parts of the system from a single source of truth. The business hours, for example, drive the booking calendar (Section 5.7), the opening-hours entry in the site's structured data (Section 5.13.2), and every human-readable display of the shop's hours — the site footer, the contact page, and the chatbot's operating-hours answer are all generated from the same values, localised into the visitor's language. Editing the business hours in Settings therefore updates every one of these at once, and the shop's configuration can never contradict itself across features.
 
 ### 5.10.10 Online Shopping Mode Toggle & Graceful Shutdown
 

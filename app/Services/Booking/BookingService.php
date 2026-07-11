@@ -116,4 +116,31 @@ class BookingService
             ->values()
             ->all();
     }
+
+    /**
+     * Human-readable opening hours composed from the SAME settings that drive
+     * the booking calendar (BUSINESS_HOURS_START/END + BUSINESS_CLOSED_WEEKDAYS).
+     * The footer, contact page, and chatbot all display this, so what the shop
+     * tells customers can never contradict the hours the booking form actually
+     * enforces — and the owner updates it from the Settings resource, not env.
+     * $locale serves the chatbot's per-conversation language; defaults to the
+     * app locale (day names localise through Carbon).
+     */
+    public function openingHoursLabel(?string $locale = null): string
+    {
+        $locale ??= app()->getLocale();
+
+        $start = Carbon::createFromFormat('H:i', (string) setting('BUSINESS_HOURS_START', '09:00'))->format('g:i A');
+        $end = Carbon::createFromFormat('H:i', (string) setting('BUSINESS_HOURS_END', '18:00'))->format('g:i A');
+
+        // Weekday numbers use the settings convention (0 = Sunday … 6 = Saturday).
+        $closedDays = collect($this->closedWeekdays())
+            ->sort()
+            ->map(fn (int $day): string => Carbon::now()->startOfWeek(Carbon::SUNDAY)->addDays($day)->locale($locale)->dayName)
+            ->implode(', ');
+
+        return $closedDays === ''
+            ? __('Open daily, :start – :end', ['start' => $start, 'end' => $end], $locale)
+            : __('Open :start – :end, closed on :days', ['start' => $start, 'end' => $end, 'days' => $closedDays], $locale);
+    }
 }

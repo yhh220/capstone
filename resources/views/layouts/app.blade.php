@@ -13,7 +13,9 @@
     $storeEmail = config('services.store.email');
     $storeFacebookUrl = config('services.store.facebook_url');
     $storeAddress = config('services.store.address');
-    $storeHours = config('services.store.hours');
+    // Settings-driven (same source as the booking calendar), not a static env
+    // string — the owner edits hours in Settings and every display follows.
+    $storeHours = app(\App\Services\Booking\BookingService::class)->openingHoursLabel();
     $whatsAppUrl = 'https://wa.me/' . $storePhoneRaw . '?text=' . rawurlencode('Hello, I would like to ask about your products and showroom visit.');
     $mapUrl = 'https://www.google.com/maps?cid=' . config('services.store.place_cid');
     $telLink = 'tel:' . preg_replace('/[^0-9+]/', '', $storePhoneDisplay);

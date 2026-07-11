@@ -53,6 +53,7 @@ class MockDriver implements ChatServiceInterface
         $calculator = new \App\Services\RefundCalculator();
         $hours = $calculator->fullRefundHours();
         $fee = $calculator->feePercent();
+        $booking = app(\App\Services\Booking\BookingService::class);
 
         return [
             // Greetings (low priority — a real topic should win)
@@ -66,14 +67,16 @@ class MockDriver implements ChatServiceInterface
                 ],
             ],
 
-            // Operating hours
+            // Operating hours — generated from the SAME settings that drive the
+            // booking calendar, so the bot can never quote hours the booking
+            // form would then refuse (the old hardcoded table had drifted).
             [
                 'priority' => 55,
                 'keywords' => ['hour', 'open', 'close', 'when do you', 'waktu', 'buka', 'tutup', 'jam operasi', '营业', '开门', '关门', '几点开', '几点关'],
                 'reply' => [
-                    'en' => "🕐 Our operating hours:\n\nMon – Thu: 10:30 AM – 8:00 PM\nFriday: CLOSED (rest day)\nSaturday: 10:30 AM – 8:00 PM\nSunday: 10:30 AM – 6:00 PM\n\nWe are closed every Friday. Plan your visit accordingly! 😊",
-                    'ms' => "🕐 Waktu operasi kami:\n\nIsnin – Khamis: 10:30 PG – 8:00 MLM\nJumaat: TUTUP (hari rehat)\nSabtu: 10:30 PG – 8:00 MLM\nAhad: 10:30 PG – 6:00 PTG\n\nKami tutup setiap hari Jumaat. Rancang kunjungan anda! 😊",
-                    'zh' => "🕐 我们的营业时间：\n\n周一至周四：上午 10:30 – 晚上 8:00\n周五：休息（不营业）\n周六：上午 10:30 – 晚上 8:00\n周日：上午 10:30 – 下午 6:00\n\n每周五休息，请提前安排好来访时间！😊",
+                    'en' => "🕐 Our operating hours:\n\n".$booking->openingHoursLabel('en')."\n\nPlan your visit accordingly! 😊",
+                    'ms' => "🕐 Waktu operasi kami:\n\n".$booking->openingHoursLabel('ms')."\n\nRancang kunjungan anda! 😊",
+                    'zh' => "🕐 我们的营业时间：\n\n".$booking->openingHoursLabel('zh')."\n\n请提前安排好来访时间！😊",
                 ],
             ],
 

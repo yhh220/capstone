@@ -73,7 +73,9 @@ return [
         // the hex pair after "!1s" is "<placeIdHex>:<cidHex>" — this is the cid
         // half, converted from hex to decimal.
         'place_cid' => env('STORE_PLACE_CID', '5750306395518804732'),
-        'hours' => env('STORE_HOURS'),
+        // Opening hours are NOT configured here: every display (footer, contact
+        // page, chatbot) reads BookingService::openingHoursLabel(), which is
+        // driven by the BUSINESS_HOURS_* settings the owner edits in the panel.
     ],
 
     // ── Social login (OAuth) ──────────────────────────────────────────────

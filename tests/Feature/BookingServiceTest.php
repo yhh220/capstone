@@ -40,4 +40,23 @@ class BookingServiceTest extends TestCase
         $this->assertTrue($bookingService->isSlotAvailable(Carbon::parse('2026-06-01 11:15')));
         $this->assertFalse($bookingService->isSlotAvailable(Carbon::parse('2026-06-01 11:00')));
     }
+
+    public function test_opening_hours_label_follows_the_settings(): void
+    {
+        \App\Models\Setting::setValue('BUSINESS_HOURS_START', '10:30');
+        \App\Models\Setting::setValue('BUSINESS_HOURS_END', '20:00');
+        \App\Models\Setting::setValue('BUSINESS_CLOSED_WEEKDAYS', '5');
+
+        $label = app(BookingService::class)->openingHoursLabel('en');
+
+        // Times and the closed day come straight from the settings the booking
+        // calendar enforces — this is what the footer/contact page/chatbot show.
+        $this->assertStringContainsString('10:30 AM', $label);
+        $this->assertStringContainsString('8:00 PM', $label);
+        $this->assertStringContainsString('Friday', $label);
+
+        // No closed days → the "open daily" variant.
+        \App\Models\Setting::setValue('BUSINESS_CLOSED_WEEKDAYS', '');
+        $this->assertStringContainsString('daily', app(BookingService::class)->openingHoursLabel('en'));
+    }
 }
