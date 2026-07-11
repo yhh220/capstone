@@ -2,7 +2,7 @@
 
 > **Purpose:** Complete feature & implementation inventory for the Capstone Report.
 > **Method:** Every entry below was verified by scanning the codebase (file paths given). Items that do not exist are explicitly marked **Not implemented** / **Not found**.
-> **Generated:** 2026-06-26 · **Last updated:** 2026-07-04 (deep security + UX audit + shop-mode graceful shutdown — see §49)
+> **Generated:** 2026-06-26 · **Last updated:** 2026-07-11 (Stripe hardening, store pickup, services CRUD, a11y/perf sweep — see §50)
 > **Live site (production):** https://winwincaraudio.onrender.com · **Admin panel:** https://winwincaraudio.onrender.com/admin
 > **Repository:** https://github.com/yhh220/capstone
 > **Stack at a glance:** Laravel 13 · Livewire 4 · Filament 5 · PHP 8.4 · Tailwind CSS 4 (Vite) · Three.js · TiDB (prod) / SQLite (local) · Hosted on Render
@@ -1516,3 +1516,57 @@ Scan of [app/](../app/) subfolders:
 - Language switch is a full-page redirect (correctly open-redirect-guarded) rather than soft navigation.
 - The custom 429 page mostly applies to route-level throttles; component-level limits intentionally show inline messages instead.
 - Guest bookings without an email rely on the on-screen reference; consider a "screenshot this" nudge on the success card.
+
+---
+
+# 50. Addendum — 2026-07-09 to 2026-07-11 changes
+
+Everything below post-dates the §1–§49 audit body; where an older section contradicts this addendum, the addendum wins.
+
+## 50.1 Payments (Stripe test-mode hybrid)
+
+- **Stripe Checkout integrated** (sandbox only; `sk_test_` enforced, live keys refused): card / FPX / GrabPay via hosted Checkout, switched at runtime by the `PAYMENT_MODE` setting; TnG/ShopeePay/Boost stay simulated. Confirmation via signature-verified webhook + success-URL re-verification, both funnelled into one idempotent settle step (`OrderPaymentService::markPaid`, cache lock + row lock + atomic conditional flip).
+- **Hardening sweep**: `pay()` re-checks awaiting-payment under its lock (stale tab can't mint a session for a cancelled order); every cancel path (admin cancel, manual mark-paid, customer cancel, shop-close) voids any open Stripe session; the method switcher refuses to drop a completed-but-settling FPX session; a failed async payment detaches its dead session so the customer can retry; the expiry job re-checks `expires_at` under the row lock.
+- **GrabPay contract fix**: Stripe's type is `grabpay` (no underscore) — `grab_pay` was rejected by the API and surfaced as "could not reach the payment provider".
+- Checkout rate limit now counts only successful orders.
+
+## 50.2 Store pickup (new fulfilment mode)
+
+- `orders.delivery_method` ('delivery' | 'pickup', default delivery). Checkout opens with a delivery/pickup choice (Alpine-entangled — instant switching, zero round-trips; server re-whitelists and re-validates). Pickup = no address, no shipping fee.
+- Downstream adaptation: payment page/invoice/confirmation email show "store pickup"; the `shipped` stage reads **Ready for Pickup** (collection email with showroom address, no tracking number) and `delivered` reads **Collected** on tracker + account; admin's Mark Shipped action relabels itself and skips the tracking field; Fulfilment badge column added.
+
+## 50.3 Services become admin-manageable (edit-only)
+
+- `services.name_ms/name_zh/description_ms/description_zh` columns (migration backfilled the old lang-JSON translations); views + chatbot read `localized_*` accessors — services now follow the products i18n pattern, not `__()` JSON keys.
+- New **ServiceResource** (Sales group): edit-only by owner decision — no create/delete (policy-enforced `false`), photo upload via medialibrary, drag reorder, visibility toggle, typical-duration field (display-only; slots use the global `BOOKING_SLOT_MINUTES`), optional chatbot-only starting price. §1.2's "no Service resource" note is superseded.
+
+## 50.4 RBAC adjustments
+
+- Staff may now **update orders** (open the read-only detail form; run the gated row actions) and **update/reschedule bookings** — aligned with the ProductPolicy operational tier. Delete/export remain admin-only.
+- **Explicit `reorder()` policy methods** on Brand/Category/Service (admin) and Feedback (staff): Filament's non-strict authorization silently ALLOWS reordering when the policy method is missing, which had let staff reorder admin-curated storefront content.
+
+## 50.5 Settings & configuration
+
+- All 13 settings rows are now **guaranteed by an idempotent migration** (shipping/cancellation keys previously existed only via the seeder — environments migrated without a re-seed had settings that were impossible to edit from the panel, since SettingResource has no create page).
+- **Opening hours single source**: footer, contact page, and the chatbot's hours answer are all generated from `BookingService::openingHoursLabel()` (BUSINESS_HOURS_* + closed weekdays, localised day names). `STORE_HOURS` env/config removed; the chatbot's hardcoded per-day table (which had drifted) is gone.
+- System Status page: new **Payments card** (surfaces the silent stripe→demo fallback and missing webhook secret), email check follows the ACTIVE mailer (`gmail_api`-aware), "Your data"→Database, "Website speed"→Content cache, the two always-zero queue cards merged into one.
+
+## 50.6 Accessibility & UX
+
+- **Dialog contract**: the 3D configurator is a true modal (visibility-hidden when closed so its ~50 controls leave the tab order, role=dialog + aria-modal, Esc, Tab trap, initial focus, focus restore); cart drawer moves focus in/out; chat widget dropped its false `aria-modal` (honest non-modal) and its input gained a label.
+- `aria-pressed` on booking service cards / calendar days (full localised date labels) / time slots and the checkout fulfilment toggle; testimonials pause on keyboard focus with an explicit pause/resume button; booking reference + My Account order/tracking/booking numbers get one-tap **copy buttons**; contact page phone is a `tel:` link; About page core-values icons/headings pinned to Bone White (light mode was red-on-red).
+- Admin: friendly **"record not found" page** (true 404 status) when a signed-in admin follows an email deep-link to a deleted record; Settings value column truncated with tooltip.
+
+## 50.7 Performance
+
+- Body scripts register their listeners **once** (wire:navigate re-executes body scripts; AOS/counters/video-restart/scroll-top had stacked one handler per navigation — AOS now `refreshHard()`s per page, the footer observer re-attaches per navigation).
+- Lucide (411 KB) ships **only on the homepage** (the one page using it); model-viewer (1.07 MB) is injected only when the 3D section approaches the viewport; the hero video (5.5 MB) is never downloaded for reduced-motion or data-saver visitors (`preload="metadata"` otherwise).
+- §32.2 note stands: production still serves static assets through `php artisan serve` (no compression / long-lived caching) — recorded as a deployment-level limitation in Chapter 7.
+
+## 50.8 Policy copy
+
+- Cancellation & Refund Policy §5 reads as a real store policy (refund to the original payment method within 3–7 working days, second confirmation email) — no "demo" or "test mode" wording anywhere on public policy pages (owner decision).
+
+## 50.9 Test suite
+
+- **226 tests / 741 assertions / 46 files** (was 214/693 at the last audit): new coverage includes the Stripe cancellation/session guards, webhook async-failure detach, payment-mode status card, opening-hours label, staff reorder denial, pickup checkout (no address / zero fee / forged-method fallback), the ready-for-pickup email contract, and the alert-email deep-link (200 alive / friendly 404 when deleted).

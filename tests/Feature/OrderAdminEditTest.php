@@ -81,6 +81,11 @@ class OrderAdminEditTest extends TestCase
         $this->get($link)->assertOk();
 
         $order->delete(); // soft delete — what admin cleanup does
-        $this->get($link)->assertNotFound();
+        // Status stays a true 404, but a signed-in admin sees the friendly
+        // "record not found" page instead of the framework's bare error.
+        $this->get($link)
+            ->assertNotFound()
+            ->assertSee('Record Not Found')
+            ->assertSee('outlived the record');
     }
 }

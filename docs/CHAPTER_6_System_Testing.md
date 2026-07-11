@@ -8,7 +8,7 @@ Testing on this project combined **two complementary approaches**, and it is imp
 
 1. **Manual, exploratory testing** was the **primary, day-to-day method** throughout the project. We used the running application directly (browsing pages, clicking through real user journeys, switching languages, toggling dark mode, resizing the window, and deliberately trying to break things) and observed the result in the browser. **The majority of the defects fixed during development were first discovered this way.**
 
-2. **Automated testing**, written with **PHPUnit**, was built alongside the manual testing as a **regression safety net**. It currently comprises **226 tests containing 739 assertions across 46 test files**, and the entire suite passes. Many of these tests exist specifically to *lock down* a bug that had already been found by hand, so that the same defect can never quietly return.
+2. **Automated testing**, written with **PHPUnit**, was built alongside the manual testing as a **regression safety net**. It currently comprises **226 tests containing 741 assertions across 46 test files**, and the entire suite passes. Many of these tests exist specifically to *lock down* a bug that had already been found by hand, so that the same defect can never quietly return.
 
 In other words, manual testing was how problems were **found**, and the automated suite is how fixes are **kept fixed**. This chapter presents the manual approach first (Section 6.3), because that reflects how testing actually happened, and then documents the automated suite and the specialised security, concurrency, performance, compatibility, and acceptance testing that support it.
 
@@ -64,6 +64,7 @@ Most of the bugs fixed during the project were first noticed through this manual
 | Invalid list role on the desktop navigation | An automated accessibility audit of the rendered page | Accessibility / markup |
 | Login button showed its spinner stacked above the label | A user-testing screenshot of the broken button (Livewire reveals loading elements as `inline-block`, overriding the flex classes) | Client-side rendering |
 | Brand marquee scrolled twice as fast on some devices | A tester comparing a 120Hz phone against a 60Hz monitor — the animation advanced per frame instead of per second | Client-side JavaScript |
+| Every GrabPay payment failed with "could not reach the payment provider" | Actually paying with GrabPay against the live Stripe sandbox: the code sent `grab_pay` where Stripe's identifier is `grabpay`. The unit test could not catch this because it asserted the same misspelt value the code produced — only real-gateway testing exposed the wrong external contract | External API contract |
 
 The workflow that followed each discovery was consistent and is the link between this section and Section 6.9: a bug found by hand was **fixed**, and then (wherever the behaviour could be checked from the server) an **automated regression test was written to lock the fix in place**, so the same problem could not silently reappear.
 
@@ -297,13 +298,13 @@ Testing on this project was carried out in two complementary layers. **Manual, e
 Alongside it, an **automated PHPUnit suite** was built as a regression safety net. Executed with `php artisan test`, it produced a full pass:
 
 ```
-Tests:    226 passed (739 assertions)
+Tests:    226 passed (741 assertions)
 Duration: ~52s
 ```
 
-Every one of the 226 automated tests passed, exercising 739 assertions across the authentication, catalogue, cart, payment, order-lifecycle, booking, administration, internationalisation, observability, and concurrency concerns of the system. Crucially, several of these tests exist because a bug was first found by hand and then locked down with an automated test, so the two layers reinforce each other: manual testing finds problems, and the automated suite keeps them fixed.
+Every one of the 226 automated tests passed, exercising 741 assertions across the authentication, catalogue, cart, payment, order-lifecycle, booking, administration, internationalisation, observability, and concurrency concerns of the system. Crucially, several of these tests exist because a bug was first found by hand and then locked down with an automated test, so the two layers reinforce each other: manual testing finds problems, and the automated suite keeps them fixed.
 
 The compatibility testing (Section 6.11) confirms the system adapts correctly across devices and browsers, and the user-acceptance testing (Section 6.12) evaluates whether it is acceptable to its real users. Taken together, the manual, automated, security, concurrency, performance, compatibility, and acceptance testing give strong, evidence-based confidence that the system implemented in Chapter 5 is functionally correct, secure against the realistic attacks it was designed to resist, and safe under concurrent use, confirming that the project's objectives have been met.
 
-*[Figure 6.13: The full `php artisan test` run showing "Tests: 226 passed (739 assertions)".]*
+*[Figure 6.13: The full `php artisan test` run showing "Tests: 226 passed (741 assertions)".]*
 *[Figure 6.14: A summary of testing coverage across manual and automated layers.]*

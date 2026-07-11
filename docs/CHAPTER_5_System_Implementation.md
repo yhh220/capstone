@@ -181,6 +181,8 @@ The entire back office is built with **Filament 5** on top of the same Laravel a
 
 The admin panel is reachable only by authenticated administrators and is served under a separate guard from customer accounts. The sidebar navigation was made **responsive** so that the panel is fully usable on a phone or tablet, collapsing into a mobile-friendly layout, important for a shop owner who manages orders from the floor rather than a desk.
 
+The panel's dead ends are humanised as well. Internal alert emails deep-link straight to the record they describe, and an email naturally outlives its record: an order deleted after the alert was sent would land its "View order" button on a bare framework 404. A signed-in administrator now gets a friendly "record not found" page instead — explaining that the link has simply outlived the record, with one-tap routes back to the orders list and dashboard — while the response keeps its true 404 status so monitoring and tests are never misled.
+
 ### 5.10.2 Catalogue Management: Products, Categories, Brands
 
 The **Product**, **Category**, and **Brand** resources let the owner manage the catalogue completely. Products are created and edited with all of their localised fields (Section 5.11), price, stock, category and brand associations, and images (uploaded through the Media Library). Categories and brands are managed as their own resources and drive both the storefront navigation and the catalogue filters. Creating a product here is what makes it appear on the homepage and in the catalogue; the storefront has no separate content system.

@@ -64,4 +64,18 @@ return Application::configure(basePath: dirname(__DIR__))
                 return redirect()->route('unauthorized');
             }
         });
+
+        // A signed-in admin hitting a record that no longer exists (usually the
+        // "View order" button of an alert email whose order was later deleted)
+        // gets a friendly explanation instead of a bare 404. Guests still go
+        // through the login redirect first, and the status stays 404 so
+        // monitoring and tests keep seeing the truth.
+        $exceptions->render(function (
+            \Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e,
+            Request $request
+        ) {
+            if ($request->is('admin/*') && auth('admin')->check()) {
+                return response()->view('errors.admin-404', [], 404);
+            }
+        });
     })->create();
