@@ -200,7 +200,7 @@ Every one of these actions runs inside a transaction with the order row locked a
 
 The **Service** resource manages the installation services that the services page presents and the booking form offers. It is deliberately **edit-only**: the shop's service menu is a fixed set, so there is no create or delete — administrators edit each service's name and description (in all three languages), upload its photo, adjust the typical job time the chatbot quotes, drag rows to reorder the public page, and temporarily hide a service with a visibility toggle without losing its booking history. Prices are intentionally absent from the storefront; the only price field is an optional starting figure the chatbot may quote before directing the customer to WhatsApp for an exact quotation.
 
-*[Figure 5.20a: The Service resource with reorderable rows, visibility toggles, and trilingual editing.]*
+*[Figure 5.19a: The Service resource with reorderable rows, visibility toggles, and trilingual editing.]*
 
 ### 5.10.4 Customer & Feedback Management
 
@@ -212,7 +212,7 @@ The **Contact** resource holds the messages submitted through the contact form (
 
 ### 5.10.6 FAQ & Chatbot Knowledge Management
 
-Two separate knowledge bases are maintained by staff without any code deployment. The **public FAQ** (the `Faq` resource) drives the storefront FAQ accordion (Section 5.8.2): each entry has a question and answer in all three languages, a category used to group related questions, a sort order, and a published toggle. The **chatbot knowledge base** (the `ChatbotFaq` resource) is managed separately and powers the support widget (Section 5.12); each rule has per-language answers and a priority field that decides which rule wins when more than one keyword matches. Keeping the two distinct lets the shop write long-form public FAQ answers independently of the short, keyword-triggered chatbot replies.
+Two separate knowledge bases are maintained through the admin panel (both are administrator-level content — staff do not see them) without any code deployment. The **public FAQ** (the `Faq` resource) drives the storefront FAQ accordion (Section 5.8.2): each entry has a question and answer in all three languages, a category used to group related questions, a sort order, and a published toggle. The **chatbot knowledge base** (the `ChatbotFaq` resource) is managed separately and powers the support widget (Section 5.12); each rule has per-language answers and a priority field that decides which rule wins when more than one keyword matches. Keeping the two distinct lets the shop write long-form public FAQ answers independently of the short, keyword-triggered chatbot replies.
 
 ### 5.10.7 Activity Log (Audit Trail)
 
@@ -285,7 +285,7 @@ Dates and times are localised as well: a listener responds to the application's 
 
 ## 5.12 Chatbot Support Widget
 
-A lightweight customer-support **chatbot** is available across the storefront as a floating widget. It answers common questions from a keyword-matched knowledge base managed by the owner (the `ChatbotFaq` resource, Section 5.10.6). When a customer's message matches a rule's keywords, the widget replies with that rule's answer in the customer's current language; where several rules match, the **priority** field decides which answer is returned. Because the knowledge base is owner-editable and multilingual, the shop can extend the bot's coverage over time without any development work, giving customers instant answers to routine questions without waiting for staff.
+A lightweight customer-support **chatbot** is available across the storefront as a floating widget. It answers common questions from a keyword-matched knowledge base managed by the owner (the `ChatbotFaq` resource, Section 5.10.6). When a customer's message matches a rule's keywords, the widget replies with that rule's answer in the customer's current language; where several rules match, the **priority** field decides which answer is returned. Beyond the editable rules, several answers are generated from **live system data** rather than typed text: opening-hours questions are answered from the same business-hours settings that drive the booking calendar, and price questions about the shop's installation services quote the current starting price held on the service record (with a pointer to WhatsApp for an exact quotation) — so the bot's answers move with the shop's configuration instead of drifting out of date. Because the knowledge base is owner-editable and multilingual, the shop can extend the bot's coverage over time without any development work, giving customers instant answers to routine questions without waiting for staff.
 
 *[Figure 5.26: The chatbot widget answering a customer question.]*
 
