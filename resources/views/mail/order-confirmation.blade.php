@@ -43,7 +43,7 @@
             <tr>
                 <td style="padding:2px 0;color:#71717a;font-size:13px;">{{ __('Shipping') }}</td>
                 <td></td>
-                <td style="padding:2px 0;text-align:right;font-size:13px;">{{ $order->shipping_fee > 0 ? 'RM ' . number_format($order->shipping_fee, 2) : __('Free') }}</td>
+                <td style="padding:2px 0;text-align:right;font-size:13px;">{{ $order->isPickup() ? __('Free — store pickup') : ($order->shipping_fee > 0 ? 'RM ' . number_format($order->shipping_fee, 2) : __('Free')) }}</td>
             </tr>
             <tr>
                 <td colspan="2" style="padding-top:12px;border-top:2px solid #18181B;font-weight:bold;font-size:16px;">{{ __('Total') }}</td>

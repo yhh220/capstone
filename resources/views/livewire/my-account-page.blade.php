@@ -77,7 +77,15 @@
                                    ($order->status === 'cancelled' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
                                    ($order->status === 'shipped' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
                                    'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400')) }}">
-                                {{ __(ucfirst($order->status)) }}
+                                {{-- Pickup orders reuse the shipped/delivered statuses but the
+                                     customer-facing words must match reality. --}}
+                                @if($order->isPickup() && $order->status === 'shipped')
+                                    {{ __('Ready for Pickup') }}
+                                @elseif($order->isPickup() && $order->status === 'delivered')
+                                    {{ __('Collected') }}
+                                @else
+                                    {{ __(ucfirst($order->status)) }}
+                                @endif
                             </span>
                             <span class="font-black text-brand-red tabular-nums">RM {{ number_format($order->total_amount, 2) }}</span>
                         </div>

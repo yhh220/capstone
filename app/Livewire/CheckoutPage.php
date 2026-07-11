@@ -41,6 +41,13 @@ class CheckoutPage extends Component
 
     public string $orderNotes = '';
 
+    /**
+     * How the customer receives the order: 'delivery' (courier, address +
+     * shipping fee) or 'pickup' (free self-collection at the showroom, no
+     * address). Whitelisted server-side in placeOrder().
+     */
+    public string $deliveryMethod = 'delivery';
+
     // Step 2: Payment method. The choice is stored on the order as a label;
     // whether it then pays via Stripe (card/FPX/GrabPay in stripe mode) or the
     // demo flip is decided on the payment page.
@@ -67,16 +74,29 @@ class CheckoutPage extends Component
 
     protected function rules(): array
     {
+        // Pickup orders are collected at the showroom, so no address is asked
+        // for or validated; delivery keeps the full West-Malaysia address.
+        $address = $this->deliveryMethod === 'pickup'
+            ? [
+                'street' => 'nullable|string|max:500',
+                'city' => 'nullable|string|max:255',
+                'postcode' => 'nullable|string|max:10',
+                'state' => 'nullable|string|max:255',
+            ]
+            : [
+                'street' => 'required|string|max:500',
+                'city' => 'required|string|max:255',
+                'postcode' => 'required|digits:5',
+                // Whitelisted to deliverable states — East Malaysia is not served,
+                // so a crafted request can't order to an address we can't ship to.
+                'state' => ['required', 'string', Rule::in(DeliveryArea::STATES)],
+            ];
+
         return [
             'customerName' => 'required|string|max:255',
             'customerEmail' => 'required|email|max:255',
             'customerPhone' => 'required|string|regex:/^[0-9]{8,15}$/',
-            'street' => 'required|string|max:500',
-            'city' => 'required|string|max:255',
-            'postcode' => 'required|digits:5',
-            // Whitelisted to deliverable states — East Malaysia is not served,
-            // so a crafted request can't order to an address we can't ship to.
-            'state' => ['required', 'string', Rule::in(DeliveryArea::STATES)],
+            ...$address,
             'orderNotes' => 'nullable|string|max:1000',
         ];
     }
@@ -141,6 +161,10 @@ class CheckoutPage extends Component
 
     public function getShippingProperty(): float
     {
+        if ($this->deliveryMethod === 'pickup') {
+            return 0.0; // self-collection: nothing to ship
+        }
+
         return app(ShippingCalculator::class)->fee($this->subtotal);
     }
 
@@ -195,7 +219,11 @@ class CheckoutPage extends Component
             return;
         }
 
-        // Whitelist the payment method — never trust the client-supplied value.
+        // Whitelist the delivery and payment methods — never trust the
+        // client-supplied value.
+        if (! in_array($this->deliveryMethod, ['delivery', 'pickup'], true)) {
+            $this->deliveryMethod = 'delivery';
+        }
         if (! in_array($this->paymentMethod, ['fpx', 'ewallet', 'card'], true)) {
             $this->paymentMethod = 'fpx';
         }
@@ -265,7 +293,8 @@ class CheckoutPage extends Component
                 });
 
                 $subtotal = round($lineItems->sum('subtotal'), 2);
-                $shippingFee = app(ShippingCalculator::class)->fee($subtotal);
+                $isPickup = $this->deliveryMethod === 'pickup';
+                $shippingFee = $isPickup ? 0.0 : app(ShippingCalculator::class)->fee($subtotal);
 
                 $order = Order::create([
                     'user_id' => Auth::id(),
@@ -273,12 +302,15 @@ class CheckoutPage extends Component
                     'customer_name' => $this->customerName,
                     'customer_email' => $this->customerEmail,
                     'customer_phone' => $this->customerPhone,
-                    'shipping_address' => [
+                    // Pickup orders carry no address — collection happens at the
+                    // showroom, and the invoice/emails print the store address.
+                    'shipping_address' => $isPickup ? null : [
                         'street' => $this->street,
                         'city' => $this->city,
                         'postcode' => $this->postcode,
                         'state' => $this->state,
                     ],
+                    'delivery_method' => $this->deliveryMethod,
                     'subtotal' => $subtotal,
                     'shipping_fee' => $shippingFee,
                     'total_amount' => round($subtotal + $shippingFee, 2),

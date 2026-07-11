@@ -23,7 +23,7 @@ class Order extends Model
     protected $fillable = [
         'user_id', 'order_number', 'tracking_number',
         'customer_name', 'customer_email', 'customer_phone',
-        'shipping_address', 'subtotal', 'shipping_fee', 'total_amount',
+        'shipping_address', 'subtotal', 'shipping_fee', 'delivery_method', 'total_amount',
         'status', 'payment_status', 'payment_method', 'notes', 'expires_at',
         'stripe_session_id', 'stripe_payment_intent_id',
         'paid_at', 'shipped_at', 'delivered_at', 'cancelled_at',
@@ -79,6 +79,12 @@ class Order extends Model
                 Product::where('id', $item->product_id)->increment('stock', $item->quantity);
             }
         }
+    }
+
+    /** Self-collection at the showroom (no address, no shipping fee). */
+    public function isPickup(): bool
+    {
+        return $this->delivery_method === 'pickup';
     }
 
     /** Order is awaiting online payment (drives the pay page, timer and "Pay now"). */

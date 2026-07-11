@@ -74,11 +74,15 @@ class OrderTracker extends Component
      */
     public function getStatusStepsProperty(): array
     {
+        // Pickup orders reuse the same lifecycle, but the words must match the
+        // customer's reality: nothing "ships" — it becomes ready, then collected.
+        $isPickup = $this->order?->isPickup() ?? false;
+
         $steps = [
             ['key' => 'pending',    'label' => __('Order Placed'),  'icon' => self::ICONS['pending']],
             ['key' => 'processing', 'label' => __('Processing'),    'icon' => self::ICONS['processing']],
-            ['key' => 'shipped',    'label' => __('Shipped'),       'icon' => self::ICONS['shipped']],
-            ['key' => 'delivered',  'label' => __('Delivered'),     'icon' => self::ICONS['delivered']],
+            ['key' => 'shipped',    'label' => $isPickup ? __('Ready for Pickup') : __('Shipped'),   'icon' => self::ICONS['shipped']],
+            ['key' => 'delivered',  'label' => $isPickup ? __('Collected') : __('Delivered'),        'icon' => self::ICONS['delivered']],
         ];
 
         if ($this->order && $this->order->status === 'cancelled') {

@@ -1,6 +1,12 @@
-<x-mail.layout :message="$message ?? null" :title="__('Your order has shipped!')" :preheader="__('Order :number is on its way.', ['number' => $order->order_number])">
+<x-mail.layout :message="$message ?? null"
+               :title="$order->isPickup() ? __('Your order is ready for pickup!') : __('Your order has shipped!')"
+               :preheader="$order->isPickup() ? __('Order :number is ready for collection.', ['number' => $order->order_number]) : __('Order :number is on its way.', ['number' => $order->order_number])">
     <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#3f3f46;">
-        {{ __('Good news, :name — your order is on its way!', ['name' => $order->customer_name]) }}
+        @if($order->isPickup())
+            {{ __('Good news, :name — your order is packed and ready for collection at our showroom!', ['name' => $order->customer_name]) }}
+        @else
+            {{ __('Good news, :name — your order is on its way!', ['name' => $order->customer_name]) }}
+        @endif
     </p>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:14px;">
@@ -8,13 +14,24 @@
             <td style="padding:8px 0;border-bottom:1px solid #f0f0f0;color:#71717a;width:40%;">{{ __('Order Number') }}</td>
             <td style="padding:8px 0;border-bottom:1px solid #f0f0f0;text-align:right;font-weight:bold;">{{ $order->order_number }}</td>
         </tr>
-        @if($order->tracking_number)
+        @if($order->isPickup())
+        <tr>
+            <td style="padding:8px 0;color:#71717a;vertical-align:top;">{{ __('Pickup location') }}</td>
+            <td style="padding:8px 0;text-align:right;font-weight:bold;">{{ config('services.store.address') }}</td>
+        </tr>
+        @elseif($order->tracking_number)
         <tr>
             <td style="padding:8px 0;color:#71717a;">{{ __('Tracking Number') }}</td>
             <td style="padding:8px 0;text-align:right;font-weight:bold;color:#C8413D;">{{ $order->tracking_number }}</td>
         </tr>
         @endif
     </table>
+
+    @if($order->isPickup())
+    <p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#71717a;">
+        {{ __('Bring your order number when you come — any of our staff can hand it over. See you soon!') }}
+    </p>
+    @endif
 
     <div style="text-align:center;margin-top:26px;">
         <a href="{{ url('/track-order') }}" style="display:inline-block;background:#C8413D;color:#fff;padding:13px 30px;text-decoration:none;border-radius:30px;font-weight:bold;font-size:14px;">{{ __('Track Your Order') }}</a>

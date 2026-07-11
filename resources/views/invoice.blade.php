@@ -104,7 +104,9 @@
                         <span class="muted">
                             {{ $order->customer_email }}<br>
                             {{ $order->customer_phone }}
-                            @if(is_array($order->shipping_address))
+                            @if($order->isPickup())
+                                <br>Store pickup — {{ config('services.store.address') }}
+                            @elseif(is_array($order->shipping_address))
                                 <br>{{ collect($order->shipping_address)->filter()->implode(', ') }}
                             @endif
                         </span>
@@ -147,7 +149,7 @@
             <tr>
                 <td></td>
                 <td class="right muted">Shipping</td>
-                <td class="right">{{ $order->shipping_fee > 0 ? 'RM ' . number_format($order->shipping_fee, 2) : 'Free' }}</td>
+                <td class="right">{{ $order->isPickup() ? 'Free (store pickup)' : ($order->shipping_fee > 0 ? 'RM ' . number_format($order->shipping_fee, 2) : 'Free') }}</td>
             </tr>
             <tr class="grand">
                 <td></td>

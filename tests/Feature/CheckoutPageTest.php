@@ -210,4 +210,72 @@ class CheckoutPageTest extends TestCase
 
         $this->assertDatabaseMissing('orders', ['user_id' => $user->id]);
     }
+
+    public function test_store_pickup_needs_no_address_and_charges_no_shipping(): void
+    {
+        $user = User::create(['name' => 'Collector', 'email' => 'pickup@example.test', 'password' => 'password', 'role' => 'client']);
+        // Priced below the free-shipping threshold, so delivery WOULD have
+        // charged the flat rate — proving the zero fee comes from pickup.
+        $product = Product::create(['name' => 'Dashcam', 'slug' => 'dashcam', 'price' => 100, 'stock' => 3, 'is_active' => true]);
+        CartItem::create(['user_id' => $user->id, 'product_id' => $product->id, 'quantity' => 1]);
+
+        Livewire::actingAs($user)
+            ->test(CheckoutPage::class)
+            ->set('deliveryMethod', 'pickup')
+            ->set('customerName', 'Collector')
+            ->set('customerEmail', 'pickup@example.test')
+            ->set('customerPhone', '0123456789')
+            // No street/city/postcode/state on purpose.
+            ->call('placeOrder')
+            ->assertHasNoErrors()
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('orders', [
+            'user_id' => $user->id,
+            'delivery_method' => 'pickup',
+            'shipping_fee' => 0,
+            'total_amount' => 100,
+            'shipping_address' => null,
+        ]);
+    }
+
+    public function test_courier_delivery_still_requires_the_full_address(): void
+    {
+        $user = User::create(['name' => 'Buyer', 'email' => 'courier@example.test', 'password' => 'password', 'role' => 'client']);
+        $product = Product::create(['name' => 'Horn', 'slug' => 'horn', 'price' => 50, 'stock' => 3, 'is_active' => true]);
+        CartItem::create(['user_id' => $user->id, 'product_id' => $product->id, 'quantity' => 1]);
+
+        Livewire::actingAs($user)
+            ->test(CheckoutPage::class)
+            ->set('deliveryMethod', 'delivery')
+            ->set('customerName', 'Buyer')
+            ->set('customerEmail', 'courier@example.test')
+            ->set('customerPhone', '0123456789')
+            ->set('street', '')
+            ->call('placeOrder')
+            ->assertHasErrors(['street']);
+
+        $this->assertDatabaseMissing('orders', ['user_id' => $user->id]);
+    }
+
+    public function test_a_forged_delivery_method_falls_back_to_delivery(): void
+    {
+        $user = User::create(['name' => 'Forger', 'email' => 'forge@example.test', 'password' => 'password', 'role' => 'client']);
+        $product = Product::create(['name' => 'Cable', 'slug' => 'cable', 'price' => 20, 'stock' => 3, 'is_active' => true]);
+        CartItem::create(['user_id' => $user->id, 'product_id' => $product->id, 'quantity' => 1]);
+
+        // 'drone_drop' is not a real method: the whitelist must coerce it back
+        // to 'delivery', whose address rules then reject the empty address —
+        // a crafted request can't invent a fee-free fulfilment mode.
+        Livewire::actingAs($user)
+            ->test(CheckoutPage::class)
+            ->set('deliveryMethod', 'drone_drop')
+            ->set('customerName', 'Forger')
+            ->set('customerEmail', 'forge@example.test')
+            ->set('customerPhone', '0123456789')
+            ->call('placeOrder')
+            ->assertHasErrors(['street']);
+
+        $this->assertDatabaseMissing('orders', ['user_id' => $user->id]);
+    }
 }

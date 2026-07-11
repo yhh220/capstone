@@ -140,9 +140,9 @@ class MockDriver implements ChatServiceInterface
                 'priority' => 60,
                 'keywords' => ['takeaway', 'take away', 'pickup', 'pick up', 'collect', 'self collect', 'ambil sendiri', '自取', '取货', '自己取', '上门取'],
                 'reply' => [
-                    'en' => "🛍️ Yes, we offer a pickup (takeaway) service!\n\nYou can order your products and collect them from our Shah Alam showroom at your convenience.\n\nTo arrange a pickup order, WhatsApp us at {$p} and we'll prepare everything for you! 😊",
-                    'ms' => "🛍️ Ya, kami menyediakan perkhidmatan ambil sendiri (takeaway)!\n\nAnda boleh pesan produk dan ambil sendiri di kedai kami di Shah Alam mengikut masa yang sesuai.\n\nUntuk membuat pesanan ambil sendiri, WhatsApp kami di {$p}! 😊",
-                    'zh' => "🛍️ 是的，我们提供自取（外带）服务！\n\n您可以先下单，然后到我们莎阿南门店自行取货，时间灵活方便。\n\n如需安排自取订单，请 WhatsApp 我们：{$p}，我们提前为您备好！😊",
+                    'en' => "🛍️ Yes, we offer free store pickup!\n\nJust choose \"Store Pickup\" at checkout when ordering online — no delivery fee, and we'll email you the moment your order is ready to collect at our Shah Alam showroom.\n\nPrefer to arrange it personally? WhatsApp us at {$p}! 😊",
+                    'ms' => "🛍️ Ya, kami menyediakan ambil sendiri di kedai secara percuma!\n\nPilih sahaja \"Store Pickup\" semasa checkout ketika memesan dalam talian — tiada caj penghantaran, dan kami akan e-mel anda sebaik sahaja pesanan sedia untuk diambil di kedai kami di Shah Alam.\n\nMahu atur secara peribadi? WhatsApp kami di {$p}! 😊",
+                    'zh' => "🛍️ 是的，我们提供免费门店自取！\n\n在线下单时结账页选择「门店自取」即可——免运费，订单备好后我们会第一时间发邮件通知您到莎阿南门店取货。\n\n想人工安排？WhatsApp 我们：{$p}！😊",
                 ],
             ],
 

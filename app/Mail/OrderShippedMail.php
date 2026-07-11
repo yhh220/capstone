@@ -22,7 +22,9 @@ class OrderShippedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your order has shipped – ' . $this->order->order_number . ' | Win Win Car Audio',
+            subject: ($this->order->isPickup()
+                ? 'Your order is ready for pickup – '
+                : 'Your order has shipped – ') . $this->order->order_number . ' | Win Win Car Audio',
         );
     }
 

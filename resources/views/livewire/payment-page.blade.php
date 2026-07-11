@@ -87,7 +87,7 @@
             </div>
             @endforeach
             <div class="flex justify-between pt-3 text-sm text-gray-600 dark:text-gray-400"><span>{{ __('Subtotal') }}</span><span class="tabular-nums">RM {{ number_format($order->subtotal, 2) }}</span></div>
-            <div class="flex justify-between py-1 text-sm text-gray-600 dark:text-gray-400"><span>{{ __('Shipping') }}</span><span class="tabular-nums">{{ $order->shipping_fee > 0 ? 'RM ' . number_format($order->shipping_fee, 2) : __('Free') }}</span></div>
+            <div class="flex justify-between py-1 text-sm text-gray-600 dark:text-gray-400"><span>{{ __('Shipping') }}</span><span class="tabular-nums">{{ $order->isPickup() ? __('Free — store pickup') : ($order->shipping_fee > 0 ? 'RM ' . number_format($order->shipping_fee, 2) : __('Free')) }}</span></div>
             <div class="flex justify-between pt-2 mt-1 border-t border-gray-100 dark:border-gray-700 font-black text-lg"><span class="text-gray-800 dark:text-white">{{ __('Total') }}</span><span class="text-brand-red tabular-nums">RM {{ number_format($order->total_amount, 2) }}</span></div>
         </div>
 

@@ -154,11 +154,19 @@ class OrderResource extends Resource
 
             Section::make('Shipping & Payment')->schema([
                 Forms\Components\TextInput::make('payment_method')->label('Payment Method')->disabled(),
-                Forms\Components\TextInput::make('tracking_number')->label('Tracking Number')->disabled(),
+                Forms\Components\TextInput::make('delivery_method')
+                    ->label('Delivery Method')
+                    ->formatStateUsing(fn (?string $state): string => $state === 'pickup' ? 'Store pickup' : 'Courier delivery')
+                    ->disabled(),
+                Forms\Components\TextInput::make('tracking_number')->label('Tracking Number')->disabled()
+                    ->visible(fn ($record) => ! $record?->isPickup()),
                 Forms\Components\Placeholder::make('shipping_address_display')
                     ->label('Shipping Address')
                     ->columnSpanFull()
                     ->content(function ($record): string {
+                        if ($record?->isPickup()) {
+                            return 'Store pickup — customer collects at the showroom';
+                        }
                         if (! $record || ! $record->shipping_address) {
                             return '—';
                         }
@@ -244,6 +252,13 @@ class OrderResource extends Resource
                     ->label('Total')
                     ->money('MYR', locale: 'ms_MY')
                     ->sortable(),
+                TextColumn::make('delivery_method')
+                    ->label('Fulfilment')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => $state === 'pickup' ? 'Pickup' : 'Delivery')
+                    ->color(fn (?string $state): string => $state === 'pickup' ? 'info' : 'gray')
+                    ->visibleFrom('lg')
+                    ->toggleable(),
                 BadgeColumn::make('status')
                     ->colors([
                         'warning' => 'pending',
@@ -384,14 +399,19 @@ class OrderResource extends Resource
                             Notification::make()->title('Marked paid, but the email failed to send')->warning()->send();
                         }
                     }),
+                // For pickup orders the same 'shipped' status means "packed and
+                // ready for collection": the label, email and tracking field all
+                // adapt, but the lifecycle machine stays untouched.
                 Action::make('markShipped')
-                    ->label('Mark Shipped')
-                    ->icon(Heroicon::OutlinedTruck)
+                    ->label(fn (Order $record) => $record->isPickup() ? 'Ready for Pickup' : 'Mark Shipped')
+                    ->icon(fn (Order $record) => $record->isPickup() ? Heroicon::OutlinedShoppingBag : Heroicon::OutlinedTruck)
                     ->color('primary')
-                    ->tooltip('Mark order as shipped and enter tracking number')
+                    ->tooltip(fn (Order $record) => $record->isPickup()
+                        ? 'Mark packed and ready — emails the customer to come and collect'
+                        : 'Mark order as shipped and enter tracking number')
                     ->authorize(fn () => auth()->user()?->isStaffMember())
                     ->visible(fn (Order $record) => in_array($record->status, ['processing'], true))
-                    ->schema([
+                    ->schema(fn (Order $record) => $record->isPickup() ? [] : [
                         Forms\Components\TextInput::make('tracking_number')
                             ->label('Tracking number')
                             ->required()
@@ -399,8 +419,11 @@ class OrderResource extends Resource
                             ->default(fn (Order $record) => $record->tracking_number)
                             ->helperText('Shown to the customer in the "shipped" email.'),
                     ])
-                    ->modalHeading('Mark as shipped & notify customer')
-                    ->modalSubmitActionLabel('Mark shipped & send email')
+                    ->modalHeading(fn (Order $record) => $record->isPickup()
+                        ? 'Ready for pickup? The customer will be emailed to come and collect.'
+                        : 'Mark as shipped & notify customer')
+                    ->modalSubmitActionLabel(fn (Order $record) => $record->isPickup() ? 'Notify customer' : 'Mark shipped & send email')
+                    ->requiresConfirmation(fn (Order $record) => $record->isPickup())
                     ->action(function (Order $record, array $data): void {
                         $claimed = DB::transaction(function () use ($record, $data) {
                             $fresh = Order::where('id', $record->id)
@@ -414,7 +437,7 @@ class OrderResource extends Resource
 
                             $fresh->update([
                                 'status' => 'shipped',
-                                'tracking_number' => $data['tracking_number'],
+                                'tracking_number' => $data['tracking_number'] ?? null,
                             ]);
 
                             return $fresh;
@@ -426,12 +449,14 @@ class OrderResource extends Resource
                             return;
                         }
 
+                        $done = $claimed->isPickup() ? 'Marked ready for pickup' : 'Marked shipped';
+
                         try {
                             Mail::to($claimed->customer_email)->send(new OrderShippedMail($claimed->fresh()));
-                            Notification::make()->title('Marked shipped — customer notified')->success()->send();
+                            Notification::make()->title($done.' — customer notified')->success()->send();
                         } catch (\Throwable $e) {
                             logger()->error('Shipped email failed: '.$e->getMessage());
-                            Notification::make()->title('Marked shipped, but the email failed to send')->warning()->send();
+                            Notification::make()->title($done.', but the email failed to send')->warning()->send();
                         }
                     }),
                 Action::make('markDelivered')

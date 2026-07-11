@@ -57,6 +57,40 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
             <h2 class="text-xl font-black text-gray-800 dark:text-white mb-6">{{ __('Delivery Information') }}</h2>
 
+            {{-- How to receive the order: courier delivery or free showroom pickup.
+                 Stacks to one column on phones; aria-pressed announces the choice. --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6" role="group" aria-label="{{ __('How would you like to receive your order?') }}">
+                <button type="button" wire:click="$set('deliveryMethod', 'delivery')"
+                        aria-pressed="{{ $deliveryMethod === 'delivery' ? 'true' : 'false' }}"
+                        class="flex items-start gap-3 text-left p-4 rounded-xl border-2 transition-all duration-200 {{ $deliveryMethod === 'delivery' ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10' : 'border-gray-200 dark:border-gray-600 hover:border-brand-red/40' }}">
+                    <svg class="w-6 h-6 shrink-0 mt-0.5 {{ $deliveryMethod === 'delivery' ? 'text-brand-red' : 'text-gray-400' }}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11m0 0h6m-6 0v-7h4l3 4v3c0 .6-.4 1-1 1h-2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+                    <span class="min-w-0">
+                        <span class="block font-bold text-sm text-gray-800 dark:text-white">{{ __('Courier Delivery') }}</span>
+                        <span class="block text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{{ __('Shipped to your address in West Malaysia.') }}</span>
+                    </span>
+                </button>
+                <button type="button" wire:click="$set('deliveryMethod', 'pickup')"
+                        aria-pressed="{{ $deliveryMethod === 'pickup' ? 'true' : 'false' }}"
+                        class="flex items-start gap-3 text-left p-4 rounded-xl border-2 transition-all duration-200 {{ $deliveryMethod === 'pickup' ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10' : 'border-gray-200 dark:border-gray-600 hover:border-brand-red/40' }}">
+                    <svg class="w-6 h-6 shrink-0 mt-0.5 {{ $deliveryMethod === 'pickup' ? 'text-brand-red' : 'text-gray-400' }}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    <span class="min-w-0">
+                        <span class="block font-bold text-sm text-gray-800 dark:text-white">{{ __('Store Pickup') }} <span class="text-green-600 dark:text-green-400 font-bold">· {{ __('Free') }}</span></span>
+                        <span class="block text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{{ __('Collect from our Shah Alam showroom when it is ready.') }}</span>
+                    </span>
+                </button>
+            </div>
+
+            @if($deliveryMethod === 'pickup')
+            <div class="mb-6 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-600 p-4 flex items-start gap-3">
+                <svg class="w-5 h-5 shrink-0 mt-0.5 text-brand-red" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <div class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    <span class="font-bold text-gray-800 dark:text-white block mb-0.5">{{ __('Pickup location') }}</span>
+                    {{ config('services.store.address') }}
+                    <span class="block text-xs text-gray-400 mt-1">{{ __('We will email you as soon as your order is ready for collection.') }}</span>
+                </div>
+            </div>
+            @endif
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label for="co-name" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Full Name') }} *</label>
@@ -73,6 +107,7 @@
                     <input wire:model.blur="customerPhone" id="co-phone" type="tel" inputmode="numeric" maxlength="15" x-on:input="$el.value = $el.value.replace(/\D/g, '')" autocomplete="tel" placeholder="0123456789" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
                     @error('customerPhone') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
+                @if($deliveryMethod === 'delivery')
                 <div class="sm:col-span-2">
                     <label for="co-street" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Street Address') }} *</label>
                     <input wire:model.blur="street" id="co-street" type="text" autocomplete="street-address" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
@@ -98,6 +133,7 @@
                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('Delivery to Sabah, Sarawak and Labuan is currently unavailable.') }}</p>
                     @error('state') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
+                @endif
                 <div>
                     <label for="co-notes" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Order Notes') }}</label>
                     <input wire:model.blur="orderNotes" id="co-notes" type="text" placeholder="{{ __('Optional') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
@@ -120,7 +156,7 @@
                     </div>
                     <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                         <span>{{ __('Shipping') }}</span>
-                        <span class="tabular-nums">{{ $this->shipping > 0 ? 'RM ' . number_format($this->shipping, 2) : __('Free') }}</span>
+                        <span class="tabular-nums">{{ $deliveryMethod === 'pickup' ? __('Free — store pickup') : ($this->shipping > 0 ? 'RM ' . number_format($this->shipping, 2) : __('Free')) }}</span>
                     </div>
                     <div class="flex justify-between font-bold text-gray-800 dark:text-white pt-1">
                         <span>{{ __('Total') }}</span>
@@ -302,7 +338,7 @@
                 </div>
                 <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300">
                     <span>{{ __('Shipping') }}</span>
-                    <span class="tabular-nums">{{ $this->shipping > 0 ? 'RM ' . number_format($this->shipping, 2) : __('Free') }}</span>
+                    <span class="tabular-nums">{{ $deliveryMethod === 'pickup' ? __('Free — store pickup') : ($this->shipping > 0 ? 'RM ' . number_format($this->shipping, 2) : __('Free')) }}</span>
                 </div>
                 <div class="flex justify-between items-center border-t border-gray-200 dark:border-gray-600 pt-2">
                     <span class="font-bold text-gray-800 dark:text-white text-lg">{{ __('Total to pay') }}</span>
