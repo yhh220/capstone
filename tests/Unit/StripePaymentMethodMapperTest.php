@@ -21,7 +21,7 @@ class StripePaymentMethodMapperTest extends TestCase
 
     public function test_grabpay_card_and_bare_fpx_map_to_their_stripe_types(): void
     {
-        $this->assertSame(['grab_pay'], StripeCheckoutService::paymentMethodTypesFor('GrabPay'));
+        $this->assertSame(['grabpay'], StripeCheckoutService::paymentMethodTypesFor('GrabPay'));
         $this->assertSame(['card'], StripeCheckoutService::paymentMethodTypesFor('Credit / Debit Card'));
         // Stripe-mode FPX orders carry no bank suffix — the bank is chosen on
         // Stripe's hosted page.

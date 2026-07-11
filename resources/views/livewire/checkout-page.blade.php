@@ -1,4 +1,8 @@
-<div>
+{{-- `method` mirrors the Livewire deliveryMethod property (deferred entangle):
+     the fulfilment toggle, address fields, and step-1 totals all switch
+     instantly client-side, and the server receives the value with the next
+     request, where it is re-whitelisted and re-validated. --}}
+<div x-data="{ method: $wire.entangle('deliveryMethod') }">
     <div class="bg-gray-100 dark:bg-gray-900 text-brand-black dark:text-white py-12">
         <div class="max-w-7xl mx-auto px-4">
             <h1 class="text-3xl sm:text-4xl font-black mb-2">{{ __('Checkout') }}</h1>
@@ -58,21 +62,28 @@
             <h2 class="text-xl font-black text-gray-800 dark:text-white mb-6">{{ __('Delivery Information') }}</h2>
 
             {{-- How to receive the order: courier delivery or free showroom pickup.
-                 Stacks to one column on phones; aria-pressed announces the choice. --}}
+                 Alpine-entangled (deferred) so switching is INSTANT and costs no
+                 server round-trip — the old wire:click version re-rendered the
+                 whole checkout (cart queries included) on every tap, which made
+                 rapid switching feel stuck. The value syncs to the server with
+                 the next request (Continue/Place order), where it is whitelisted
+                 and validated again. Stacks to one column on phones. --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6" role="group" aria-label="{{ __('How would you like to receive your order?') }}">
-                <button type="button" wire:click="$set('deliveryMethod', 'delivery')"
-                        aria-pressed="{{ $deliveryMethod === 'delivery' ? 'true' : 'false' }}"
-                        class="flex items-start gap-3 text-left p-4 rounded-xl border-2 transition-all duration-200 {{ $deliveryMethod === 'delivery' ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10' : 'border-gray-200 dark:border-gray-600 hover:border-brand-red/40' }}">
-                    <svg class="w-6 h-6 shrink-0 mt-0.5 {{ $deliveryMethod === 'delivery' ? 'text-brand-red' : 'text-gray-400' }}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11m0 0h6m-6 0v-7h4l3 4v3c0 .6-.4 1-1 1h-2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+                <button type="button" @click="method = 'delivery'"
+                        :aria-pressed="method === 'delivery' ? 'true' : 'false'"
+                        class="flex items-start gap-3 text-left p-4 rounded-xl border-2 transition-all duration-200"
+                        :class="method === 'delivery' ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10' : 'border-gray-200 dark:border-gray-600 hover:border-brand-red/40'">
+                    <svg class="w-6 h-6 shrink-0 mt-0.5" :class="method === 'delivery' ? 'text-brand-red' : 'text-gray-400'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11m0 0h6m-6 0v-7h4l3 4v3c0 .6-.4 1-1 1h-2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
                     <span class="min-w-0">
                         <span class="block font-bold text-sm text-gray-800 dark:text-white">{{ __('Courier Delivery') }}</span>
                         <span class="block text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{{ __('Shipped to your address in West Malaysia.') }}</span>
                     </span>
                 </button>
-                <button type="button" wire:click="$set('deliveryMethod', 'pickup')"
-                        aria-pressed="{{ $deliveryMethod === 'pickup' ? 'true' : 'false' }}"
-                        class="flex items-start gap-3 text-left p-4 rounded-xl border-2 transition-all duration-200 {{ $deliveryMethod === 'pickup' ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10' : 'border-gray-200 dark:border-gray-600 hover:border-brand-red/40' }}">
-                    <svg class="w-6 h-6 shrink-0 mt-0.5 {{ $deliveryMethod === 'pickup' ? 'text-brand-red' : 'text-gray-400' }}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <button type="button" @click="method = 'pickup'"
+                        :aria-pressed="method === 'pickup' ? 'true' : 'false'"
+                        class="flex items-start gap-3 text-left p-4 rounded-xl border-2 transition-all duration-200"
+                        :class="method === 'pickup' ? 'border-brand-red bg-brand-red/5 dark:bg-brand-red/10' : 'border-gray-200 dark:border-gray-600 hover:border-brand-red/40'">
+                    <svg class="w-6 h-6 shrink-0 mt-0.5" :class="method === 'pickup' ? 'text-brand-red' : 'text-gray-400'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                     <span class="min-w-0">
                         <span class="block font-bold text-sm text-gray-800 dark:text-white">{{ __('Store Pickup') }} <span class="text-green-600 dark:text-green-400 font-bold">· {{ __('Free') }}</span></span>
                         <span class="block text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{{ __('Collect from our Shah Alam showroom when it is ready.') }}</span>
@@ -80,8 +91,7 @@
                 </button>
             </div>
 
-            @if($deliveryMethod === 'pickup')
-            <div class="mb-6 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-600 p-4 flex items-start gap-3">
+            <div x-show="method === 'pickup'" x-cloak class="mb-6 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-600 p-4 flex items-start gap-3">
                 <svg class="w-5 h-5 shrink-0 mt-0.5 text-brand-red" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                 <div class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                     <span class="font-bold text-gray-800 dark:text-white block mb-0.5">{{ __('Pickup location') }}</span>
@@ -89,7 +99,6 @@
                     <span class="block text-xs text-gray-400 mt-1">{{ __('We will email you as soon as your order is ready for collection.') }}</span>
                 </div>
             </div>
-            @endif
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -107,23 +116,22 @@
                     <input wire:model.blur="customerPhone" id="co-phone" type="tel" inputmode="numeric" maxlength="15" x-on:input="$el.value = $el.value.replace(/\D/g, '')" autocomplete="tel" placeholder="0123456789" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
                     @error('customerPhone') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
-                @if($deliveryMethod === 'delivery')
-                <div class="sm:col-span-2">
+                <div class="sm:col-span-2" x-show="method === 'delivery'">
                     <label for="co-street" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Street Address') }} *</label>
                     <input wire:model.blur="street" id="co-street" type="text" autocomplete="street-address" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
                     @error('street') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
-                <div>
+                <div x-show="method === 'delivery'">
                     <label for="co-city" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('City') }} *</label>
                     <input wire:model.blur="city" id="co-city" type="text" autocomplete="off" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
                     @error('city') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
-                <div>
+                <div x-show="method === 'delivery'">
                     <label for="co-postcode" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Postcode') }} *</label>
                     <input wire:model.blur="postcode" id="co-postcode" type="text" inputmode="numeric" maxlength="5" x-on:input="$el.value = $el.value.replace(/\D/g, '')" autocomplete="postal-code" placeholder="40150" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition" required>
                     @error('postcode') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
-                <div>
+                <div x-show="method === 'delivery'">
                     <label for="co-state" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('State') }} *</label>
                     <select wire:model="state" id="co-state" autocomplete="address-level1" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
                         @foreach(\App\Support\DeliveryArea::STATES as $s)
@@ -133,7 +141,6 @@
                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('Delivery to Sabah, Sarawak and Labuan is currently unavailable.') }}</p>
                     @error('state') <span role="alert" class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
-                @endif
                 <div>
                     <label for="co-notes" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Order Notes') }}</label>
                     <input wire:model.blur="orderNotes" id="co-notes" type="text" placeholder="{{ __('Optional') }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition">
@@ -149,6 +156,13 @@
                     <span class="tabular-nums">RM {{ number_format(($item->product?->current_price ?? 0) * $item->quantity, 2) }}</span>
                 </div>
                 @endforeach
+                @php
+                    // Both fulfilment variants are rendered and toggled client-side
+                    // (x-show on `method`), so switching updates the totals instantly
+                    // with no server round-trip. The fee here is the delivery fee
+                    // regardless of the currently selected method.
+                    $deliveryFee = app(\App\Services\ShippingCalculator::class)->fee($this->subtotal);
+                @endphp
                 <div class="border-t border-gray-200 dark:border-gray-600 mt-2 pt-2 space-y-1">
                     <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                         <span>{{ __('Subtotal') }}</span>
@@ -156,11 +170,17 @@
                     </div>
                     <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                         <span>{{ __('Shipping') }}</span>
-                        <span class="tabular-nums">{{ $deliveryMethod === 'pickup' ? __('Free — store pickup') : ($this->shipping > 0 ? 'RM ' . number_format($this->shipping, 2) : __('Free')) }}</span>
+                        <span class="tabular-nums">
+                            <span x-show="method === 'pickup'" x-cloak>{{ __('Free — store pickup') }}</span>
+                            <span x-show="method !== 'pickup'">{{ $deliveryFee > 0 ? 'RM ' . number_format($deliveryFee, 2) : __('Free') }}</span>
+                        </span>
                     </div>
                     <div class="flex justify-between font-bold text-gray-800 dark:text-white pt-1">
                         <span>{{ __('Total') }}</span>
-                        <span class="text-brand-red tabular-nums">RM {{ number_format($this->total, 2) }}</span>
+                        <span class="text-brand-red tabular-nums">
+                            <span x-show="method === 'pickup'" x-cloak>RM {{ number_format($this->subtotal, 2) }}</span>
+                            <span x-show="method !== 'pickup'">RM {{ number_format($this->subtotal + $deliveryFee, 2) }}</span>
+                        </span>
                     </div>
                 </div>
             </div>

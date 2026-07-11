@@ -69,7 +69,10 @@ class StripeCheckoutService
     {
         return match (true) {
             $label !== null && str_starts_with($label, 'FPX') => ['fpx'],
-            $label === 'GrabPay' => ['grab_pay'],
+            // Stripe's type identifier is 'grabpay' — NO underscore. 'grab_pay'
+            // is rejected outright by the API ("Invalid payment_method_types"),
+            // which surfaced as "could not reach the payment provider".
+            $label === 'GrabPay' => ['grabpay'],
             $label === 'Credit / Debit Card' => ['card'],
             default => null,
         };
