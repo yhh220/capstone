@@ -45,4 +45,12 @@ class ServicePolicy
     {
         return false;
     }
+
+    // Drag-reordering rewrites the public services page (and its road
+    // animation) — same tier as update. Without this method Filament's
+    // non-strict authorization silently ALLOWED any panel user to reorder.
+    public function reorder(User $user): bool
+    {
+        return $user->isAdmin();
+    }
 }

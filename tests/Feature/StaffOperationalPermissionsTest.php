@@ -183,4 +183,34 @@ class StaffOperationalPermissionsTest extends TestCase
         $this->assertTrue($staff->can('update', $testimonial));
         $this->assertFalse($staff->can('delete', $testimonial));
     }
+
+    public function test_staff_can_work_orders_and_bookings_but_not_admin_curated_content(): void
+    {
+        $staff = $this->staff();
+        $order = $this->makeOrder();
+
+        // Operational tier: order details and booking edits are staff work.
+        // (Unsaved instances — these policies only inspect the user's role.)
+        $this->assertTrue($staff->can('update', $order));
+        $this->assertTrue($staff->can('update', new Booking));
+
+        // Admin-curated content stays read-only for staff.
+        $this->assertFalse($staff->can('update', new \App\Models\Service));
+        $this->assertFalse($staff->can('update', new \App\Models\Brand));
+        $this->assertFalse($staff->can('update', new \App\Models\Category));
+    }
+
+    public function test_staff_cannot_reorder_admin_curated_tables(): void
+    {
+        // Filament allows reordering whenever the policy has NO reorder()
+        // method — these assertions pin the explicit methods so the storefront
+        // ordering of brands, categories, and services stays admin-only, while
+        // testimonial curation (a staff duty) keeps its reorder rights.
+        $staff = $this->staff();
+
+        $this->assertFalse($staff->can('reorder', \App\Models\Brand::class));
+        $this->assertFalse($staff->can('reorder', \App\Models\Category::class));
+        $this->assertFalse($staff->can('reorder', \App\Models\Service::class));
+        $this->assertTrue($staff->can('reorder', Feedback::class));
+    }
 }

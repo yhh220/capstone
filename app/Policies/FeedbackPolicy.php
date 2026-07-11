@@ -42,4 +42,12 @@ class FeedbackPolicy
     {
         return $user->isOwner();
     }
+
+    // Staff curate homepage testimonials (create/update above), so ordering
+    // them is part of the same operational tier. Explicit rather than relying
+    // on Filament's silent allow-when-method-missing fallback.
+    public function reorder(User $user): bool
+    {
+        return $user->isStaffMember();
+    }
 }

@@ -41,4 +41,12 @@ class BrandPolicy
     {
         return $user->isOwner();
     }
+
+    // Drag-reordering rewrites the public homepage's brand order — same tier
+    // as update. Without this method Filament's non-strict authorization
+    // silently ALLOWED any panel user (including staff) to reorder.
+    public function reorder(User $user): bool
+    {
+        return $user->isAdmin();
+    }
 }
