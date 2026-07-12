@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\AssignTraceId;
+use App\Http\Middleware\RedirectToNewHost;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -38,7 +39,15 @@ return Application::configure(basePath: dirname(__DIR__))
                 | Request::HEADER_X_FORWARDED_PROTO
                 | Request::HEADER_X_FORWARDED_PORT,
         );
-        // Runs first so every log line in the request carries a trace id.
+        // GLOBAL, first middleware of all: on the old redirect-stub deployment
+        // (REDIRECT_TO set) this short-circuits EVERY request — storefront,
+        // /admin, /stripe/webhook, anything — into a ~0.5KB redirect to the new
+        // host before any group middleware, session, locale, or DB is touched,
+        // so the printed-QR domain keeps working with negligible bandwidth. On
+        // the real site (REDIRECT_TO unset) it is a no-op that returns instantly.
+        $middleware->prepend(RedirectToNewHost::class);
+
+        // Runs first within the web group so every log line carries a trace id.
         $middleware->web(prepend: [
             AssignTraceId::class,
         ]);

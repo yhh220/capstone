@@ -56,6 +56,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Redirect-Stub Target
+    |--------------------------------------------------------------------------
+    |
+    | When set (on the OLD Render service whose URL is printed on physical QR
+    | codes), every request is answered with a lightweight redirect to this
+    | host, preserving path and query — see App\Http\Middleware\RedirectToNewHost.
+    | Leave unset on the real site, where the middleware is a no-op.
+    |
+    */
+
+    'redirect_to' => env('REDIRECT_TO'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
