@@ -44,6 +44,18 @@ class RedirectStubTest extends TestCase
             ->assertRedirect('https://winwinautoaccessories.onrender.com/about');
     }
 
+    public function test_stub_answers_healthz_with_a_plain_200_not_a_redirect(): void
+    {
+        // The keep-alive pinger hits /healthz and must get a 200 (a 302 gets
+        // flagged as failure and auto-disables the cron), while still reaching
+        // the stub (any request wakes it).
+        config(['app.redirect_to' => 'https://winwinautoaccessories.onrender.com']);
+
+        $this->get('/healthz')
+            ->assertOk()
+            ->assertSee('OK');
+    }
+
     public function test_real_site_is_unaffected_when_redirect_to_is_unset(): void
     {
         config(['app.redirect_to' => null]);

@@ -29,6 +29,16 @@ class RedirectToNewHost
             return $next($request);
         }
 
+        // Keep-alive endpoint for an uptime/cron pinger. Every other request 302s
+        // to the new host, but a pinger receiving a 302 is flagged as a failure by
+        // cron-job.org, which auto-disables the job after repeated "failures" — so
+        // the keep-alive would silently stop and the stub would start cold-starting
+        // on scanned QR visits. This path returns a plain 200 instead (and still
+        // wakes the service, since any request wakes it), keeping the pinger green.
+        if ($request->path() === 'healthz') {
+            return response('OK', 200);
+        }
+
         $target = rtrim($target, '/');
 
         // Preserve the path and query so a link like /products?x=1 lands on the
