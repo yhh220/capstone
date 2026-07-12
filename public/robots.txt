@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: /admin
 
-Sitemap: https://winwincaraudio.onrender.com/sitemap.xml
+Sitemap: https://winwinautoaccessories.onrender.com/sitemap.xml
