@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
-// Configuration Data (配置数据：包含配件价格和颜色映射表)
+// Configuration Data
 const BASE_PRICE = 150000;
 const ACCESSORY_PRICES = {
     rims: {
@@ -70,7 +70,7 @@ const TINT_MAP = {
     '5': { transmission: 1.0, opacity: 1.0, color: 0x111111 },
 };
 
-// Application State (应用状态：记录当前选择的配置项、颜色、视角等)
+// Application State
 const state = {
     color: 'white',
     rims: 'rim7',
@@ -81,12 +81,12 @@ const state = {
     brakeColor: 'red',
     windowTint: '100',
     doorsOpen: false,
-    viewMode: 'exterior', // 'exterior' | 'interior' (视角模式：'外部' | '内部')
-    interiorPosMode: 'driver', // 'driver' | 'center' (内部视角位置：'主驾' | '中控')
+    viewMode: 'exterior', // 'exterior' | 'interior'
+    interiorPosMode: 'driver', // 'driver' | 'center'
     transitioning: false,
 };
 
-// Three.js Globals (Three.js全局变量：场景、相机、渲染器、控制器等)
+// Three.js Globals
 let scene, camera, renderer, controls, carModel;
 let isInitialized = false;
 let animationFrameId = null;
@@ -110,17 +110,17 @@ function easeInOutCubic(x) {
     return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 }
 
-// References to Car Meshes (汽车网格模型引用：存储需要动态替换或变色的3D部件)
+// References to Car Meshes
 const carParts = {
-    rims: {},     // rim1 -> Array of meshes (轮毂1 -> 网格数组)
-    spoilers: {}, // wing1 -> Array of meshes (尾翼1 -> 网格数组)
-    bumpers: {},  // bumperF1 -> Array of meshes (前保险杠1 -> 网格数组)
-    dashcams: {}, // dashcam1 -> Array of meshes (行车记录仪1 -> 网格数组)
-    body: [],     // Array of meshes for car_body (车身网格数组)
-    glass: []     // Array of meshes for windows (车窗网格数组)
+    rims: {},     // rim1 -> Array of meshes
+    spoilers: {}, // wing1 -> Array of meshes
+    bumpers: {},  // bumperF1 -> Array of meshes
+    dashcams: {}, // dashcam1 -> Array of meshes
+    body: [],     // Array of meshes for car_body
+    glass: []     // Array of meshes for windows
 };
 
-// Materials (材质库：存储车漆、轮毂、刹车卡钳、玻璃等材质对象)
+// Materials
 let carBodyMaterial;
 let carRimMaterial;
 let carBrakeMaterial;
@@ -128,38 +128,38 @@ let glassMaterial;
 
 /**
  * Helper to check if a mesh is part of a swappable accessory based on name/ancestors using Regex
- * 辅助函数：通过正则表达式判断当前3D部件是否属于可替换的配件（如轮毂、尾翼、保险杠）
+ * Helper: use regex to tell whether a 3D part is a swappable accessory (rim, spoiler, bumper).
  */
 function getPartInfo(child) {
     let current = child;
     while (current && current.parent) {
         const name = current.name || '';
 
-        // Rims Regex match (1 to 7) (使用正则匹配轮毂：从1到7)
+        // Rims Regex match (1 to 7)
         const rimMatch = name.match(/rim[_\s-]*0?([1-7])/i);
         if (rimMatch) {
             return { category: 'rims', key: `rim${rimMatch[1]}` };
         }
 
-        // Wings/Spoilers Regex match (1 to 4) (使用正则匹配尾翼：从1到4)
+        // Wings/Spoilers Regex match (1 to 4)
         const wingMatch = name.match(/(wing|spoiler)[_\s-]*0?([1-4])/i);
         if (wingMatch) {
             return { category: 'spoilers', key: `wing${wingMatch[2]}` };
         }
 
-        // Front Bumpers Regex match (1 to 3) (使用正则匹配前保险杠：从1到3)
+        // Front Bumpers Regex match (1 to 3)
         const bumperFMatch = name.match(/bumper[_\s-]*f[_\s-]*0?([1-3])/i);
         if (bumperFMatch) {
             return { category: 'bumpers', key: `bumperF${bumperFMatch[1]}` };
         }
 
-        // Dashcams Regex match (1 to 3) (使用正则匹配行车记录仪：从1到3)
+        // Dashcams Regex match (1 to 3)
         const dashcamMatch = name.match(/dashcam[_\s-]*0?([1-3])/i);
         if (dashcamMatch) {
             return { category: 'dashcams', key: `dashcam${dashcamMatch[1]}` };
         }
 
-        // Rear Bumper Regex match (bumperB1) (使用正则匹配后保险杠：仅bumperB1)
+        // Rear Bumper Regex match (bumperB1)
         const bumperBMatch = name.match(/bumper[_\s-]*b[_\s-]*0?1/i);
         if (bumperBMatch) {
             return { category: 'bumperB1', key: 'bumperB1' };
@@ -173,7 +173,7 @@ function getPartInfo(child) {
 /**
  * Helper to determine recursively if a mesh belongs to the body paint target list,
  * while respecting negative exclusions.
- * 辅助函数：递归判断部件是否属于需要更改车漆颜色的目标列表（排除玻璃、轮胎、内饰等）
+ * Helper: recursively decide whether a part should take the body paint colour (excludes glass, tyres, interior).
  */
 function isMeshBodyPaint(child, partInfo) {
     const bodyPaintNames = [
@@ -190,7 +190,7 @@ function isMeshBodyPaint(child, partInfo) {
         'AM-DoorL', 'AM-DoorR'
     ];
 
-    // Whichever front bumper is selected gets colored (无论选择哪个前保险杠，都会被染色)
+    // Whichever front bumper is selected gets colored
     if (partInfo && partInfo.category === 'bumpers') {
         return true;
     }
@@ -203,17 +203,17 @@ function isMeshBodyPaint(child, partInfo) {
     let isTarget = false;
     let isExcluded = false;
 
-    // Climb the parent tree recursively to see if child or any ancestor matches target list (递归向上查找父节点，判断当前节点或其祖先是否在目标列表中)
+    // Climb the parent tree recursively to see if child or any ancestor matches target list
     while (current && current.parent) {
         const name = current.name || '';
         const baseName = name.split('.')[0];
 
-        // 1. Check exclusions (1. 检查排除项，确保不被错误染色)
+        // 1. Check exclusions
         if (bodyPaintExclusions.includes(name) || bodyPaintExclusions.includes(baseName)) {
             isExcluded = true;
         }
 
-        // Direct prefix checks to exclude indices variations (e.g. AM-Dash.001) (使用前缀检查来排除带有序号的变体，如 AM-Dash.001)
+        // Direct prefix checks to exclude indices variations (e.g. AM-Dash.001)
         if (name.startsWith('AM-Dash') ||
             name.startsWith('AM-Window') ||
             name.startsWith('AM-Glass') ||
@@ -228,7 +228,7 @@ function isMeshBodyPaint(child, partInfo) {
             isExcluded = true;
         }
 
-        // 2. Check paint targets (2. 检查染色目标列表)
+        // 2. Check paint targets
         if (bodyPaintNames.includes(name) || bodyPaintNames.includes(baseName)) {
             isTarget = true;
         }
@@ -241,10 +241,10 @@ function isMeshBodyPaint(child, partInfo) {
 
 /**
  * Initialize Event Delegation on document to ensure persistence against Livewire re-renders
- * 初始化事件代理：确保Livewire重新渲染后，点击事件依然生效（处理配置面板的点击）
+ * Set up delegated events so clicks keep working after Livewire re-renders the configurator panel.
  */
 function wireConfiguratorEvents() {
-    // Open Configurator (打开配置器) — the hero trigger, plus any promo CTA
+    // Open Configurator — the hero trigger, plus any promo CTA
     // tagged with .js-open-configurator (e.g. the Products-page banner).
     document.addEventListener('click', (e) => {
         if (e.target.closest('#open-configurator-btn, .js-open-configurator')) {
@@ -252,21 +252,21 @@ function wireConfiguratorEvents() {
         }
     });
 
-    // Close Configurator (关闭配置器)
+    // Close Configurator
     document.addEventListener('click', (e) => {
         if (e.target.closest('#close-configurator-btn')) {
             closeConfigurator();
         }
     });
 
-    // Reset Camera (重置摄像机视角)
+    // Reset Camera
     document.addEventListener('click', (e) => {
         if (e.target.closest('#camera-reset-btn')) {
             resetCamera();
         }
     });
 
-    // Toggle Doors (开关车门)
+    // Toggle Doors
     document.addEventListener('click', (e) => {
         if (e.target.closest('#toggle-doors-btn')) {
             if (state.transitioning) return;
@@ -274,28 +274,28 @@ function wireConfiguratorEvents() {
         }
     });
 
-    // Toggle View Mode (Interior/Exterior) (切换视角模式：内饰/外部)
+    // Toggle View Mode (Interior/Exterior)
     document.addEventListener('click', (e) => {
         if (e.target.closest('#toggle-view-btn')) {
             toggleView();
         }
     });
 
-    // Toggle Interior Position (Driver/Center) (切换内饰座位视角：主驾/副驾)
+    // Toggle Interior Position (Driver/Center)
     document.addEventListener('click', (e) => {
         if (e.target.closest('#toggle-interior-pos-btn')) {
             toggleInteriorPos();
         }
     });
 
-    // WhatsApp Enquiry Export (导出并跳转到WhatsApp询价)
+    // WhatsApp Enquiry Export
     document.addEventListener('click', (e) => {
         if (e.target.closest('#enquire-config-btn')) {
             sendWhatsAppEnquiry();
         }
     });
 
-    // Tabs Switcher (配置面板的标签页切换)
+    // Tabs Switcher
     document.addEventListener('click', (e) => {
         const tab = e.target.closest('.tab-btn');
         if (tab) {
@@ -315,7 +315,7 @@ function wireConfiguratorEvents() {
         }
     });
 
-    // Color Swatch Selection (Body Color) (选择车漆颜色)
+    // Color Swatch Selection (Body Color)
     document.addEventListener('click', (e) => {
         const swatch = e.target.closest('.color-swatch[data-color]');
         if (swatch) {
@@ -325,14 +325,14 @@ function wireConfiguratorEvents() {
             const colorKey = swatch.dataset.color;
             state.color = colorKey;
 
-            // Update 3D body material color (更新3D车身材质颜色)
+            // Update 3D body material color
             if (carBodyMaterial && COLOR_MAP[colorKey]) {
                 carBodyMaterial.color.setHex(COLOR_MAP[colorKey].hex);
             }
         }
     });
 
-    // Rim Color Swatch Selection (选择轮毂颜色)
+    // Rim Color Swatch Selection
     document.addEventListener('click', (e) => {
         const swatch = e.target.closest('[data-rim-color]');
         if (swatch) {
@@ -346,7 +346,7 @@ function wireConfiguratorEvents() {
         }
     });
 
-    // Brake Color Swatch Selection (选择刹车卡钳颜色)
+    // Brake Color Swatch Selection
     document.addEventListener('click', (e) => {
         const swatch = e.target.closest('[data-brake-color]');
         if (swatch) {
@@ -362,19 +362,19 @@ function wireConfiguratorEvents() {
         }
     });
 
-    // Accessory Option Card Selection (选择配件卡片)
+    // Accessory Option Card Selection
     document.addEventListener('click', (e) => {
         const card = e.target.closest('.option-card');
         if (card && card.dataset.category) {
             const category = card.dataset.category;
             const itemKey = card.dataset.item;
 
-            // Visual toggle in category grid (在分类网格中切换选中状态样式)
+            // Visual toggle in category grid
             const categoryCards = document.querySelectorAll(`.option-card[data-category="${category}"]`);
             categoryCards.forEach(c => c.classList.remove('active'));
             card.classList.add('active');
 
-            // Hide old variant, show new variant in 3D (在3D视图中隐藏旧款，显示新款配件)
+            // Hide old variant, show new variant in 3D
             const oldItemKey = state[category];
             state[category] = itemKey;
 
@@ -382,7 +382,7 @@ function wireConfiguratorEvents() {
         }
     });
 
-    // Window Tint Selection (选择车窗贴膜透光率)
+    // Window Tint Selection
     document.addEventListener('click', (e) => {
         const card = e.target.closest('.option-card[data-tint]');
         if (card) {
@@ -400,7 +400,7 @@ function wireConfiguratorEvents() {
                     glassMaterial.opacity = config.opacity;
                 } else {
                     const pct = parseInt(tintKey, 10);
-                    glassMaterial.color.setHex(0x000000); // 绝对纯黑
+                    glassMaterial.color.setHex(0x000000); // pure black
                     
                     // opacity calculation: 100% (Fully Transparent) -> 0.0 opacity, 5% (Darkest) -> 0.95 opacity
                     // We set a minimum of 0.1 so the glass doesn't completely disappear at 100%
@@ -480,7 +480,7 @@ function trapConfiguratorKeydown(e) {
 
 /**
  * Open the configurator popup modal and load/run Three.js
- * 打开3D看车模态框并加载运行Three.js
+ * Open the 3D viewer modal and boot Three.js.
  */
 function openConfigurator() {
     const modal = document.getElementById('configurator-modal');
@@ -501,7 +501,7 @@ function openConfigurator() {
         history.replaceState(null, '', window.location.pathname + window.location.search + '#car-configurator');
     }
 
-    // 旧设备 / 被禁用 WebGL 时给出友好提示，而不是黑屏报错
+    // Friendly message for old devices / disabled WebGL instead of a black screen.
     if (!isInitialized && !isWebGLAvailable()) {
         const loader = document.getElementById('configurator-loader');
         if (loader) {
@@ -537,7 +537,7 @@ function requestRender(duration = 350) {
 }
 
 /**
- * WebGL availability check (检测设备是否支持 WebGL)
+ * WebGL availability check
  */
 function isWebGLAvailable() {
     try {
@@ -551,7 +551,7 @@ function isWebGLAvailable() {
 
 /**
  * Close the configurator popup modal
- * 关闭3D看车模态框：隐藏视图并停止渲染循环（节省性能）
+ * Close the 3D viewer modal: hide it and stop the render loop to save resources.
  */
 function closeConfigurator() {
     const modal = document.getElementById('configurator-modal');
@@ -666,24 +666,24 @@ function disposeConfigurator() {
 
 /**
  * Show/Hide meshes of a category in the 3D model
- * 显示/隐藏指定类别的3D部件：用于在切换不同轮毂、尾翼时，隐藏旧的并显示新的
+ * Show/hide the 3D parts of a category, swapping the old variant for the newly selected one.
  */
 function togglePartVisibility(category, oldKey, newKey) {
-    // Hide old meshes (隐藏旧的网格模型)
+    // Hide old meshes
     if (carParts[category] && carParts[category][oldKey]) {
         carParts[category][oldKey].forEach(mesh => {
             mesh.visible = false;
         });
     }
 
-    // Show new meshes (显示新的网格模型)
+    // Show new meshes
     if (carParts[category] && carParts[category][newKey]) {
         carParts[category][newKey].forEach(mesh => {
             mesh.visible = true;
         });
     }
 
-    // If swapping rims, ensure the newly visible rim gets the correct material styling (如果是切换轮毂，确保新显示的轮毂应用正确的材质样式)
+    // If swapping rims, ensure the newly visible rim gets the correct material styling
     if (category === 'rims') {
         updateRimMaterials();
     }
@@ -694,7 +694,7 @@ function togglePartVisibility(category, oldKey, newKey) {
 
 /**
  * Core Three.js Setup
- * 核心 Three.js 初始化设置
+ * Core Three.js initialisation.
  */
 function initThree() {
     // If a previous session somehow survived (e.g. re-init after a Livewire DOM
@@ -711,16 +711,16 @@ function initThree() {
         return;
     }
 
-    // 1. 创建场景 (Scene)：3D世界的容器，所有物体、光照都在这里
+    // 1. Scene: the container for the 3D world — all objects and lights live here.
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x222226);
     scene.fog = new THREE.FogExp2(0x222226, 0.04);
 
-    // 2. 摄像机设置 (Camera)：相当于人的眼睛，决定了我们从哪个角度看车
+    // 2. Camera: the viewer's eye — decides the angle the car is seen from.
     camera = new THREE.PerspectiveCamera(40, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 100);
     camera.position.set(5.5, 2, 5.5);
 
-    // 3. 渲染器 (Renderer)：引擎的核心，负责把 3D 画面计算并渲染到网页的画布 (Canvas) 上
+    // 3. Renderer: draws the computed 3D scene onto the page canvas.
     renderer = new THREE.WebGLRenderer({
         canvas: canvas,
         antialias: true,
@@ -739,17 +739,17 @@ function initThree() {
     scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
     pmremGenerator.dispose();
 
-    // 4. 轨道控制器 (OrbitControls)：允许用户用鼠标拖动来旋转、缩放、平移视角
+    // 4. OrbitControls: let the user rotate, zoom and pan the view by dragging.
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.maxPolarAngle = Math.PI / 2 - 0.03; // Limit looking underneath the floor (限制视角，防止看到地板下面)
+    controls.maxPolarAngle = Math.PI / 2 - 0.03; // Limit looking underneath the floor
     controls.minDistance = 3.5;
     controls.maxDistance = 8.5;
     controls.target.set(0, 0.4, 0);
     controls.addEventListener('change', () => requestRender());
 
-    // 5. 光照设置 (Lighting)：打光让车身有立体感和材质反射（包含环境光、主光源、补光等）
+    // 5. Lighting: ambient + key + fill lights give the body depth and material reflections.
     const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x2d2d35, 1.0);
     scene.add(hemisphereLight);
 
@@ -778,7 +778,7 @@ function initThree() {
     fillLight.position.set(-6, 3, 5);
     scene.add(fillLight);
 
-    // 6. 影棚地板和网格 (Floor & Grid)：给车子一个落脚点，并且用来接收底部阴影
+    // 6. Floor & grid: a ground plane for the car that also receives its shadow.
     const floorGeo = new THREE.PlaneGeometry(30, 30);
     const floorMat = new THREE.MeshStandardMaterial({
         color: 0x222226,
@@ -794,8 +794,8 @@ function initThree() {
     gridHelper.position.y = 0.005;
     scene.add(gridHelper);
 
-    // 7. 加载 3D 模型 (GLTF Loader)：通过加载器把服务器上的 .glb 汽车模型文件读取进来
-    // 模型用 Draco 压缩，需要 DRACOLoader 解码几何体
+    // 7. GLTF loader: read the .glb car model from the server.
+    // The model is Draco-compressed, so DRACOLoader is needed to decode the geometry.
     const modelUrl = modal.dataset.modelUrl || '/models/3d/car-draco.glb';
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('/draco/');
@@ -809,14 +809,14 @@ function initThree() {
         if (pct) pct.textContent = `${Math.round(percent)}%`;
     };
 
-    // On Loaded Success (加载成功后的回调)
+    // On Loaded Success
     const onModelLoaded = (gltf) => {
         const car = gltf.scene;
         carModel = car;
 
         scene.add(car);
 
-        // Pre-traverse to hide non-default accessories so they do not corrupt the ground level bounding box calculation (预遍历以隐藏非默认配件，避免它们影响底部包围盒的计算)
+        // Pre-traverse to hide non-default accessories so they do not corrupt the ground level bounding box calculation
         car.traverse((child) => {
             if (child.isMesh) {
                 const partInfo = getPartInfo(child);
@@ -831,18 +831,18 @@ function initThree() {
             }
         });
 
-        // Step 1: Center X and Z first (步骤1：先在X和Z轴上居中)
+        // Step 1: Center X and Z first
         const box1 = new THREE.Box3().setFromObject(car);
         const center = box1.getCenter(new THREE.Vector3());
         car.position.x = -center.x;
         car.position.z = -center.z;
 
-        // Step 2: Recalculate bounding box after centering, then fix Y (步骤2：居中后重新计算包围盒，然后修正Y轴以贴合地面)
+        // Step 2: Recalculate bounding box after centering, then fix Y
         car.updateMatrixWorld(true);
         const box2 = new THREE.Box3().setFromObject(car);
         car.position.y = -box2.min.y;
 
-        // Setup Animation Mixer (设置动画混合器，用于播放开关门动画)
+        // Setup Animation Mixer
         if (gltf.animations && gltf.animations.length > 0) {
             mixer = new THREE.AnimationMixer(car);
 
@@ -862,7 +862,7 @@ function initThree() {
                 doorActions.push(action2);
             }
         }
-        // Initialize materials (初始化车漆、轮毂等材质)
+        // Initialize materials
         carBodyMaterial = new THREE.MeshPhysicalMaterial({
             color: COLOR_MAP[state.color].hex,
             metalness: 0.9,
@@ -898,7 +898,7 @@ function initThree() {
             side: THREE.DoubleSide
         });
 
-        // Map and identify car meshes (遍历并分类标记汽车所有的网格模型)
+        // Map and identify car meshes
         car.traverse((child) => {
             if (child.isMesh) {
                 child.castShadow = true;
@@ -907,7 +907,7 @@ function initThree() {
                 const name = child.name;
                 const nameLower = name.toLowerCase();
 
-                // Check if it belongs to one of the custom accessories (检查当前网格是否属于自定义配件)
+                // Check if it belongs to one of the custom accessories
                 const partInfo = getPartInfo(child);
                 if (partInfo) {
                     const { category, key } = partInfo;
@@ -918,17 +918,17 @@ function initThree() {
                         }
                         carParts[category][key].push(child);
 
-                        // Hide non-default on load (在加载时隐藏非默认配件)
+                        // Hide non-default on load
                         child.visible = (key === state[category]);
 
-                        // Store original material reference (保存原始材质的引用，以便重置时使用)
+                        // Store original material reference
                         child.userData.originalMaterial = child.material;
 
                         if (category === 'dashcams') {
                             child.material = dashcamMaterial;
                         }
 
-                        // Apply Rim material to rims category if not default (如果不是默认颜色，则应用自定义轮毂材质)
+                        // Apply Rim material to rims category if not default
                         if (category === 'rims') {
                             if (state.rimColor !== 'default') {
                                 const meshName = (child.name || '').toLowerCase();
@@ -939,24 +939,24 @@ function initThree() {
                             }
                         }
                     } else if (category === 'bumperB1') {
-                        child.visible = false; // Hide loose misplaced bumper mesh (隐藏多余错位的保险杠网格)
+                        child.visible = false; // Hide loose misplaced bumper mesh
                     }
                 }
 
-                // 修复：模型文件内部存在不小心多导出的重叠车门，这里自动将带有 .001 的冗余车门隐藏
+                // Fix: the model was exported with duplicate overlapping doors — hide the redundant .001 door.
                 if (name.includes('door') || name.includes('Door')) {
                     if (name.includes('.001')) {
                         child.visible = false;
                     }
                 }
 
-                // Apply Brake material to brake parts (给刹车部件应用刹车卡钳材质)
+                // Apply Brake material to brake parts
                 const isBrake = name.startsWith('AM-Brake') || name.split('.')[0] === 'AM-Brake';
                 if (isBrake) {
                     child.material = carBrakeMaterial;
                 }
 
-                // Check if this is one of the explicitly excluded fake windows (检查是否是那些被显式排除的假车窗网格)
+                // Check if this is one of the explicitly excluded fake windows
                 let isExcludedWindow = false;
                 let tempObj = child;
                 while (tempObj && tempObj.parent) {
@@ -968,7 +968,7 @@ function initThree() {
                     tempObj = tempObj.parent;
                 }
 
-                // Apply Glass material if it matches glass/window name and is NOT excluded (如果是车窗/玻璃且未被排除，则应用玻璃材质)
+                // Apply Glass material if it matches glass/window name and is NOT excluded
                 let isGlass = false;
                 if (!isExcludedWindow) {
                     let currentObj = child;
@@ -986,7 +986,7 @@ function initThree() {
                     carParts.glass.push(child);
                     child.material = glassMaterial;
                 } else if (!isExcludedWindow) {
-                    // Apply Body paint color strictly to matching targets (and nested body meshes) AND active front bumpers (严格为目标部件、嵌套的车身网格以及当前激活的前保险杠应用车漆颜色)
+                    // Apply Body paint color strictly to matching targets (and nested body meshes) AND active front bumpers
                     if (isMeshBodyPaint(child, partInfo)) {
                         carParts.body.push(child);
                         child.material = carBodyMaterial;
@@ -997,7 +997,7 @@ function initThree() {
 
         console.log('Mapped Car Parts:', carParts);
 
-        // Hide Loading Overlay (隐藏加载动画遮罩)
+        // Hide Loading Overlay
         setTimeout(() => {
             const progressContainer = document.getElementById('configurator-loader');
             if (progressContainer) {
@@ -1043,7 +1043,7 @@ function initThree() {
         })
         .catch(onModelError);
 
-    // Setup Window Resize hooks (设置窗口缩放监听钩子)
+    // Setup Window Resize hooks
     window.addEventListener('resize', onWindowResize);
 }
 
@@ -1078,7 +1078,7 @@ async function streamGlb(url, knownSize, onProgress) {
 
 /**
  * Orbit controls and rendering loop
- * 轨道控制器与渲染循环（每一帧的更新）
+ * OrbitControls update + the per-frame render loop.
  */
 function animate() {
     const now = performance.now();
@@ -1134,7 +1134,7 @@ function animate() {
 
 /**
  * Handle screen size changes for canvas responsive scaling
- * 响应式处理：当屏幕或画布尺寸改变时更新摄像机比例和渲染器尺寸
+ * Responsive: update camera aspect and renderer size when the canvas resizes.
  */
 function onWindowResize() {
     const canvasContainer = document.getElementById('configurator-viewport');
@@ -1148,7 +1148,7 @@ function onWindowResize() {
 
 /**
  * Reset OrbitControls back to default viewing angle
- * 重置轨道控制器到默认外部视角
+ * Reset OrbitControls to the default exterior view.
  */
 function resetCamera() {
     if (camera && controls) {
@@ -1165,7 +1165,7 @@ function resetCamera() {
 
 /**
  * Toggle the car doors open/closed by running the mixer animations
- * 开关车门控制：播放GLTF模型中自带的开门/关门动画
+ * Door toggle: play the open/close door animations bundled in the GLTF model.
  */
 function toggleDoors(open, onComplete) {
     if (doorActions.length === 0) {
@@ -1196,7 +1196,7 @@ function toggleDoors(open, onComplete) {
         action.play();
     });
 
-    // Update doors toggle button UI state (更新开关车门按钮的UI状态)
+    // Update doors toggle button UI state
     const doorBtn = document.getElementById('toggle-doors-btn');
     if (doorBtn) {
         const textSpan = doorBtn.querySelector('span');
@@ -1215,7 +1215,7 @@ function toggleDoors(open, onComplete) {
 
 /**
  * Handle screen fade transitions using CSS overlay
- * 屏幕黑屏淡入淡出：用于在视角切换时做一个过渡效果
+ * Fade the screen to/from black as a transition when switching views.
  */
 function fadeScreen(fade, callback) {
     const overlay = document.getElementById('configurator-fade-overlay');
@@ -1230,7 +1230,7 @@ function fadeScreen(fade, callback) {
         overlay.classList.remove('active');
     }
 
-    // CSS fade transition is 400ms, wait 450ms to ensure completion (CSS过渡动画为400毫秒，等待450毫秒确保执行完毕)
+    // CSS fade transition is 400ms, wait 450ms to ensure completion
     setTimeout(() => {
         if (callback) callback();
     }, 450);
@@ -1238,50 +1238,50 @@ function fadeScreen(fade, callback) {
 
 /**
  * Get interior and door camera/target coordinates relative to the car's current position
- * 获取相对于汽车当前位置的内饰、车门摄像机和目标焦点坐标
+ * Compute interior/door camera and target positions relative to the car's current position.
  */
 function getInteriorCoords() {
     const carPos = (carModel && carModel.position) ? carModel.position.clone() : new THREE.Vector3();
 
-    // Driver's eye/camera position (seated inside LHD driver seat) (主驾视角摄像机位置：坐在驾驶位)
-    // Steering wheel is at local: x = -0.508, y = 0.745, z = 0.40 (方向盘相对坐标)
-    // Driver seat cushion is at local: x = 0.15, y = 0.45, z = 0.40 (驾驶座垫相对坐标)
-    // Driver eye level: x = 0.15, y = 0.95, z = 0.40 (驾驶员视线高度坐标)
+    // Driver's eye/camera position (seated inside LHD driver seat)
+    // Steering wheel is at local: x = -0.508, y = 0.745, z = 0.40
+    // Driver seat cushion is at local: x = 0.15, y = 0.45, z = 0.40
+    // Driver eye level: x = 0.15, y = 0.95, z = 0.40
     const driverPos = new THREE.Vector3(
         carPos.x + 0.15,
         carPos.y + 0.95,
         carPos.z + 0.40
     );
 
-    // Target inside looking forward: x = -0.60, y = 0.85, z = 0.40 (主驾向前方看的焦点坐标)
+    // Target inside looking forward: x = -0.60, y = 0.85, z = 0.40
     const driverTarget = new THREE.Vector3(
         carPos.x - 0.60,
         carPos.y + 0.85,
         carPos.z + 0.40
     );
 
-    // Center eye level (between seats) (副驾视线高度：位于座位之间)
+    // Center eye level (between seats)
     const centerPos = new THREE.Vector3(
         carPos.x + 0.15,
         carPos.y + 0.95,
         carPos.z - 0.45
     );
 
-    // Target from center looking forward (从副驾向前方看的焦点坐标)
+    // Target from center looking forward
     const centerTarget = new THREE.Vector3(
         carPos.x - 0.60,
         carPos.y + 0.85,
         carPos.z - 0.45
     );
 
-    // Door exterior check/pan position (outside open driver-side door at z = 1.60) (车门外部检查视角：在打开的主驾门外侧)
+    // Door exterior check/pan position (outside open driver-side door at z = 1.60)
     const doorPos = new THREE.Vector3(
         carPos.x - 0.40,
         carPos.y + 1.10,
         carPos.z + 1.60
     );
 
-    // Looking at steering wheel/dashboard area (看向方向盘和仪表盘区域)
+    // Looking at steering wheel/dashboard area
     const doorTarget = new THREE.Vector3(
         carPos.x - 0.50,
         carPos.y + 0.85,
@@ -1300,7 +1300,7 @@ function getInteriorCoords() {
 
 /**
  * Helper to get active interior camera position vector based on current state
- * 辅助函数：根据当前状态获取激活的内饰摄像机位置向量
+ * Helper: the active interior camera position vector for the current state.
  */
 function getActiveInteriorPos() {
     const coords = getInteriorCoords();
@@ -1312,7 +1312,7 @@ function getActiveInteriorPos() {
 
 /**
  * Helper to get active interior camera target vector based on current state
- * 辅助函数：根据当前状态获取激活的内饰摄像机焦点向量
+ * Helper: the active interior camera target vector for the current state.
  */
 function getActiveInteriorTarget() {
     const coords = getInteriorCoords();
@@ -1324,31 +1324,31 @@ function getActiveInteriorTarget() {
 
 /**
  * Smoothly transition view between Driver position and Center position in the cabin
- * 切换内饰座位视角：在主驾位置和副驾位置之间平滑过渡切换
+ * Switch the interior seat view, smoothly transitioning between driver and centre positions.
  */
 function toggleInteriorPos() {
     if (state.transitioning || state.viewMode !== 'interior') return;
     state.transitioning = true;
 
-    // Fade screen to black (使屏幕渐变到黑屏)
+    // Fade screen to black
     fadeScreen(true, () => {
-        // Toggle state (切换当前状态：主驾/副驾)
+        // Toggle state
         state.interiorPosMode = (state.interiorPosMode === 'driver') ? 'center' : 'driver';
 
         const coords = getInteriorCoords();
         const newPos = (state.interiorPosMode === 'center') ? coords.centerPos : coords.driverPos;
         const newTarget = (state.interiorPosMode === 'center') ? coords.centerTarget : coords.driverTarget;
 
-        // Reset controls target (pivot point is the eye) (重置控制器焦点：以眼睛为轴心点)
+        // Reset controls target (pivot point is the eye)
         controls.target.copy(newPos);
 
-        // Position the camera slightly behind the pivot so it looks forward (把摄像机放在焦点稍微靠后的位置，使其面向前方)
+        // Position the camera slightly behind the pivot so it looks forward
         const direction = new THREE.Vector3().subVectors(newTarget, newPos).normalize();
         camera.position.copy(newPos).sub(direction.multiplyScalar(0.01));
 
         controls.update();
 
-        // Update button label and active state (更新按钮的文本标签和高亮状态)
+        // Update button label and active state
         const interiorPosBtn = document.getElementById('toggle-interior-pos-btn');
         if (interiorPosBtn) {
             const textSpan = interiorPosBtn.querySelector('span');
@@ -1362,7 +1362,7 @@ function toggleInteriorPos() {
             }
         }
 
-        // Fade screen back in (使屏幕黑屏渐渐褪去，恢复亮屏)
+        // Fade screen back in
         fadeScreen(false, () => {
             state.transitioning = false;
         });
@@ -1371,7 +1371,7 @@ function toggleInteriorPos() {
 
 /**
  * Animate the camera smoothly towards the open door area
- * 镜头移动动画：将镜头平滑移动到车门附近，引导用户观察开门动作
+ * Camera move animation: glide toward the door to draw attention to it opening.
  */
 function animateCameraToDoorSide(callback) {
     if (!camera || !controls) {
@@ -1379,7 +1379,7 @@ function animateCameraToDoorSide(callback) {
         return;
     }
 
-    controls.enabled = false; // Disable controls during active tween interpolation (在补间动画插值执行期间，禁用用户控制)
+    controls.enabled = false; // Disable controls during active tween interpolation
     cameraAnimation.active = true;
     cameraAnimation.startTime = performance.now();
     cameraAnimation.duration = 1200;
@@ -1396,21 +1396,21 @@ function animateCameraToDoorSide(callback) {
 
 /**
  * Handle transition to interior cabin view
- * 处理过渡到车内内饰视角的逻辑
+ * Handle the transition into the interior view.
  */
 function enterInteriorView() {
     if (state.transitioning) return;
     state.transitioning = true;
 
-    // 1. Play door open animation first (第一步：先播放打开车门的动画)
+    // 1. Play door open animation first
     toggleDoors(true, () => {
-        // 2. Camera moves slowly towards the car door area (第二步：摄像机缓慢移动向车门区域)
+        // 2. Camera moves slowly towards the car door area
         animateCameraToDoorSide(() => {
-            // 3. Screen fades to black (第三步：屏幕渐变到黑屏)
+            // 3. Screen fades to black
             fadeScreen(true, () => {
-                // Close doors silently while screen is black (趁屏幕黑屏时，偷偷把车门关上以避免内饰穿模)
+                // Close doors silently while screen is black
                 toggleDoors(false, () => {
-                    // 4. Camera jumps inside the car (第四步：摄像机瞬间跳进车内)
+                    // 4. Camera jumps inside the car
                     state.viewMode = 'interior';
                     const activePos = getActiveInteriorPos();
                     const activeTarget = getActiveInteriorTarget();
@@ -1420,18 +1420,18 @@ function enterInteriorView() {
                     controls.enablePan = false;
                     controls.minDistance = 0.01;
                     controls.maxDistance = 0.01;
-                    controls.maxPolarAngle = Math.PI - 0.1; // Allow looking down at floor/console (放宽轨道控制器的垂直角度限制，允许往下看)
+                    controls.maxPolarAngle = Math.PI - 0.1; // Allow looking down at floor/console
 
-                    // Pivot is the eye position (旋转中心/枢轴点 就是眼睛的位置)
+                    // Pivot is the eye position
                     controls.target.copy(activePos);
 
-                    // Camera is slightly offset backwards so it looks forward towards the target (相机微微向后偏移，这样就能面向前方)
+                    // Camera is slightly offset backwards so it looks forward towards the target
                     const direction = new THREE.Vector3().subVectors(activeTarget, activePos).normalize();
                     camera.position.copy(activePos).sub(direction.multiplyScalar(0.01));
 
                     controls.update();
 
-                    // Show the interior position toggle button (显示主驾/副驾视角切换按钮)
+                    // Show the interior position toggle button
                     const interiorPosBtn = document.getElementById('toggle-interior-pos-btn');
                     if (interiorPosBtn) {
                         interiorPosBtn.style.display = 'inline-flex';
@@ -1446,7 +1446,7 @@ function enterInteriorView() {
                         }
                     }
 
-                    // Update View Toggle button UI (更新内/外视角切换按钮的UI样式)
+                    // Update View Toggle button UI
                     const viewBtn = document.getElementById('toggle-view-btn');
                     if (viewBtn) {
                         const textSpan = viewBtn.querySelector('span');
@@ -1454,7 +1454,7 @@ function enterInteriorView() {
                         viewBtn.classList.add('active');
                     }
 
-                    // 5. Screen fades back in (第五步：屏幕黑屏渐渐褪去)
+                    // 5. Screen fades back in
                     fadeScreen(false, () => {
                         state.transitioning = false;
                     });
@@ -1466,7 +1466,7 @@ function enterInteriorView() {
 
 /**
  * Handle transition back to exterior showroom view
- * 处理退回到外部展厅视角的逻辑
+ * Handle the transition back to the exterior showroom view.
  */
 function exitInteriorView() {
     if (state.transitioning) return;
@@ -1474,13 +1474,13 @@ function exitInteriorView() {
 
     // 1. Screen fades to black
     fadeScreen(true, () => {
-        // Hide the interior position toggle button (隐藏主驾/副驾视角切换按钮)
+        // Hide the interior position toggle button
         const interiorPosBtn = document.getElementById('toggle-interior-pos-btn');
         if (interiorPosBtn) {
             interiorPosBtn.style.display = 'none';
         }
 
-        // 2. Camera jumps back to exterior position (x=5, y=2, z=8) (第二步：摄像机瞬间跳回外部预设位置)
+        // 2. Camera jumps back to exterior position (x=5, y=2, z=8)
         camera.position.set(5, 2, 8);
         controls.target.set(0, 0.4, 0);
 
@@ -1489,12 +1489,12 @@ function exitInteriorView() {
         controls.enablePan = true;
         controls.minDistance = 3.5;
         controls.maxDistance = 8.5;
-        controls.maxPolarAngle = Math.PI / 2 - 0.03; // Limit looking underneath the floor (限制视角，防止看到地板下面)
+        controls.maxPolarAngle = Math.PI / 2 - 0.03; // Limit looking underneath the floor
         controls.update();
 
         state.viewMode = 'exterior';
 
-        // Update View Toggle button UI (更新内/外视角切换按钮的UI样式)
+        // Update View Toggle button UI
         const viewBtn = document.getElementById('toggle-view-btn');
         if (viewBtn) {
             const textSpan = viewBtn.querySelector('span');
@@ -1502,9 +1502,9 @@ function exitInteriorView() {
             viewBtn.classList.remove('active');
         }
 
-        // 3. Screen fades in (第三步：屏幕黑屏渐渐褪去)
+        // 3. Screen fades in
         fadeScreen(false, () => {
-            // 4. Play door close animation (第四步：播放关门的动画)
+            // 4. Play door close animation
             toggleDoors(false, () => {
                 state.transitioning = false;
             });
@@ -1514,7 +1514,7 @@ function exitInteriorView() {
 
 /**
  * Toggle between interior and exterior views
- * 在外部视图和内部视图之间切换
+ * Toggle between the exterior and interior views.
  */
 function toggleView() {
     if (state.viewMode === 'exterior') {
@@ -1527,7 +1527,7 @@ function toggleView() {
 /**
  * Update rim materials based on selected rim color state.
  * If 'default', restores original GLB materials; otherwise applies colored carRimMaterial.
- * 更新轮毂材质：如果是 'default'，则恢复原始的 GLTF 材质；否则应用已着色的自定义金属材质。
+ * Update rim material: 'default' restores the original GLTF material, otherwise apply the tinted custom metal material.
  */
 function updateRimMaterials() {
     const isDefault = state.rimColor === 'default';
@@ -1553,7 +1553,7 @@ function updateRimMaterials() {
 
 /**
  * Grab chosen options and compile a WhatsApp link
- * 获取选中的配件配置，并拼接成 WhatsApp 发送询价的链接
+ * Collect the selected configuration and build the WhatsApp enquiry link.
  */
 function sendWhatsAppEnquiry() {
     const enquireBtn = document.getElementById('enquire-config-btn');
