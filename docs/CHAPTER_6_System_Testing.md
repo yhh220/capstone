@@ -8,7 +8,7 @@ Testing on this project combined **two complementary approaches**, and it is imp
 
 1. **Manual, exploratory testing** was the **primary, day-to-day method** throughout the project. We used the running application directly (browsing pages, clicking through real user journeys, switching languages, toggling dark mode, resizing the window, and deliberately trying to break things) and observed the result in the browser. **The majority of the defects fixed during development were first discovered this way.**
 
-2. **Automated testing**, written with **PHPUnit**, was built alongside the manual testing as a **regression safety net**. It currently comprises **227 tests containing 746 assertions across 46 test files**, and the entire suite passes. Many of these tests exist specifically to *lock down* a bug that had already been found by hand, so that the same defect can never quietly return.
+2. **Automated testing**, written with **PHPUnit**, was built alongside the manual testing as a **regression safety net**. It currently comprises **237 tests containing 773 assertions across 49 test files**, and the entire suite passes. Many of these tests exist specifically to *lock down* a bug that had already been found by hand, so that the same defect can never quietly return.
 
 In other words, manual testing was how problems were **found**, and the automated suite is how fixes are **kept fixed**. This chapter presents the manual approach first (Section 6.3), because that reflects how testing actually happened, and then documents the automated suite and the specialised security, concurrency, performance, compatibility, and acceptance testing that support it.
 
@@ -42,8 +42,8 @@ Manual, hands-on testing was the front line of quality assurance on this project
 
 Manual testing covered both the local development site and the live deployed site at `winwincaraudio.onrender.com`, and included:
 
-- **Full customer journeys**: browsing and searching the catalogue, opening product details and the 3D configurator, adding items to the cart, checking out, registering and logging in, viewing order and booking history, and booking a service appointment.
-- **Full administrator journeys**: creating and editing products with images and translations, processing orders (mark paid, shipped, delivered, cancelled), managing bookings, editing settings, and reviewing the activity and error logs.
+- **Full customer journeys**: browsing and searching the catalogue, switching a product gallery on desktop and touch screens, submitting a verified product review, adding items to the cart, checking out with delivery or a scheduled pickup time, registering and logging in, viewing order and booking history, booking a service appointment, and opening the public service-status page from the chatbot.
+- **Full administrator journeys**: creating and editing products with ordered images and translations, approving product reviews, processing orders (mark paid, shipped, delivered, cancelled), rescheduling a pickup, managing bookings, editing settings, and reviewing the activity and error logs.
 - **Cross-cutting checks on every page**: switching between English, Bahasa Melayu, and Chinese; toggling dark mode; and resizing the browser (and using real phones) to confirm the responsive layout.
 - **Deliberate "break it" attempts**: submitting forms with empty, invalid, or oversized input; trying to reach another user's records by changing an ID in the URL; and repeatedly failing login to observe the lockout.
 
@@ -80,7 +80,7 @@ The automated tests are written with **PHPUnit** and executed through Laravel's 
 - **`RefreshDatabase`**: every test starts from a clean, migrated database, so tests are independent and order does not matter.
 - **Model factories**: realistic products, users, orders, and bookings are generated on demand, so each test sets up exactly the data it needs.
 - **Faked mail and queues**: `MAIL_MAILER=array` captures outgoing email in memory instead of sending it, so a test can *assert that the right email would have been sent* without delivering anything; `QUEUE_CONNECTION=sync` runs queued work inline so its effects are testable immediately.
-- **Array cache/session drivers** and a reduced bcrypt cost keep each run fast: the full 227-test suite completes in under two minutes.
+- **Array cache/session drivers** and a reduced bcrypt cost keep each run fast: the full 237-test suite completes in under two minutes.
 
 This configuration means the suite is safe to run at any time, gives identical results on any machine, and could be added to a continuous-integration pipeline unchanged.
 
@@ -90,7 +90,7 @@ This configuration means the suite is safe to run at any time, gives identical r
 
 ## 6.5 Automated Test Coverage Overview
 
-The 46 test files are organised by the area of the system they exercise. Table 6.2 shows how the 227 tests are distributed.
+The 49 test files are organised by the area of the system they exercise. Table 6.2 shows how the 237 tests are distributed.
 
 **Table 6.2: Automated test coverage by module**
 
@@ -98,14 +98,16 @@ The 46 test files are organised by the area of the system they exercise. Table 6
 |---|---|---:|
 | Authentication & Access Control | AuthFlow, LoginLockout, SetPassword, SocialLogin, UserAdminAuthorization, StaffBulkDeleteAuthorization, StaffOperationalPermissions | 64 |
 | Payment & Order Lifecycle | PaymentFlow, PaymentHardening, PaymentExpiryGuard, OrderMarkPaidGuard, OrderCancellation, OrderAdminEdit, OrderTracker, OrderImporter, Invoice, StripeWebhook, StripeCheckoutRedirect, StripeReturnVerification | 76 |
-| Service Booking | BookingService, ServicesPage, BookingSlotAvailability, BookingSlotRaceCondition, BookingConfirmGuard, BookingAdminEdit, BookingFormEmail, BookingReminder | 20 |
+| Service Booking & Pickup | BookingService, ServicesPage, BookingSlotAvailability, BookingSlotRaceCondition, BookingConfirmGuard, BookingAdminEdit, BookingFormEmail, BookingReminder, CheckoutPage, StaffOperationalPermissions | 21 |
+| Product Reviews | ProductReview | 2 |
+| Chatbot & Public Status Access | ChatbotStatusPage | 2 |
 | Observability & Error Logging | Observability, ErrorLogLifecycle, LogResource, LogResolved | 18 |
-| Store Config, Shop Mode & Admin Ops | SettingResource, ShopModeClose, ActivityResource, SystemStatusClearCache | 13 |
+| Store Config, Shop Mode & Admin Ops | SettingResource, ShopModeClose, ActivityResource, SystemStatusClearCache, StaffOperationalPermissions | 18 |
 | Cart, Checkout & Shipping | CartItem, CheckoutPage, GuestCartClaimOnLogin, ShippingCalculator | 15 |
 | Catalogue, SEO & Front-End Assets | ProductsPageSearch, SeoStructuredData, AssetLoading | 10 |
 | Internationalisation | LocalizationCoverage, LocalizedPages | 7 |
 | Unit | ExampleTest, StripePaymentMethodMapper | 4 |
-| **Total** | **46 files** | **227** |
+| **Total** | **49 files** | **237** |
 
 The distribution deliberately concentrates on the highest-risk server-side areas: money (orders, payment, cancellation, invoicing) and access control (authentication and authorisation) together account for over half of all automated tests, because those are the areas where a defect is most costly and where automated checks are most reliable.
 
@@ -119,19 +121,19 @@ The automated functional tests verify the server-side behaviour of each feature 
 
 ### 6.6.1 Catalogue, Search & Storefront
 
-These tests confirm that product search returns the right products, that filtering and sorting narrow and order results correctly, and that search operates on the localised product name. Asset tests confirm the performance decisions of Section 5.13.5 are in force: `AssetLoadingTest` asserts that the contact page embeds the Google map **pinned by coordinates and lazily loaded**, that no storefront page pulls a script from a third-party CDN (the icon, animation and 3D-viewer libraries are self-hosted and version-pinned), and (the regression guard for the manually-found bug) that the page loader ships all three language captions rather than one.
+These tests confirm that product search returns the right products, that filtering and sorting narrow and order results correctly, and that search operates on the localised product name. Asset tests confirm the performance decisions of Section 5.13.5 are in force: `AssetLoadingTest` asserts that the contact page embeds the Google map **pinned by coordinates and lazily loaded**, that no storefront page pulls a script from a third-party CDN (the icon, animation and 3D-viewer libraries are self-hosted and version-pinned), and (the regression guard for the manually-found bug) that the page loader ships all three language captions rather than one. Gallery behaviour is additionally checked through the product model and rendered product-detail component: a pre-existing single image remains valid while the first media item continues to be the primary image.
 
 ### 6.6.2 Cart, Checkout & Shipping
 
-These tests verify quantity handling, subtotal calculation, and that **shipping is computed from the configured flat rate and free-shipping threshold** rather than being fixed, including the boundary where an order crosses the threshold. A dedicated test confirms that a **guest's cart is claimed and preserved when they log in**.
+These tests verify quantity handling, subtotal calculation, and that **shipping is computed from the configured flat rate and free-shipping threshold** rather than being fixed, including the boundary where an order crosses the threshold. A dedicated test confirms that a **guest's cart is claimed and preserved when they log in**. Pickup coverage verifies that no address or shipping fee is required, a valid future collection slot is saved as `pickup_at`, and a forged or unavailable pickup selection cannot bypass server-side validation.
 
 ### 6.6.3 Payment, Orders & Invoicing
 
 The most heavily tested area. Tests cover placing an order, confirming payment, the forward-only status transitions, tracking, admin editing, invoice generation, and importing orders. The **`OrderCancellation` suite alone contains 21 tests**, because the tiered refund policy (Section 5.6) has many boundaries: the refund amount is asserted for cancellations inside the window, just outside it, and after shipping, and every cancellation is checked to restock the items. The suite also asserts the **paired notifications**: a customer cancellation must send both the customer's email and the internal owner/staff alert (Section 5.14.2), while marking an order refunded sends the customer's confirmation without a redundant internal alert.
 
-### 6.6.4 Service Booking
+### 6.6.4 Service Booking, Pickup & Product Reviews
 
-These tests confirm that available slots are generated correctly from the business-hours settings, that closed weekdays and out-of-hours slots are excluded, and that **same-day slots which have already passed are not offered**. Further tests cover confirmation and reminder emails and admin-side booking management.
+These tests confirm that available slots are generated correctly from the business-hours settings, that closed weekdays and out-of-hours slots are excluded, and that **same-day slots which have already passed are not offered**. Further tests cover confirmation and reminder emails and admin-side booking management. Pickup uses the same operating-hours rules without reserving an installation slot; `StaffOperationalPermissionsTest` verifies that a staff member can reschedule a pickup only through the admin action and that the customer receives the revised-time email. `ProductReviewTest` verifies that a customer without a completed purchase cannot submit a review, that a completed purchaser can submit one, and that an unapproved review is never visible to visitors.
 
 ### 6.6.5 Administration, Settings & Shop Mode
 
@@ -139,7 +141,7 @@ Admin tests confirm the Settings resource validates and persists each configurat
 
 ### 6.6.6 Internationalisation
 
-These tests assert that key storefront pages render in each supported language and that translation coverage is complete, guarding against a missing key silently falling back to English on a customer-facing page.
+These tests assert that key storefront pages render in each supported language and that translation coverage is complete, guarding against a missing key silently falling back to English on a customer-facing page. The status-support tests exercise Chinese and Malay chatbot questions, the translated reply, and the externally-opening Statuspage call-to-action.
 
 ### 6.6.7 Observability & Error Logging
 
@@ -274,18 +276,23 @@ User Acceptance Testing (UAT) checks whether the system meets the real needs of 
 | C6 | Cancel an order within the refund window | Correct refund amount shown; stock returned | *[to fill]* | |
 | C7 | Switch the site language to Malay / Chinese | All content, including the page loader, shown in the chosen language | *[to fill]* | |
 | C8 | Ask the chatbot a common question | Relevant answer in the current language | *[to fill]* | |
-| C9 | Check out with "Store Pickup" selected | No address asked for, no shipping fee; "ready for pickup" email received when staff mark it ready | *[to fill]* | |
+| C9 | Check out with "Store Pickup" selected | No address asked for or shipping fee; a valid collection date/time is required and shown in the order | *[to fill]* | |
+| C10 | View a multi-image product on phone and desktop | Main image, thumbnails, controls and touch scrolling remain usable without layout overflow | *[to fill]* | |
+| C11 | Submit a product review after a completed purchase | Review is submitted as pending; only an approved review is visible publicly | *[to fill]* | |
+| C12 | Ask the chatbot about website/system status | Localised response and a Statuspage button open the configured public status page in a new tab | *[to fill]* | |
 
 **Table 6.7: Owner/Staff UAT scenarios**
 
 | # | Scenario | Expected outcome | Result | Remarks |
 |---|---|---|---|---|
-| A1 | Add a new product with images and translations | Product appears on the storefront | *[to fill]* | |
+| A1 | Add a new product with images and translations | Product appears on the storefront; gallery images can be reordered and the first is primary | *[to fill]* | |
 | A2 | Process an order: mark paid, mark shipped with tracking | Customer receives the corresponding emails | *[to fill]* | |
 | A3 | Change business hours in Settings | Booking slots update immediately | *[to fill]* | |
 | A4 | Turn on showroom mode and the announcement bar | Cart hidden for new visitors; unpaid orders cancelled & restocked; banner shown | *[to fill]* | |
 | A5 | Edit a FAQ entry | Updated FAQ appears on the storefront | *[to fill]* | |
 | A6 | Review the activity and error logs | Changes and grouped errors are visible | *[to fill]* | |
+| A7 | Approve a verified product review | Approved review appears on the correct product page; pending review stays hidden | *[to fill]* | |
+| A8 | Reschedule a pickup order | Only an in-hours collection time is accepted; customer receives a revised-time email | *[to fill]* | |
 
 *[Figure 6.12: A UAT session walking through a customer purchase scenario.]*
 
@@ -298,13 +305,13 @@ Testing on this project was carried out in two complementary layers. **Manual, e
 Alongside it, an **automated PHPUnit suite** was built as a regression safety net. Executed with `php artisan test`, it produced a full pass:
 
 ```
-Tests:    227 passed (746 assertions)
-Duration: ~52s
+Tests:    237 passed (773 assertions)
+Duration: ~74s
 ```
 
-Every one of the 227 automated tests passed, exercising 746 assertions across the authentication, catalogue, cart, payment, order-lifecycle, booking, administration, internationalisation, observability, and concurrency concerns of the system. Crucially, several of these tests exist because a bug was first found by hand and then locked down with an automated test, so the two layers reinforce each other: manual testing finds problems, and the automated suite keeps them fixed.
+Every one of the 237 automated tests passed, exercising 773 assertions across the authentication, catalogue, gallery, product-review, cart, payment, order-lifecycle, pickup, booking, administration, chatbot/status access, internationalisation, observability, and concurrency concerns of the system. Crucially, several of these tests exist because a bug was first found by hand and then locked down with an automated test, so the two layers reinforce each other: manual testing finds problems, and the automated suite keeps them fixed.
 
 The compatibility testing (Section 6.11) confirms the system adapts correctly across devices and browsers, and the user-acceptance testing (Section 6.12) evaluates whether it is acceptable to its real users. Taken together, the manual, automated, security, concurrency, performance, compatibility, and acceptance testing give strong, evidence-based confidence that the system implemented in Chapter 5 is functionally correct, secure against the realistic attacks it was designed to resist, and safe under concurrent use, confirming that the project's objectives have been met.
 
-*[Figure 6.13: The full `php artisan test` run showing "Tests: 227 passed (746 assertions)".]*
+*[Figure 6.13: The full `php artisan test` run showing "Tests: 237 passed (773 assertions)".]*
 *[Figure 6.14: A summary of testing coverage across manual and automated layers.]*
