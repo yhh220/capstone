@@ -28,7 +28,13 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
             <div data-aos="fade-right">
                 @php
-                    $gallery = $galleryMedia->map(fn ($media) => ['main' => $media->getUrl('card') ?: $media->getUrl(), 'thumb' => $media->getUrl('thumb') ?: $media->getUrl()])->values();
+                    $gallery = $galleryMedia->map(fn ($media) => [
+                        // A conversion URL is non-empty even before its file has
+                        // been written. Check it first so a new gallery image
+                        // always falls back to its original instead of a 404.
+                        'main' => $media->hasGeneratedConversion('card') ? $media->getUrl('card') : $media->getUrl(),
+                        'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
+                    ])->values();
                     if ($gallery->isEmpty() && $product->image) $gallery = collect([['main' => Storage::url($product->image), 'thumb' => Storage::url($product->image)]]);
                 @endphp
                 @if($gallery->isNotEmpty())
@@ -235,17 +241,29 @@
         </div>
         @endif
 
-        <section class="mt-12" aria-labelledby="reviews-heading">
+        <section id="reviews" class="mt-12 scroll-mt-24" aria-labelledby="reviews-heading">
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
-                <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 border-b border-gray-100 dark:border-gray-700 pb-5">
+                <div class="flex flex-col gap-4 border-b border-gray-100 pb-5 dark:border-gray-700 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <h2 id="reviews-heading" class="text-2xl font-black text-brand-black dark:text-white">{{ __('Customer Reviews') }}</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('Approved reviews: :count', ['count' => $reviews->count()]) }}</p>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Total reviews: :count', ['count' => $reviewCount]) }}</p>
                     </div>
-                    <div class="flex items-center gap-2" aria-label="{{ __('Average rating') }}">
-                        <span class="text-2xl font-black text-brand-red">{{ $reviewAverage ? number_format($reviewAverage, 1) : '—' }}</span>
-                        <span class="text-amber-400 tracking-tight" aria-hidden="true">★★★★★</span>
-                        <span class="sr-only">{{ $reviewAverage ? __(':rating out of 5 stars', ['rating' => number_format($reviewAverage, 1)]) : __('No reviews yet') }}</span>
+                    <div class="flex flex-wrap items-center gap-3 sm:justify-end">
+                        <div class="flex items-center gap-2" aria-label="{{ __('Average rating') }}">
+                            <span class="text-2xl font-black text-brand-red">{{ $reviewAverage ? number_format($reviewAverage, 1) : '—' }}</span>
+                            <span class="text-amber-400 tracking-tight" aria-hidden="true">★★★★★</span>
+                            <span class="sr-only">{{ $reviewAverage ? __(':rating out of 5 stars', ['rating' => number_format($reviewAverage, 1)]) : __('No reviews yet') }}</span>
+                        </div>
+                        @if($reviewCount > 0)
+                        <label class="flex flex-wrap items-center gap-2 text-sm font-semibold text-gray-600 dark:text-gray-300" for="review-sort">
+                            <span>{{ __('Sort reviews') }}</span>
+                            <select id="review-sort" wire:model.live="reviewSort" class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm font-medium text-gray-700 focus:border-brand-red focus:ring-brand-red dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                <option value="newest">{{ __('Newest') }}</option>
+                                <option value="highest">{{ __('Highest rating') }}</option>
+                                <option value="lowest">{{ __('Lowest rating') }}</option>
+                            </select>
+                        </label>
+                        @endif
                     </div>
                 </div>
 
@@ -270,6 +288,22 @@
                     @endforelse
                 </div>
 
+                @if($reviews->hasPages())
+                <nav class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-5 text-sm dark:border-gray-700 sm:flex-nowrap" aria-label="{{ __('Customer Reviews') }}">
+                    @if($reviews->onFirstPage())
+                        <span class="rounded-lg border border-gray-200 px-3 py-2 font-bold text-gray-400 dark:border-gray-700">{{ __('Previous') }}</span>
+                    @else
+                        <button type="button" wire:click="previousPage('reviewsPage')" class="rounded-lg border border-gray-300 px-3 py-2 font-bold text-gray-700 transition-colors hover:border-brand-red hover:text-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red dark:border-gray-600 dark:text-gray-200">{{ __('Previous') }}</button>
+                    @endif
+                    <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ __('Page :current of :last', ['current' => $reviews->currentPage(), 'last' => $reviews->lastPage()]) }}</span>
+                    @if($reviews->hasMorePages())
+                        <button type="button" wire:click="nextPage('reviewsPage')" class="rounded-lg border border-gray-300 px-3 py-2 font-bold text-gray-700 transition-colors hover:border-brand-red hover:text-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red dark:border-gray-600 dark:text-gray-200">{{ __('Next') }}</button>
+                    @else
+                        <span class="rounded-lg border border-gray-200 px-3 py-2 font-bold text-gray-400 dark:border-gray-700">{{ __('Next') }}</span>
+                    @endif
+                </nav>
+                @endif
+
                 <div class="mt-7 pt-6 border-t border-gray-100 dark:border-gray-700">
                     @guest
                         <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('Bought this product? Sign in after your order is completed to leave a verified review.') }} <a wire:navigate href="{{ route('login') }}" class="font-bold text-brand-red hover:underline">{{ __('Sign in') }}</a></p>
@@ -288,7 +322,6 @@
                                     @error('reviewComment') <span role="alert" class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                                 </div>
                                 <button type="submit" wire:loading.attr="disabled" class="rounded-full bg-brand-red-solid px-5 py-2.5 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-60">{{ $myReview ? __('Update review') : __('Submit review') }}</button>
-                                <p class="text-xs text-gray-400">{{ __('Reviews are published after a quick approval check.') }}</p>
                             </form>
                         @else
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Only customers with a completed order can review this product.') }}</p>

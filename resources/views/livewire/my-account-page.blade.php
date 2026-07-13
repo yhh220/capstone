@@ -96,12 +96,19 @@
 
                     <div class="px-5 py-3">
                         @foreach($order->items as $item)
-                        <div class="flex justify-between items-center py-2 text-sm {{ !$loop->last ? 'border-b border-gray-50 dark:border-gray-700/50' : '' }}">
-                            <div class="flex items-center gap-2">
-                                <span class="text-gray-700 dark:text-gray-300">{{ $item->product_name }}</span>
+                        <div class="flex flex-col gap-2 py-2 text-sm sm:flex-row sm:items-center sm:justify-between {{ !$loop->last ? 'border-b border-gray-50 dark:border-gray-700/50' : '' }}">
+                            <div class="flex min-w-0 items-center gap-2">
+                                <span class="break-words text-gray-700 dark:text-gray-300">{{ $item->product_name }}</span>
                                 <span class="text-gray-400">× {{ $item->quantity }}</span>
                             </div>
-                            <span class="font-semibold text-gray-700 dark:text-gray-300 tabular-nums">RM {{ number_format($item->subtotal, 2) }}</span>
+                            <div class="flex items-center justify-between gap-4 sm:justify-end">
+                                <span class="font-semibold text-gray-700 dark:text-gray-300 tabular-nums">RM {{ number_format($item->subtotal, 2) }}</span>
+                                @if($order->status === 'delivered' && $item->product?->is_active)
+                                <a href="{{ route('product.show', $item->product->slug) }}#reviews" class="shrink-0 rounded-lg border border-brand-red px-2.5 py-1 text-xs font-bold text-brand-red transition-colors hover:bg-brand-red-solid hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                                    {{ __('Write a review') }}
+                                </a>
+                                @endif
+                            </div>
                         </div>
                         @endforeach
                     </div>

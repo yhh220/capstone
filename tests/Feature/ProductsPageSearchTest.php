@@ -43,6 +43,38 @@ class ProductsPageSearchTest extends TestCase
             ->assertSee('Cable Set');
     }
 
+    public function test_discounted_products_appear_before_full_price_products(): void
+    {
+        $regular = Product::create([
+            'name' => 'Regular Price Product', 'slug' => 'regular-price-product',
+            'price' => 100, 'stock' => 10, 'is_active' => true,
+        ]);
+        $sale = Product::create([
+            'name' => 'On Sale Product', 'slug' => 'on-sale-product',
+            'price' => 100, 'sale_price' => 80, 'stock' => 10, 'is_active' => true,
+        ]);
+
+        Livewire::test(ProductsPage::class)
+            ->assertViewHas('products', fn ($products) => $products->first()->is($sale)
+                && $products->contains($regular));
+    }
+
+    public function test_out_of_stock_products_appear_after_in_stock_products_even_when_discounted(): void
+    {
+        $inStock = Product::create([
+            'name' => 'Available Product', 'slug' => 'available-product',
+            'price' => 100, 'stock' => 2, 'is_active' => true,
+        ]);
+        Product::create([
+            'name' => 'Sold Out Sale Product', 'slug' => 'sold-out-sale-product',
+            'price' => 100, 'sale_price' => 70, 'stock' => 0, 'is_active' => true,
+        ]);
+
+        Livewire::test(ProductsPage::class)
+            ->assertViewHas('products', fn ($products) => $products->first()->is($inStock)
+                && $products->last()->stock === 0);
+    }
+
     public function test_search_matches_the_translated_name_a_zh_visitor_actually_sees(): void
     {
         // A ZH visitor's cards show name_zh — searching by that visible name has

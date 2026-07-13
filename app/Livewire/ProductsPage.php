@@ -74,6 +74,10 @@ class ProductsPage extends Component
 
         $query = Product::where('is_active', true)
             ->with('category')
+            // In-stock products first, then genuine discounts. The portable CASE
+            // expressions work on both TiDB/MySQL in production and SQLite tests.
+            ->orderByRaw('CASE WHEN stock > 0 THEN 0 ELSE 1 END')
+            ->orderByRaw('CASE WHEN sale_price IS NOT NULL AND sale_price < price THEN 0 ELSE 1 END')
             ->latest();
 
         if ($this->search !== '') {

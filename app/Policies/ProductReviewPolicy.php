@@ -10,5 +10,5 @@ class ProductReviewPolicy
     public function viewAny(User $user): bool { return $user->isStaffMember(); }
     public function view(User $user, ProductReview $review): bool { return $user->isStaffMember(); }
     public function update(User $user, ProductReview $review): bool { return $user->isStaffMember(); }
-    public function delete(User $user, ProductReview $review): bool { return $user->isAdmin(); }
+    public function delete(User $user, ProductReview $review): bool { return $user->isStaffMember(); }
 }

@@ -197,7 +197,7 @@ class MyAccountPage extends Component
         return view('livewire.my-account-page', [
             'shoppingEnabled' => $shoppingEnabled,
             'orders' => $this->tab === 'orders'
-                ? Order::where('user_id', Auth::id())->with('items')->latest()->paginate(10)
+                ? Order::where('user_id', Auth::id())->with('items.product')->latest()->paginate(10)
                 : null,
             'bookings' => $this->tab === 'bookings'
                 ? Booking::where('user_id', Auth::id())->with('service')->latest()->paginate(10)

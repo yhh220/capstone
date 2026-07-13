@@ -65,6 +65,8 @@ class HomePage extends Component
         $featuredProducts = Product::where('is_active', true)
             ->where('is_featured', true)
             ->with('category')
+            ->orderByRaw('CASE WHEN stock > 0 THEN 0 ELSE 1 END')
+            ->orderByRaw('CASE WHEN sale_price IS NOT NULL AND sale_price < price THEN 0 ELSE 1 END')
             ->latest()
             ->take(8)
             ->get();

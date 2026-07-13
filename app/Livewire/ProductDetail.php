@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class ProductDetail extends Component
 {
-    use SetsSeo;
+    use SetsSeo, WithPagination;
 
     public Product $product;
     public int $quantity = 1;
@@ -21,6 +22,18 @@ class ProductDetail extends Component
     public int $reviewRating = 5;
 
     public string $reviewComment = '';
+
+    /** newest | highest | lowest */
+    public string $reviewSort = 'newest';
+
+    public function updatedReviewSort(): void
+    {
+        if (! in_array($this->reviewSort, ['newest', 'highest', 'lowest'], true)) {
+            $this->reviewSort = 'newest';
+        }
+
+        $this->resetPage('reviewsPage');
+    }
 
     public function mount(string $slug): void
     {
@@ -86,13 +99,22 @@ class ProductDetail extends Component
             return;
         }
 
-        ProductReview::updateOrCreate(
-            ['product_id' => $this->product->id, 'user_id' => Auth::id()],
-            ['rating' => $this->reviewRating, 'comment' => trim($this->reviewComment), 'is_approved' => false],
-        );
+        $review = ProductReview::firstOrNew([
+            'product_id' => $this->product->id,
+            'user_id' => Auth::id(),
+        ]);
+        $review->rating = $this->reviewRating;
+        $review->comment = trim($this->reviewComment);
+
+        // New verified-purchase reviews are public immediately. If staff have
+        // deliberately hidden an existing review, preserve that decision.
+        if (! $review->exists) {
+            $review->is_approved = true;
+        }
+        $review->save();
         RateLimiter::hit($key, 3600);
         $this->reset('reviewComment');
-        session()->flash('review-success', __('Thank you. Your review has been submitted for approval.'));
+        session()->flash('review-success', __('Thank you. Your review has been saved.'));
     }
 
     private function hasCompletedPurchase(): bool
@@ -105,7 +127,18 @@ class ProductDetail extends Component
 
     public function render()
     {
-        $reviews = $this->product->approvedReviews()->with('user:id,name')->get();
+        $reviewsQuery = $this->product->visibleReviews()->with('user:id,name');
+
+        match ($this->reviewSort) {
+            'highest' => $reviewsQuery->orderByDesc('rating')->orderByDesc('created_at'),
+            'lowest' => $reviewsQuery->orderBy('rating')->orderByDesc('created_at'),
+            default => $reviewsQuery->latest(),
+        };
+
+        $reviews = $reviewsQuery->paginate(5, ['*'], 'reviewsPage');
+        $reviewSummary = $this->product->visibleReviews()
+            ->selectRaw('COUNT(*) as total, AVG(rating) as average')
+            ->first();
         $myReview = Auth::check()
             ? ProductReview::where('product_id', $this->product->id)->where('user_id', Auth::id())->first()
             : null;
@@ -125,7 +158,8 @@ class ProductDetail extends Component
             'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
             'galleryMedia' => $this->product->getMedia('images'),
             'reviews' => $reviews,
-            'reviewAverage' => $reviews->avg('rating'),
+            'reviewAverage' => $reviewSummary->average,
+            'reviewCount' => (int) $reviewSummary->total,
             'canReview' => $this->hasCompletedPurchase(),
             'myReview' => $myReview,
         ])->layout('layouts.app');

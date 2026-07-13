@@ -43,9 +43,19 @@ class Product extends Model implements HasMedia
     /** Returns the best available image URL: medialibrary first, then legacy Storage path */
     public function getImageUrl(string $conversion = ''): ?string
     {
-        if ($this->hasMedia('images')) {
-            return $this->getFirstMediaUrl('images', $conversion) ?: null;
+        $media = $this->getFirstMedia('images');
+
+        if ($media) {
+            // getUrl('thumb') still returns a URL even when that conversion file
+            // does not exist yet. Serving the original image is preferable to a
+            // broken <img> while a newly uploaded image is being processed.
+            if ($conversion !== '' && ! $media->hasGeneratedConversion($conversion)) {
+                return $media->getUrl() ?: null;
+            }
+
+            return $media->getUrl($conversion) ?: null;
         }
+
         return $this->image ? Storage::url($this->image) : null;
     }
 
@@ -54,9 +64,15 @@ class Product extends Model implements HasMedia
         return $this->hasMany(ProductReview::class)->where('is_approved', true)->latest();
     }
 
+    /** Reviews currently enabled for public display by a staff member. */
+    public function visibleReviews()
+    {
+        return $this->hasMany(ProductReview::class)->where('is_approved', true);
+    }
+
     public function reviews()
     {
-        return $this->hasMany(ProductReview::class)->latest();
+        return $this->hasMany(ProductReview::class);
     }
 
     public function getActivitylogOptions(): LogOptions
