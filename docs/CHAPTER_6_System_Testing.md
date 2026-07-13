@@ -279,7 +279,7 @@ User Acceptance Testing (UAT) checks whether the system meets the real needs of 
 | C9 | Check out with "Store Pickup" selected | No address asked for or shipping fee; a valid collection date/time is required and shown in the order | *[to fill]* | |
 | C10 | View a multi-image product on phone and desktop | Main image, thumbnails, controls and touch scrolling remain usable without layout overflow | *[to fill]* | |
 | C11 | Submit a product review after a completed purchase | Review is submitted as pending; only an approved review is visible publicly | *[to fill]* | |
-| C12 | Ask the chatbot about website/system status | Localised response and a Statuspage button open the configured public status page in a new tab | *[to fill]* | |
+| C12 | Ask the chatbot about website/system status | Localised response and a button open the configured **Atlassian Statuspage** public status page in a new tab | *[to fill]* | |
 
 **Table 6.7: Owner/Staff UAT scenarios**
 
