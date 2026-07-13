@@ -210,7 +210,7 @@ class StaffOperationalPermissionsTest extends TestCase
         $this->assertFalse($staff->can('delete', $message));
     }
 
-    public function test_staff_can_curate_testimonials_but_not_delete_them(): void
+    public function test_staff_can_fully_manage_testimonials(): void
     {
         $staff = $this->staff();
         $testimonial = Feedback::create([
@@ -221,7 +221,7 @@ class StaffOperationalPermissionsTest extends TestCase
 
         $this->assertTrue($staff->can('create', Feedback::class));
         $this->assertTrue($staff->can('update', $testimonial));
-        $this->assertFalse($staff->can('delete', $testimonial));
+        $this->assertTrue($staff->can('delete', $testimonial));
     }
 
     public function test_staff_can_work_orders_and_bookings_but_not_admin_curated_content(): void
@@ -234,9 +234,11 @@ class StaffOperationalPermissionsTest extends TestCase
         $this->assertTrue($staff->can('update', $order));
         $this->assertTrue($staff->can('update', new Booking));
 
-        // Categories and services remain admin-curated; brands are catalogue
-        // content that staff maintain day to day.
-        $this->assertFalse($staff->can('update', new \App\Models\Service));
+        // Categories remain admin-curated. Staff maintain the fixed service
+        // menu's content and order, but cannot add or remove its rows.
+        $this->assertTrue($staff->can('update', new \App\Models\Service));
+        $this->assertFalse($staff->can('create', \App\Models\Service::class));
+        $this->assertFalse($staff->can('delete', new \App\Models\Service));
         $this->assertTrue($staff->can('create', \App\Models\Brand::class));
         $this->assertTrue($staff->can('update', new \App\Models\Brand));
         $this->assertTrue($staff->can('delete', new \App\Models\Brand));
@@ -253,7 +255,7 @@ class StaffOperationalPermissionsTest extends TestCase
 
         $this->assertTrue($staff->can('reorder', \App\Models\Brand::class));
         $this->assertFalse($staff->can('reorder', \App\Models\Category::class));
-        $this->assertFalse($staff->can('reorder', \App\Models\Service::class));
+        $this->assertTrue($staff->can('reorder', \App\Models\Service::class));
         $this->assertTrue($staff->can('reorder', Feedback::class));
     }
 

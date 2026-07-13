@@ -53,9 +53,9 @@ class ServicesTable
                     ->label('Visible')
                     ->sortable()
                     ->alignCenter()
-                    ->disabled(fn () => ! auth()->user()?->isAdmin())
+                    ->disabled(fn () => ! auth()->user()?->isStaffMember())
                     ->updateStateUsing(function (Service $record, $state) {
-                        if (! auth()->user()?->isAdmin()) {
+                        if (! auth()->user()?->isStaffMember()) {
                             return;
                         }
                         $record->update(['is_active' => (bool) $state]);

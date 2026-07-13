@@ -28,7 +28,7 @@ class ServicePolicy
 
     public function update(User $user, Service $service): bool
     {
-        return $user->isAdmin();
+        return $user->isStaffMember();
     }
 
     public function delete(User $user, Service $service): bool
@@ -51,6 +51,6 @@ class ServicePolicy
     // non-strict authorization silently ALLOWED any panel user to reorder.
     public function reorder(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isStaffMember();
     }
 }

@@ -38,9 +38,9 @@ class FeedbackTable
                 ToggleColumn::make('is_active')
                     ->label('Status')
                     ->alignCenter()
-                    ->disabled(fn () => !auth()->user()?->isAdmin())
+                    ->disabled(fn () => !auth()->user()?->isStaffMember())
                     ->updateStateUsing(function ($record, $state) {
-                        if (! auth()->user()?->isAdmin()) {
+                        if (! auth()->user()?->isStaffMember()) {
                             return;
                         }
                         $record->update(['is_active' => (bool) $state]);
@@ -67,7 +67,7 @@ class FeedbackTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()?->isAdmin() ?? false),
+                        ->visible(fn () => auth()->user()?->isStaffMember() ?? false),
                 ]),
             ]);
     }

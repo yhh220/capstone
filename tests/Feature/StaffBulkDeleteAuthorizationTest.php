@@ -23,7 +23,9 @@ use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
- * Regression test: all resources below except Products restrict delete() to isAdmin(), but
+ * Regression test: Categories, Contacts, Bookings, and Orders restrict delete()
+ * to isAdmin(), while Products, Brands, and Testimonials are deliberately
+ * staff-manageable. None of the tables' DeleteBulkAction had a
  * none of the tables' DeleteBulkAction had a ->visible()/->authorize() guard.
  * Filament's default per-action authorization for DeleteBulkAction resolves
  * the "deleteAny" ability, which none of these policies define — and with
@@ -108,7 +110,7 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
         $this->assertNotNull(Contact::find($contact->id));
     }
 
-    public function test_staff_cannot_bulk_delete_feedback(): void
+    public function test_staff_can_bulk_delete_feedback(): void
     {
         $feedback = Feedback::create([
             'name'    => 'Test',
@@ -118,9 +120,10 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
         $this->actingAs($this->staff(), 'admin');
 
         Livewire::test(ListFeedback::class)
-            ->assertTableBulkActionHidden('delete');
+            ->assertTableBulkActionVisible('delete')
+            ->callTableBulkAction('delete', [$feedback]);
 
-        $this->assertNotNull(Feedback::find($feedback->id));
+        $this->assertNull(Feedback::find($feedback->id));
     }
 
     public function test_staff_can_bulk_manage_and_delete_products_but_cannot_export_them(): void

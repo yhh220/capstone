@@ -17,7 +17,7 @@ class FeedbackPolicy
         return $user->isAdmin() || $user->isStaff();
     }
 
-    // Staff curate testimonials day-to-day (add/edit); deletion stays admin-only.
+    // Testimonials are day-to-day storefront content for staff to manage.
     public function create(User $user): bool
     {
         return $user->isStaffMember();
@@ -30,7 +30,7 @@ class FeedbackPolicy
 
     public function delete(User $user, Feedback $feedback): bool
     {
-        return $user->isAdmin();
+        return $user->isStaffMember();
     }
 
     public function restore(User $user, Feedback $feedback): bool

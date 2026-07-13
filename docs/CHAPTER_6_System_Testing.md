@@ -8,7 +8,7 @@ Testing on this project combined **two complementary approaches**, and it is imp
 
 1. **Manual, exploratory testing** was the **primary, day-to-day method** throughout the project. We used the running application directly (browsing pages, clicking through real user journeys, switching languages, toggling dark mode, resizing the window, and deliberately trying to break things) and observed the result in the browser. **The majority of the defects fixed during development were first discovered this way.**
 
-2. **Automated testing**, written with **PHPUnit**, was built alongside the manual testing as a **regression safety net**. It currently comprises **243 tests containing 796 assertions across 49 test files**, and the entire suite passes. Many of these tests exist specifically to *lock down* a bug that had already been found by hand, so that the same defect can never quietly return.
+2. **Automated testing**, written with **PHPUnit**, was built alongside the manual testing as a **regression safety net**. It currently comprises **243 tests containing 800 assertions across 49 test files**, and the entire suite passes. Many of these tests exist specifically to *lock down* a bug that had already been found by hand, so that the same defect can never quietly return.
 
 In other words, manual testing was how problems were **found**, and the automated suite is how fixes are **kept fixed**. This chapter presents the manual approach first (Section 6.3), because that reflects how testing actually happened, and then documents the automated suite and the specialised security, concurrency, performance, compatibility, and acceptance testing that support it.
 
@@ -133,7 +133,7 @@ The most heavily tested area. Tests cover placing an order, confirming payment, 
 
 ### 6.6.4 Service Booking, Pickup & Product Reviews
 
-These tests confirm that available slots are generated correctly from the business-hours settings, that closed weekdays and out-of-hours slots are excluded, and that **same-day slots which have already passed are not offered**. Further tests cover confirmation and reminder emails and admin-side booking management. Pickup uses the same operating-hours rules without reserving an installation slot; `StaffOperationalPermissionsTest` verifies that a staff member can reschedule a pickup only through the admin action, that the customer receives the revised-time email, and that staff can see the dashboard Inventory Watchlist. The staff bulk-action tests verify that staff can select and manage Products in bulk, including deletion, while catalogue export remains hidden; they also verify Staff CRUD and ordering access for Brands while Categories remain administrator-curated. `ProductReviewTest` verifies that a customer without a completed purchase cannot submit a review, that a completed purchaser's review is immediately visible, that staff-hidden reviews are excluded from the storefront, that five-review pagination and rating sorting work, and that staff can delete a review.
+These tests confirm that available slots are generated correctly from the business-hours settings, that closed weekdays and out-of-hours slots are excluded, and that **same-day slots which have already passed are not offered**. Further tests cover confirmation and reminder emails and admin-side booking management. Pickup uses the same operating-hours rules without reserving an installation slot; `StaffOperationalPermissionsTest` verifies that a staff member can reschedule a pickup only through the admin action, that the customer receives the revised-time email, and that staff can see the dashboard Inventory Watchlist. The staff bulk-action tests verify that staff can select and manage Products in bulk, including deletion, while catalogue export remains hidden; they also verify Staff CRUD and ordering access for Brands and Testimonials, plus Staff editing, visibility, and ordering access for the fixed Service menu while Categories remain administrator-curated. `ProductReviewTest` verifies that a customer without a completed purchase cannot submit a review, that a completed purchaser's review is immediately visible, that staff-hidden reviews are excluded from the storefront, that five-review pagination and rating sorting work, and that staff can delete a review.
 
 ### 6.6.5 Administration, Settings & Shop Mode
 
@@ -305,13 +305,13 @@ Testing on this project was carried out in two complementary layers. **Manual, e
 Alongside it, an **automated PHPUnit suite** was built as a regression safety net. Executed with `php artisan test`, it produced a full pass:
 
 ```
-Tests:    243 passed (796 assertions)
-Duration: ~83s
+Tests:    243 passed (800 assertions)
+Duration: ~57s
 ```
 
-Every one of the 243 automated tests passed, exercising 796 assertions across the authentication, catalogue, gallery, product-review, cart, payment, order-lifecycle, pickup, booking, administration, chatbot/status access, internationalisation, observability, and concurrency concerns of the system. Crucially, several of these tests exist because a bug was first found by hand and then locked down with an automated test, so the two layers reinforce each other: manual testing finds problems, and the automated suite keeps them fixed.
+Every one of the 243 automated tests passed, exercising 800 assertions across the authentication, catalogue, gallery, product-review, cart, payment, order-lifecycle, pickup, booking, administration, chatbot/status access, internationalisation, observability, and concurrency concerns of the system. Crucially, several of these tests exist because a bug was first found by hand and then locked down with an automated test, so the two layers reinforce each other: manual testing finds problems, and the automated suite keeps them fixed.
 
 The compatibility testing (Section 6.11) confirms the system adapts correctly across devices and browsers, and the user-acceptance testing (Section 6.12) evaluates whether it is acceptable to its real users. Taken together, the manual, automated, security, concurrency, performance, compatibility, and acceptance testing give strong, evidence-based confidence that the system implemented in Chapter 5 is functionally correct, secure against the realistic attacks it was designed to resist, and safe under concurrent use, confirming that the project's objectives have been met.
 
-*[Figure 6.13: The full `php artisan test` run showing "Tests: 243 passed (796 assertions)".]*
+*[Figure 6.13: The full `php artisan test` run showing "Tests: 243 passed (800 assertions)".]*
 *[Figure 6.14: A summary of testing coverage across manual and automated layers.]*
