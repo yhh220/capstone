@@ -95,9 +95,12 @@ class ProductForm
                 SpatieMediaLibraryFileUpload::make('images')
                     ->collection('images')
                     ->image()
+                    ->multiple()
+                    ->reorderable()
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                     ->maxSize(4096)
                     ->imageEditor()
+                    ->helperText('The first image is the main product image. Drag to reorder the gallery.')
                     ->columnSpanFull(),
             ]);
     }

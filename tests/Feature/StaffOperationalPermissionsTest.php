@@ -102,6 +102,24 @@ class StaffOperationalPermissionsTest extends TestCase
         });
     }
 
+    public function test_staff_can_reschedule_a_pickup_and_customer_is_notified(): void
+    {
+        Mail::fake();
+        $order = $this->makeOrder();
+        $order->update(['payment_status' => 'paid', 'status' => 'processing', 'delivery_method' => 'pickup', 'pickup_at' => now()->addDay()]);
+        $pickup = app(\App\Services\PickupScheduleService::class);
+        $day = $pickup->availableDates()->first(fn ($candidate) => $pickup->slotsFor($candidate->format('Y-m-d'))->isNotEmpty());
+        $date = $day->format('Y-m-d');
+        $time = $pickup->slotsFor($date)->first();
+        $this->actingAs($this->staff(), 'admin');
+
+        Livewire::test(ListOrders::class)
+            ->callTableAction('reschedulePickup', $order, ['pickup_at' => "$date $time"]);
+
+        $this->assertSame("$date $time", $order->refresh()->pickup_at->format('Y-m-d H:i'));
+        Mail::assertSent(\App\Mail\OrderPickupRescheduledMail::class, fn ($mail) => $mail->hasTo($order->customer_email));
+    }
+
     public function test_staff_can_confirm_a_booking(): void
     {
         Mail::fake();

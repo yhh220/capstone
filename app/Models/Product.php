@@ -17,8 +17,10 @@ class Product extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
+        // The first item remains the primary catalogue image. A multi-file
+        // collection enables an ordered product gallery without disrupting
+        // existing products that have only one image.
         $this->addMediaCollection('images')
-            ->singleFile()
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
     }
 
@@ -45,6 +47,16 @@ class Product extends Model implements HasMedia
             return $this->getFirstMediaUrl('images', $conversion) ?: null;
         }
         return $this->image ? Storage::url($this->image) : null;
+    }
+
+    public function approvedReviews()
+    {
+        return $this->hasMany(ProductReview::class)->where('is_approved', true)->latest();
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class)->latest();
     }
 
     public function getActivitylogOptions(): LogOptions

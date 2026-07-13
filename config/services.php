@@ -49,6 +49,9 @@ return [
         // alerts somewhere else entirely.
         'alert_email' => env('STORE_ALERT_EMAIL'),
         'facebook_url' => env('STORE_FACEBOOK_URL', 'https://www.facebook.com/winwincaraudio/'),
+        // Public status page: deliberately a simple link, not a claimed live
+        // health indicator, so the storefront never displays stale availability.
+        'status_url' => env('STORE_STATUS_URL', 'https://winwincaraudioautoaccessories.statuspage.io/'),
         // Canonical public site URL. Used to generate sitemap.xml so its URLs
         // always point at production, independent of the local APP_URL (which is
         // the Herd/Valet .test domain in development) — Google rejects a sitemap

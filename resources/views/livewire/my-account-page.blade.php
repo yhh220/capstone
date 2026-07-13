@@ -124,6 +124,9 @@
                                 </span>
                                 <span class="block text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{{ __("This is the courier company's number — use it on their website (e.g. GDEX, Ninja Van) to follow the parcel.") }}</span>
                             @endif
+                            @if($order->isPickup() && $order->pickup_at)
+                                <span class="block mt-1">{{ __('Pickup time') }}: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $order->pickup_at->locale(app()->getLocale())->translatedFormat('D, d M Y · h:mm A') }}</span></span>
+                            @endif
                         </div>
                         <div class="flex items-center gap-4">
                             {{-- "Pay now" only while online shopping is on — otherwise the

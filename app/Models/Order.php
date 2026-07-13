@@ -23,7 +23,7 @@ class Order extends Model
     protected $fillable = [
         'user_id', 'order_number', 'tracking_number',
         'customer_name', 'customer_email', 'customer_phone',
-        'shipping_address', 'subtotal', 'shipping_fee', 'delivery_method', 'total_amount',
+        'shipping_address', 'subtotal', 'shipping_fee', 'delivery_method', 'pickup_at', 'total_amount',
         'status', 'payment_status', 'payment_method', 'notes', 'expires_at',
         'stripe_session_id', 'stripe_payment_intent_id',
         'paid_at', 'shipped_at', 'delivered_at', 'cancelled_at',
@@ -36,6 +36,7 @@ class Order extends Model
         'shipping_fee' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'expires_at' => 'datetime',
+        'pickup_at' => 'datetime',
         'paid_at' => 'datetime',
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',

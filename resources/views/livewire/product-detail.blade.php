@@ -27,28 +27,35 @@
     <div class="max-w-7xl mx-auto px-4 py-10">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
             <div data-aos="fade-right">
-                <div class="bg-gray-100 dark:bg-gray-700 rounded-2xl h-64 sm:h-80 md:h-96 flex items-center justify-center overflow-hidden">
-                    @if($product->getImageUrl('card'))
-                    <img src="{{ $product->getImageUrl('card') }}"
-                         alt="{{ $product->translated_name }}"
-                         class="w-full h-full object-cover rounded-2xl"
-                         fetchpriority="high">
-                    @elseif($product->getImageUrl())
-                    <img src="{{ $product->getImageUrl() }}"
-                         alt="{{ $product->translated_name }}"
-                         class="w-full h-full object-cover rounded-2xl"
-                         fetchpriority="high">
-                    @elseif($product->image)
-                    <img src="{{ Storage::url($product->image) }}"
-                         alt="{{ $product->translated_name }}"
-                         class="w-full h-full object-cover rounded-2xl"
-                         fetchpriority="high">
-                    @else
-                    <div class="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 transition-all duration-500 text-gray-300 dark:text-gray-600" aria-hidden="true">
-                        <svg class="w-24 h-24 drop-shadow-sm transition-all duration-500" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m7.5 4.27 9 5.15"></path><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+                @php
+                    $gallery = $galleryMedia->map(fn ($media) => ['main' => $media->getUrl('card') ?: $media->getUrl(), 'thumb' => $media->getUrl('thumb') ?: $media->getUrl()])->values();
+                    if ($gallery->isEmpty() && $product->image) $gallery = collect([['main' => Storage::url($product->image), 'thumb' => Storage::url($product->image)]]);
+                @endphp
+                @if($gallery->isNotEmpty())
+                    <div x-data="{ images: {{ Illuminate\Support\Js::from($gallery) }}, active: 0, previous() { this.active = (this.active - 1 + this.images.length) % this.images.length }, next() { this.active = (this.active + 1) % this.images.length } }" @keydown.left.prevent="previous()" @keydown.right.prevent="next()" tabindex="0" class="outline-none">
+                        <div class="relative bg-gray-100 dark:bg-gray-700 rounded-2xl h-64 sm:h-80 md:h-96 overflow-hidden">
+                            <img :src="images[active].main" :alt="'{{ e($product->translated_name) }} — {{ __('Product image') }} ' + (active + 1)" class="w-full h-full object-cover rounded-2xl" fetchpriority="high">
+                            @if($gallery->count() > 1)
+                                <button type="button" @click="previous()" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/55 text-white hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-white" aria-label="{{ __('Previous image') }}">‹</button>
+                                <button type="button" @click="next()" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/55 text-white hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-white" aria-label="{{ __('Next image') }}">›</button>
+                                <span class="absolute bottom-3 right-3 rounded-full bg-black/55 px-2.5 py-1 text-xs font-bold text-white" x-text="(active + 1) + ' / ' + images.length" aria-live="polite"></span>
+                            @endif
+                        </div>
+                        @if($gallery->count() > 1)
+                            <div class="mt-3 flex gap-2 overflow-x-auto pb-1 snap-x" aria-label="{{ __('Product images') }}">
+                                <template x-for="(image, index) in images" :key="image.main">
+                                    <button type="button" @click="active = index" :aria-label="'{{ __('Show image') }} ' + (index + 1)" :aria-current="active === index ? 'true' : 'false'" class="shrink-0 snap-start rounded-lg overflow-hidden border-2 focus:outline-none focus:ring-2 focus:ring-brand-red" :class="active === index ? 'border-brand-red' : 'border-transparent opacity-70 hover:opacity-100'">
+                                        <img :src="image.thumb" alt="" class="h-16 w-20 object-cover sm:h-20 sm:w-24">
+                                    </button>
+                                </template>
+                            </div>
+                        @endif
                     </div>
-                    @endif
-                </div>
+                @else
+                    <div class="bg-gray-100 dark:bg-gray-700 rounded-2xl h-64 sm:h-80 md:h-96 flex items-center justify-center text-gray-300 dark:text-gray-600" aria-label="{{ __('No product image available') }}">
+                        <svg class="w-24 h-24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m7.5 4.27 9 5.15"></path><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+                    </div>
+                @endif
             </div>
 
             <div data-aos="fade-left" data-aos-delay="80">
@@ -227,6 +234,69 @@
             </div>
         </div>
         @endif
+
+        <section class="mt-12" aria-labelledby="reviews-heading">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 border-b border-gray-100 dark:border-gray-700 pb-5">
+                    <div>
+                        <h2 id="reviews-heading" class="text-2xl font-black text-brand-black dark:text-white">{{ __('Customer Reviews') }}</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('Approved reviews: :count', ['count' => $reviews->count()]) }}</p>
+                    </div>
+                    <div class="flex items-center gap-2" aria-label="{{ __('Average rating') }}">
+                        <span class="text-2xl font-black text-brand-red">{{ $reviewAverage ? number_format($reviewAverage, 1) : '—' }}</span>
+                        <span class="text-amber-400 tracking-tight" aria-hidden="true">★★★★★</span>
+                        <span class="sr-only">{{ $reviewAverage ? __(':rating out of 5 stars', ['rating' => number_format($reviewAverage, 1)]) : __('No reviews yet') }}</span>
+                    </div>
+                </div>
+
+                @if(session('review-success'))
+                    <div role="status" class="mt-5 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/40 px-4 py-3 text-sm text-green-700 dark:text-green-300">{{ session('review-success') }}</div>
+                @endif
+
+                <div class="mt-6 space-y-5">
+                    @forelse($reviews as $review)
+                        <article class="border-b border-gray-100 dark:border-gray-700 last:border-0 pb-5 last:pb-0">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <p class="font-bold text-gray-800 dark:text-white">{{ $review->user?->name ?? __('Verified customer') }}</p>
+                                    <p class="text-xs text-gray-400 mt-1">{{ $review->created_at->locale(app()->getLocale())->translatedFormat('d M Y') }} · {{ __('Verified purchase') }}</p>
+                                </div>
+                                <span class="text-amber-400 text-sm tracking-tight" aria-label="{{ __(':rating out of 5 stars', ['rating' => $review->rating]) }}">{{ str_repeat('★', $review->rating) }}<span class="text-gray-300 dark:text-gray-600">{{ str_repeat('★', 5 - $review->rating) }}</span></span>
+                            </div>
+                            <p class="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-300 whitespace-pre-line">{{ $review->comment }}</p>
+                        </article>
+                    @empty
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No reviews yet. Be the first verified customer to share your experience.') }}</p>
+                    @endforelse
+                </div>
+
+                <div class="mt-7 pt-6 border-t border-gray-100 dark:border-gray-700">
+                    @guest
+                        <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('Bought this product? Sign in after your order is completed to leave a verified review.') }} <a wire:navigate href="{{ route('login') }}" class="font-bold text-brand-red hover:underline">{{ __('Sign in') }}</a></p>
+                    @else
+                        @if($canReview)
+                            <form wire:submit="submitReview" class="space-y-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-5">
+                                    <label class="font-bold text-gray-800 dark:text-white" for="review-rating">{{ $myReview ? __('Update your review') : __('Write a review') }}</label>
+                                    <select id="review-rating" wire:model="reviewRating" class="rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-brand-red focus:ring-brand-red">
+                                        @for($star = 5; $star >= 1; $star--) <option value="{{ $star }}">{{ $star }} {{ $star === 1 ? __('star') : __('stars') }}</option> @endfor
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="review-comment" class="sr-only">{{ __('Your review') }}</label>
+                                    <textarea id="review-comment" wire:model="reviewComment" rows="4" maxlength="1000" placeholder="{{ __('Tell other customers about your experience…') }}" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-3 text-sm focus:border-brand-red focus:ring-brand-red"></textarea>
+                                    @error('reviewComment') <span role="alert" class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                                </div>
+                                <button type="submit" wire:loading.attr="disabled" class="rounded-full bg-brand-red-solid px-5 py-2.5 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-60">{{ $myReview ? __('Update review') : __('Submit review') }}</button>
+                                <p class="text-xs text-gray-400">{{ __('Reviews are published after a quick approval check.') }}</p>
+                            </form>
+                        @else
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Only customers with a completed order can review this product.') }}</p>
+                        @endif
+                    @endguest
+                </div>
+            </div>
+        </section>
 
         @if($related->count() > 0)
         <div class="mt-12" aria-labelledby="related-heading">

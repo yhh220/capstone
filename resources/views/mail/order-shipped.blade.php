@@ -19,6 +19,12 @@
             <td style="padding:8px 0;color:#71717a;vertical-align:top;">{{ __('Pickup location') }}</td>
             <td style="padding:8px 0;text-align:right;font-weight:bold;">{{ config('services.store.address') }}</td>
         </tr>
+        @if($order->pickup_at)
+        <tr>
+            <td style="padding:8px 0;color:#71717a;vertical-align:top;">{{ __('Pickup time') }}</td>
+            <td style="padding:8px 0;text-align:right;font-weight:bold;">{{ $order->pickup_at->locale(app()->getLocale())->translatedFormat('D, d M Y · h:mm A') }}</td>
+        </tr>
+        @endif
         @elseif($order->tracking_number)
         <tr>
             <td style="padding:8px 0;color:#71717a;">{{ __('Courier tracking number') }}</td>

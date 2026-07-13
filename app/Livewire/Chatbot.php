@@ -459,6 +459,11 @@ class Chatbot extends Component
         // Order matters: more specific intents (tracking) are checked first.
         $intents = [
             [
+                'words' => ['system status', 'website status', 'service status', 'site status', 'is the website down', 'website down', 'outage', 'downtime', 'status sistem', 'status laman web', 'laman web down', 'gangguan sistem', '系统状态', '网站状态', '服务状态', '网站打不开', '故障', '宕机'],
+                'external_url' => config('services.store.status_url'),
+                'label' => ['en' => 'Check service status', 'ms' => 'Semak status perkhidmatan', 'zh' => '查看服务状态'],
+            ],
+            [
                 'words' => ['track order', 'order status', 'my order', 'where is my order', 'status pesanan', 'jejak pesanan', '订单状态', '查订单', '我的订单'],
                 'route' => 'track-order',
                 'label' => ['en' => 'Track your order', 'ms' => 'Jejak pesanan anda', 'zh' => '查询订单状态'],
@@ -492,6 +497,14 @@ class Chatbot extends Component
 
         foreach ($intents as $intent) {
             if ($has($intent['words'])) {
+                if (isset($intent['external_url'])) {
+                    return [
+                        'label' => $intent['label'][$this->chatLang] ?? $intent['label']['en'],
+                        'url' => $intent['external_url'],
+                        'external' => true,
+                    ];
+                }
+
                 return [
                     'label' => $intent['label'][$this->chatLang] ?? $intent['label']['en'],
                     'url'   => route($intent['route']),

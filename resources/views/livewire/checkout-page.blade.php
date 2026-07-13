@@ -100,6 +100,41 @@
                 </div>
             </div>
 
+            <div x-show="method === 'pickup'" x-cloak class="mb-6 rounded-xl border border-brand-red/20 bg-brand-red/5 dark:bg-brand-red/10 p-4 sm:p-5">
+                <div class="flex items-start gap-3 mb-4">
+                    <svg class="w-5 h-5 shrink-0 mt-0.5 text-brand-red" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <div>
+                        <h3 class="font-bold text-gray-800 dark:text-white">{{ __('Choose your pickup time') }}</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('Choose a collection slot during showroom opening hours. We will email you when the order is ready.') }}</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="pickup-date" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">{{ __('Pickup date') }} *</label>
+                        <select id="pickup-date" wire:model.live="pickupDate" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-3 text-sm focus:border-brand-red focus:ring-brand-red">
+                            <option value="">{{ __('Select a date') }}</option>
+                            @foreach($pickupDates as $date)
+                                <option value="{{ $date->format('Y-m-d') }}">{{ $date->locale(app()->getLocale())->translatedFormat('D, d M') }}</option>
+                            @endforeach
+                        </select>
+                        @error('pickupDate') <span role="alert" class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label for="pickup-time" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">{{ __('Pickup time') }} *</label>
+                        <select id="pickup-time" wire:model="pickupTime" @disabled(blank($pickupDate)) class="w-full rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-3 text-sm focus:border-brand-red focus:ring-brand-red disabled:cursor-not-allowed disabled:opacity-60">
+                            <option value="">{{ $pickupDate ? __('Select a time') : __('Choose a date first') }}</option>
+                            @foreach($pickupSlots as $slot)
+                                <option value="{{ $slot }}">{{ \Carbon\Carbon::createFromFormat('H:i', $slot)->format('g:i A') }}</option>
+                            @endforeach
+                        </select>
+                        @if($pickupDate && $pickupSlots->isEmpty())
+                            <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">{{ __('No pickup times are available on this date.') }}</p>
+                        @endif
+                        @error('pickupTime') <span role="alert" class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label for="co-name" class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{{ __('Full Name') }} *</label>

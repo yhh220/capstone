@@ -162,6 +162,15 @@
                 </div>
             </div>
             @endif
+            @if($order->isPickup())
+            <div class="border-t border-gray-100 dark:border-gray-700 pt-6 mt-6">
+                <h3 class="font-bold text-gray-800 dark:text-white mb-2">{{ __('Store Pickup') }}</h3>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    <p>{{ config('services.store.address') }}</p>
+                    @if($order->pickup_at)<p class="mt-1"><span class="font-semibold text-gray-800 dark:text-gray-200">{{ __('Pickup time') }}:</span> {{ $order->pickup_at->locale(app()->getLocale())->translatedFormat('D, d M Y · h:mm A') }}</p>@endif
+                </div>
+            </div>
+            @endif
         </div>
         @endif
     </div>

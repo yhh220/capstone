@@ -763,5 +763,18 @@
         "reply_ms": "Selamat datang ke Win Win Car Studio! 🚗\n\nKami adalah kedai aksesori automotif yang pakar dalam tint cermin, filem perlindungan cat, pembalutan kereta, dan perkhidmatan detailing.\n\nLayari produk kami, buat temujanji, atau hubungi kami bila-bila masa!\n",
         "reply_zh": "欢迎来到 Win Win Car Studio！🚗\n\n我们是一家汽车配件店，专业提供隔热膜、漆面保护膜、车身改色及美容护理服务。\n\n欢迎浏览我们的产品、预约服务，或随时联系我们！\n",
         "is_active": true
+    },
+    {
+        "topic": "System Status",
+        "keywords": [
+            "system status", "website status", "service status", "site status", "website down", "outage", "downtime",
+            "status sistem", "status laman web", "gangguan sistem", "sistem down",
+            "系统状态", "网站状态", "服务状态", "网站打不开", "故障", "宕机"
+        ],
+        "priority": 95,
+        "reply_en": "You can check the latest website, ordering, booking, email and chat-support updates on our public System Status page. Tap the button below to open it in a new tab.",
+        "reply_ms": "Anda boleh menyemak kemas kini terkini tentang laman web, pesanan, tempahan, e-mel dan sokongan chat pada halaman Status Sistem awam kami. Ketik butang di bawah untuk membukanya dalam tab baharu.",
+        "reply_zh": "您可以在我们的公开系统状态页面查看网站、订单、预约、电子邮件与聊天支持的最新状态。点击下方按钮即可在新标签页打开。",
+        "is_active": true
     }
 ]

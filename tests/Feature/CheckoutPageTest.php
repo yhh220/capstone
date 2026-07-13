@@ -6,6 +6,7 @@ use App\Livewire\CheckoutPage;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\PickupScheduleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -218,6 +219,10 @@ class CheckoutPageTest extends TestCase
         // charged the flat rate — proving the zero fee comes from pickup.
         $product = Product::create(['name' => 'Dashcam', 'slug' => 'dashcam', 'price' => 100, 'stock' => 3, 'is_active' => true]);
         CartItem::create(['user_id' => $user->id, 'product_id' => $product->id, 'quantity' => 1]);
+        $pickup = app(PickupScheduleService::class);
+        $day = $pickup->availableDates()->first(fn ($candidate) => $pickup->slotsFor($candidate->format('Y-m-d'))->isNotEmpty());
+        $date = $day->format('Y-m-d');
+        $time = $pickup->slotsFor($date)->first();
 
         Livewire::actingAs($user)
             ->test(CheckoutPage::class)
@@ -225,6 +230,8 @@ class CheckoutPageTest extends TestCase
             ->set('customerName', 'Collector')
             ->set('customerEmail', 'pickup@example.test')
             ->set('customerPhone', '0123456789')
+            ->set('pickupDate', $date)
+            ->set('pickupTime', $time)
             // No street/city/postcode/state on purpose.
             ->call('placeOrder')
             ->assertHasNoErrors()
@@ -237,6 +244,7 @@ class CheckoutPageTest extends TestCase
             'total_amount' => 100,
             'shipping_address' => null,
         ]);
+        $this->assertDatabaseHas('orders', ['user_id' => $user->id, 'pickup_at' => "$date $time:00"]);
     }
 
     public function test_courier_delivery_still_requires_the_full_address(): void

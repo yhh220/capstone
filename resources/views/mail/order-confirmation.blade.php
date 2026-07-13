@@ -52,6 +52,12 @@
         </tbody>
     </table>
 
+    @if($order->isPickup() && $order->pickup_at)
+    <p style="margin:16px 0 0;font-size:14px;line-height:1.6;color:#3f3f46;">
+        <strong>{{ __('Pickup time') }}:</strong> {{ $order->pickup_at->locale(app()->getLocale())->translatedFormat('D, d M Y · h:mm A') }}
+    </p>
+    @endif
+
     <div style="text-align:center;margin-top:26px;">
         <a href="{{ url('/track-order') }}" style="display:inline-block;background:#C8413D;color:#fff;padding:13px 30px;text-decoration:none;border-radius:30px;font-weight:bold;font-size:14px;">{{ __('Track Your Order') }}</a>
     </div>

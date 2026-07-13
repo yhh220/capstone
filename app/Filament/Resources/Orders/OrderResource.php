@@ -7,10 +7,12 @@ use App\Mail\OrderCancelledMail;
 use App\Mail\OrderConfirmationMail;
 use App\Mail\OrderDeliveredMail;
 use App\Mail\OrderRefundProcessedMail;
+use App\Mail\OrderPickupRescheduledMail;
 use App\Mail\OrderShippedMail;
 use App\Mail\OwnerAlertMail;
 use App\Models\Order;
 use App\Services\RefundCalculator;
+use App\Services\PickupScheduleService;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -34,6 +36,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\HtmlString;
+use Illuminate\Validation\ValidationException;
 
 class OrderResource extends Resource
 {
@@ -157,6 +160,11 @@ class OrderResource extends Resource
                 Forms\Components\TextInput::make('delivery_method')
                     ->label('Delivery Method')
                     ->formatStateUsing(fn (?string $state): string => $state === 'pickup' ? 'Store pickup' : 'Courier delivery')
+                    ->disabled(),
+                Forms\Components\TextInput::make('pickup_at')
+                    ->label('Pickup time')
+                    ->formatStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('d M Y, h:i A') : '—')
+                    ->visible(fn ($record) => $record?->isPickup())
                     ->disabled(),
                 Forms\Components\TextInput::make('tracking_number')->label('Tracking Number')->disabled()
                     ->visible(fn ($record) => ! $record?->isPickup()),
@@ -457,6 +465,39 @@ class OrderResource extends Resource
                         } catch (\Throwable $e) {
                             logger()->error('Shipped email failed: '.$e->getMessage());
                             Notification::make()->title($done.', but the email failed to send')->warning()->send();
+                        }
+                    }),
+                Action::make('reschedulePickup')
+                    ->label('Reschedule Pickup')
+                    ->icon(Heroicon::OutlinedCalendarDays)
+                    ->color('gray')
+                    ->authorize(fn () => auth()->user()?->isStaffMember())
+                    ->visible(fn (Order $record) => $record->isPickup() && ! in_array($record->status, ['delivered', 'cancelled'], true))
+                    ->schema([
+                        Forms\Components\DateTimePicker::make('pickup_at')
+                            ->label('New pickup date & time')
+                            ->native(false)
+                            ->seconds(false)
+                            ->required()
+                            ->helperText('Must be within showroom opening hours. The customer will be emailed.'),
+                    ])
+                    ->fillForm(fn (Order $record) => ['pickup_at' => $record->pickup_at])
+                    ->action(function (Order $record, array $data): void {
+                        $pickupAt = Carbon::parse($data['pickup_at']);
+                        if (! app(PickupScheduleService::class)->isValid($pickupAt->format('Y-m-d'), $pickupAt->format('H:i'))) {
+                            throw ValidationException::withMessages([
+                                'pickup_at' => 'Choose an available time during showroom opening hours.',
+                            ]);
+                        }
+
+                        $record->update(['pickup_at' => $pickupAt]);
+
+                        try {
+                            Mail::to($record->customer_email)->send(new OrderPickupRescheduledMail($record->fresh()));
+                            Notification::make()->title('Pickup time updated — customer notified')->success()->send();
+                        } catch (\Throwable $e) {
+                            logger()->error('Pickup reschedule email failed: '.$e->getMessage());
+                            Notification::make()->title('Pickup time updated, but the email failed to send')->warning()->send();
                         }
                     }),
                 Action::make('markDelivered')

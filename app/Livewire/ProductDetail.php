@@ -4,6 +4,10 @@ namespace App\Livewire;
 
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\Product;
+use App\Models\ProductReview;
+use App\Models\OrderItem;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
@@ -13,6 +17,10 @@ class ProductDetail extends Component
 
     public Product $product;
     public int $quantity = 1;
+
+    public int $reviewRating = 5;
+
+    public string $reviewComment = '';
 
     public function mount(string $slug): void
     {
@@ -55,8 +63,58 @@ class ProductDetail extends Component
         $this->quantity = 1;
     }
 
+    public function submitReview(): void
+    {
+        if (! Auth::check()) {
+            $this->redirect(route('login'));
+            return;
+        }
+
+        if (! $this->hasCompletedPurchase()) {
+            $this->addError('reviewComment', __('Only customers with a completed order can review this product.'));
+            return;
+        }
+
+        $this->validate([
+            'reviewRating' => 'required|integer|between:1,5',
+            'reviewComment' => 'required|string|min:10|max:1000',
+        ]);
+
+        $key = 'product-review:'.Auth::id().':'.$this->product->id;
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $this->addError('reviewComment', __('Please wait a moment before trying again.'));
+            return;
+        }
+
+        ProductReview::updateOrCreate(
+            ['product_id' => $this->product->id, 'user_id' => Auth::id()],
+            ['rating' => $this->reviewRating, 'comment' => trim($this->reviewComment), 'is_approved' => false],
+        );
+        RateLimiter::hit($key, 3600);
+        $this->reset('reviewComment');
+        session()->flash('review-success', __('Thank you. Your review has been submitted for approval.'));
+    }
+
+    private function hasCompletedPurchase(): bool
+    {
+        return Auth::check() && OrderItem::query()
+            ->where('product_id', $this->product->id)
+            ->whereHas('order', fn ($query) => $query->where('user_id', Auth::id())->where('status', 'delivered'))
+            ->exists();
+    }
+
     public function render()
     {
+        $reviews = $this->product->approvedReviews()->with('user:id,name')->get();
+        $myReview = Auth::check()
+            ? ProductReview::where('product_id', $this->product->id)->where('user_id', Auth::id())->first()
+            : null;
+
+        if ($myReview && $this->reviewComment === '') {
+            $this->reviewRating = $myReview->rating;
+            $this->reviewComment = $myReview->comment;
+        }
+
         return view('livewire.product-detail', [
             'related' => Product::where('category_id', $this->product->category_id)
                 ->where('id', '!=', $this->product->id)
@@ -65,6 +123,11 @@ class ProductDetail extends Component
                 ->get(),
             'translatedDescription' => $this->product->translated_description,
             'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
+            'galleryMedia' => $this->product->getMedia('images'),
+            'reviews' => $reviews,
+            'reviewAverage' => $reviews->avg('rating'),
+            'canReview' => $this->hasCompletedPurchase(),
+            'myReview' => $myReview,
         ])->layout('layouts.app');
     }
 }

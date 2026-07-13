@@ -150,6 +150,7 @@
                     {{-- Full-page navigation (no wire:navigate) — matches the rest of the
                          site and lets the <head> theme script re-apply dark mode cleanly. --}}
                     <a href="{{ $msg['cta']['url'] }}"
+                       @if(!empty($msg['cta']['external'])) target="_blank" rel="noopener noreferrer" @endif
                        class="group mt-2 inline-flex items-center gap-2 bg-brand-red-solid text-white text-[13px] font-bold pl-4 pr-3 py-2 rounded-xl shadow-sm
                               hover:shadow-[0_6px_18px_rgb(var(--brand-red-rgb)_/_0.4)] hover:-translate-y-0.5 active:scale-95 transition-all duration-300">
                         <span>{{ $msg['cta']['label'] }}</span>

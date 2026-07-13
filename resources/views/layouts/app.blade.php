@@ -1187,6 +1187,10 @@
                     <a href="{{ route('cancellation-refund-policy') }}" wire:navigate.hover class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('Cancellation & Refund Policy') }}</a>
                     <span aria-hidden="true" class="hidden sm:inline">·</span>
                     <a href="{{ route('faq') }}" wire:navigate.hover class="hover:text-brand-yellow active:text-brand-yellow transition-colors">{{ __('FAQ') }}</a>
+                    <span aria-hidden="true" class="hidden sm:inline">Â·</span>
+                    <a href="{{ config('services.store.status_url') }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 hover:text-brand-yellow active:text-brand-yellow transition-colors">
+                        <span class="w-1.5 h-1.5 rounded-full bg-current opacity-80" aria-hidden="true"></span>{{ __('System Status') }}
+                    </a>
                 </div>
             </div>
         </div>

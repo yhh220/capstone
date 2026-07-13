@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\Payments\StripeCheckoutService;
+use App\Services\PickupScheduleService;
 use App\Services\ShippingCalculator;
 use App\Support\Breadcrumbs;
 use App\Support\DeliveryArea;
@@ -47,6 +48,11 @@ class CheckoutPage extends Component
      * address). Whitelisted server-side in placeOrder().
      */
     public string $deliveryMethod = 'delivery';
+
+    /** Required only for store pickup; stored on the order after server validation. */
+    public string $pickupDate = '';
+
+    public string $pickupTime = '';
 
     // Step 2: Payment method. The choice is stored on the order as a label;
     // whether it then pays via Stripe (card/FPX/GrabPay in stripe mode) or the
@@ -92,13 +98,25 @@ class CheckoutPage extends Component
                 'state' => ['required', 'string', Rule::in(DeliveryArea::STATES)],
             ];
 
+        $pickup = $this->deliveryMethod === 'pickup'
+            ? ['pickupDate' => 'required|date_format:Y-m-d', 'pickupTime' => 'required|date_format:H:i']
+            : ['pickupDate' => 'nullable', 'pickupTime' => 'nullable'];
+
         return [
             'customerName' => 'required|string|max:255',
             'customerEmail' => 'required|email|max:255',
             'customerPhone' => 'required|string|regex:/^[0-9]{8,15}$/',
             ...$address,
             'orderNotes' => 'nullable|string|max:1000',
+            ...$pickup,
         ];
+    }
+
+    public function updatedPickupDate(): void
+    {
+        // A newly selected day must not keep a time from the old day.
+        $this->pickupTime = '';
+        $this->resetValidation('pickupTime');
     }
 
     public function mount(): void
@@ -238,6 +256,13 @@ class CheckoutPage extends Component
         if (! in_array($this->deliveryMethod, ['delivery', 'pickup'], true)) {
             $this->deliveryMethod = 'delivery';
         }
+
+        if ($this->deliveryMethod === 'pickup' && ! app(PickupScheduleService::class)->isValid($this->pickupDate, $this->pickupTime)) {
+            $this->addError('pickupTime', __('Please choose an available pickup date and time.'));
+            $this->step = 1;
+
+            return;
+        }
         if (! in_array($this->paymentMethod, ['fpx', 'ewallet', 'card'], true)) {
             $this->paymentMethod = 'fpx';
         }
@@ -325,6 +350,7 @@ class CheckoutPage extends Component
                         'state' => $this->state,
                     ],
                     'delivery_method' => $this->deliveryMethod,
+                    'pickup_at' => $isPickup ? app(PickupScheduleService::class)->pickupAt($this->pickupDate, $this->pickupTime) : null,
                     'subtotal' => $subtotal,
                     'shipping_fee' => $shippingFee,
                     'total_amount' => round($subtotal + $shippingFee, 2),
@@ -384,6 +410,8 @@ class CheckoutPage extends Component
 
     public function render()
     {
+        $pickup = app(PickupScheduleService::class);
+
         return view('livewire.checkout-page', [
             'fpxBanks' => self::FPX_BANKS,
             'ewallets' => self::EWALLETS,
@@ -391,6 +419,8 @@ class CheckoutPage extends Component
             // pure demo). Whether a given order actually redirects to Stripe is
             // decided per payment method on the payment page.
             'stripeEnabled' => app(StripeCheckoutService::class)->enabled(),
+            'pickupDates' => $pickup->availableDates(),
+            'pickupSlots' => $this->pickupDate ? $pickup->slotsFor($this->pickupDate) : collect(),
         ])->layout('layouts.app');
     }
 }
