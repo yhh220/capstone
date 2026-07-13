@@ -17,8 +17,8 @@ class ProductPolicy
         return $user->isAdmin() || $user->isStaff();
     }
 
-    // Staff manage the catalogue day-to-day (create/edit); destructive
-    // operations below stay admin-only.
+    // Staff manage the catalogue day-to-day; Product export is the only
+    // restricted operation because it can disclose the full catalogue in bulk.
     public function create(User $user): bool
     {
         return $user->isStaffMember();
@@ -31,7 +31,7 @@ class ProductPolicy
 
     public function delete(User $user, Product $product): bool
     {
-        return $user->isAdmin();
+        return $user->isStaffMember();
     }
 
     public function restore(User $user, Product $product): bool

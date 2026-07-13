@@ -69,9 +69,9 @@ class ProductsTable
                     ->label('Active')
                     ->alignCenter()
                     ->tooltip('Toggle product visibility in the store catalog')
-                    ->disabled(fn () => !auth()->user()?->isAdmin())
+                    ->disabled(fn () => !auth()->user()?->isStaffMember())
                     ->updateStateUsing(function ($record, $state) {
-                        if (! auth()->user()?->isAdmin()) {
+                        if (! auth()->user()?->isStaffMember()) {
                             return;
                         }
                         $record->update(['is_active' => (bool) $state]);
@@ -81,9 +81,9 @@ class ProductsTable
                     ->alignCenter()
                     ->visibleFrom('md')
                     ->tooltip('Toggle showing this product in the homepage featured section')
-                    ->disabled(fn () => !auth()->user()?->isAdmin())
+                    ->disabled(fn () => !auth()->user()?->isStaffMember())
                     ->updateStateUsing(function ($record, $state) {
-                        if (! auth()->user()?->isAdmin()) {
+                        if (! auth()->user()?->isStaffMember()) {
                             return;
                         }
                         $record->update(['is_featured' => (bool) $state]);
@@ -139,7 +139,7 @@ class ProductsTable
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->tooltip('Activate all selected products')
-                        ->authorize(fn () => auth()->user()?->isAdmin())
+                        ->authorize(fn () => auth()->user()?->isStaffMember())
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => true]))
                         ->deselectRecordsAfterCompletion(),
                     BulkAction::make('deactivate')
@@ -147,7 +147,7 @@ class ProductsTable
                         ->icon('heroicon-o-x-circle')
                         ->color('warning')
                         ->tooltip('Deactivate all selected products')
-                        ->authorize(fn () => auth()->user()?->isAdmin())
+                        ->authorize(fn () => auth()->user()?->isStaffMember())
                         ->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each->update(['is_active' => false]))
                         ->deselectRecordsAfterCompletion(),
@@ -155,7 +155,7 @@ class ProductsTable
                         ->label('Show on homepage')
                         ->icon('heroicon-o-star')
                         ->tooltip('Feature all selected products on homepage')
-                        ->authorize(fn () => auth()->user()?->isAdmin())
+                        ->authorize(fn () => auth()->user()?->isStaffMember())
                         ->action(fn (Collection $records) => $records->each->update(['is_featured' => true]))
                         ->deselectRecordsAfterCompletion(),
                     BulkAction::make('unfeature')
@@ -163,14 +163,14 @@ class ProductsTable
                         ->icon('heroicon-o-star')
                         ->color('gray')
                         ->tooltip('Remove all selected products from homepage featured section')
-                        ->authorize(fn () => auth()->user()?->isAdmin())
+                        ->authorize(fn () => auth()->user()?->isStaffMember())
                         ->action(fn (Collection $records) => $records->each->update(['is_featured' => false]))
                         ->deselectRecordsAfterCompletion(),
                     ExportBulkAction::make()
                         ->exporter(ProductExporter::class)
                         ->authorize(fn () => auth()->user()?->isAdmin()),
                     DeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()?->isAdmin() ?? false),
+                        ->visible(fn () => auth()->user()?->isStaffMember() ?? false),
                 ]),
             ]);
     }

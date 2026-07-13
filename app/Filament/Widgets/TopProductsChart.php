@@ -11,19 +11,20 @@ class TopProductsChart extends ChartWidget
 
     public static function canView(): bool
     {
-        return auth()->user()?->isAdmin() ?? false;
+        return auth()->user()?->isStaffMember() ?? false;
     }
 
     protected int|string|array $columnSpan = 'full';
 
-    protected ?string $heading = 'Product Stock Overview';
+    protected ?string $heading = 'Inventory Watchlist';
 
-    protected ?string $description = 'Current stock levels for all active products';
+    protected ?string $description = 'The 10 active products with the lowest stock, including out-of-stock items';
 
     protected function getData(): array
     {
         $products = Product::where('is_active', true)
-            ->orderByDesc('stock')
+            ->orderBy('stock')
+            ->orderBy('name')
             ->limit(10)
             ->get(['name', 'stock', 'category_id']);
 
@@ -32,20 +33,10 @@ class TopProductsChart extends ChartWidget
                 [
                     'label'           => 'Stock Available',
                     'data'            => $products->pluck('stock')->toArray(),
-                    'backgroundColor' => $products->map(function ($p, $i) {
-                        $colors = [
-                            'rgba(236, 72, 153, 0.85)',
-                            'rgba(139, 92, 246, 0.85)',
-                            'rgba(59, 130, 246, 0.85)',
-                            'rgba(16, 185, 129, 0.85)',
-                            'rgba(245, 158, 11, 0.85)',
-                            'rgba(239, 68, 68, 0.85)',
-                            'rgba(20, 184, 166, 0.85)',
-                            'rgba(249, 115, 22, 0.85)',
-                            'rgba(99, 102, 241, 0.85)',
-                            'rgba(34, 197, 94, 0.85)',
-                        ];
-                        return $colors[$i % count($colors)];
+                    'backgroundColor' => $products->map(fn ($product) => match (true) {
+                        $product->stock <= 0 => 'rgba(239, 68, 68, 0.85)',
+                        $product->stock < 5 => 'rgba(245, 158, 11, 0.85)',
+                        default => 'rgba(59, 130, 246, 0.85)',
                     })->toArray(),
                     'borderRadius'      => 6,
                     'borderSkipped'     => false,

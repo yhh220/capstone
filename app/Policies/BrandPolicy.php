@@ -19,17 +19,17 @@ class BrandPolicy
 
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isStaffMember();
     }
 
     public function update(User $user, Brand $brand): bool
     {
-        return $user->isAdmin();
+        return $user->isStaffMember();
     }
 
     public function delete(User $user, Brand $brand): bool
     {
-        return $user->isAdmin();
+        return $user->isStaffMember();
     }
 
     public function restore(User $user, Brand $brand): bool
@@ -47,6 +47,6 @@ class BrandPolicy
     // silently ALLOWED any panel user (including staff) to reorder.
     public function reorder(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isStaffMember();
     }
 }

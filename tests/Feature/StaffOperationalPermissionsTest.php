@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Filament\Resources\Bookings\Pages\ListBookings;
 use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Filament\Resources\Products\Pages\ListProducts;
+use App\Filament\Widgets\TopProductsChart;
 use App\Models\Booking;
 use App\Models\Contact;
 use App\Models\Feedback;
@@ -20,7 +21,7 @@ use Tests\TestCase;
 /**
  * Staff are the shop's operational workers: they confirm bookings, settle and
  * ship orders, import data, and maintain the catalogue — but they can never
- * EXPORT data (bulk exfiltration stays admin-only) and never delete anything.
+ * export catalogue data (bulk exfiltration stays admin-only).
  */
 class StaffOperationalPermissionsTest extends TestCase
 {
@@ -168,14 +169,14 @@ class StaffOperationalPermissionsTest extends TestCase
         Livewire::test(ListProducts::class)->assertActionVisible('export');
     }
 
-    public function test_staff_manage_products_but_cannot_delete_them(): void
+    public function test_staff_can_fully_manage_products_except_exporting_them(): void
     {
         $staff = $this->staff();
         $product = Product::create(['name' => 'Amp', 'slug' => 'amp', 'price' => 300, 'stock' => 1, 'is_active' => true]);
 
         $this->assertTrue($staff->can('create', Product::class));
         $this->assertTrue($staff->can('update', $product));
-        $this->assertFalse($staff->can('delete', $product));
+        $this->assertTrue($staff->can('delete', $product));
     }
 
     public function test_staff_can_cancel_and_refund_orders(): void
@@ -233,9 +234,12 @@ class StaffOperationalPermissionsTest extends TestCase
         $this->assertTrue($staff->can('update', $order));
         $this->assertTrue($staff->can('update', new Booking));
 
-        // Admin-curated content stays read-only for staff.
+        // Categories and services remain admin-curated; brands are catalogue
+        // content that staff maintain day to day.
         $this->assertFalse($staff->can('update', new \App\Models\Service));
-        $this->assertFalse($staff->can('update', new \App\Models\Brand));
+        $this->assertTrue($staff->can('create', \App\Models\Brand::class));
+        $this->assertTrue($staff->can('update', new \App\Models\Brand));
+        $this->assertTrue($staff->can('delete', new \App\Models\Brand));
         $this->assertFalse($staff->can('update', new \App\Models\Category));
     }
 
@@ -247,9 +251,16 @@ class StaffOperationalPermissionsTest extends TestCase
         // testimonial curation (a staff duty) keeps its reorder rights.
         $staff = $this->staff();
 
-        $this->assertFalse($staff->can('reorder', \App\Models\Brand::class));
+        $this->assertTrue($staff->can('reorder', \App\Models\Brand::class));
         $this->assertFalse($staff->can('reorder', \App\Models\Category::class));
         $this->assertFalse($staff->can('reorder', \App\Models\Service::class));
         $this->assertTrue($staff->can('reorder', Feedback::class));
+    }
+
+    public function test_staff_can_view_the_dashboard_inventory_watchlist(): void
+    {
+        $this->actingAs($this->staff());
+
+        $this->assertTrue(TopProductsChart::canView());
     }
 }

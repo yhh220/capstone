@@ -23,7 +23,7 @@ use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
- * Regression test: every policy below restricts delete() to isAdmin(), but
+ * Regression test: all resources below except Products restrict delete() to isAdmin(), but
  * none of the tables' DeleteBulkAction had a ->visible()/->authorize() guard.
  * Filament's default per-action authorization for DeleteBulkAction resolves
  * the "deleteAny" ability, which none of these policies define — and with
@@ -69,15 +69,16 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
         $this->assertNotNull(Booking::find($booking->id));
     }
 
-    public function test_staff_cannot_bulk_delete_brands(): void
+    public function test_staff_can_bulk_delete_brands(): void
     {
         $brand = Brand::create(['name' => 'Pioneer']);
         $this->actingAs($this->staff(), 'admin');
 
         Livewire::test(ListBrands::class)
-            ->assertTableBulkActionHidden('delete');
+            ->assertTableBulkActionVisible('delete')
+            ->callTableBulkAction('delete', [$brand]);
 
-        $this->assertNotNull(Brand::find($brand->id));
+        $this->assertNull(Brand::find($brand->id));
     }
 
     public function test_staff_cannot_bulk_delete_categories(): void
@@ -122,7 +123,7 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
         $this->assertNotNull(Feedback::find($feedback->id));
     }
 
-    public function test_staff_cannot_bulk_delete_products(): void
+    public function test_staff_can_bulk_manage_and_delete_products_but_cannot_export_them(): void
     {
         $product = Product::create([
             'name'      => 'Speaker Kit',
@@ -134,9 +135,15 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
         $this->actingAs($this->staff(), 'admin');
 
         Livewire::test(ListProducts::class)
-            ->assertTableBulkActionHidden('delete');
+            ->assertTableBulkActionVisible('activate')
+            ->assertTableBulkActionVisible('deactivate')
+            ->assertTableBulkActionVisible('feature')
+            ->assertTableBulkActionVisible('unfeature')
+            ->assertTableBulkActionVisible('delete')
+            ->assertTableBulkActionHidden('export')
+            ->callTableBulkAction('delete', [$product]);
 
-        $this->assertNotNull(Product::find($product->id));
+        $this->assertNull(Product::find($product->id));
     }
 
     public function test_staff_cannot_bulk_delete_orders(): void
