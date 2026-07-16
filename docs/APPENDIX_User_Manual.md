@@ -5,8 +5,13 @@ System. It is written for two audiences: **customers** who browse and order
 through the public website, and the **shop owner and staff** who run the business
 through the admin panel. No technical knowledge is assumed.
 
-The public website is at **https://winwinautoaccessories.onrender.com**. The
-admin panel is at the same address followed by **/admin**.
+The system can be reached either at its **hosted address**
+(https://winwinautoaccessories.onrender.com) or, when it is run **locally** for
+evaluation, at a local address such as **http://localhost:8000** (or the `.test`
+address configured on the evaluator's machine). This manual refers to pages by
+**name** rather than by full URL, so the steps apply the same way whether the
+system is running online or locally. The admin panel is always at the same
+address followed by **/admin**.
 
 ---
 
