@@ -16,6 +16,14 @@ A local PHP environment such as **Laravel Herd** provides PHP, Composer and a
 
 ## Setup Steps
 
+> **Using Laravel Herd? (recommended — simplest)** Herd supplies PHP, Composer
+> and Node, and **automatically serves the site** at your project folder's name
+> followed by `.test` (for example `winwinautoaccessories.test`) — **no
+> `php artisan serve` needed**. Just place the project inside a Herd-parked
+> folder, run the `composer` / `php artisan` / `npm` commands below through
+> Herd's PHP, and in Step 11 open the `.test` address instead of
+> `localhost:8000`. Everything else (Steps 1–10, 12) is identical.
+
 1. **Get the code** — clone the repository (or unzip the submitted archive) and
    open a terminal in the project folder.
 
