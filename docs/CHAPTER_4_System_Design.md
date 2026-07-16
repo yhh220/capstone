@@ -39,7 +39,7 @@ This means the three Model-View-Controller (MVC) roles are still present, they a
 
 | Layer | Technology | Role in this project |
 |---|---|---|
-| Model | Eloquent ORM (20 models) | Data access, relationships, casts, accessors such as Product::getCurrentPriceAttribute() |
+| Model | Eloquent ORM (21 models) | Data access, relationships, casts, accessors such as Product::getCurrentPriceAttribute() |
 | View | Blade + Livewire | Server rendered templates that update without a full page reload |
 | Controller (Livewire) | 21 Livewire component classes | Handle validation, database queries, and state for each page, for example BookingForm, CheckoutPage |
 | Controller (classic) | 5 HTTP Controllers | Used only where Livewire does not fit: InvoiceController (PDF/HTML invoice), SocialAuthController (OAuth redirect/callback), GmailSendSetupController (one time mail OAuth setup), StripeWebhookController (signature-verified server-to-server payment confirmations from Stripe), plus the base Controller |
@@ -154,7 +154,7 @@ Actors: Guest (not logged in), Registered Customer, Staff, Admin, Owner. WhatsAp
 | Actor | Use Cases |
 |---|---|
 | Guest | Browse products, use the 3D configurator, view services, submit the contact form, chat with the chatbot, track an order or booking by reference, register, log in |
-| Registered Customer | Everything a Guest can do, plus manage profile, enable 2FA, add to cart, checkout with a choice of courier delivery or free store pickup (Shop Mode only), pay online (simulated, or through Stripe Checkout in test mode for card / FPX / GrabPay), view order and booking history, copy reference numbers, cancel own order or booking |
+| Registered Customer | Everything a Guest can do, plus manage profile, enable 2FA, add to cart, checkout with a choice of courier delivery or free store pickup (Shop Mode only), pay online (simulated, or through Stripe Checkout in test mode for card / FPX / GrabPay), view order and booking history, copy reference numbers, cancel own order or booking, and review a product they have bought once its order is delivered (verified-purchase review) |
 | Staff | Log in to the admin panel and run the day-to-day operations: confirm, edit, and reschedule bookings, open order details, mark orders paid, ready for pickup, shipped, and delivered, cancel orders and process refunds, import product and order data, create and edit products, curate homepage testimonials, and work the contact inbox. Staff can never delete anything, never export data, and never manage user accounts |
 | Admin | Everything Staff can do, plus delete records, export data, manage categories, brands, services, the FAQ and chatbot knowledge bases, setting values, and staff accounts, and monitor the system through the dashboard analytics, activity log, error log, and system status pages |
 | Owner | Everything Admin can do, plus assign roles, administer Admin accounts, permanently force delete records, and create or delete Setting keys |
@@ -175,23 +175,24 @@ Before showing the diagram, a few terms specific to the framework this project i
 | Eloquent | The name Laravel gives its own tool for talking to the database. It lets the code read and write data using plain PHP, for example Product::find(1), instead of writing raw SQL like SELECT * FROM products WHERE id = 1 |
 | Migration | A small script that makes one change to the database structure, for example creating a table or adding a new column. Migrations are how the actual tables get built and updated over time, one step at a time |
 
-The table below lists the core relationships between the 20 models, followed by the diagram itself.
+The table below lists the core relationships between the 21 models, followed by the diagram itself.
 
 **Table 4.10: Models Relationship**
 
 | Model | Relationship |
 |---|---|
-| Product | Belongs to Category. Has many OrderItem and CartItem. Belongs to many CarModel through the product_compatibilities pivot |
+| Product | Belongs to Category. Has many OrderItem, CartItem, and ProductReview. Belongs to many CarModel through the product_compatibilities pivot |
 | Category | Has many Product |
 | Brand | Standalone, drives the homepage marquee |
 | CarModel | Belongs to many Product through the product_compatibilities pivot (structured vehicle-fitment data) |
 | ProductCompatibility | The pivot linking Product and CarModel |
 | Order | Belongs to User. Has many OrderItem |
 | OrderItem | Belongs to Order and Product |
+| ProductReview | Belongs to Product and User (a verified-purchase rating + comment; one per customer per product) |
 | CartItem | Belongs to User (or a guest session), and Product |
 | Booking | Belongs to Service and User (user is nullable for guest bookings) |
 | Service | Has many Booking |
-| User | Has many Order, Booking, CartItem, SocialAccount |
+| User | Has many Order, Booking, CartItem, SocialAccount, ProductReview |
 | SocialAccount | Belongs to User |
 | Feedback (Testimonial) | Standalone |
 | Contact | Standalone, the contact form inbox |
@@ -259,11 +260,11 @@ Placing an order does not immediately take payment. It creates the order with a 
 
 ## 4.3 Database Design
 
-### 4.3.1 Entity Relationship (ER) Diagram (20 models)
+### 4.3.1 Entity Relationship (ER) Diagram (21 models)
 
 The ER diagram is meant to represent the schema exactly as it exists in the database, including how each relationship is structured.
 
-The diagram covers 20 business tables. Nine framework and package managed tables (sessions, cache, jobs, media, notifications, password_reset_tokens, and Filament's imports, exports, failed_import_rows) are left out of the diagram, since they hold no business data and would only add clutter without helping the reader understand the design.
+The diagram covers 21 business tables. Nine framework and package managed tables (sessions, cache, jobs, media, notifications, password_reset_tokens, and Filament's imports, exports, failed_import_rows) are left out of the diagram, since they hold no business data and would only add clutter without helping the reader understand the design.
 
 We wrote out the full schema in DBML (Database Markup Language), a simple text format for describing tables, columns, and foreign keys, and generated the diagrams using dbdiagram.io, which lays out each table as a box and draws the relationship lines automatically from the foreign keys we defined. Fitting all the tables into a single diagram made the relationship lines cross over each other and become hard to follow, so the schema is presented across three figures instead of one, grouped by how closely the tables are related to each other.
 
@@ -271,7 +272,7 @@ Figure 4.10 shows the nine tables that stand on their own, with no foreign key l
 
 *[Figure 4.10: ERD diagram nine standalone]*
 
-Figure 4.11 covers the catalogue and commerce side of the system: categories, products, car_models, product_compatibilities, users, orders, order_items, and cart_items. This is the busiest part of the schema, since almost every purchase-related action eventually touches the products and users tables, whether that is adding an item to a cart, placing an order, or recording what was bought in order_items. The car_models and product_compatibilities pair stores structured vehicle-fitment data alongside the free-text fitment notes on the product itself.
+Figure 4.11 covers the catalogue and commerce side of the system: categories, products, car_models, product_compatibilities, users, orders, order_items, cart_items, and product_reviews. This is the busiest part of the schema, since almost every purchase-related action eventually touches the products and users tables, whether that is adding an item to a cart, placing an order, recording what was bought in order_items, or leaving a verified-purchase review after delivery. The car_models and product_compatibilities pair stores structured vehicle-fitment data alongside the free-text fitment notes on the product itself.
 
 *[Figure 4.11: ERD diagram Catalogue & Commerce]*
 
@@ -299,6 +300,7 @@ Before the table below, one term is worth explaining. Several tables use what La
 | bookings | reference, customer name/phone/email, service_id (FK, nullable), user_id (FK, nullable), vehicle_model, vehicle_plate, start_at, end_at, status, reminder_sent_at | Soft deletes, service is optional |
 | orders | order_number, user_id (FK), status, payment_status, payment_method, delivery_method, total_amount, expires_at, stripe_session_id, stripe_payment_intent_id, and lifecycle timestamps (paid_at, shipped_at, delivered_at, cancelled_at, refunded_at) | Soft deletes. delivery_method records courier delivery or store pickup (pickup orders carry no shipping address and no fee); the stripe columns tie the order to its hosted Checkout session and confirmed payment |
 | order_items | order_id (FK), product_id (FK), product_name, quantity, unit_price, subtotal | product_name is stored at the time of purchase, so the order stays accurate even if the product is later renamed |
+| product_reviews | product_id (FK), user_id (FK), rating (1–5), comment, is_approved | One verified-purchase review per customer per product; only submittable after that customer has a delivered order containing the product. is_approved controls storefront visibility |
 | cart_items | user_id (nullable), session_id (nullable), product_id (FK), quantity | Auto pruned after 30 days |
 | contacts | name, email, phone, subject, message, is_read | Soft deletes |
 | feedback | name, location, message, rating, image, is_active, sort_order | Soft deletes, shown as "Testimonials", curated by staff in the admin panel |
@@ -399,4 +401,4 @@ On the admin side, the navigation is grouped by how often a typical day to day o
 
 ## 4.5 Summary
 
-This chapter set out how the Win Win Car Audio Auto Accessories showroom system is structured before any code was written. Section 4.1 explained how the project adapts the MVC pattern using Livewire components in place of separate Controller classes, and listed the full technology stack behind it. Section 4.2 walked through the system from four different UML perspectives: who can do what (Use Case), how the 20 core models relate to each other (Class Diagram), how a booking and a checkout actually flow step by step (Activity Diagrams). Section 4.3 documented the database itself, a 20 table schema split across three diagrams to keep the relationships readable, along with a full data dictionary explaining what each table stores. Section 4.4 covered the visual and interaction design, including the brand colour system and its accessibility considerations, responsive breakpoints, the dark and light theme mechanism, and the layout priorities behind both the customer-facing storefront and the admin panel. Together, these sections form the design blueprint that Chapter 5 builds from.
+This chapter set out how the Win Win Car Audio Auto Accessories showroom system is structured before any code was written. Section 4.1 explained how the project adapts the MVC pattern using Livewire components in place of separate Controller classes, and listed the full technology stack behind it. Section 4.2 walked through the system from four different UML perspectives: who can do what (Use Case), how the 21 core models relate to each other (Class Diagram), how a booking and a checkout actually flow step by step (Activity Diagrams). Section 4.3 documented the database itself, a 21 table schema split across three diagrams to keep the relationships readable, along with a full data dictionary explaining what each table stores. Section 4.4 covered the visual and interaction design, including the brand colour system and its accessibility considerations, responsive breakpoints, the dark and light theme mechanism, and the layout priorities behind both the customer-facing storefront and the admin panel. Together, these sections form the design blueprint that Chapter 5 builds from.

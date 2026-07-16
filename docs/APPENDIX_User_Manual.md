@@ -78,7 +78,17 @@ address followed by **/admin**.
 
 *[Screenshot: My Account with the orders list and copy buttons.]*
 
-### 1.8 Booking a Service
+### 1.8 Reviewing a Product You Bought
+> You can review a product **only after you have bought it and the order has been delivered** — a "verified purchase". This keeps reviews genuine and blocks anonymous spam.
+
+1. Open the product's page, or in **My Account → Orders** click **Write a review** next to an item from a delivered order.
+2. Choose a **star rating (1–5)** and write your review (at least 10 characters).
+3. Submit — your review appears on the product page immediately and counts toward the product's average rating.
+4. You can update your own review later. Staff/administrators can hide a review from the storefront if necessary.
+
+*[Screenshot: the product review form and the review list on a product page.]*
+
+### 1.9 Booking a Service
 1. Click **Booking** in the menu.
 2. **Step 1:** choose a service (or leave it as a general visit).
 3. **Step 2:** pick a date and time. Past dates and closed days are disabled.
@@ -88,14 +98,14 @@ address followed by **/admin**.
 
 *[Screenshot: the four-step booking wizard.]*
 
-### 1.9 Tracking or Cancelling a Booking
+### 1.10 Tracking or Cancelling a Booking
 1. Click **Track Booking** (or the link on the booking success screen).
 2. Enter your **booking reference** and **phone number**.
 3. From there you can view the status or cancel an upcoming booking.
 
 *[Screenshot: the booking tracker.]*
 
-### 1.10 Contacting the Shop
+### 1.11 Contacting the Shop
 - **Contact form:** the Contact page has a form for enquiries.
 - **WhatsApp:** WhatsApp buttons appear throughout the site for instant questions.
 - **Map & directions:** the Contact page shows the showroom on a map with a "Get directions" link.
@@ -103,7 +113,7 @@ address followed by **/admin**.
 
 *[Screenshot: the Contact page and the chatbot widget.]*
 
-### 1.11 Language and Dark Mode
+### 1.12 Language and Dark Mode
 - **Language:** use the **EN / BM / ZH** switcher in the top bar to view the whole site in English, Bahasa Melayu, or Chinese.
 - **Dark mode:** use the theme switcher to choose light, dark, or match-your-device.
 
@@ -171,6 +181,7 @@ After logging in you see the **dashboard**: key figures at the top (active produ
 ### 2.8 Customers, Feedback, and Contact Messages
 - **Customers:** view registered customers and their order counts.
 - **Feedback (Testimonials):** approve/hide customer testimonials shown on the homepage; drag to reorder.
+- **Product Reviews:** inspect verified-purchase product reviews left by customers, edit or delete them, and toggle a review's visibility on the storefront. (This is separate from Feedback — testimonials are marketing quotes; product reviews are tied to a specific product and a real delivered order.)
 - **Contacts:** read enquiries submitted through the contact form; unread ones show a badge.
 
 *[Screenshot: the feedback and contacts lists.]*
