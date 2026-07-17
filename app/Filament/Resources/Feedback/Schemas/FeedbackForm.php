@@ -3,9 +3,10 @@
 namespace App\Filament\Resources\Feedback\Schemas;
 
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class FeedbackForm
@@ -15,7 +16,7 @@ class FeedbackForm
         return $schema
             ->columns(['default' => 1, 'sm' => 2])
             ->components([
-                \Filament\Schemas\Components\Section::make('Homepage Testimonial')
+                Section::make('Homepage Testimonial')
                     ->description('This feedback will be displayed in the "What Our Clients Say" section on the home page. Make sure to set "Active" to show it.')
                     ->schema([
                         FileUpload::make('image')

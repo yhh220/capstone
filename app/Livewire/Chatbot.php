@@ -38,14 +38,20 @@ class Chatbot extends Component
     public string $currentRoute = '';
 
     private const MAX_INPUT_LENGTH = 500;
+
     private const MAX_HISTORY = 20;
+
     private const MAX_MESSAGES = 40;        // hard cap on retained transcript
+
     private const RATE_LIMIT_MAX = 12;      // messages per minute / IP
+
     private const RATE_LIMIT_DECAY = 60;
+
     private const HOURLY_MAX = 120;         // messages per hour / IP (sustained-spam guard)
 
     // Abuse / security thresholds
     private const ABUSE_BLOCK_THRESHOLD = 4;   // malicious attempts before a cooldown
+
     private const ABUSE_BLOCK_SECONDS = 600;   // 10-minute cooldown
 
     private function ai(): ChatServiceInterface
@@ -94,8 +100,8 @@ class Chatbot extends Component
 
         session(['chatbot' => [
             'messages' => $this->messages,
-            'open'     => $this->isOpen,
-            'lang'     => $this->chatLang,
+            'open' => $this->isOpen,
+            'lang' => $this->chatLang,
         ]]);
     }
 
@@ -231,8 +237,8 @@ class Chatbot extends Component
     private function langSwitchedNote(): string
     {
         return match ($this->chatLang) {
-            'ms' => "Baik! Saya akan berbual dalam Bahasa Melayu sekarang. 😊 Apa yang boleh saya bantu?",
-            'zh' => "好的！我现在用中文为您服务。😊 有什么可以帮您？",
+            'ms' => 'Baik! Saya akan berbual dalam Bahasa Melayu sekarang. 😊 Apa yang boleh saya bantu?',
+            'zh' => '好的！我现在用中文为您服务。😊 有什么可以帮您？',
             default => "Done! I'll chat in English now. 😊 How can I help?",
         };
     }
@@ -302,6 +308,7 @@ class Chatbot extends Component
             $this->messages[] = ['role' => 'assistant', 'text' => $this->safetyMessage()];
             $this->persist();
             $this->dispatch('chatbot-scroll');
+
             return;
         }
 
@@ -315,12 +322,13 @@ class Chatbot extends Component
             ];
             $this->persist();
             $this->dispatch('chatbot-scroll');
+
             return;
         }
 
         // ── Rate limiting (two tiers: burst per-minute + sustained per-hour) ─
-        $throttleKey = 'chatbot:' . $ip;
-        $hourlyKey = 'chatbot_hourly:' . $ip;
+        $throttleKey = 'chatbot:'.$ip;
+        $hourlyKey = 'chatbot_hourly:'.$ip;
 
         if (RateLimiter::tooManyAttempts($throttleKey, self::RATE_LIMIT_MAX)
             || RateLimiter::tooManyAttempts($hourlyKey, self::HOURLY_MAX)) {
@@ -338,6 +346,7 @@ class Chatbot extends Component
             $this->userInput = '';
             $this->persist();
             $this->dispatch('chatbot-scroll');
+
             return;
         }
 
@@ -386,14 +395,14 @@ class Chatbot extends Component
             $aiMessages = collect($recent)
                 ->filter(fn (array $m) => isset($m['text']))
                 ->map(fn (array $message) => [
-                    'role'    => $message['role'] === 'user' ? 'user' : 'assistant',
+                    'role' => $message['role'] === 'user' ? 'user' : 'assistant',
                     'content' => $message['text'],
                 ])
                 ->values()
                 ->all();
 
             try {
-                $response = $this->ai()->chat($aiMessages, 'lang:' . $this->chatLang);
+                $response = $this->ai()->chat($aiMessages, 'lang:'.$this->chatLang);
                 $reply = $response['message'];
                 $suggestions = $response['suggestions'] ?? [];
             } catch (\Throwable) {
@@ -446,10 +455,10 @@ class Chatbot extends Component
             if ($isLatin && ! str_contains($w, ' ')) {
                 $len = mb_strlen($w);
                 if ($len <= 3) {
-                    return (bool) preg_match('/\b' . preg_quote($w, '/') . '\b/i', $t);
+                    return (bool) preg_match('/\b'.preg_quote($w, '/').'\b/i', $t);
                 }
                 if ($len === 4) {
-                    return (bool) preg_match('/\b' . preg_quote($w, '/') . '/i', $t);
+                    return (bool) preg_match('/\b'.preg_quote($w, '/').'/i', $t);
                 }
             }
 
@@ -507,7 +516,7 @@ class Chatbot extends Component
 
                 return [
                     'label' => $intent['label'][$this->chatLang] ?? $intent['label']['en'],
-                    'url'   => route($intent['route']),
+                    'url' => route($intent['route']),
                 ];
             }
         }
@@ -545,23 +554,23 @@ class Chatbot extends Component
     private function currentPageName(): ?string
     {
         $names = [
-            'home'              => ['en' => 'Home', 'ms' => 'Laman Utama', 'zh' => '首页'],
-            'products'          => ['en' => 'Products', 'ms' => 'Produk', 'zh' => '产品'],
-            'product.show'      => ['en' => 'Product Details', 'ms' => 'Butiran Produk', 'zh' => '产品详情'],
-            'services'          => ['en' => 'Services', 'ms' => 'Servis', 'zh' => '服务'],
-            'booking'           => ['en' => 'Booking', 'ms' => 'Tempahan', 'zh' => '预约'],
-            'booking.track'     => ['en' => 'Booking Tracker', 'ms' => 'Jejak Tempahan', 'zh' => '预约查询'],
-            'track-order'       => ['en' => 'Order Tracking', 'ms' => 'Jejak Pesanan', 'zh' => '订单查询'],
-            'about'             => ['en' => 'About Us', 'ms' => 'Tentang Kami', 'zh' => '关于我们'],
-            'contact'           => ['en' => 'Contact', 'ms' => 'Hubungi Kami', 'zh' => '联系我们'],
-            'faq'               => ['en' => 'FAQ', 'ms' => 'Soalan Lazim', 'zh' => '常见问题'],
-            'privacy-policy'    => ['en' => 'Privacy Policy', 'ms' => 'Dasar Privasi', 'zh' => '隐私政策'],
-            'terms-of-service'  => ['en' => 'Terms of Service', 'ms' => 'Terma Perkhidmatan', 'zh' => '服务条款'],
-            'cart'              => ['en' => 'Cart', 'ms' => 'Troli', 'zh' => '购物车'],
-            'checkout'          => ['en' => 'Checkout', 'ms' => 'Pembayaran', 'zh' => '结账'],
-            'account'           => ['en' => 'My Account', 'ms' => 'Akaun Saya', 'zh' => '我的账户'],
-            'profile'           => ['en' => 'My Profile', 'ms' => 'Profil Saya', 'zh' => '个人资料'],
-            'login'             => ['en' => 'Login', 'ms' => 'Log Masuk', 'zh' => '登录'],
+            'home' => ['en' => 'Home', 'ms' => 'Laman Utama', 'zh' => '首页'],
+            'products' => ['en' => 'Products', 'ms' => 'Produk', 'zh' => '产品'],
+            'product.show' => ['en' => 'Product Details', 'ms' => 'Butiran Produk', 'zh' => '产品详情'],
+            'services' => ['en' => 'Services', 'ms' => 'Servis', 'zh' => '服务'],
+            'booking' => ['en' => 'Booking', 'ms' => 'Tempahan', 'zh' => '预约'],
+            'booking.track' => ['en' => 'Booking Tracker', 'ms' => 'Jejak Tempahan', 'zh' => '预约查询'],
+            'track-order' => ['en' => 'Order Tracking', 'ms' => 'Jejak Pesanan', 'zh' => '订单查询'],
+            'about' => ['en' => 'About Us', 'ms' => 'Tentang Kami', 'zh' => '关于我们'],
+            'contact' => ['en' => 'Contact', 'ms' => 'Hubungi Kami', 'zh' => '联系我们'],
+            'faq' => ['en' => 'FAQ', 'ms' => 'Soalan Lazim', 'zh' => '常见问题'],
+            'privacy-policy' => ['en' => 'Privacy Policy', 'ms' => 'Dasar Privasi', 'zh' => '隐私政策'],
+            'terms-of-service' => ['en' => 'Terms of Service', 'ms' => 'Terma Perkhidmatan', 'zh' => '服务条款'],
+            'cart' => ['en' => 'Cart', 'ms' => 'Troli', 'zh' => '购物车'],
+            'checkout' => ['en' => 'Checkout', 'ms' => 'Pembayaran', 'zh' => '结账'],
+            'account' => ['en' => 'My Account', 'ms' => 'Akaun Saya', 'zh' => '我的账户'],
+            'profile' => ['en' => 'My Profile', 'ms' => 'Profil Saya', 'zh' => '个人资料'],
+            'login' => ['en' => 'Login', 'ms' => 'Log Masuk', 'zh' => '登录'],
         ];
 
         if (! isset($names[$this->currentRoute])) {
@@ -672,18 +681,18 @@ class Chatbot extends Component
 
     private function registerThreat(string $ip): void
     {
-        $key = 'chatbot_threat:' . $ip;
+        $key = 'chatbot_threat:'.$ip;
         $count = (int) Cache::get($key, 0) + 1;
         Cache::put($key, $count, now()->addSeconds(self::ABUSE_BLOCK_SECONDS));
 
         if ($count >= self::ABUSE_BLOCK_THRESHOLD) {
-            Cache::put('chatbot_block:' . $ip, true, now()->addSeconds(self::ABUSE_BLOCK_SECONDS));
+            Cache::put('chatbot_block:'.$ip, true, now()->addSeconds(self::ABUSE_BLOCK_SECONDS));
         }
     }
 
     private function isUnderAbuseBlock(string $ip): bool
     {
-        return Cache::has('chatbot_block:' . $ip);
+        return Cache::has('chatbot_block:'.$ip);
     }
 
     private function safetyMessage(): string

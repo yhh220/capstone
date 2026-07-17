@@ -9,11 +9,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('services', function (Blueprint $table) {
-            if (!Schema::hasColumn('services', 'duration_minutes')) {
+            if (! Schema::hasColumn('services', 'duration_minutes')) {
                 $table->unsignedInteger('duration_minutes')->default(60)->after('description');
             }
 
-            if (!Schema::hasColumn('services', 'buffer_after')) {
+            if (! Schema::hasColumn('services', 'buffer_after')) {
                 $table->unsignedInteger('buffer_after')->default(15)->after('duration_minutes');
             }
         });

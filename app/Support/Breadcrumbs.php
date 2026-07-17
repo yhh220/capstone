@@ -18,10 +18,10 @@ class Breadcrumbs
     public function add(string $category, string $message, array $data = []): void
     {
         $this->crumbs[] = [
-            'ts'       => now()->format('H:i:s.v'),
+            'ts' => now()->format('H:i:s.v'),
             'category' => $category,
-            'message'  => $message,
-            'data'     => $data,
+            'message' => $message,
+            'data' => $data,
         ];
 
         // Ring buffer — keep only the most recent MAX entries.

@@ -21,9 +21,9 @@ class AssignTraceId
 
         Context::add([
             'trace_id' => $traceId,
-            'ip'       => $request->ip(),
-            'method'   => $request->method(),
-            'path'     => '/' . ltrim($request->path(), '/'),
+            'ip' => $request->ip(),
+            'method' => $request->method(),
+            'path' => '/'.ltrim($request->path(), '/'),
         ]);
 
         $response = $next($request);

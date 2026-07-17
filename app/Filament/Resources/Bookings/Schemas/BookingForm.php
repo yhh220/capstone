@@ -6,8 +6,8 @@ use App\Models\Service;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class BookingForm
@@ -41,6 +41,7 @@ class BookingForm
                         if ($record?->service_id) {
                             $query->orWhere('id', $record->service_id);
                         }
+
                         return $query->orderBy('name')->pluck('name', 'id');
                     })
                     ->searchable()
@@ -68,7 +69,7 @@ class BookingForm
                     ->columnSpanFull(),
                 Select::make('status')
                     ->options([
-                        'pending'   => 'Pending',
+                        'pending' => 'Pending',
                         'confirmed' => 'Confirmed',
                         'cancelled' => 'Cancelled',
                         'completed' => 'Completed',

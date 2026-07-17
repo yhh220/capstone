@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\ChatbotFaq;
-use App\Services\Chat\MockDriver;
 use Illuminate\Database\Seeder;
 
 class ChatbotFaqSeeder extends Seeder
@@ -16,17 +15,19 @@ class ChatbotFaqSeeder extends Seeder
      */
     public function run(): void
     {
-        $jsonPath = __DIR__ . '/chatbot_faqs.json';
-        
-        if (!file_exists($jsonPath)) {
+        $jsonPath = __DIR__.'/chatbot_faqs.json';
+
+        if (! file_exists($jsonPath)) {
             $this->command?->error("FAQ JSON file not found at {$jsonPath}");
+
             return;
         }
 
         $rules = json_decode(file_get_contents($jsonPath), true);
 
-        if (!$rules) {
-            $this->command?->error("Failed to decode FAQ JSON.");
+        if (! $rules) {
+            $this->command?->error('Failed to decode FAQ JSON.');
+
             return;
         }
 
@@ -34,16 +35,16 @@ class ChatbotFaqSeeder extends Seeder
             ChatbotFaq::updateOrCreate(
                 ['topic' => $rule['topic']],
                 [
-                    'keywords'  => $rule['keywords'] ?? [],
-                    'priority'  => $rule['priority'] ?? 50,
-                    'reply_en'  => $rule['reply_en'] ?? '',
-                    'reply_ms'  => $rule['reply_ms'] ?? null,
-                    'reply_zh'  => $rule['reply_zh'] ?? null,
+                    'keywords' => $rule['keywords'] ?? [],
+                    'priority' => $rule['priority'] ?? 50,
+                    'reply_en' => $rule['reply_en'] ?? '',
+                    'reply_ms' => $rule['reply_ms'] ?? null,
+                    'reply_zh' => $rule['reply_zh'] ?? null,
                     'is_active' => $rule['is_active'] ?? true,
                 ]
             );
         }
 
-        $this->command?->info('Seeded ' . count($rules) . ' chatbot FAQs from JSON.');
+        $this->command?->info('Seeded '.count($rules).' chatbot FAQs from JSON.');
     }
 }

@@ -20,7 +20,7 @@ class InvoiceController extends Controller
         $order = $this->authorizedOrder($orderNumber);
 
         return Pdf::loadView('invoice', ['order' => $order, 'pdf' => true])
-            ->download('invoice-' . $order->order_number . '.pdf');
+            ->download('invoice-'.$order->order_number.'.pdf');
     }
 
     /**

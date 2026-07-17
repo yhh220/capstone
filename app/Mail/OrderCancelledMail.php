@@ -23,7 +23,7 @@ class OrderCancelledMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Cancelled – ' . $this->order->order_number . ' | Win Win Car Audio',
+            subject: 'Order Cancelled – '.$this->order->order_number.' | Win Win Car Audio',
         );
     }
 

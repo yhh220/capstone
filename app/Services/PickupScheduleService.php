@@ -11,9 +11,7 @@ class PickupScheduleService
 {
     public const DAYS_AHEAD = 30;
 
-    public function __construct(private readonly BookingService $bookings)
-    {
-    }
+    public function __construct(private readonly BookingService $bookings) {}
 
     public function availableDates(): Collection
     {
@@ -25,17 +23,35 @@ class PickupScheduleService
 
     public function slotsFor(string $date): Collection
     {
-        try { $day = Carbon::createFromFormat('Y-m-d', $date)->startOfDay(); } catch (\Throwable) { return collect(); }
-        if (! $day->betweenIncluded(now()->startOfDay(), now()->startOfDay()->addDays(self::DAYS_AHEAD)) || $this->bookings->isClosedDate($day)) return collect();
+        try {
+            $day = Carbon::createFromFormat('Y-m-d', $date)->startOfDay();
+        } catch (\Throwable) {
+            return collect();
+        }
+        if (! $day->betweenIncluded(now()->startOfDay(), now()->startOfDay()->addDays(self::DAYS_AHEAD)) || $this->bookings->isClosedDate($day)) {
+            return collect();
+        }
 
         $start = Carbon::createFromFormat('Y-m-d H:i', $day->format('Y-m-d').' '.setting('BUSINESS_HOURS_START', '09:00'));
         $end = Carbon::createFromFormat('Y-m-d H:i', $day->format('Y-m-d').' '.setting('BUSINESS_HOURS_END', '18:00'));
         $minutes = max(15, (int) setting('BOOKING_SLOT_MINUTES', 30));
         $slots = collect();
-        while ($start->copy()->addMinutes($minutes) <= $end) { if ($start->isFuture()) $slots->push($start->format('H:i')); $start->addMinutes($minutes); }
+        while ($start->copy()->addMinutes($minutes) <= $end) {
+            if ($start->isFuture()) {
+                $slots->push($start->format('H:i'));
+            } $start->addMinutes($minutes);
+        }
+
         return $slots;
     }
 
-    public function isValid(string $date, string $time): bool { return $this->slotsFor($date)->contains($time); }
-    public function pickupAt(string $date, string $time): Carbon { return Carbon::createFromFormat('Y-m-d H:i', "{$date} {$time}"); }
+    public function isValid(string $date, string $time): bool
+    {
+        return $this->slotsFor($date)->contains($time);
+    }
+
+    public function pickupAt(string $date, string $time): Carbon
+    {
+        return Carbon::createFromFormat('Y-m-d H:i', "{$date} {$time}");
+    }
 }

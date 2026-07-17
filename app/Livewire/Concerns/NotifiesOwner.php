@@ -23,7 +23,7 @@ trait NotifiesOwner
         try {
             Mail::to($email)->send(new OwnerAlertMail($heading, $rows, $actionUrl, $actionLabel));
         } catch (\Throwable $e) {
-            logger()->error('Owner alert email failed: ' . $e->getMessage());
+            logger()->error('Owner alert email failed: '.$e->getMessage());
         }
     }
 }

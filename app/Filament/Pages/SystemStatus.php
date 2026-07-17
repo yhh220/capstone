@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\AppLog;
 use App\Models\Setting;
+use App\Services\Payments\StripeCheckoutService;
 use BackedEnum;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
@@ -70,7 +71,7 @@ class SystemStatus extends Page
                 if (setting('PAYMENT_MODE', 'demo') !== 'stripe') {
                     return ['ok', 'Demo mode — payments are simulated'];
                 }
-                if (! app(\App\Services\Payments\StripeCheckoutService::class)->enabled()) {
+                if (! app(StripeCheckoutService::class)->enabled()) {
                     // enabled() already logged the specifics; the admin-facing
                     // story is that the switch says Stripe but demo is running.
                     return ['fail', 'Set to Stripe, but the test key is missing — taking demo payments instead'];

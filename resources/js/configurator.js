@@ -995,7 +995,6 @@ function initThree() {
             }
         });
 
-        console.log('Mapped Car Parts:', carParts);
 
         // Hide Loading Overlay
         setTimeout(() => {

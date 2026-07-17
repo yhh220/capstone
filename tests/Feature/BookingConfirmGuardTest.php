@@ -23,14 +23,14 @@ class BookingConfirmGuardTest extends TestCase
     private function booking(array $overrides = []): Booking
     {
         return Booking::create(array_merge([
-            'reference'      => Booking::generateReference(),
-            'customer_name'  => 'Test',
+            'reference' => Booking::generateReference(),
+            'customer_name' => 'Test',
             'customer_email' => 'test@example.test',
             'customer_phone' => '0123456789',
             'preferred_date' => now()->addDay()->toDateString(),
-            'start_at'       => now()->addDay()->setTime(10, 0),
-            'end_at'         => now()->addDay()->setTime(10, 30),
-            'status'         => 'pending',
+            'start_at' => now()->addDay()->setTime(10, 0),
+            'end_at' => now()->addDay()->setTime(10, 30),
+            'status' => 'pending',
         ], $overrides));
     }
 
@@ -64,7 +64,7 @@ class BookingConfirmGuardTest extends TestCase
 
     public function test_bulk_confirm_skips_non_pending_rows(): void
     {
-        $pending   = $this->booking();
+        $pending = $this->booking();
         $cancelled = $this->booking(['status' => 'cancelled', 'start_at' => now()->addDay()->setTime(11, 0), 'end_at' => now()->addDay()->setTime(11, 30)]);
         $this->actAsAdmin();
 

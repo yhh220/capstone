@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -51,7 +52,7 @@ class OwnerAlertMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->heading . ' | ' . config('services.store.seo_name', 'Win Win Car Audio'),
+            subject: $this->heading.' | '.config('services.store.seo_name', 'Win Win Car Audio'),
             cc: $this->adminCc(),
         );
     }
@@ -67,7 +68,7 @@ class OwnerAlertMail extends Mailable
      */
     private function adminCc(): array
     {
-        return \App\Models\User::query()
+        return User::query()
             ->where('role', 'admin')
             ->where('email', '!=', (string) config('services.store.email'))
             ->pluck('email')

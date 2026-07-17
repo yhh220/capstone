@@ -39,7 +39,7 @@ class BookingSlotRaceConditionTest extends TestCase
         // Simulate another request that's already past the slot-availability
         // check and is mid-transaction inserting its own booking for this slot —
         // no row exists yet, so a plain lockForUpdate() check can't see it.
-        $lock = Cache::lock('booking-slot:' . $startAt->toDateTimeString(), 10);
+        $lock = Cache::lock('booking-slot:'.$startAt->toDateTimeString(), 10);
         $lock->get();
 
         // Mount first so the honeypot's valid_from is stamped before we fast-forward —

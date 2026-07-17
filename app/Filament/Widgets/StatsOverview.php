@@ -21,13 +21,13 @@ class StatsOverview extends StatsOverviewWidget
         return auth()->user()?->isAdmin() ?? false;
     }
 
-    protected function getColumns(): int | array
+    protected function getColumns(): int|array
     {
         return [
             'default' => 1,
-            'sm'      => 2,
-            'md'      => 2,
-            'xl'      => 4,
+            'sm' => 2,
+            'md' => 2,
+            'xl' => 4,
         ];
     }
 
@@ -36,15 +36,15 @@ class StatsOverview extends StatsOverviewWidget
         // Cache the dashboard aggregates for a minute — these count/sum queries
         // ran on every dashboard visit and every Livewire poll.
         $s = Cache::remember('dashboard_stats', 60, fn () => [
-            'activeProducts'  => Product::where('is_active', true)->count(),
-            'totalBookings'   => Booking::count(),
+            'activeProducts' => Product::where('is_active', true)->count(),
+            'totalBookings' => Booking::count(),
             'pendingBookings' => Booking::where('status', 'pending')->count(),
-            'todayBookings'   => Booking::whereDate('preferred_date', today())->count(),
-            'unreadContacts'  => Contact::where('is_read', false)->count(),
+            'todayBookings' => Booking::whereDate('preferred_date', today())->count(),
+            'unreadContacts' => Contact::where('is_read', false)->count(),
             'registeredUsers' => User::where('role', 'client')->count(),
-            'totalOrders'     => Order::count(),
-            'pendingOrders'   => Order::where('status', 'pending')->count(),
-            'monthRevenue'    => (float) Order::where('status', 'delivered')
+            'totalOrders' => Order::count(),
+            'pendingOrders' => Order::where('status', 'pending')->count(),
+            'monthRevenue' => (float) Order::where('status', 'delivered')
                 ->whereNull('refunded_at') // defense-in-depth: never count a refunded order as revenue
                 ->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
@@ -52,11 +52,11 @@ class StatsOverview extends StatsOverviewWidget
             // Scope chat stats to the current month so spam / nonsense from the
             // past never inflates the number — it resets monthly and reflects
             // current activity. Old rows are pruned by the scheduler anyway.
-            'chatTotal'       => ChatLog::where('feature', 'chat')
+            'chatTotal' => ChatLog::where('feature', 'chat')
                 ->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
                 ->count(),
-            'chatFallback'    => ChatLog::where('feature', 'chat')
+            'chatFallback' => ChatLog::where('feature', 'chat')
                 ->where('status', 'fallback')
                 ->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
@@ -70,7 +70,7 @@ class StatsOverview extends StatsOverviewWidget
                 ->color('info'),
 
             Stat::make('Total Bookings', $s['totalBookings'])
-                ->description($s['pendingBookings'] . ' awaiting confirmation')
+                ->description($s['pendingBookings'].' awaiting confirmation')
                 ->descriptionIcon('heroicon-m-calendar-days')
                 ->color($s['pendingBookings'] > 0 ? 'warning' : 'gray'),
 
@@ -86,7 +86,7 @@ class StatsOverview extends StatsOverviewWidget
 
             Stat::make('Chatbot Questions', $s['chatTotal'])
                 ->description($s['chatFallback'] > 0
-                    ? $s['chatFallback'] . ' unanswered this month'
+                    ? $s['chatFallback'].' unanswered this month'
                     : 'All answered this month')
                 ->descriptionIcon('heroicon-m-chat-bubble-left-right')
                 ->color($s['chatFallback'] > 0 ? 'warning' : 'success'),
@@ -97,11 +97,11 @@ class StatsOverview extends StatsOverviewWidget
                 ->color('info'),
 
             Stat::make('Total Orders', $s['totalOrders'])
-                ->description($s['pendingOrders'] . ' awaiting processing')
+                ->description($s['pendingOrders'].' awaiting processing')
                 ->descriptionIcon('heroicon-m-shopping-bag')
                 ->color($s['pendingOrders'] > 0 ? 'warning' : 'gray'),
 
-            Stat::make('Revenue This Month', 'RM ' . number_format($s['monthRevenue'], 2))
+            Stat::make('Revenue This Month', 'RM '.number_format($s['monthRevenue'], 2))
                 ->description('Delivered orders this month')
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),

@@ -45,6 +45,7 @@ class Service extends Model implements HasMedia
         if ($this->hasMedia('images')) {
             return $this->getFirstMediaUrl('images', $conversion) ?: null;
         }
+
         return $this->image ? Storage::url($this->image) : null;
     }
 

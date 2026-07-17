@@ -11,7 +11,7 @@ class CategoryDistributionChart extends ChartWidget
 
     protected int|string|array $columnSpan = [
         'default' => 'full',
-        'xl'      => 5,
+        'xl' => 5,
     ];
 
     protected ?string $heading = 'Products by Category';
@@ -23,12 +23,13 @@ class CategoryDistributionChart extends ChartWidget
         $categories = Category::withCount(['products' => function ($q) {
             $q->where('is_active', true);
         }])->orderByDesc('products_count')->get()
-          ->filter(fn ($c) => $c->products_count > 0);
+            ->filter(fn ($c) => $c->products_count > 0);
 
         // If no category has products yet, show all with 0
         if ($categories->isEmpty()) {
             $categories = Category::orderBy('name')->get()->map(function ($c) {
                 $c->products_count = 0;
+
                 return $c;
             });
         }
@@ -37,7 +38,7 @@ class CategoryDistributionChart extends ChartWidget
             'datasets' => [
                 [
                     'label' => 'Products',
-                    'data'  => $categories->pluck('products_count')->toArray(),
+                    'data' => $categories->pluck('products_count')->toArray(),
                     'backgroundColor' => [
                         'rgba(236, 72, 153, 0.85)',   // Rose/Pink
                         'rgba(139, 92, 246, 0.85)',   // Violet
@@ -67,7 +68,7 @@ class CategoryDistributionChart extends ChartWidget
             'plugins' => [
                 'legend' => [
                     'position' => 'bottom',
-                    'labels'   => ['padding' => 16],
+                    'labels' => ['padding' => 16],
                 ],
             ],
             'cutout' => '65%',

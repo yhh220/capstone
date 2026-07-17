@@ -3,7 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Order;
-use Filament\Tables\Columns\BadgeColumn;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -26,7 +26,7 @@ class RecentOrdersWidget extends BaseWidget
                     ->searchable()
                     ->copyable()
                     ->fontFamily('mono')
-                    ->weight(\Filament\Support\Enums\FontWeight::Bold),
+                    ->weight(FontWeight::Bold),
 
                 TextColumn::make('customer_name')
                     ->label('Customer')
@@ -49,36 +49,36 @@ class RecentOrdersWidget extends BaseWidget
                     ->label('Total')
                     ->money('MYR', locale: 'ms_MY')
                     ->sortable()
-                    ->weight(\Filament\Support\Enums\FontWeight::SemiBold),
+                    ->weight(FontWeight::SemiBold),
 
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'pending'    => 'warning',
+                        'pending' => 'warning',
                         'processing' => 'info',
-                        'shipped'    => 'primary',
-                        'delivered'  => 'success',
-                        'cancelled'  => 'danger',
-                        default      => 'gray',
+                        'shipped' => 'primary',
+                        'delivered' => 'success',
+                        'cancelled' => 'danger',
+                        default => 'gray',
                     })
                     ->icon(fn (string $state): string => match ($state) {
-                        'pending'    => 'heroicon-m-clock',
+                        'pending' => 'heroicon-m-clock',
                         'processing' => 'heroicon-m-cog-6-tooth',
-                        'shipped'    => 'heroicon-m-truck',
-                        'delivered'  => 'heroicon-m-check-circle',
-                        'cancelled'  => 'heroicon-m-x-circle',
-                        default      => 'heroicon-m-question-mark-circle',
+                        'shipped' => 'heroicon-m-truck',
+                        'delivered' => 'heroicon-m-check-circle',
+                        'cancelled' => 'heroicon-m-x-circle',
+                        default => 'heroicon-m-question-mark-circle',
                     }),
 
                 TextColumn::make('payment_status')
                     ->label('Payment')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'paid'    => 'success',
+                        'paid' => 'success',
                         'pending' => 'warning',
-                        'failed'  => 'danger',
-                        default   => 'gray',
+                        'failed' => 'danger',
+                        default => 'gray',
                     }),
 
                 TextColumn::make('created_at')

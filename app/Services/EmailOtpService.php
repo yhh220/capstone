@@ -27,12 +27,18 @@ class EmailOtpService
     /** Minimum seconds between resends for the same purpose+email. */
     public const RESEND_COOLDOWN = 60;
 
-    public const PURPOSE_REGISTER     = 'register';
-    public const PURPOSE_RESET        = 'pwreset';
+    public const PURPOSE_REGISTER = 'register';
+
+    public const PURPOSE_RESET = 'pwreset';
+
     public const PURPOSE_SET_PASSWORD = 'setpw';
-    public const PURPOSE_LOGIN        = 'login2fa';
-    public const PURPOSE_ENABLE_2FA   = 'enable2fa';
-    public const PURPOSE_DISABLE_2FA  = 'disable2fa';
+
+    public const PURPOSE_LOGIN = 'login2fa';
+
+    public const PURPOSE_ENABLE_2FA = 'enable2fa';
+
+    public const PURPOSE_DISABLE_2FA = 'disable2fa';
+
     public const PURPOSE_DELETE_ACCOUNT = 'deleteaccount';
 
     /**
@@ -40,8 +46,8 @@ class EmailOtpService
      * plaintext code only so callers can optionally surface it in demo mode.
      *
      * @throws OtpSendFailedException if the email could not be sent — unlike
-     *         booking/order notifications, the email IS the action here, so a
-     *         failure must surface to the user rather than be swallowed.
+     *                                booking/order notifications, the email IS the action here, so a
+     *                                failure must surface to the user rather than be swallowed.
      */
     public function send(string $purpose, string $email): string
     {
@@ -54,10 +60,10 @@ class EmailOtpService
             Notification::route('mail', $this->normalize($email))
                 ->notify(new EmailOtp($code, $purpose));
         } catch (\Throwable $e) {
-            logger()->error('OTP email failed: ' . $e->getMessage());
+            logger()->error('OTP email failed: '.$e->getMessage());
             $this->clear($purpose, $email);
 
-            throw new OtpSendFailedException();
+            throw new OtpSendFailedException;
         }
 
         RateLimiter::hit($this->resendKey($purpose, $email), self::RESEND_COOLDOWN);
@@ -91,11 +97,13 @@ class EmailOtpService
 
         if ($attempts >= self::MAX_ATTEMPTS) {
             $this->clear($purpose, $email);
+
             return false;
         }
 
         if (! Hash::check($code, $hash)) {
             Cache::put($this->attemptsKey($purpose, $email), $attempts + 1, self::TTL);
+
             return false;
         }
 
@@ -123,16 +131,16 @@ class EmailOtpService
 
     private function codeKey(string $purpose, string $email): string
     {
-        return "otp:{$purpose}:" . $this->normalize($email);
+        return "otp:{$purpose}:".$this->normalize($email);
     }
 
     private function attemptsKey(string $purpose, string $email): string
     {
-        return "otp_attempts:{$purpose}:" . $this->normalize($email);
+        return "otp_attempts:{$purpose}:".$this->normalize($email);
     }
 
     private function resendKey(string $purpose, string $email): string
     {
-        return "otp_resend:{$purpose}:" . $this->normalize($email);
+        return "otp_resend:{$purpose}:".$this->normalize($email);
     }
 }

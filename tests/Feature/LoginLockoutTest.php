@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Livewire\Auth\UserLogin;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -23,14 +24,14 @@ class LoginLockoutTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function attempt(\Livewire\Features\SupportTesting\Testable $component, string $password = 'wrong-password'): string
+    private function attempt(Testable $component, string $password = 'wrong-password'): string
     {
         $component->call('login', $password);
 
         return (string) $component->instance()->getErrorBag()->first('loginEmail');
     }
 
-    private function freshComponent(string $email): \Livewire\Features\SupportTesting\Testable
+    private function freshComponent(string $email): Testable
     {
         return Livewire::test(UserLogin::class)->set('loginEmail', $email);
     }

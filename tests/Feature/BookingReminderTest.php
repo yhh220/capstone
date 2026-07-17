@@ -15,14 +15,14 @@ class BookingReminderTest extends TestCase
     private function booking(array $overrides = []): Booking
     {
         return Booking::create(array_merge([
-            'reference'      => Booking::generateReference(),
-            'customer_name'  => 'Test',
+            'reference' => Booking::generateReference(),
+            'customer_name' => 'Test',
             'customer_email' => 'test@example.test',
             'customer_phone' => '0123456789',
             'preferred_date' => now()->addDay()->toDateString(),
-            'start_at'       => now()->addDay()->setTime(10, 0),
-            'end_at'         => now()->addDay()->setTime(11, 0),
-            'status'         => 'pending',
+            'start_at' => now()->addDay()->setTime(10, 0),
+            'end_at' => now()->addDay()->setTime(11, 0),
+            'status' => 'pending',
         ], $overrides));
     }
 
@@ -50,7 +50,7 @@ class BookingReminderTest extends TestCase
         $this->booking(['customer_email' => null]);
         $this->booking([
             'preferred_date' => now()->addWeek()->toDateString(),
-            'start_at'       => now()->addWeek()->setTime(10, 0),
+            'start_at' => now()->addWeek()->setTime(10, 0),
         ]);
 
         $this->artisan('bookings:send-reminders')->assertSuccessful();

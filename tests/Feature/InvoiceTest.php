@@ -15,16 +15,16 @@ class InvoiceTest extends TestCase
     private function paidOrder(User $user): Order
     {
         $order = Order::create([
-            'user_id'        => $user->id,
-            'order_number'   => Order::generateOrderNumber(),
-            'customer_name'  => $user->name,
+            'user_id' => $user->id,
+            'order_number' => Order::generateOrderNumber(),
+            'customer_name' => $user->name,
             'customer_email' => $user->email,
             'customer_phone' => '0123456789',
             'shipping_address' => ['street' => '1 Jln', 'city' => 'KL', 'postcode' => '50000', 'state' => 'KL'],
-            'subtotal'       => 600,
-            'shipping_fee'   => 10,
-            'total_amount'   => 610,
-            'status'         => 'processing',
+            'subtotal' => 600,
+            'shipping_fee' => 10,
+            'total_amount' => 610,
+            'status' => 'processing',
             'payment_status' => 'paid',
             'payment_method' => 'FPX - Maybank2u',
         ]);
@@ -79,13 +79,13 @@ class InvoiceTest extends TestCase
         $user = User::create(['name' => 'Refunded', 'email' => 'refunded@example.test', 'password' => 'password', 'role' => 'client']);
         $order = $this->paidOrder($user);
         $order->update([
-            'status'              => 'cancelled',
-            'payment_status'      => 'paid', // unchanged by design — refund is tracked separately
-            'cancelled_at'        => now(),
+            'status' => 'cancelled',
+            'payment_status' => 'paid', // unchanged by design — refund is tracked separately
+            'cancelled_at' => now(),
             'cancellation_reason' => 'Customer changed their mind',
-            'refund_amount'       => 610,
-            'refund_percentage'   => 100,
-            'refunded_at'         => now(),
+            'refund_amount' => 610,
+            'refund_percentage' => 100,
+            'refunded_at' => now(),
         ]);
 
         $this->actingAs($user)

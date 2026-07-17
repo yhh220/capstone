@@ -9,6 +9,7 @@ use App\Services\Booking\BookingService;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -50,7 +51,7 @@ class CreateBooking extends CreateRecord
         // concurrent creates for the same never-before-booked slot could both
         // pass isSlotAvailable(). Keyed identically to those two paths so an
         // admin create and a customer booking for the same slot serialise.
-        $lock = $startAt ? \Illuminate\Support\Facades\Cache::lock('booking-slot:' . $startAt->toDateTimeString(), 10) : null;
+        $lock = $startAt ? Cache::lock('booking-slot:'.$startAt->toDateTimeString(), 10) : null;
 
         if ($lock && ! $lock->get()) {
             Notification::make()
@@ -81,7 +82,7 @@ class CreateBooking extends CreateRecord
 
             // $this->halt() throws internally — this line is unreachable, but
             // satisfies the method's non-nullable Booking return type.
-            return new Booking();
+            return new Booking;
         } finally {
             $lock?->release();
         }
@@ -90,7 +91,7 @@ class CreateBooking extends CreateRecord
             try {
                 Mail::to($booking->customer_email)->send(new BookingConfirmationMail($booking->fresh('service')));
             } catch (\Throwable $e) {
-                logger()->error('Admin-created booking confirmation email failed: ' . $e->getMessage());
+                logger()->error('Admin-created booking confirmation email failed: '.$e->getMessage());
             }
         }
 

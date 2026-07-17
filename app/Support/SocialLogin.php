@@ -11,7 +11,7 @@ class SocialLogin
 {
     /** Supported providers → display label. (Apple intentionally omitted for now.) */
     public const PROVIDERS = [
-        'google'    => 'Google',
+        'google' => 'Google',
         'microsoft' => 'Microsoft',
     ];
 

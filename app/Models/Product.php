@@ -110,9 +110,9 @@ class Product extends Model implements HasMedia
             if (empty($product->slug)) {
                 $base = Str::slug($product->name);
                 $slug = $base;
-                $i    = 2;
+                $i = 2;
                 while (static::where('slug', $slug)->exists()) {
-                    $slug = $base . '-' . $i++;
+                    $slug = $base.'-'.$i++;
                 }
                 $product->slug = $slug;
             }
@@ -136,7 +136,7 @@ class Product extends Model implements HasMedia
 
     public function getIsOnSaleAttribute()
     {
-        return !is_null($this->sale_price) && $this->sale_price < $this->price;
+        return ! is_null($this->sale_price) && $this->sale_price < $this->price;
     }
 
     public function getTranslatedDescriptionAttribute(): ?string
@@ -158,8 +158,8 @@ class Product extends Model implements HasMedia
     private function translatedField(string $field): ?string
     {
         return match (app()->getLocale()) {
-            'ms' => $this->{$field . '_ms'} ?: $this->{$field},
-            'zh' => $this->{$field . '_zh'} ?: $this->{$field},
+            'ms' => $this->{$field.'_ms'} ?: $this->{$field},
+            'zh' => $this->{$field.'_zh'} ?: $this->{$field},
             default => $this->{$field},
         };
     }

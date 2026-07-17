@@ -13,14 +13,14 @@ return new class extends Migration
     {
         DB::table('settings')->insertOrIgnore([
             [
-                'key'        => 'SITE_ANNOUNCEMENT_ENABLED',
-                'value'      => 'false',
+                'key' => 'SITE_ANNOUNCEMENT_ENABLED',
+                'value' => 'false',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'key'        => 'SITE_ANNOUNCEMENT_TEXT',
-                'value'      => 'Online shopping and sign-in are temporarily under maintenance. You can still browse our products and book an in-store appointment.',
+                'key' => 'SITE_ANNOUNCEMENT_TEXT',
+                'value' => 'Online shopping and sign-in are temporarily under maintenance. You can still browse our products and book an in-store appointment.',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

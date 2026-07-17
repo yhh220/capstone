@@ -3,11 +3,13 @@
 namespace App\Services\Chat;
 
 use App\Contracts\ChatServiceInterface;
-use App\Models\ChatLog;
 use App\Models\Brand;
 use App\Models\ChatbotFaq;
+use App\Models\ChatLog;
 use App\Models\Product;
 use App\Models\Service;
+use App\Services\Booking\BookingService;
+use App\Services\RefundCalculator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -21,6 +23,7 @@ class MockDriver implements ChatServiceInterface
         if (str_starts_with($systemPrompt ?? '', 'lang:')) {
             return substr($systemPrompt, 5);
         }
+
         return 'en';
     }
 
@@ -50,10 +53,10 @@ class MockDriver implements ChatServiceInterface
     public function builtinKnowledge(): array
     {
         $p = $this->phone;
-        $calculator = new \App\Services\RefundCalculator();
+        $calculator = new RefundCalculator;
         $hours = $calculator->fullRefundHours();
         $fee = $calculator->feePercent();
-        $booking = app(\App\Services\Booking\BookingService::class);
+        $booking = app(BookingService::class);
 
         return [
             // Greetings (low priority — a real topic should win)
@@ -429,8 +432,8 @@ class MockDriver implements ChatServiceInterface
                 'keywords' => ['thank', 'thanks', 'terima kasih', 'tq', 'thx', '谢谢', '感谢', '多谢', 'tqsm'],
                 'reply' => [
                     'en' => "You're welcome! 😊 If you have more questions, feel free to ask. Hope to see you at Win Win Car Studio! 🚗✨",
-                    'ms' => "Sama-sama! 😊 Jika ada soalan lain, jangan segan untuk bertanya. Jumpa di Win Win Car Studio! 🚗✨",
-                    'zh' => "不客气！😊 如有其他问题随时来问。期待在 Win Win Car Studio 见到您！🚗✨",
+                    'ms' => 'Sama-sama! 😊 Jika ada soalan lain, jangan segan untuk bertanya. Jumpa di Win Win Car Studio! 🚗✨',
+                    'zh' => '不客气！😊 如有其他问题随时来问。期待在 Win Win Car Studio 见到您！🚗✨',
                 ],
             ],
         ];
@@ -485,12 +488,12 @@ class MockDriver implements ChatServiceInterface
             // ≤3 chars: whole-word match — "hi" must not fire inside "chinese"
             // or "high". Greeting/abbreviation tokens are complete words.
             if ($len <= 3) {
-                return (bool) preg_match('/\b' . preg_quote($keyword, '/') . '\b/i', $message);
+                return (bool) preg_match('/\b'.preg_quote($keyword, '/').'\b/i', $message);
             }
             // 4 chars: word-start prefix — these are stems, so "book" should
             // catch "booking" but not "facebook", "ship" not "relationship".
             if ($len === 4) {
-                return (bool) preg_match('/\b' . preg_quote($keyword, '/') . '/i', $message);
+                return (bool) preg_match('/\b'.preg_quote($keyword, '/').'/i', $message);
             }
         }
 
@@ -520,35 +523,35 @@ class MockDriver implements ChatServiceInterface
     {
         return [
             ['keywords' => ['hour', 'open', 'close', 'waktu', 'buka', '营业', '开门'],
-             'label' => ['en' => 'Opening hours', 'ms' => 'Waktu operasi', 'zh' => '营业时间'],
-             'query' => ['en' => 'What are your operating hours?', 'ms' => 'Apakah waktu operasi anda?', 'zh' => '你们的营业时间是几点？']],
+                'label' => ['en' => 'Opening hours', 'ms' => 'Waktu operasi', 'zh' => '营业时间'],
+                'query' => ['en' => 'What are your operating hours?', 'ms' => 'Apakah waktu operasi anda?', 'zh' => '你们的营业时间是几点？']],
             ['keywords' => ['location', 'address', 'direction', 'alamat', 'lokasi', '地址', '位置'],
-             'label' => ['en' => 'Location', 'ms' => 'Lokasi', 'zh' => '门店地址'],
-             'query' => ['en' => 'Where are you located?', 'ms' => 'Di mana lokasi anda?', 'zh' => '你们在哪里？']],
+                'label' => ['en' => 'Location', 'ms' => 'Lokasi', 'zh' => '门店地址'],
+                'query' => ['en' => 'Where are you located?', 'ms' => 'Di mana lokasi anda?', 'zh' => '你们在哪里？']],
             ['keywords' => ['book', 'appointment', 'tempah', '预约'],
-             'label' => ['en' => 'Book appointment', 'ms' => 'Buat tempahan', 'zh' => '预约服务'],
-             'query' => ['en' => 'I want to book an appointment', 'ms' => 'Saya mahu buat tempahan', 'zh' => '我想预约']],
+                'label' => ['en' => 'Book appointment', 'ms' => 'Buat tempahan', 'zh' => '预约服务'],
+                'query' => ['en' => 'I want to book an appointment', 'ms' => 'Saya mahu buat tempahan', 'zh' => '我想预约']],
             ['keywords' => ['price', 'cost', 'harga', 'berapa', '价格', '多少钱'],
-             'label' => ['en' => 'Pricing', 'ms' => 'Harga', 'zh' => '价格'],
-             'query' => ['en' => 'How much does it cost?', 'ms' => 'Berapakah harganya?', 'zh' => '价格多少？']],
+                'label' => ['en' => 'Pricing', 'ms' => 'Harga', 'zh' => '价格'],
+                'query' => ['en' => 'How much does it cost?', 'ms' => 'Berapakah harganya?', 'zh' => '价格多少？']],
             ['keywords' => ['warranty', 'guarantee', 'waranti', '保修', '保固'],
-             'label' => ['en' => 'Warranty', 'ms' => 'Waranti', 'zh' => '保修'],
-             'query' => ['en' => 'What is your warranty policy?', 'ms' => 'Apakah polisi waranti anda?', 'zh' => '保修政策是怎样的？']],
+                'label' => ['en' => 'Warranty', 'ms' => 'Waranti', 'zh' => '保修'],
+                'query' => ['en' => 'What is your warranty policy?', 'ms' => 'Apakah polisi waranti anda?', 'zh' => '保修政策是怎样的？']],
             ['keywords' => ['audio', 'speaker', 'subwoofer', 'sound', '音响', '喇叭'],
-             'label' => ['en' => 'Car audio', 'ms' => 'Audio kereta', 'zh' => '汽车音响'],
-             'query' => ['en' => 'Tell me about car audio systems', 'ms' => 'Ceritakan tentang sistem audio kereta', 'zh' => '介绍一下汽车音响系统']],
+                'label' => ['en' => 'Car audio', 'ms' => 'Audio kereta', 'zh' => '汽车音响'],
+                'query' => ['en' => 'Tell me about car audio systems', 'ms' => 'Ceritakan tentang sistem audio kereta', 'zh' => '介绍一下汽车音响系统']],
             ['keywords' => ['tint', 'film', 'tinted', '贴膜', '隔热膜'],
-             'label' => ['en' => 'Window tinting', 'ms' => 'Tinted tingkap', 'zh' => '车窗隔热膜'],
-             'query' => ['en' => 'Tell me about window tinting', 'ms' => 'Ceritakan tentang tinted tingkap', 'zh' => '介绍一下车窗隔热膜']],
+                'label' => ['en' => 'Window tinting', 'ms' => 'Tinted tingkap', 'zh' => '车窗隔热膜'],
+                'query' => ['en' => 'Tell me about window tinting', 'ms' => 'Ceritakan tentang tinted tingkap', 'zh' => '介绍一下车窗隔热膜']],
             ['keywords' => ['dashcam', 'camera', 'kamera', '记录仪', '行车'],
-             'label' => ['en' => 'Dashcams', 'ms' => 'Dashcam', 'zh' => '行车记录仪'],
-             'query' => ['en' => 'Tell me about dashcams', 'ms' => 'Ceritakan tentang dashcam', 'zh' => '介绍一下行车记录仪']],
+                'label' => ['en' => 'Dashcams', 'ms' => 'Dashcam', 'zh' => '行车记录仪'],
+                'query' => ['en' => 'Tell me about dashcams', 'ms' => 'Ceritakan tentang dashcam', 'zh' => '介绍一下行车记录仪']],
             ['keywords' => ['install', 'fitting', 'pasang', '安装'],
-             'label' => ['en' => 'Installation', 'ms' => 'Pemasangan', 'zh' => '安装服务'],
-             'query' => ['en' => 'Do you provide installation?', 'ms' => 'Adakah anda menyediakan pemasangan?', 'zh' => '你们提供安装服务吗？']],
+                'label' => ['en' => 'Installation', 'ms' => 'Pemasangan', 'zh' => '安装服务'],
+                'query' => ['en' => 'Do you provide installation?', 'ms' => 'Adakah anda menyediakan pemasangan?', 'zh' => '你们提供安装服务吗？']],
             ['keywords' => ['product', 'accessories', 'produk', '产品', '配件'],
-             'label' => ['en' => 'Products', 'ms' => 'Produk', 'zh' => '产品'],
-             'query' => ['en' => 'What products do you sell?', 'ms' => 'Apakah produk yang anda jual?', 'zh' => '你们卖什么产品？']],
+                'label' => ['en' => 'Products', 'ms' => 'Produk', 'zh' => '产品'],
+                'query' => ['en' => 'What products do you sell?', 'ms' => 'Apakah produk yang anda jual?', 'zh' => '你们卖什么产品？']],
         ];
     }
 
@@ -566,6 +569,7 @@ class MockDriver implements ChatServiceInterface
             foreach ($topic['keywords'] as $keyword) {
                 if ($this->keywordMatches($keyword, $message, $messageWords)) {
                     $score += 10;
+
                     continue;
                 }
                 // Partial similarity nudges near-misses up the list.
@@ -641,8 +645,8 @@ class MockDriver implements ChatServiceInterface
         if (preg_match('/\b(how are you|how r u|how are u|how\'?s it going|apa khabar|how do you do)\b/iu', $msg)
             || preg_match('/(你好吗|最近好吗|过得怎么样)/u', $msg)) {
             return match ($lang) {
-                'ms' => "Saya baik, terima kasih! 😊 Sedia membantu anda. Ada apa-apa tentang kereta anda yang boleh saya bantu hari ini?",
-                'zh' => "我很好，谢谢您！😊 随时为您服务。今天有什么关于爱车的问题我可以帮忙吗？",
+                'ms' => 'Saya baik, terima kasih! 😊 Sedia membantu anda. Ada apa-apa tentang kereta anda yang boleh saya bantu hari ini?',
+                'zh' => '我很好，谢谢您！😊 随时为您服务。今天有什么关于爱车的问题我可以帮忙吗？',
                 default => "I'm doing great, thanks for asking! 😊 I'm here to help. Is there anything about your car I can assist with today?",
             };
         }
@@ -652,9 +656,9 @@ class MockDriver implements ChatServiceInterface
             || preg_match('/(selamat tinggal|jumpa lagi|babai)/iu', $msg)
             || preg_match('/(再见|拜拜|晚安)/u', $msg)) {
             return match ($lang) {
-                'ms' => "Selamat tinggal! 👋 Terima kasih kerana berkunjung. Jumpa lagi di Win Win Car Studio! 🚗",
-                'zh' => "再见！👋 感谢您的到访，期待在 Win Win Car Studio 再次见到您！🚗",
-                default => "Goodbye! 👋 Thanks for stopping by. Hope to see you at Win Win Car Studio soon! 🚗",
+                'ms' => 'Selamat tinggal! 👋 Terima kasih kerana berkunjung. Jumpa lagi di Win Win Car Studio! 🚗',
+                'zh' => '再见！👋 感谢您的到访，期待在 Win Win Car Studio 再次见到您！🚗',
+                default => 'Goodbye! 👋 Thanks for stopping by. Hope to see you at Win Win Car Studio soon! 🚗',
             };
         }
 
@@ -692,9 +696,9 @@ class MockDriver implements ChatServiceInterface
             || preg_match('/^(好|好的|好滴|可以|嗯|嗯嗯|行|没事|没有|不用了|知道了|明白)$/u', trim($msg))
             || preg_match('/^(ok|okay|baik|boleh|takpe|faham|noted)$/iu', trim($msg))) {
             return match ($lang) {
-                'ms' => "Baik! 😊 Ada apa-apa lagi yang boleh saya bantu?",
-                'zh' => "好的！😊 还有什么可以帮您的吗？",
-                default => "Got it! 😊 Is there anything else I can help you with?",
+                'ms' => 'Baik! 😊 Ada apa-apa lagi yang boleh saya bantu?',
+                'zh' => '好的！😊 还有什么可以帮您的吗？',
+                default => 'Got it! 😊 Is there anything else I can help you with?',
             };
         }
 
@@ -703,8 +707,8 @@ class MockDriver implements ChatServiceInterface
             || preg_match('/(你真棒|你好棒|做得好|你很厉害|你太聪明|我喜欢你|爱你|你真好|你很好)/u', $msg)
             || preg_match('/(awak (bagus|hebat|pandai|terbaik)|bagus la|terima kasih banyak)/iu', $msg)) {
             return match ($lang) {
-                'ms' => "Terima kasih! 🥰 Anda sangat baik. Saya sentiasa di sini untuk membantu — tanya saja bila-bila masa! 🚗✨",
-                'zh' => "谢谢您！🥰 您太客气了。我随时都在，有需要随时问我哦！🚗✨",
+                'ms' => 'Terima kasih! 🥰 Anda sangat baik. Saya sentiasa di sini untuk membantu — tanya saja bila-bila masa! 🚗✨',
+                'zh' => '谢谢您！🥰 您太客气了。我随时都在，有需要随时问我哦！🚗✨',
                 default => "Aww, thank you! 🥰 You're too kind. I'm always here to help — ask me anything, anytime! 🚗✨",
             };
         }
@@ -763,9 +767,9 @@ class MockDriver implements ChatServiceInterface
         $now = now()->setTimezone('Asia/Kuala_Lumpur');
 
         return match ($lang) {
-            'ms' => "🕐 Masa sekarang ialah " . $now->format('g:i A') . " (waktu Malaysia).\n\nIngat, kami tutup setiap hari Jumaat ya! 😊",
-            'zh' => "🕐 现在是 " . $now->format('g:i A') . "（马来西亚时间）。\n\n提醒您，我们每周五休息哦！😊",
-            default => "🕐 The time right now is " . $now->format('g:i A') . " (Malaysia time).\n\nJust a reminder — we're closed every Friday! 😊",
+            'ms' => '🕐 Masa sekarang ialah '.$now->format('g:i A')." (waktu Malaysia).\n\nIngat, kami tutup setiap hari Jumaat ya! 😊",
+            'zh' => '🕐 现在是 '.$now->format('g:i A')."（马来西亚时间）。\n\n提醒您，我们每周五休息哦！😊",
+            default => '🕐 The time right now is '.$now->format('g:i A')." (Malaysia time).\n\nJust a reminder — we're closed every Friday! 😊",
         };
     }
 
@@ -779,17 +783,20 @@ class MockDriver implements ChatServiceInterface
             $days = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
             $months = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
             $note = $dow === 5 ? "\n\n⚠️ Hari ini Jumaat — kami tutup hari ini." : '';
-            return "📅 Hari ini ialah {$days[$dow]}, " . $now->format('j') . " {$months[$monthIndex]} " . $now->format('Y') . ".{$note}";
+
+            return "📅 Hari ini ialah {$days[$dow]}, ".$now->format('j')." {$months[$monthIndex]} ".$now->format('Y').".{$note}";
         }
 
         if ($lang === 'zh') {
             $days = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
             $note = $dow === 5 ? "\n\n⚠️ 今天是星期五——我们今天休息。" : '';
-            return "📅 今天是 " . $now->format('Y') . " 年 " . $now->format('n') . " 月 " . $now->format('j') . " 日，{$days[$dow]}。{$note}";
+
+            return '📅 今天是 '.$now->format('Y').' 年 '.$now->format('n').' 月 '.$now->format('j')." 日，{$days[$dow]}。{$note}";
         }
 
         $note = $dow === 5 ? "\n\n⚠️ It's Friday today — we're closed." : '';
-        return "📅 Today is " . $now->format('l, F j, Y') . ".{$note}";
+
+        return '📅 Today is '.$now->format('l, F j, Y').".{$note}";
     }
 
     /**
@@ -800,22 +807,22 @@ class MockDriver implements ChatServiceInterface
     private function normalizeSlang(string $msg): string
     {
         $replacements = [
-            '/\bwru\b/iu'   => 'who are you',
-            '/\bhru\b/iu'   => 'how are you',
-            '/\bwdyd\b/iu'  => 'what do you do',
-            '/\bur\b/iu'    => 'your',
-            '/\bu\b/iu'     => 'you',
-            '/\br\b/iu'     => 'are',
+            '/\bwru\b/iu' => 'who are you',
+            '/\bhru\b/iu' => 'how are you',
+            '/\bwdyd\b/iu' => 'what do you do',
+            '/\bur\b/iu' => 'your',
+            '/\bu\b/iu' => 'you',
+            '/\br\b/iu' => 'are',
             '/\bwa[t]+\b/iu' => 'what',   // wat, watt
-            '/\bwut\b/iu'   => 'what',
-            '/\bwot\b/iu'   => 'what',
+            '/\bwut\b/iu' => 'what',
+            '/\bwot\b/iu' => 'what',
             '/\bwanna\b/iu' => 'want to',
             '/\bgonna\b/iu' => 'going to',
-            '/\bpls\b/iu'   => 'please',
-            '/\bplz\b/iu'   => 'please',
-            '/\bdis\b/iu'   => 'this',
-            '/\bda\b/iu'    => 'the',
-            '/\bn\b/iu'     => 'and',
+            '/\bpls\b/iu' => 'please',
+            '/\bplz\b/iu' => 'please',
+            '/\bdis\b/iu' => 'this',
+            '/\bda\b/iu' => 'the',
+            '/\bn\b/iu' => 'and',
         ];
 
         return preg_replace(array_keys($replacements), array_values($replacements), $msg) ?? $msg;
@@ -896,12 +903,12 @@ class MockDriver implements ChatServiceInterface
 
         // Aliases let BM/ZH (and common shorthand) hit English service names.
         $aliases = [
-            'tint'      => ['tint', 'tinted', 'film', '隔热膜', '贴膜', '车窗'],
-            'audio'     => ['audio', 'speaker', 'head unit', 'stereo', '音响', '喇叭', 'bunyi'],
+            'tint' => ['tint', 'tinted', 'film', '隔热膜', '贴膜', '车窗'],
+            'audio' => ['audio', 'speaker', 'head unit', 'stereo', '音响', '喇叭', 'bunyi'],
             'subwoofer' => ['subwoofer', 'amplifier', 'woofer', 'bass', '低音', '功放'],
-            'dashcam'   => ['dashcam', 'dash cam', 'kamera', '记录仪', '行车记录'],
-            'alarm'     => ['alarm', 'security', 'immobilizer', 'penggera', '防盗', '警报'],
-            'dsp'       => ['dsp', 'tuning', 'calibration', 'penalaan', '调音', '校准'],
+            'dashcam' => ['dashcam', 'dash cam', 'kamera', '记录仪', '行车记录'],
+            'alarm' => ['alarm', 'security', 'immobilizer', 'penggera', '防盗', '警报'],
+            'dsp' => ['dsp', 'tuning', 'calibration', 'penalaan', '调音', '校准'],
         ];
 
         $matched = $services->filter(function (array $service) use ($msg, $aliases) {
@@ -915,6 +922,7 @@ class MockDriver implements ChatServiceInterface
                     }
                 }
             }
+
             return false;
         });
 
@@ -929,15 +937,15 @@ class MockDriver implements ChatServiceInterface
             $name = in_array($lang, ['ms', 'zh'], true)
                 ? (($service['name_'.$lang] ?? null) ?: $service['name'])
                 : $service['name'];
-            $price = $service['price'] ? 'RM ' . number_format((float) $service['price'], 0) : null;
+            $price = $service['price'] ? 'RM '.number_format((float) $service['price'], 0) : null;
 
-            return '• ' . $name
-                . ($price ? match ($lang) {
+            return '• '.$name
+                .($price ? match ($lang) {
                     'ms' => " — dari {$price}",
                     'zh' => " — {$price} 起",
                     default => " — from {$price}",
                 } : '')
-                . ($service['duration_label'] ? " ({$service['duration_label']})" : '');
+                .($service['duration_label'] ? " ({$service['duration_label']})" : '');
         })->implode("\n");
 
         $message = match ($lang) {
@@ -949,8 +957,12 @@ class MockDriver implements ChatServiceInterface
         return [
             'message' => $message,
             'suggestions' => [[
-                'label' => match ($lang) { 'ms' => 'Buat tempahan', 'zh' => '立即预约', default => 'Book appointment' },
-                'query' => match ($lang) { 'ms' => 'Saya mahu buat tempahan', 'zh' => '我想预约', default => 'I want to book an appointment' },
+                'label' => match ($lang) {
+                    'ms' => 'Buat tempahan', 'zh' => '立即预约', default => 'Book appointment'
+                },
+                'query' => match ($lang) {
+                    'ms' => 'Saya mahu buat tempahan', 'zh' => '我想预约', default => 'I want to book an appointment'
+                },
             ]],
         ];
     }
@@ -1016,8 +1028,9 @@ class MockDriver implements ChatServiceInterface
         }
 
         $lines = $products->map(function (Product $product) {
-            $price = $product->current_price ? ' — RM ' . number_format((float) $product->current_price, 0) : '';
-            return "• {$product->name}" . ($product->brand ? " ({$product->brand})" : '') . $price;
+            $price = $product->current_price ? ' — RM '.number_format((float) $product->current_price, 0) : '';
+
+            return "• {$product->name}".($product->brand ? " ({$product->brand})" : '').$price;
         })->implode("\n");
 
         $message = match ($lang) {
@@ -1029,8 +1042,12 @@ class MockDriver implements ChatServiceInterface
         return [
             'message' => $message,
             'suggestions' => [[
-                'label' => match ($lang) { 'ms' => 'Lihat semua produk', 'zh' => '查看全部产品', default => 'View all products' },
-                'query' => match ($lang) { 'ms' => 'Apakah produk yang anda jual?', 'zh' => '你们卖什么产品？', default => 'What products do you sell?' },
+                'label' => match ($lang) {
+                    'ms' => 'Lihat semua produk', 'zh' => '查看全部产品', default => 'View all products'
+                },
+                'query' => match ($lang) {
+                    'ms' => 'Apakah produk yang anda jual?', 'zh' => '你们卖什么产品？', default => 'What products do you sell?'
+                },
             ]],
         ];
     }
@@ -1091,10 +1108,10 @@ class MockDriver implements ChatServiceInterface
                 $reply = implode("\n\n— — —\n\n", $answers);
 
                 if ($topicCount > 3) {
-                    $reply .= "\n\n" . match ($lang) {
-                        'ms' => "👆 Anda bertanya beberapa perkara sekali gus — ini yang utama. Untuk selebihnya, tanya satu persatu ya! 😊",
-                        'zh' => "👆 您一次问了好几个问题，以上是主要的几个。其余的可以一个一个问我哦！😊",
-                        default => "👆 You asked about a few things at once — here are the main ones. For the rest, just ask me one at a time! 😊",
+                    $reply .= "\n\n".match ($lang) {
+                        'ms' => '👆 Anda bertanya beberapa perkara sekali gus — ini yang utama. Untuk selebihnya, tanya satu persatu ya! 😊',
+                        'zh' => '👆 您一次问了好几个问题，以上是主要的几个。其余的可以一个一个问我哦！😊',
+                        default => '👆 You asked about a few things at once — here are the main ones. For the rest, just ask me one at a time! 😊',
                     };
                 }
             }
@@ -1113,14 +1130,14 @@ class MockDriver implements ChatServiceInterface
         }
 
         ChatLog::record([
-            'driver'           => 'mock',
-            'feature'          => 'chat',
-            'request_payload'  => ['messages' => $messages, 'lang' => $lang],
+            'driver' => 'mock',
+            'feature' => 'chat',
+            'request_payload' => ['messages' => $messages, 'lang' => $lang],
             'response_payload' => ['message' => $reply],
             // 'fallback' lets the admin filter unanswered questions in AI Logs
             // and turn them into Chatbot FAQ entries.
-            'status'           => $isFallback ? 'fallback' : 'success',
-            'ip_address'       => request()->ip(),
+            'status' => $isFallback ? 'fallback' : 'success',
+            'ip_address' => request()->ip(),
         ]);
 
         // Return the detected language so the widget can switch its UI (selector,
@@ -1134,23 +1151,23 @@ class MockDriver implements ChatServiceInterface
             ->take(3)
             ->map(fn (Product $product) => [
                 'product_id' => $product->id,
-                'reason'     => 'Recommended based on your query.',
+                'reason' => 'Recommended based on your query.',
             ])
             ->values()
             ->all();
 
         $response = [
             'recommendations' => $recommendations,
-            'follow_up'       => 'For a confirmed fitment check, WhatsApp us at ' . $this->phone . '.',
+            'follow_up' => 'For a confirmed fitment check, WhatsApp us at '.$this->phone.'.',
         ];
 
         ChatLog::record([
-            'driver'           => 'mock',
-            'feature'          => 'recommend',
-            'request_payload'  => ['query' => $query],
+            'driver' => 'mock',
+            'feature' => 'recommend',
+            'request_payload' => ['query' => $query],
             'response_payload' => $response,
-            'status'           => 'success',
-            'ip_address'       => request()->ip(),
+            'status' => 'success',
+            'ip_address' => request()->ip(),
         ]);
 
         return $response;
@@ -1166,15 +1183,16 @@ class MockDriver implements ChatServiceInterface
     {
         $product->loadMissing('category');
 
-        $name     = trim((string) $product->name);
-        $brand    = trim((string) $product->brand);
+        $name = trim((string) $product->name);
+        $brand = trim((string) $product->brand);
         $category = trim((string) ($product->category->name ?? ''));
-        $short    = trim((string) $product->short_description);
+        $short = trim((string) $product->short_description);
 
         // Money formatter: RM850, RM99.90
         $money = function ($v): string {
             $v = (float) $v;
-            return 'RM' . ($v == floor($v) ? number_format($v, 0) : number_format($v, 2));
+
+            return 'RM'.($v == floor($v) ? number_format($v, 0) : number_format($v, 2));
         };
 
         // Top key specs as "Key Value" fragments (specs is an assoc array).
@@ -1196,20 +1214,20 @@ class MockDriver implements ChatServiceInterface
         $onSale = $product->sale_price !== null && (float) $product->sale_price < (float) $product->price;
 
         // ---- English ----------------------------------------------------
-        $catEn   = $category !== '' ? strtolower($category) : 'car accessory';
+        $catEn = $category !== '' ? strtolower($category) : 'car accessory';
         $article = in_array(strtolower($catEn[0] ?? 'c'), ['a', 'e', 'i', 'o', 'u'], true) ? 'an' : 'a';
-        $en   = [];
+        $en = [];
         $en[] = $brand !== ''
             ? "The {$name} is {$article} {$catEn} by {$brand}, hand-picked by the team at Win Win Car Audio for its build quality, fitment, and value."
             : "The {$name} is {$article} {$catEn} hand-picked by the team at Win Win Car Audio for its build quality, fitment, and value.";
         if ($short !== '') {
-            $en[] = rtrim($short, '.') . '.';
+            $en[] = rtrim($short, '.').'.';
         }
         if ($specs) {
-            $en[] = 'Key specs: ' . implode(', ', $specs) . '.';
+            $en[] = 'Key specs: '.implode(', ', $specs).'.';
         }
         if ($vehicles) {
-            $en[] = 'A confirmed fit for: ' . implode(', ', $vehicles) . '.';
+            $en[] = 'A confirmed fit for: '.implode(', ', $vehicles).'.';
         }
         if ($product->price !== null) {
             $en[] = $onSale
@@ -1220,15 +1238,15 @@ class MockDriver implements ChatServiceInterface
 
         // ---- Bahasa Malaysia -------------------------------------------
         $catMs = $category !== '' ? $category : 'aksesori kereta';
-        $ms   = [];
+        $ms = [];
         $ms[] = $brand !== ''
             ? "{$name} ialah {$catMs} dari {$brand}, dipilih khas oleh pasukan Win Win Car Audio kerana kualiti, kesesuaian, dan nilainya."
             : "{$name} ialah {$catMs} yang dipilih khas oleh pasukan Win Win Car Audio kerana kualiti, kesesuaian, dan nilainya.";
         if ($specs) {
-            $ms[] = 'Spesifikasi utama: ' . implode(', ', $specs) . '.';
+            $ms[] = 'Spesifikasi utama: '.implode(', ', $specs).'.';
         }
         if ($vehicles) {
-            $ms[] = 'Sesuai untuk: ' . implode(', ', $vehicles) . '.';
+            $ms[] = 'Sesuai untuk: '.implode(', ', $vehicles).'.';
         }
         if ($product->price !== null) {
             $ms[] = $onSale
@@ -1239,15 +1257,15 @@ class MockDriver implements ChatServiceInterface
 
         // ---- Chinese ----------------------------------------------------
         $catZh = $category !== '' ? "({$category})" : '';
-        $zh   = [];
+        $zh = [];
         $zh[] = $brand !== ''
             ? "{$name} 是 {$brand} 出品的优质汽车配件{$catZh},由 Win Win Car Audio 团队精选,注重做工、适配与性价比。"
             : "{$name} 是一款优质汽车配件{$catZh},由 Win Win Car Audio 团队精选,注重做工、适配与性价比。";
         if ($specs) {
-            $zh[] = '主要规格:' . implode('、', $specs) . '。';
+            $zh[] = '主要规格:'.implode('、', $specs).'。';
         }
         if ($vehicles) {
-            $zh[] = '适配车型:' . implode('、', $vehicles) . '。';
+            $zh[] = '适配车型:'.implode('、', $vehicles).'。';
         }
         if ($product->price !== null) {
             $zh[] = $onSale
@@ -1263,12 +1281,12 @@ class MockDriver implements ChatServiceInterface
         ];
 
         ChatLog::record([
-            'driver'           => 'mock',
-            'feature'          => 'generate_description',
-            'request_payload'  => ['product_id' => $product->id],
+            'driver' => 'mock',
+            'feature' => 'generate_description',
+            'request_payload' => ['product_id' => $product->id],
             'response_payload' => $response,
-            'status'           => 'success',
-            'ip_address'       => request()->ip(),
+            'status' => 'success',
+            'ip_address' => request()->ip(),
         ]);
 
         return $response;

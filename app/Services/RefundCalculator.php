@@ -52,9 +52,9 @@ class RefundCalculator
         $percentage = $withinFullWindow ? 100.0 : (100.0 - $this->feePercent());
 
         return [
-            'tier'       => $withinFullWindow ? 'full' : 'fee',
+            'tier' => $withinFullWindow ? 'full' : 'fee',
             'percentage' => $percentage,
-            'amount'     => round(((float) $order->total_amount) * $percentage / 100, 2),
+            'amount' => round(((float) $order->total_amount) * $percentage / 100, 2),
         ];
     }
 

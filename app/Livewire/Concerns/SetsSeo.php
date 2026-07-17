@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Concerns;
 
+use App\Services\Booking\BookingService;
 use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
@@ -13,8 +14,8 @@ trait SetsSeo
         $this->applyBusinessSchema();
 
         $storeName = config('services.store.seo_name', config('services.store.name'));
-        $isBrand   = $title === $storeName || $title === config('services.store.name');
-        $fullTitle = $isBrand ? $storeName : $title . ' | ' . $storeName;
+        $isBrand = $title === $storeName || $title === config('services.store.name');
+        $fullTitle = $isBrand ? $storeName : $title.' | '.$storeName;
 
         // seotools appends "separator + defaults.title" itself, so pass the bare
         // page title (or suppress the default on brand-only pages like home).
@@ -57,18 +58,18 @@ trait SetsSeo
         JsonLd::addValue('priceRange', 'RM');
 
         JsonLd::addValue('address', array_filter([
-            '@type'           => 'PostalAddress',
-            'streetAddress'   => $store['address'] ?? null,
+            '@type' => 'PostalAddress',
+            'streetAddress' => $store['address'] ?? null,
             'addressLocality' => $store['city'] ?? null,
-            'addressRegion'   => $store['state'] ?? null,
-            'postalCode'      => $store['postcode'] ?? null,
-            'addressCountry'  => $store['country'] ?? null,
+            'addressRegion' => $store['state'] ?? null,
+            'postalCode' => $store['postcode'] ?? null,
+            'addressCountry' => $store['country'] ?? null,
         ]));
 
         if (isset($store['lat'], $store['lng'])) {
             JsonLd::addValue('geo', [
-                '@type'     => 'GeoCoordinates',
-                'latitude'  => $store['lat'],
+                '@type' => 'GeoCoordinates',
+                'latitude' => $store['lat'],
                 'longitude' => $store['lng'],
             ]);
         }
@@ -91,10 +92,10 @@ trait SetsSeo
     private function openingHoursSpecification(): ?array
     {
         $start = (string) setting('BUSINESS_HOURS_START', '09:00');
-        $end   = (string) setting('BUSINESS_HOURS_END', '18:00');
+        $end = (string) setting('BUSINESS_HOURS_END', '18:00');
 
         $dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        $closed   = app(\App\Services\Booking\BookingService::class)->closedWeekdays();
+        $closed = app(BookingService::class)->closedWeekdays();
         $openDays = array_values(array_diff([0, 1, 2, 3, 4, 5, 6], $closed));
 
         if ($openDays === []) {
@@ -102,10 +103,10 @@ trait SetsSeo
         }
 
         return [
-            '@type'     => 'OpeningHoursSpecification',
+            '@type' => 'OpeningHoursSpecification',
             'dayOfWeek' => array_map(fn (int $d): string => $dayNames[$d], $openDays),
-            'opens'     => $start,
-            'closes'    => $end,
+            'opens' => $start,
+            'closes' => $end,
         ];
     }
 }

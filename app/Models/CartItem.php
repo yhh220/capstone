@@ -89,7 +89,7 @@ class CartItem extends Model
                     $guestItem->delete();
                 } else {
                     $guestItem->update([
-                        'user_id'    => $userId,
+                        'user_id' => $userId,
                         'session_id' => null,
                     ]);
                 }

@@ -41,7 +41,7 @@ class BrandsTable
                     ->label('Active')
                     ->sortable()
                     ->alignCenter()
-                    ->disabled(fn () => !auth()->user()?->isStaffMember())
+                    ->disabled(fn () => ! auth()->user()?->isStaffMember())
                     ->updateStateUsing(function ($record, $state) {
                         if (! auth()->user()?->isStaffMember()) {
                             return;

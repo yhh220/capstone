@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Support\Str;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
@@ -14,27 +14,27 @@ class ProductSeeder extends Seeder
     {
         $categories = [
             'Android Player' => 'Premium Android players with navigation, Apple CarPlay and Android Auto.',
-            'Dash Cam'       => 'Front and rear dash cameras for road safety.',
-            'Speaker 6x9'    => '6x9 inch coaxial and component car speakers.',
-            'Tweeter'        => 'High-frequency tweeters for crystal clear highs.',
-            'Number Plate'   => 'Custom number plates and accessories.',
-            'Tinted'         => 'Window tinting films and packages.',
-            'Bodykit'        => 'Bodykits, bumpers and aero accessories.',
-            'Wiper'          => 'Wiper blades and wiper accessories.',
-            'Led Light'      => 'LED headlights, fog lights and interior lighting.',
-            'Lamp Cover'     => 'Tail lamp and headlamp covers.',
-            'Aircond Gas'    => 'Air conditioning gas refill and service.',
+            'Dash Cam' => 'Front and rear dash cameras for road safety.',
+            'Speaker 6x9' => '6x9 inch coaxial and component car speakers.',
+            'Tweeter' => 'High-frequency tweeters for crystal clear highs.',
+            'Number Plate' => 'Custom number plates and accessories.',
+            'Tinted' => 'Window tinting films and packages.',
+            'Bodykit' => 'Bodykits, bumpers and aero accessories.',
+            'Wiper' => 'Wiper blades and wiper accessories.',
+            'Led Light' => 'LED headlights, fog lights and interior lighting.',
+            'Lamp Cover' => 'Tail lamp and headlamp covers.',
+            'Aircond Gas' => 'Air conditioning gas refill and service.',
             'Oil Compressor' => 'Compressor oil and AC system lubricants.',
-            'Car Wash'       => 'Car wash shampoos, wax and detailing products.',
+            'Car Wash' => 'Car wash shampoos, wax and detailing products.',
         ];
 
         foreach ($categories as $name => $desc) {
             Category::updateOrCreate(
                 ['slug' => Str::slug($name)],
                 [
-                    'name'        => $name,
+                    'name' => $name,
                     'description' => $desc,
-                    'is_active'   => true,
+                    'is_active' => true,
                 ]
             );
         }
@@ -68,19 +68,19 @@ class ProductSeeder extends Seeder
             $product = Product::updateOrCreate(
                 ['slug' => Str::slug($name)],
                 [
-                    'category_id'       => $category?->id,
-                    'brand'             => $brand,
-                    'name'              => $name,
+                    'category_id' => $category?->id,
+                    'brand' => $brand,
+                    'name' => $name,
                     'short_description' => $desc,
-                    'description'       => $fullDesc,
-                    'price'             => $price,
-                    'sale_price'        => null,
+                    'description' => $fullDesc,
+                    'price' => $price,
+                    'sale_price' => null,
                     // Derive the SKU from the slug so re-seeding keeps it stable
                     // (Str::random() regenerated it on every run before).
-                    'sku'               => 'WW-' . strtoupper(substr(md5(Str::slug($name)), 0, 6)),
-                    'stock'             => $stock,
-                    'is_active'         => true,
-                    'is_featured'       => in_array($catName, ['Android Player', 'Dash Cam', 'Speaker 6x9', 'Tweeter', 'Tinted']),
+                    'sku' => 'WW-'.strtoupper(substr(md5(Str::slug($name)), 0, 6)),
+                    'stock' => $stock,
+                    'is_active' => true,
+                    'is_featured' => in_array($catName, ['Android Player', 'Dash Cam', 'Speaker 6x9', 'Tweeter', 'Tinted']),
                 ]
             );
 
@@ -93,8 +93,8 @@ class ProductSeeder extends Seeder
                 if (! $currentMedia || $currentMedia->file_name !== $imageFilename) {
                     $product->clearMediaCollection('images');
                     $product->addMedia($path)
-                            ->preservingOriginal()
-                            ->toMediaCollection('images');
+                        ->preservingOriginal()
+                        ->toMediaCollection('images');
                 }
             }
         }

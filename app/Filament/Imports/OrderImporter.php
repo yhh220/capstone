@@ -128,8 +128,8 @@ class OrderImporter extends Importer
         // or shipped. Enforce the same forward-only chain here.
         $requiredPrecursor = [
             'processing' => 'pending',
-            'shipped'    => 'processing',
-            'delivered'  => 'shipped',
+            'shipped' => 'processing',
+            'delivered' => 'shipped',
         ];
 
         if ($status !== null && isset($requiredPrecursor[$status]) && $this->record->status !== $requiredPrecursor[$status]) {
@@ -193,17 +193,17 @@ class OrderImporter extends Importer
 
             Mail::to($this->record->customer_email)->send($mail);
         } catch (\Throwable $e) {
-            logger()->error('Order import status-change email failed: ' . $e->getMessage());
+            logger()->error('Order import status-change email failed: '.$e->getMessage());
         }
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your order import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your order import has completed and '.number_format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         $failedRowsCount = $import->getFailedRowsCount();
         if ($failedRowsCount) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.number_format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         self::notifyCompletionToDatabase(

@@ -1,5 +1,8 @@
 <?php
 
+use App\Logging\AddObservabilityProcessor;
+use App\Logging\CreateDatabaseLogger;
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -87,7 +90,7 @@ return [
         // Structured logs written to the app_logs DB table (admin "Logs" viewer).
         'database' => [
             'driver' => 'custom',
-            'via' => \App\Logging\CreateDatabaseLogger::class,
+            'via' => CreateDatabaseLogger::class,
             'level' => env('LOG_DB_LEVEL', 'info'),
         ],
 
@@ -97,8 +100,8 @@ return [
             'path' => storage_path('logs/structured.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
-            'formatter' => \Monolog\Formatter\JsonFormatter::class,
-            'tap' => [\App\Logging\AddObservabilityProcessor::class],
+            'formatter' => JsonFormatter::class,
+            'tap' => [AddObservabilityProcessor::class],
             'replace_placeholders' => true,
         ],
 

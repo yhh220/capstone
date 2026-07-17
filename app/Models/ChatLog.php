@@ -37,7 +37,7 @@ class ChatLog extends Model
 
     public static function record(array $attributes): void
     {
-        if (!Schema::hasTable('chat_logs')) {
+        if (! Schema::hasTable('chat_logs')) {
             return;
         }
 

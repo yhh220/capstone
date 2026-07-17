@@ -19,15 +19,18 @@ class AuthFlowTest extends TestCase
     use RefreshDatabase;
 
     private string $email = 'flowtest@example.com';
-    private string $pass  = 'Passw0rd!@#';
+
+    private string $pass = 'Passw0rd!@#';
 
     private function captureOtp(): string
     {
         $code = null;
         Notification::assertSentOnDemand(EmailOtp::class, function ($n) use (&$code) {
             $code = $n->code;
+
             return true;
         });
+
         return $code;
     }
 
@@ -223,10 +226,10 @@ class AuthFlowTest extends TestCase
     private function makeUser(): User
     {
         return User::forceCreate([
-            'name'              => 'Flow Test',
-            'email'             => $this->email,
-            'password'          => $this->pass, // hashed cast
-            'role'              => 'client',
+            'name' => 'Flow Test',
+            'email' => $this->email,
+            'password' => $this->pass, // hashed cast
+            'role' => 'client',
             'email_verified_at' => now(),
         ]);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ShopModeService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -12,7 +13,9 @@ class Setting extends Model
     use LogsActivity;
 
     protected $primaryKey = 'key';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = ['key', 'value'];
@@ -37,7 +40,7 @@ class Setting extends Model
             if ($setting->key === 'ONLINE_SHOPPING_ENABLED'
                 && $setting->wasChanged('value')
                 && $setting->value === 'false') {
-                app(\App\Services\ShopModeService::class)->cancelUnpaidOrders();
+                app(ShopModeService::class)->cancelUnpaidOrders();
             }
         });
     }
@@ -47,12 +50,11 @@ class Setting extends Model
      */
     public static function getValue(string $key, mixed $default = null): mixed
     {
-        if (!Schema::hasTable('settings')) {
+        if (! Schema::hasTable('settings')) {
             return $default;
         }
 
-        return cache()->remember("setting_{$key}", 3600, fn() =>
-            static::find($key)?->value ?? $default
+        return cache()->remember("setting_{$key}", 3600, fn () => static::find($key)?->value ?? $default
         );
     }
 
@@ -61,7 +63,7 @@ class Setting extends Model
      */
     public static function setValue(string $key, mixed $value): void
     {
-        if (!Schema::hasTable('settings')) {
+        if (! Schema::hasTable('settings')) {
             return;
         }
 

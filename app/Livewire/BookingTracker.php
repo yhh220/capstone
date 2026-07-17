@@ -14,11 +14,15 @@ class BookingTracker extends Component
 {
     use NotifiesOwner, SetsSeo;
 
-    public string  $reference = '';
-    public string  $email     = '';
-    public ?Booking $booking  = null;
-    public bool    $searched  = false;
-    public string  $errorMsg  = '';
+    public string $reference = '';
+
+    public string $email = '';
+
+    public ?Booking $booking = null;
+
+    public bool $searched = false;
+
+    public string $errorMsg = '';
 
     public function mount(): void
     {
@@ -32,17 +36,18 @@ class BookingTracker extends Component
     {
         $this->validate([
             'reference' => 'required|string|max:50',
-            'email'     => 'required|email|max:100',
+            'email' => 'required|email|max:100',
         ]);
 
         $this->searched = true;
         $this->errorMsg = '';
-        $this->booking  = null;
+        $this->booking = null;
 
-        $key = 'booking-track:' . request()->ip();
+        $key = 'booking-track:'.request()->ip();
         if (RateLimiter::tooManyAttempts($key, 6)) {
             $seconds = RateLimiter::availableIn($key);
             $this->errorMsg = __('Too many lookups. Please try again in :seconds seconds.', ['seconds' => $seconds]);
+
             return;
         }
         RateLimiter::hit($key, 120);
@@ -54,6 +59,7 @@ class BookingTracker extends Component
         // enumerate which references exist (and thus the shop's booking volume).
         if (! $booking || strtolower(trim($booking->customer_email ?? '')) !== strtolower(trim($this->email))) {
             $this->errorMsg = __('No matching booking found. Please check your booking reference and email.');
+
             return;
         }
 
@@ -64,13 +70,14 @@ class BookingTracker extends Component
     {
         $this->validate([
             'reference' => 'required|string|max:50',
-            'email'     => 'required|email|max:100',
+            'email' => 'required|email|max:100',
         ]);
 
-        $cancelKey = 'booking-cancel:' . request()->ip();
+        $cancelKey = 'booking-cancel:'.request()->ip();
         if (RateLimiter::tooManyAttempts($cancelKey, 3)) {
             $seconds = RateLimiter::availableIn($cancelKey);
             $this->errorMsg = __('Too many attempts. Please try again in :seconds seconds.', ['seconds' => $seconds]);
+
             return;
         }
         RateLimiter::hit($cancelKey, 120);
@@ -84,12 +91,14 @@ class BookingTracker extends Component
             || ! $booking->customer_email
             || strtolower(trim($booking->customer_email)) !== strtolower(trim($this->email))) {
             $this->errorMsg = __('No matching booking found. Please check your booking reference and email.');
+
             return;
         }
 
         if (in_array($booking->status, ['cancelled', 'completed'], true)) {
             session()->flash('success', __('This booking has already been cancelled or completed.'));
             $this->booking = $booking->fresh('service');
+
             return;
         }
 
@@ -103,7 +112,7 @@ class BookingTracker extends Component
                 Mail::to($booking->customer_email)->send(new BookingCancelledMail($this->booking));
             }
         } catch (\Throwable $e) {
-            logger()->error('BookingCancelledMail failed: ' . $e->getMessage());
+            logger()->error('BookingCancelledMail failed: '.$e->getMessage());
         }
 
         // Notify the shop owner
@@ -111,11 +120,11 @@ class BookingTracker extends Component
             'Booking cancelled by customer',
             [
                 'Reference' => $booking->reference,
-                'Customer'  => $booking->customer_name,
-                'Phone'     => $booking->customer_phone,
-                'When'      => $booking->start_at?->format('D, d M Y · g:i A'),
+                'Customer' => $booking->customer_name,
+                'Phone' => $booking->customer_phone,
+                'When' => $booking->start_at?->format('D, d M Y · g:i A'),
             ],
-            url('/admin/bookings/' . $booking->getKey() . '/edit'),
+            url('/admin/bookings/'.$booking->getKey().'/edit'),
             'View booking',
         );
     }

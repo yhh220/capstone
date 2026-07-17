@@ -6,11 +6,9 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Setting;
-use App\Models\User;
 use App\Services\ShopModeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
@@ -35,14 +33,14 @@ class ShopModeCloseTest extends TestCase
     private function order(string $paymentStatus, Product $product, int $qty = 2): Order
     {
         $order = Order::create([
-            'order_number'   => Order::generateOrderNumber(),
-            'customer_name'  => 'Test',
+            'order_number' => Order::generateOrderNumber(),
+            'customer_name' => 'Test',
             'customer_email' => 'test@example.test',
             'customer_phone' => '0123456789',
-            'subtotal'       => 500,
-            'shipping_fee'   => 0,
-            'total_amount'   => 500,
-            'status'         => $paymentStatus === 'paid' ? 'processing' : 'pending',
+            'subtotal' => 500,
+            'shipping_fee' => 0,
+            'total_amount' => 500,
+            'status' => $paymentStatus === 'paid' ? 'processing' : 'pending',
             'payment_status' => $paymentStatus,
         ]);
         OrderItem::create([
@@ -57,7 +55,7 @@ class ShopModeCloseTest extends TestCase
     {
         Mail::fake();
         $product = $this->product(stock: 5);
-        $unpaid  = $this->order('pending', $product, qty: 2);
+        $unpaid = $this->order('pending', $product, qty: 2);
 
         $cancelled = app(ShopModeService::class)->cancelUnpaidOrders();
 
@@ -71,7 +69,7 @@ class ShopModeCloseTest extends TestCase
     {
         Mail::fake();
         $product = $this->product(stock: 5);
-        $paid    = $this->order('paid', $product, qty: 2);
+        $paid = $this->order('paid', $product, qty: 2);
 
         app(ShopModeService::class)->cancelUnpaidOrders();
 
@@ -85,7 +83,7 @@ class ShopModeCloseTest extends TestCase
         Mail::fake();
         Setting::setValue('ONLINE_SHOPPING_ENABLED', 'true');
         $product = $this->product(stock: 5);
-        $unpaid  = $this->order('pending', $product, qty: 1);
+        $unpaid = $this->order('pending', $product, qty: 1);
 
         // The model's updated event should fire the cleanup on a true→false change.
         Setting::setValue('ONLINE_SHOPPING_ENABLED', 'false');
@@ -99,7 +97,7 @@ class ShopModeCloseTest extends TestCase
         Mail::fake();
         Setting::setValue('ONLINE_SHOPPING_ENABLED', 'false');
         $product = $this->product(stock: 5);
-        $unpaid  = $this->order('pending', $product, qty: 1);
+        $unpaid = $this->order('pending', $product, qty: 1);
 
         Setting::setValue('ONLINE_SHOPPING_ENABLED', 'true');
 

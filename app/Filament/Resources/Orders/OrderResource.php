@@ -6,13 +6,14 @@ use App\Filament\Exports\OrderExporter;
 use App\Mail\OrderCancelledMail;
 use App\Mail\OrderConfirmationMail;
 use App\Mail\OrderDeliveredMail;
-use App\Mail\OrderRefundProcessedMail;
 use App\Mail\OrderPickupRescheduledMail;
+use App\Mail\OrderRefundProcessedMail;
 use App\Mail\OrderShippedMail;
 use App\Mail\OwnerAlertMail;
 use App\Models\Order;
-use App\Services\RefundCalculator;
+use App\Services\Payments\StripeCheckoutService;
 use App\Services\PickupScheduleService;
+use App\Services\RefundCalculator;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -393,7 +394,7 @@ class OrderResource extends Resource
 
                         // Void any open Stripe session so the customer can't ALSO pay
                         // online after this manual settle (double charge → manual refund).
-                        app(\App\Services\Payments\StripeCheckoutService::class)
+                        app(StripeCheckoutService::class)
                             ->expireSessionQuietly($claimed->stripe_session_id);
 
                         // Online payment (PaymentPage::pay()) emails the customer on
@@ -618,7 +619,7 @@ class OrderResource extends Resource
 
                         // Void any open Stripe session: the stock was just released, so
                         // a customer still on Stripe's page must not be able to pay.
-                        app(\App\Services\Payments\StripeCheckoutService::class)
+                        app(StripeCheckoutService::class)
                             ->expireSessionQuietly($order->stripe_session_id);
 
                         $order = $order->fresh('items');

@@ -31,18 +31,18 @@ class TopProductsChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label'           => 'Stock Available',
-                    'data'            => $products->pluck('stock')->toArray(),
+                    'label' => 'Stock Available',
+                    'data' => $products->pluck('stock')->toArray(),
                     'backgroundColor' => $products->map(fn ($product) => match (true) {
                         $product->stock <= 0 => 'rgba(239, 68, 68, 0.85)',
                         $product->stock < 5 => 'rgba(245, 158, 11, 0.85)',
                         default => 'rgba(59, 130, 246, 0.85)',
                     })->toArray(),
-                    'borderRadius'      => 6,
-                    'borderSkipped'     => false,
+                    'borderRadius' => 6,
+                    'borderSkipped' => false,
                 ],
             ],
-            'labels' => $products->map(fn ($p) => strlen($p->name) > 25 ? substr($p->name, 0, 22) . '…' : $p->name)->toArray(),
+            'labels' => $products->map(fn ($p) => strlen($p->name) > 25 ? substr($p->name, 0, 22).'…' : $p->name)->toArray(),
         ];
     }
 
@@ -62,15 +62,15 @@ class TopProductsChart extends ChartWidget
                     'ticks' => [
                         'maxRotation' => 45,
                         'minRotation' => 0,
-                        'autoSkip'    => true,
-                        'font'        => ['size' => 11],
+                        'autoSkip' => true,
+                        'font' => ['size' => 11],
                     ],
                 ],
                 'y' => [
                     'beginAtZero' => true,
                     'title' => [
                         'display' => true,
-                        'text'    => 'Units in Stock',
+                        'text' => 'Units in Stock',
                     ],
                 ],
             ],

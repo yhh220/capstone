@@ -32,23 +32,23 @@ class GmailSendSetupController extends Controller
                 ->redirectUrl(route('gmail-send.callback'))
                 ->user();
         } catch (\Throwable $e) {
-            return response('Google consent failed: ' . $e->getMessage(), 500);
+            return response('Google consent failed: '.$e->getMessage(), 500);
         }
 
         if (! $socialUser->refreshToken) {
             return response(
-                "No refresh token came back. This usually means the account already \n" .
-                "authorized this app before without offline access. Go to \n" .
-                "https://myaccount.google.com/permissions, remove this app's access, \n" .
-                "then visit /gmail-send/connect again.",
+                "No refresh token came back. This usually means the account already \n".
+                "authorized this app before without offline access. Go to \n".
+                "https://myaccount.google.com/permissions, remove this app's access, \n".
+                'then visit /gmail-send/connect again.',
                 500
             );
         }
 
         return response(
-            "Connected as: {$socialUser->getEmail()}\n\n" .
-            "Refresh token (copy this into GMAIL_SEND_REFRESH_TOKEN in .env, both \n" .
-            "locally and in Render's environment variables):\n\n" .
+            "Connected as: {$socialUser->getEmail()}\n\n".
+            "Refresh token (copy this into GMAIL_SEND_REFRESH_TOKEN in .env, both \n".
+            "locally and in Render's environment variables):\n\n".
             $socialUser->refreshToken
         )->header('Content-Type', 'text/plain');
     }

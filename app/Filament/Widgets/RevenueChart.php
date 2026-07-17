@@ -18,7 +18,7 @@ class RevenueChart extends ChartWidget
 
     protected int|string|array $columnSpan = [
         'default' => 'full',
-        'xl'      => 7,
+        'xl' => 7,
     ];
 
     protected ?string $heading = 'Revenue';
@@ -30,8 +30,8 @@ class RevenueChart extends ChartWidget
     protected function getFilters(): ?array
     {
         return [
-            '3'  => 'Last 3 months',
-            '6'  => 'Last 6 months',
+            '3' => 'Last 3 months',
+            '6' => 'Last 6 months',
             '12' => 'Last 12 months',
         ];
     }
@@ -46,7 +46,7 @@ class RevenueChart extends ChartWidget
         // latter used in tests/local dev), so branch on the connection.
         $ymExpr = match (Order::query()->getConnection()->getDriverName()) {
             'sqlite' => "strftime('%Y-%m', created_at)",
-            default  => "DATE_FORMAT(created_at, '%Y-%m')",
+            default => "DATE_FORMAT(created_at, '%Y-%m')",
         };
 
         $totals = Order::where('status', 'delivered')
@@ -57,24 +57,24 @@ class RevenueChart extends ChartWidget
             ->pluck('total', 'ym')
             ->map(fn ($v) => (float) $v);
 
-        $months  = [];
+        $months = [];
         $revenue = [];
         for ($i = $monthCount - 1; $i >= 0; $i--) {
-            $date      = Carbon::now()->subMonths($i);
-            $months[]  = $date->format('M Y');
+            $date = Carbon::now()->subMonths($i);
+            $months[] = $date->format('M Y');
             $revenue[] = $totals[$date->format('Y-m')] ?? 0;
         }
 
         return [
             'datasets' => [
                 [
-                    'label'            => 'Revenue (RM)',
-                    'data'             => $revenue,
-                    'borderColor'      => '#C8413D',
-                    'backgroundColor'  => 'rgba(200, 65, 61, 0.12)',
-                    'fill'             => true,
-                    'tension'          => 0.4,
-                    'pointRadius'      => 3,
+                    'label' => 'Revenue (RM)',
+                    'data' => $revenue,
+                    'borderColor' => '#C8413D',
+                    'backgroundColor' => 'rgba(200, 65, 61, 0.12)',
+                    'fill' => true,
+                    'tension' => 0.4,
+                    'pointRadius' => 3,
                     'pointHoverRadius' => 5,
                 ],
             ],

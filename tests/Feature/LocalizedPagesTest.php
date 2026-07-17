@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\BookingForm;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Service;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
@@ -41,7 +43,7 @@ class LocalizedPagesTest extends TestCase
         app()->setLocale('zh');
         $expectedMonth = now()->translatedFormat('F Y'); // e.g. 七月 2026
 
-        \Livewire\Livewire::test(\App\Livewire\BookingForm::class)
+        Livewire::test(BookingForm::class)
             ->set('currentStep', 2)
             ->assertSee($expectedMonth);
     }

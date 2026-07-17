@@ -38,7 +38,7 @@ class FeedbackTable
                 ToggleColumn::make('is_active')
                     ->label('Status')
                     ->alignCenter()
-                    ->disabled(fn () => !auth()->user()?->isStaffMember())
+                    ->disabled(fn () => ! auth()->user()?->isStaffMember())
                     ->updateStateUsing(function ($record, $state) {
                         if (! auth()->user()?->isStaffMember()) {
                             return;

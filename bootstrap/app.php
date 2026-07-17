@@ -10,6 +10,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -80,7 +81,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // through the login redirect first, and the status stays 404 so
         // monitoring and tests keep seeing the truth.
         $exceptions->render(function (
-            \Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e,
+            NotFoundHttpException $e,
             Request $request
         ) {
             if ($request->is('admin/*') && auth('admin')->check()) {

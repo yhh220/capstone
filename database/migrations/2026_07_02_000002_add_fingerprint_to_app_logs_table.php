@@ -15,7 +15,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('app_logs', function (Blueprint $table) {
-            if (!Schema::hasColumn('app_logs', 'fingerprint')) {
+            if (! Schema::hasColumn('app_logs', 'fingerprint')) {
                 $table->string('fingerprint', 100)->nullable()->after('message');
                 $table->index(['fingerprint', 'logged_at']);
             }

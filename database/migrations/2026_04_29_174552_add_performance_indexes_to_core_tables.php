@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             $table->index('category_id', 'idx_products_category_id');
-            $table->index('is_active',   'idx_products_is_active');
-            $table->index('created_at',  'idx_products_created_at');
+            $table->index('is_active', 'idx_products_is_active');
+            $table->index('created_at', 'idx_products_created_at');
         });
 
         Schema::table('orders', function (Blueprint $table) {
@@ -23,7 +23,7 @@ return new class extends Migration
         });
 
         Schema::table('bookings', function (Blueprint $table) {
-            $table->index('status',   'idx_bookings_status');
+            $table->index('status', 'idx_bookings_status');
             $table->index('start_at', 'idx_bookings_start_at');
         });
 

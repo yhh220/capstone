@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class BookingResource extends Resource
 {
@@ -44,7 +45,7 @@ class BookingResource extends Resource
         return BookingsTable::configure($table);
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with(['service']);
     }
@@ -57,9 +58,9 @@ class BookingResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListBookings::route('/'),
+            'index' => ListBookings::route('/'),
             'create' => CreateBooking::route('/create'),
-            'edit'   => EditBooking::route('/{record}/edit'),
+            'edit' => EditBooking::route('/{record}/edit'),
         ];
     }
 }

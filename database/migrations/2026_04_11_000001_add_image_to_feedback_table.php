@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('feedback', 'image')) {
+        if (! Schema::hasColumn('feedback', 'image')) {
             Schema::table('feedback', function (Blueprint $table) {
                 $table->string('image')->nullable()->after('message');
             });

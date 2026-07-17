@@ -23,10 +23,10 @@ class SettingResourceTest extends TestCase
     private function admin(): User
     {
         return User::forceCreate([
-            'name'              => 'Admin',
-            'email'             => 'admin@example.test',
-            'password'          => 'password',
-            'role'              => 'admin',
+            'name' => 'Admin',
+            'email' => 'admin@example.test',
+            'password' => 'password',
+            'role' => 'admin',
             'email_verified_at' => now(),
         ]);
     }

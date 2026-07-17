@@ -6,6 +6,8 @@ use App\Filament\Resources\ProductReviews\Pages\EditProductReview;
 use App\Filament\Resources\ProductReviews\Pages\ListProductReviews;
 use App\Models\ProductReview;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -21,11 +23,17 @@ use Filament\Tables\Table;
 class ProductReviewResource extends Resource
 {
     protected static ?string $model = ProductReview::class;
+
     protected static \UnitEnum|string|null $navigationGroup = 'Customer Interactions';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedStar;
+
     protected static ?string $navigationLabel = 'Product Reviews';
+
     protected static ?string $modelLabel = 'Product Review';
+
     protected static ?string $pluralModelLabel = 'Product Reviews';
+
     protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema
@@ -52,8 +60,8 @@ class ProductReviewResource extends Resource
             TextColumn::make('created_at')->dateTime()->sortable(),
         ])->filters([TernaryFilter::make('is_approved')->label('Visibility')])
             ->recordActions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ]);
     }
 

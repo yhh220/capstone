@@ -22,7 +22,7 @@ class BookingConfirmationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Booking Received – ' . $this->booking->reference . ' | Win Win Car Audio',
+            subject: 'Booking Received – '.$this->booking->reference.' | Win Win Car Audio',
         );
     }
 

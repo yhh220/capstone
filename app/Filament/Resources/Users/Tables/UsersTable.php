@@ -32,9 +32,9 @@ class UsersTable
                     ->searchable(),
                 BadgeColumn::make('role')
                     ->colors([
-                        'danger'  => 'owner',
+                        'danger' => 'owner',
                         'warning' => 'admin',
-                        'info'    => 'staff',
+                        'info' => 'staff',
                     ])
                     ->formatStateUsing(fn (string $state) => ucfirst($state))
                     ->sortable(),

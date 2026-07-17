@@ -8,6 +8,7 @@ use App\Mail\BookingCancelledMail;
 use App\Mail\OrderCancelledMail;
 use App\Models\Booking;
 use App\Models\Order;
+use App\Services\Payments\StripeCheckoutService;
 use App\Services\RefundCalculator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +27,7 @@ class MyAccountPage extends Component
     {
         if (! Auth::check()) {
             $this->redirect(route('login'), navigate: false);
+
             return;
         }
 
@@ -62,6 +64,7 @@ class MyAccountPage extends Component
 
         if (in_array($booking->status, ['cancelled', 'completed'], true)) {
             session()->flash('booking_success', __('This booking has already been cancelled or completed.'));
+
             return;
         }
 
@@ -74,7 +77,7 @@ class MyAccountPage extends Component
                 Mail::to($booking->customer_email)->send(new BookingCancelledMail($booking->fresh('service')));
             }
         } catch (\Throwable $e) {
-            logger()->error('BookingCancelledMail failed: ' . $e->getMessage());
+            logger()->error('BookingCancelledMail failed: '.$e->getMessage());
         }
 
         // Notify the shop owner
@@ -82,11 +85,11 @@ class MyAccountPage extends Component
             'Booking cancelled by customer',
             [
                 'Reference' => $booking->reference,
-                'Customer'  => $booking->customer_name,
-                'Phone'     => $booking->customer_phone,
-                'When'      => $booking->start_at?->format('D, d M Y · g:i A'),
+                'Customer' => $booking->customer_name,
+                'Phone' => $booking->customer_phone,
+                'When' => $booking->start_at?->format('D, d M Y · g:i A'),
             ],
-            url('/admin/bookings/' . $booking->getKey() . '/edit'),
+            url('/admin/bookings/'.$booking->getKey().'/edit'),
             'View booking',
         );
     }
@@ -100,7 +103,7 @@ class MyAccountPage extends Component
      */
     public function cancelOrder(int $orderId): void
     {
-        $calculator = new RefundCalculator();
+        $calculator = new RefundCalculator;
 
         $order = DB::transaction(function () use ($orderId, $calculator) {
             $order = Order::where('id', $orderId)
@@ -116,8 +119,8 @@ class MyAccountPage extends Component
             if ($order->payment_status === 'pending' && $order->isAwaitingPayment()) {
                 $order->restockItems();
                 $order->update([
-                    'status'              => 'cancelled',
-                    'cancelled_by'        => 'customer',
+                    'status' => 'cancelled',
+                    'cancelled_by' => 'customer',
                     'cancellation_reason' => 'Cancelled by customer before payment',
                 ]);
 
@@ -133,11 +136,11 @@ class MyAccountPage extends Component
 
                 $order->restockItems();
                 $order->update([
-                    'status'              => 'cancelled',
-                    'cancelled_by'        => 'customer',
+                    'status' => 'cancelled',
+                    'cancelled_by' => 'customer',
                     'cancellation_reason' => 'Cancelled by customer via My Account',
-                    'refund_amount'       => $refund['amount'],
-                    'refund_percentage'   => $refund['percentage'],
+                    'refund_amount' => $refund['amount'],
+                    'refund_percentage' => $refund['percentage'],
                 ]);
 
                 return $order;
@@ -154,7 +157,7 @@ class MyAccountPage extends Component
 
         // Void any open Stripe session for the cancelled order — a still-open
         // checkout tab must not be able to pay for stock that was just released.
-        app(\App\Services\Payments\StripeCheckoutService::class)
+        app(StripeCheckoutService::class)
             ->expireSessionQuietly($order->stripe_session_id);
 
         $order = $order->fresh('items');
@@ -162,21 +165,21 @@ class MyAccountPage extends Component
         try {
             Mail::to($order->customer_email)->send(new OrderCancelledMail($order));
         } catch (\Throwable $e) {
-            logger()->error('Order cancellation email failed: ' . $e->getMessage());
+            logger()->error('Order cancellation email failed: '.$e->getMessage());
         }
 
         $this->notifyOwner(
             'Order cancelled',
             [
                 'Order Number' => $order->order_number,
-                'Customer'     => $order->customer_name,
+                'Customer' => $order->customer_name,
                 'Cancelled By' => 'Customer (My Account)',
-                'Reason'       => $order->cancellation_reason,
-                'Refund'       => $order->refund_amount !== null
-                    ? 'RM ' . number_format($order->refund_amount, 2) . ' (' . $order->refund_percentage . '%)'
+                'Reason' => $order->cancellation_reason,
+                'Refund' => $order->refund_amount !== null
+                    ? 'RM '.number_format($order->refund_amount, 2).' ('.$order->refund_percentage.'%)'
                     : null,
             ],
-            url('/admin/orders/' . $order->getKey() . '/edit'),
+            url('/admin/orders/'.$order->getKey().'/edit'),
         );
 
         session()->flash(
@@ -184,7 +187,7 @@ class MyAccountPage extends Component
             $order->refund_amount !== null
                 ? __('Order cancelled. A refund of RM :amount (:pct%) has been recorded.', [
                     'amount' => number_format($order->refund_amount, 2),
-                    'pct'    => number_format((float) $order->refund_percentage, 0),
+                    'pct' => number_format((float) $order->refund_percentage, 0),
                 ])
                 : __('Order cancelled.')
         );

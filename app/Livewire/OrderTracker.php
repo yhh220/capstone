@@ -12,10 +12,14 @@ class OrderTracker extends Component
     use SetsSeo;
 
     public string $orderNumber = '';
-    public string $email       = '';
-    public ?Order $order       = null;
-    public bool $searched      = false;
-    public string $errorMsg    = '';
+
+    public string $email = '';
+
+    public ?Order $order = null;
+
+    public bool $searched = false;
+
+    public string $errorMsg = '';
 
     public function mount(): void
     {
@@ -29,17 +33,18 @@ class OrderTracker extends Component
     {
         $this->validate([
             'orderNumber' => 'required|string',
-            'email'       => 'required|email',
+            'email' => 'required|email',
         ]);
 
         $this->searched = true;
         $this->errorMsg = '';
 
-        $throttleKey = 'track-order:' . request()->ip();
+        $throttleKey = 'track-order:'.request()->ip();
 
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
             $this->errorMsg = __('Too many tracking attempts. Please try again in :seconds seconds.', ['seconds' => $seconds]);
+
             return;
         }
 
@@ -54,6 +59,7 @@ class OrderTracker extends Component
         // enumerate which numbers exist (and thus the store's order volume).
         if (! $order || strtolower(trim($order->customer_email ?? '')) !== strtolower(trim($this->email))) {
             $this->errorMsg = __('No matching order found. Please check your order number and email.');
+
             return;
         }
 
@@ -62,11 +68,11 @@ class OrderTracker extends Component
 
     /** Lucide icon markup (lucide.dev, MIT) keyed by status — keeps the timeline's icons SVG, not emoji. */
     private const ICONS = [
-        'pending'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"/></svg>',
+        'pending' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"/></svg>',
         'processing' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-        'shipped'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12"/></svg>',
-        'delivered'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
-        'cancelled'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+        'shipped' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12"/></svg>',
+        'delivered' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+        'cancelled' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
     ];
 
     /**

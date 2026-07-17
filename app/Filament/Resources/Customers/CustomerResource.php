@@ -18,6 +18,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class CustomerResource extends Resource
 {
@@ -47,7 +48,7 @@ class CustomerResource extends Resource
     /**
      * Only owner and admin can edit customers.
      */
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return Filament::auth()->user()?->isAdmin() ?? false;
     }
@@ -63,7 +64,7 @@ class CustomerResource extends Resource
     /**
      * Only owner and admin can delete customers.
      */
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return Filament::auth()->user()?->isAdmin() ?? false;
     }
@@ -83,15 +84,15 @@ class CustomerResource extends Resource
                         ->label('Phone Number')
                         ->tel()
                         ->maxLength(20),
-                        TextInput::make('password')
-                            ->password()
-                            ->dehydrated(fn ($state) => filled($state))
-                            ->required(fn (string $context): bool => $context === 'create')
-                            ->helperText('Leave blank to keep current password.')
-                            ->hiddenOn('view'),
-                        Hidden::make('role')
-                            ->default('client'),
-                    ])->columns(['default' => 1, 'sm' => 2]),
+                    TextInput::make('password')
+                        ->password()
+                        ->dehydrated(fn ($state) => filled($state))
+                        ->required(fn (string $context): bool => $context === 'create')
+                        ->helperText('Leave blank to keep current password.')
+                        ->hiddenOn('view'),
+                    Hidden::make('role')
+                        ->default('client'),
+                ])->columns(['default' => 1, 'sm' => 2]),
 
             Section::make('Address Details')
                 ->schema([
@@ -105,26 +106,26 @@ class CustomerResource extends Resource
                         ->maxLength(10),
                     Select::make('state')
                         ->options([
-                            'Selangor'        => 'Selangor',
-                            'Kuala Lumpur'    => 'Kuala Lumpur',
-                            'Johor'           => 'Johor',
-                            'Penang'          => 'Penang',
-                            'Perak'           => 'Perak',
-                            'Pahang'          => 'Pahang',
+                            'Selangor' => 'Selangor',
+                            'Kuala Lumpur' => 'Kuala Lumpur',
+                            'Johor' => 'Johor',
+                            'Penang' => 'Penang',
+                            'Perak' => 'Perak',
+                            'Pahang' => 'Pahang',
                             'Negeri Sembilan' => 'Negeri Sembilan',
-                            'Melaka'          => 'Melaka',
-                            'Kedah'           => 'Kedah',
-                            'Kelantan'        => 'Kelantan',
-                            'Terengganu'      => 'Terengganu',
-                            'Perlis'          => 'Perlis',
-                            'Sabah'           => 'Sabah',
-                            'Sarawak'         => 'Sarawak',
-                            'Putrajaya'       => 'Putrajaya',
-                            'Labuan'          => 'Labuan',
+                            'Melaka' => 'Melaka',
+                            'Kedah' => 'Kedah',
+                            'Kelantan' => 'Kelantan',
+                            'Terengganu' => 'Terengganu',
+                            'Perlis' => 'Perlis',
+                            'Sabah' => 'Sabah',
+                            'Sarawak' => 'Sarawak',
+                            'Putrajaya' => 'Putrajaya',
+                            'Labuan' => 'Labuan',
                         ]),
                 ])->columns(['default' => 1, 'sm' => 2])
-                 ->collapsible()
-                 ->collapsed(),
+                ->collapsible()
+                ->collapsed(),
         ]);
     }
 
@@ -141,9 +142,9 @@ class CustomerResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListCustomers::route('/'),
+            'index' => ListCustomers::route('/'),
             'create' => CreateCustomer::route('/create'),
-            'edit'   => EditCustomer::route('/{record}/edit'),
+            'edit' => EditCustomer::route('/{record}/edit'),
         ];
     }
 }

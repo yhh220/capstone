@@ -24,7 +24,7 @@ class OrderRefundProcessedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Refund Sent – ' . $this->order->order_number . ' | Win Win Car Audio',
+            subject: 'Refund Sent – '.$this->order->order_number.' | Win Win Car Audio',
         );
     }
 

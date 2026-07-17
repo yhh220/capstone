@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Imports\OrderImporter;
+use App\Mail\OrderShippedMail;
 use App\Models\Order;
 use App\Models\User;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
@@ -115,7 +116,7 @@ class OrderImporterTest extends TestCase
         $order->refresh();
         $this->assertSame('shipped', $order->status);
         $this->assertNotNull($order->shipped_at);
-        Mail::assertSent(\App\Mail\OrderShippedMail::class);
+        Mail::assertSent(OrderShippedMail::class);
     }
 
     public function test_pending_order_cannot_skip_directly_to_shipped(): void

@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\Services\Schemas;
 
+use App\Models\Service;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -85,7 +86,7 @@ class ServiceForm
                         ->prefix('RM')
                         ->helperText('Used only when the chatbot is asked about pricing, quoted as "from RM X" with a pointer to WhatsApp. Leave blank and the chatbot names the service without any figure.'),
                 ])->collapsible()
-                ->collapsed(fn (?\App\Models\Service $record) => $record === null || $record->price === null),
+                ->collapsed(fn (?Service $record) => $record === null || $record->price === null),
         ]);
     }
 }

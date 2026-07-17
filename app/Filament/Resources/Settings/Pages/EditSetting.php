@@ -13,7 +13,7 @@ class EditSetting extends EditRecord
     protected function afterSave(): void
     {
         // Bust the cache for the updated setting
-        cache()->forget('setting_' . $this->record->key);
+        cache()->forget('setting_'.$this->record->key);
     }
 
     protected function getRedirectUrl(): string

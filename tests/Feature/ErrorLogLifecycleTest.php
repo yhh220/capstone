@@ -28,12 +28,12 @@ class ErrorLogLifecycleTest extends TestCase
     private function makeLog(string $message, Carbon $at, ?Carbon $resolvedAt = null): AppLog
     {
         return AppLog::create([
-            'level'       => 400,
-            'level_name'  => 'error',
-            'message'     => $message,
+            'level' => 400,
+            'level_name' => 'error',
+            'message' => $message,
             'fingerprint' => AppLog::fingerprintFor($message),
-            'logged_at'   => $at,
-            'created_at'  => $at,
+            'logged_at' => $at,
+            'created_at' => $at,
             'resolved_at' => $resolvedAt,
         ]);
     }
@@ -53,7 +53,7 @@ class ErrorLogLifecycleTest extends TestCase
 
     public function test_new_occurrence_reopens_a_resolved_error(): void
     {
-        $message = '支付网关超时：' . str_repeat('订单处理失败', 20);
+        $message = '支付网关超时：'.str_repeat('订单处理失败', 20);
 
         $old = $this->makeLog($message, now()->subDays(3), resolvedAt: now()->subDay());
 
@@ -94,7 +94,7 @@ class ErrorLogLifecycleTest extends TestCase
     {
         // Group A: old entry, but the same error recurred an hour ago → stays open.
         $stillActive = $this->makeLog('Gateway timeout', now()->subDays(3));
-        $recent      = $this->makeLog('Gateway timeout', now()->subHour());
+        $recent = $this->makeLog('Gateway timeout', now()->subHour());
 
         // Group B: silent for 3 days → auto-resolved.
         $wentQuiet = $this->makeLog('Disk full', now()->subDays(3));
@@ -127,7 +127,7 @@ class ErrorLogLifecycleTest extends TestCase
             'name' => 'Admin', 'email' => 'admin@example.test', 'password' => bcrypt('secret'), 'role' => 'admin',
         ]);
 
-        $error   = $this->makeLog('A real error', now()->subDays(3));
+        $error = $this->makeLog('A real error', now()->subDays(3));
         $warning = AppLog::create([
             'level' => 300, 'level_name' => 'warning', 'message' => 'Just a warning',
             'fingerprint' => AppLog::fingerprintFor('Just a warning'), 'logged_at' => now()->subDays(3),

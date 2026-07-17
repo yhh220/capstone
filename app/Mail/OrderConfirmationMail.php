@@ -24,7 +24,7 @@ class OrderConfirmationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Confirmed – ' . $this->order->order_number . ' | Win Win Car Audio',
+            subject: 'Order Confirmed – '.$this->order->order_number.' | Win Win Car Audio',
         );
     }
 
@@ -43,7 +43,7 @@ class OrderConfirmationMail extends Mailable
         $pdf = Pdf::loadView('invoice', ['order' => $this->order, 'pdf' => true]);
 
         return [
-            Attachment::fromData(fn () => $pdf->output(), 'invoice-' . $this->order->order_number . '.pdf')
+            Attachment::fromData(fn () => $pdf->output(), 'invoice-'.$this->order->order_number.'.pdf')
                 ->withMime('application/pdf'),
         ];
     }

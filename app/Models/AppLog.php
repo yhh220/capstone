@@ -33,9 +33,9 @@ class AppLog extends Model
     ];
 
     protected $casts = [
-        'context'     => 'array',
-        'logged_at'   => 'datetime',
-        'created_at'  => 'datetime',
+        'context' => 'array',
+        'logged_at' => 'datetime',
+        'created_at' => 'datetime',
         'resolved_at' => 'datetime',
     ];
 
@@ -103,9 +103,9 @@ class AppLog extends Model
     {
         return match ($this->level_name) {
             'emergency', 'alert', 'critical', 'error' => 'danger',
-            'warning'                                 => 'warning',
-            'notice', 'info'                          => 'info',
-            default                                   => 'gray', // debug
+            'warning' => 'warning',
+            'notice', 'info' => 'info',
+            default => 'gray', // debug
         };
     }
 }

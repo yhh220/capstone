@@ -52,14 +52,14 @@ class BookingAdminEditTest extends TestCase
         $day = $this->openDay(1);
 
         return Booking::create(array_merge([
-            'reference'      => Booking::generateReference(),
-            'customer_name'  => 'Test',
+            'reference' => Booking::generateReference(),
+            'customer_name' => 'Test',
             'customer_email' => 'test@example.test',
             'customer_phone' => '0123456789',
             'preferred_date' => $day->toDateString(),
-            'start_at'       => $day->copy()->setTime(10, 0),
-            'end_at'         => $day->copy()->setTime(11, 0),
-            'status'         => 'pending',
+            'start_at' => $day->copy()->setTime(10, 0),
+            'end_at' => $day->copy()->setTime(11, 0),
+            'status' => 'pending',
         ], $overrides));
     }
 
@@ -112,8 +112,8 @@ class BookingAdminEditTest extends TestCase
         $conflictDay = $this->openDay(2);
         $this->booking([
             'start_at' => $conflictDay->copy()->setTime(14, 0),
-            'end_at'   => $conflictDay->copy()->setTime(15, 0),
-            'status'   => 'confirmed',
+            'end_at' => $conflictDay->copy()->setTime(15, 0),
+            'status' => 'confirmed',
         ]);
         $booking = $this->booking();
         $originalDay = $booking->start_at->copy();
@@ -121,7 +121,7 @@ class BookingAdminEditTest extends TestCase
         Livewire::test(EditBooking::class, ['record' => $booking->getRouteKey()])
             ->fillForm([
                 'start_at' => $conflictDay->copy()->setTime(14, 0)->toDateTimeString(),
-                'end_at'   => $conflictDay->copy()->setTime(15, 0)->toDateTimeString(),
+                'end_at' => $conflictDay->copy()->setTime(15, 0)->toDateTimeString(),
             ])
             ->call('save');
 
@@ -138,7 +138,7 @@ class BookingAdminEditTest extends TestCase
         Livewire::test(EditBooking::class, ['record' => $booking->getRouteKey()])
             ->fillForm([
                 'start_at' => $newDay->copy()->setTime(10, 0)->toDateTimeString(),
-                'end_at'   => $newDay->copy()->setTime(11, 0)->toDateTimeString(),
+                'end_at' => $newDay->copy()->setTime(11, 0)->toDateTimeString(),
             ])
             ->call('save')
             ->assertHasNoFormErrors();

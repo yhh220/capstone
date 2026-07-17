@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Booking;
 use App\Models\Service;
+use App\Models\Setting;
 use App\Services\Booking\BookingService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -43,9 +44,9 @@ class BookingServiceTest extends TestCase
 
     public function test_opening_hours_label_follows_the_settings(): void
     {
-        \App\Models\Setting::setValue('BUSINESS_HOURS_START', '10:30');
-        \App\Models\Setting::setValue('BUSINESS_HOURS_END', '20:00');
-        \App\Models\Setting::setValue('BUSINESS_CLOSED_WEEKDAYS', '5');
+        Setting::setValue('BUSINESS_HOURS_START', '10:30');
+        Setting::setValue('BUSINESS_HOURS_END', '20:00');
+        Setting::setValue('BUSINESS_CLOSED_WEEKDAYS', '5');
 
         $label = app(BookingService::class)->openingHoursLabel('en');
 
@@ -56,7 +57,7 @@ class BookingServiceTest extends TestCase
         $this->assertStringContainsString('Friday', $label);
 
         // No closed days → the "open daily" variant.
-        \App\Models\Setting::setValue('BUSINESS_CLOSED_WEEKDAYS', '');
+        Setting::setValue('BUSINESS_CLOSED_WEEKDAYS', '');
         $this->assertStringContainsString('daily', app(BookingService::class)->openingHoursLabel('en'));
     }
 }

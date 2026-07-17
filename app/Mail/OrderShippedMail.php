@@ -24,7 +24,7 @@ class OrderShippedMail extends Mailable
         return new Envelope(
             subject: ($this->order->isPickup()
                 ? 'Your order is ready for pickup – '
-                : 'Your order has shipped – ') . $this->order->order_number . ' | Win Win Car Audio',
+                : 'Your order has shipped – ').$this->order->order_number.' | Win Win Car Audio',
         );
     }
 

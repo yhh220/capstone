@@ -56,7 +56,7 @@ class SendBookingReminders extends Command
                 Mail::to($booking->customer_email)->send(new BookingReminderMail($booking));
                 $sent++;
             } catch (\Throwable $e) {
-                logger()->error("Booking reminder failed for {$booking->reference}: " . $e->getMessage());
+                logger()->error("Booking reminder failed for {$booking->reference}: ".$e->getMessage());
             }
         }
 

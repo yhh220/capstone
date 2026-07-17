@@ -16,7 +16,7 @@ class CreateDatabaseLogger
         $level = Logger::toMonologLevel($config['level'] ?? env('LOG_DB_LEVEL', 'info'));
 
         $logger = new Logger('database', [new DatabaseLogHandler($level)]);
-        $logger->pushProcessor(new ObservabilityProcessor());
+        $logger->pushProcessor(new ObservabilityProcessor);
 
         return $logger;
     }

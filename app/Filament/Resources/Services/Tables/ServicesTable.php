@@ -8,6 +8,7 @@ use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 /**
  * Edit-only (see ServiceResource docblock): no create, no delete. Rows can be
@@ -36,7 +37,7 @@ class ServicesTable
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
-                    ->description(fn (Service $record): string => \Illuminate\Support\Str::limit($record->description, 60)),
+                    ->description(fn (Service $record): string => Str::limit($record->description, 60)),
                 TextColumn::make('duration_label')
                     ->label('Duration')
                     ->badge()

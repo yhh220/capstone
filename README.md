@@ -1,78 +1,116 @@
-<div align="center">
-
-<img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="380" alt="Laravel Logo">
-
 # Win Win Car Studio
 
-**Malaysian Car Accessories E-Commerce & Workshop Booking Platform**
+Malaysian car-accessories e-commerce and workshop-booking platform, built as an academic capstone project.
 
-<br>
+Customers can browse products and services, make workshop bookings, track bookings and orders, and use a trilingual assistant. Staff manage the catalogue, bookings, orders, users, site settings, and activity logs through the Filament admin panel.
 
-![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
-![Livewire](https://img.shields.io/badge/Livewire-4.2-FB70A9?style=for-the-badge&logo=livewire&logoColor=white)
-![Filament](https://img.shields.io/badge/Filament-5-F59E0B?style=for-the-badge)
-![PHP](https://img.shields.io/badge/PHP-8.3+-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-Dev-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
-
-</div>
-
----
-
-## About
-
-**Win Win Car Studio** is a full-stack capstone project that simulates a Malaysian car-accessories showroom. Customers can browse products, book workshop appointments, track orders/bookings, and chat with a trilingual assistant; staff manage everything through a Filament admin panel.
-
-Built on the **TALL stack** (Tailwind, Alpine.js, Livewire, Laravel).
-
-> For educational use only. All sample data, images, and business details are fictional.
-
----
+> All business details, customer data, products, and media in this repository are fictional and provided for educational demonstration only.
 
 ## Features
 
-- **Storefront** — Home, Products, Services, Booking, About, Contact, FAQ, 3D configurator
-- **Online Shopping** — cart, checkout, order history; toggleable view-only vs shopping mode (admin setting)
-- **Bookings & Orders** — appointment booking with time slots; guest lookup by reference + phone/email
-- **Trilingual (EN / BM / ZH)** — full i18n with translation-coverage tests
-- **Chatbot** — keyword assistant with typo tolerance and per-message language detection
-- **Admin Panel** — Filament resources for products, orders, bookings, customers, settings, and an audit log
-- **Light / dark mode** — flash-free, cookie-driven
-- **Security & a11y** — security headers, rate limiting, honeypot, WCAG-aligned accessibility
-
----
+- Customer storefront: products, services, booking, order tracking, FAQ, contact pages, and a 3D configurator.
+- E-commerce flow: cart, checkout, simulated payment, order history, and invoice download.
+- Workshop bookings: available time slots, booking references, and guest booking lookup.
+- Admin panel: catalogue, orders, bookings, customers, staff, settings, and audit logs.
+- English, Bahasa Melayu, and Chinese localisation.
+- Light/dark mode, accessibility-focused UI, rate limiting, honeypot protection, and security headers.
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Backend | Laravel 13 (PHP 8.3+) |
-| Reactive UI | Livewire 4 + Alpine.js |
-| Admin Panel | Filament 5 |
-| Styling / Build | Tailwind CSS v4 via Vite |
-| 3D | Three.js |
-| Database | SQLite (dev) / MySQL (production) |
-| Media | Spatie MediaLibrary |
+| Area | Technology |
+| --- | --- |
+| Backend | Laravel 13 / PHP 8.3+ |
+| Interactive UI | Livewire 4 / Alpine.js |
+| Admin panel | Filament 5 |
+| Frontend build | Tailwind CSS 4 / Vite |
+| 3D configurator | Three.js |
+| Database | SQLite (local development) / MySQL-compatible database (deployment) |
+| Media handling | Spatie Media Library |
 
----
+## Requirements
+
+- PHP 8.3 or later, with SQLite enabled
+- Composer 2
+- Node.js 20 or later and npm
+- Git
+
+## Local Setup
+
+From the project directory, run:
+
+```bash
+composer install
+npm install
+cp .env.example .env
+touch database/database.sqlite
+php artisan key:generate
+```
+
+Before seeding, add a private administrator account to `.env`:
+
+```dotenv
+DEFAULT_ADMIN_EMAIL=admin@example.test
+DEFAULT_ADMIN_PASSWORD=choose-a-strong-local-password
+```
+
+Then initialise the application and build the frontend assets:
+
+```bash
+php artisan migrate --seed
+php artisan storage:link
+npm run build
+php artisan serve
+```
+
+Open `http://127.0.0.1:8000` for the storefront. Sign in to the admin panel at `http://127.0.0.1:8000/admin` with the email and password set above.
+
+For frontend development with hot reloading, run this in a second terminal:
+
+```bash
+npm run dev
+```
+
+### Windows PowerShell
+
+Use these equivalents for the two Unix commands above:
+
+```powershell
+Copy-Item .env.example .env
+New-Item -ItemType File -Path database/database.sqlite -Force
+```
+
+## Development Defaults
+
+- The seeded payment mode is `demo`; no real payment gateway is required for local use.
+- Email uses Laravel's `log` mailer by default, so messages are written to the application logs instead of being sent.
+- Stripe test payments, Google/Microsoft sign-in, and Gmail API sending are optional. Their environment-variable placeholders and comments are in `.env.example`.
+- Never commit `.env`, real passwords, Stripe keys, OAuth secrets, or mail credentials.
+
+## Tests and Quality Checks
+
+```bash
+php artisan test
+vendor/bin/pint --test
+npm run build
+```
+
+To reset the local database and recreate all sample data:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+## Project Scope
+
+This group capstone project demonstrates an end-to-end web application: a customer-facing storefront, e-commerce and workshop workflows, a role-based administration area, localisation, and operational safeguards suitable for a small-business prototype.
 
 ## Live Demo
 
 - Storefront: [winwincaraudio.onrender.com](https://winwincaraudio.onrender.com)
 - Admin panel: [winwincaraudio.onrender.com/admin](https://winwincaraudio.onrender.com/admin)
 
----
-
-## Project Scope
-
-This is a group capstone project built by a team of three, covering the full stack end-to-end (backend, frontend, admin panel, and deployment) to demonstrate a complete, production-shaped web application rather than an isolated coding exercise. It covers a full customer-facing storefront, a real booking/ordering workflow, a role-based admin panel, and the supporting concerns (security, accessibility, localization, observability) that a real small-business site would need.
-
-The business itself — Win Win Car Studio — and all product data, images, and customer information are fictional, created for demonstration purposes only.
-
----
-
 ## License
 
 Built for academic capstone submission. Not intended for commercial use.
 
-Copyright © 2026 INTI International College Subang. All rights reserved. This project was developed as part of an academic capstone requirement, and ownership of the work belongs to INTI International College Subang.
+Copyright © 2026 INTI International College Subang. All rights reserved.

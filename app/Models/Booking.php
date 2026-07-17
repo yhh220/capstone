@@ -53,10 +53,10 @@ class Booking extends Model
     public function getStatusColorAttribute(): string
     {
         return match ($this->status) {
-            'confirmed'  => 'success',
-            'cancelled'  => 'danger',
-            'completed'  => 'info',
-            default      => 'warning',
+            'confirmed' => 'success',
+            'cancelled' => 'danger',
+            'completed' => 'info',
+            default => 'warning',
         };
     }
 
@@ -81,7 +81,7 @@ class Booking extends Model
                 ? ((int) substr($latest->reference, strrpos($latest->reference, '-') + 1)) + 1
                 : 1;
 
-            return 'BK-' . $year . '-' . str_pad((string) $count, 5, '0', STR_PAD_LEFT);
+            return 'BK-'.$year.'-'.str_pad((string) $count, 5, '0', STR_PAD_LEFT);
         });
     }
 }

@@ -23,8 +23,8 @@ class EditProfile extends BaseEditProfile
 
         if ($passwordChanged) {
             $this->js(
-                'alert(' . Js::from(__('Your password has been changed successfully. Click OK to log in again.')) . ');'
-                . 'window.location.href = ' . Js::from(Filament::getLoginUrl()) . ';'
+                'alert('.Js::from(__('Your password has been changed successfully. Click OK to log in again.')).');'
+                .'window.location.href = '.Js::from(Filament::getLoginUrl()).';'
             );
         }
     }

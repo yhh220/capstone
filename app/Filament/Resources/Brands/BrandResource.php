@@ -42,9 +42,9 @@ class BrandResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListBrands::route('/'),
+            'index' => ListBrands::route('/'),
             'create' => CreateBrand::route('/create'),
-            'edit'   => EditBrand::route('/{record}/edit'),
+            'edit' => EditBrand::route('/{record}/edit'),
         ];
     }
 }

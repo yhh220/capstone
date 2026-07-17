@@ -18,7 +18,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'preferred_courier')) {
+            if (! Schema::hasColumn('users', 'preferred_courier')) {
                 $table->string('preferred_courier')->nullable()->after('state');
             }
         });

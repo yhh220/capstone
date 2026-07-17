@@ -1,7 +1,11 @@
 <?php
 
+use App\Models\AppLog;
+use App\Models\CartItem;
+use App\Models\ChatLog;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
@@ -13,13 +17,13 @@ Schedule::command('sitemap:generate')->daily();
 
 // Prune chat logs (90d), structured app logs (LOG_DB_RETENTION_DAYS), and
 // abandoned guest carts (30d) so none of these tables can grow unbounded.
-Schedule::command('model:prune', ['--model' => [\App\Models\ChatLog::class, \App\Models\AppLog::class, \App\Models\CartItem::class]])->daily();
+Schedule::command('model:prune', ['--model' => [ChatLog::class, AppLog::class, CartItem::class]])->daily();
 
 // The database session driver never deletes its own expired rows — prune
 // anything past 2x the configured lifetime so the sessions table can't grow
 // unbounded under real traffic.
 Schedule::call(function () {
-    \Illuminate\Support\Facades\DB::table('sessions')
+    DB::table('sessions')
         ->where('last_activity', '<', now()->subMinutes(config('session.lifetime') * 2)->getTimestamp())
         ->delete();
 })->daily()->name('prune-expired-sessions');

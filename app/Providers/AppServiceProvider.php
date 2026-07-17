@@ -3,11 +3,15 @@
 namespace App\Providers;
 
 use App\Mail\Transport\GmailApiTransport;
+use App\Support\Breadcrumbs;
+use Illuminate\Foundation\Events\LocaleUpdated;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use SocialiteProviders\Manager\SocialiteWasCalled;
+use SocialiteProviders\Microsoft\Provider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Request-scoped breadcrumb trail (attached to error logs by the
         // ObservabilityProcessor).
-        $this->app->singleton(\App\Support\Breadcrumbs::class);
+        $this->app->singleton(Breadcrumbs::class);
     }
 
     public function boot(): void
@@ -28,9 +32,9 @@ class AppServiceProvider extends ServiceProvider
         // App::setLocale() alone only switches the translator — it never touches
         // Carbon — so this listener covers the SetLocale middleware, Mailable's
         // ->locale() rendering, and any manual setLocale() call in one place.
-        \Illuminate\Support\Carbon::setLocale(app()->getLocale());
-        Event::listen(function (\Illuminate\Foundation\Events\LocaleUpdated $event) {
-            \Illuminate\Support\Carbon::setLocale($event->locale);
+        Carbon::setLocale(app()->getLocale());
+        Event::listen(function (LocaleUpdated $event) {
+            Carbon::setLocale($event->locale);
         });
 
         // Single source of truth for password strength, applied everywhere via
@@ -46,7 +50,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Register the Microsoft Socialite driver (Google ships with Socialite).
         Event::listen(function (SocialiteWasCalled $event) {
-            $event->extendSocialite('microsoft', \SocialiteProviders\Microsoft\Provider::class);
+            $event->extendSocialite('microsoft', Provider::class);
         });
 
         // Gmail-over-HTTPS mail transport (see GmailApiTransport docblock) —

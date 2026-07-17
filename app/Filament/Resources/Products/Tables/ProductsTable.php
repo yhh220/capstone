@@ -69,7 +69,7 @@ class ProductsTable
                     ->label('Active')
                     ->alignCenter()
                     ->tooltip('Toggle product visibility in the store catalog')
-                    ->disabled(fn () => !auth()->user()?->isStaffMember())
+                    ->disabled(fn () => ! auth()->user()?->isStaffMember())
                     ->updateStateUsing(function ($record, $state) {
                         if (! auth()->user()?->isStaffMember()) {
                             return;
@@ -81,7 +81,7 @@ class ProductsTable
                     ->alignCenter()
                     ->visibleFrom('md')
                     ->tooltip('Toggle showing this product in the homepage featured section')
-                    ->disabled(fn () => !auth()->user()?->isStaffMember())
+                    ->disabled(fn () => ! auth()->user()?->isStaffMember())
                     ->updateStateUsing(function ($record, $state) {
                         if (! auth()->user()?->isStaffMember()) {
                             return;

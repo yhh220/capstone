@@ -11,6 +11,7 @@ use Spatie\Sitemap\Tags\Url;
 class GenerateSitemap extends Command
 {
     protected $signature = 'sitemap:generate';
+
     protected $description = 'Generate the sitemap.xml for the public site';
 
     public function handle(): void

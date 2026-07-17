@@ -7,14 +7,15 @@ use Illuminate\Console\Command;
 
 class AutoResolveErrorLogs extends Command
 {
-    protected $signature   = 'logs:auto-resolve {--hours= : Hours of silence before auto-resolving (overrides LOG_AUTO_RESOLVE_HOURS)}';
+    protected $signature = 'logs:auto-resolve {--hours= : Hours of silence before auto-resolving (overrides LOG_AUTO_RESOLVE_HOURS)}';
+
     protected $description = 'Mark error logs as resolved when the same error has not recurred within the silence window.';
 
     public function handle(): int
     {
         // config(), not env() — env() reads nothing from .env once config is
         // cached (the entrypoint runs config:cache), silently reverting to 48.
-        $hours  = max(1, (int) ($this->option('hours') ?: config('logging.db_log.auto_resolve_hours')));
+        $hours = max(1, (int) ($this->option('hours') ?: config('logging.db_log.auto_resolve_hours')));
         $cutoff = now()->subHours($hours);
 
         // Two set-based queries instead of a per-row exists() loop. (Not a single

@@ -55,7 +55,7 @@ class OrderExporter extends Exporter
         }
 
         return in_array($state[0], ['=', '+', '-', '@', "\t", "\r"], true)
-            ? "\t" . $state
+            ? "\t".$state
             : $state;
     }
 
@@ -69,11 +69,11 @@ class OrderExporter extends Exporter
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = 'Your order export has completed and ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
+        $body = 'Your order export has completed and '.number_format($export->successful_rows).' '.str('row')->plural($export->successful_rows).' exported.';
 
         $failedRowsCount = $export->getFailedRowsCount();
         if ($failedRowsCount) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to export.';
+            $body .= ' '.number_format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to export.';
         }
 
         self::notifyCompletionToDatabase(

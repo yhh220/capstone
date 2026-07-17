@@ -22,7 +22,7 @@ class BookingReminderMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Reminder: your booking tomorrow – ' . $this->booking->reference . ' | Win Win Car Audio',
+            subject: 'Reminder: your booking tomorrow – '.$this->booking->reference.' | Win Win Car Audio',
         );
     }
 

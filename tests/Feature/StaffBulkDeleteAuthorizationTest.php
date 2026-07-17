@@ -54,14 +54,14 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
     public function test_staff_cannot_bulk_delete_bookings(): void
     {
         $booking = Booking::create([
-            'reference'      => Booking::generateReference(),
-            'customer_name'  => 'Test',
+            'reference' => Booking::generateReference(),
+            'customer_name' => 'Test',
             'customer_email' => 'test@example.test',
             'customer_phone' => '0123456789',
             'preferred_date' => now()->addDay()->toDateString(),
-            'start_at'       => now()->addDay()->setTime(10, 0),
-            'end_at'         => now()->addDay()->setTime(11, 0),
-            'status'         => 'pending',
+            'start_at' => now()->addDay()->setTime(10, 0),
+            'end_at' => now()->addDay()->setTime(11, 0),
+            'status' => 'pending',
         ]);
         $this->actingAs($this->staff(), 'admin');
 
@@ -97,8 +97,8 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
     public function test_staff_cannot_bulk_delete_contacts(): void
     {
         $contact = Contact::create([
-            'name'    => 'Test',
-            'email'   => 'test@example.test',
+            'name' => 'Test',
+            'email' => 'test@example.test',
             'subject' => 'Question',
             'message' => 'Hello',
         ]);
@@ -113,9 +113,9 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
     public function test_staff_can_bulk_delete_feedback(): void
     {
         $feedback = Feedback::create([
-            'name'    => 'Test',
+            'name' => 'Test',
             'message' => 'Great service',
-            'rating'  => 5,
+            'rating' => 5,
         ]);
         $this->actingAs($this->staff(), 'admin');
 
@@ -129,10 +129,10 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
     public function test_staff_can_bulk_manage_and_delete_products_but_cannot_export_them(): void
     {
         $product = Product::create([
-            'name'      => 'Speaker Kit',
-            'slug'      => 'speaker-kit',
-            'price'     => 250,
-            'stock'     => 5,
+            'name' => 'Speaker Kit',
+            'slug' => 'speaker-kit',
+            'price' => 250,
+            'stock' => 5,
             'is_active' => true,
         ]);
         $this->actingAs($this->staff(), 'admin');
@@ -152,14 +152,14 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
     public function test_staff_cannot_bulk_delete_orders(): void
     {
         $order = Order::create([
-            'order_number'   => Order::generateOrderNumber(),
-            'customer_name'  => 'Test',
+            'order_number' => Order::generateOrderNumber(),
+            'customer_name' => 'Test',
             'customer_email' => 'test@example.test',
             'customer_phone' => '0123456789',
-            'subtotal'       => 100,
-            'shipping_fee'   => 0,
-            'total_amount'   => 100,
-            'status'         => 'delivered',
+            'subtotal' => 100,
+            'shipping_fee' => 0,
+            'total_amount' => 100,
+            'status' => 'delivered',
             'payment_status' => 'paid',
         ]);
         $this->actingAs($this->staff(), 'admin');
@@ -173,14 +173,14 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
     public function test_admin_can_still_bulk_delete_delivered_orders(): void
     {
         $order = Order::create([
-            'order_number'   => Order::generateOrderNumber(),
-            'customer_name'  => 'Test',
+            'order_number' => Order::generateOrderNumber(),
+            'customer_name' => 'Test',
             'customer_email' => 'test@example.test',
             'customer_phone' => '0123456789',
-            'subtotal'       => 100,
-            'shipping_fee'   => 0,
-            'total_amount'   => 100,
-            'status'         => 'delivered',
+            'subtotal' => 100,
+            'shipping_fee' => 0,
+            'total_amount' => 100,
+            'status' => 'delivered',
             'payment_status' => 'paid',
         ]);
         $admin = User::factory()->create(['role' => 'admin']);
@@ -195,10 +195,10 @@ class StaffBulkDeleteAuthorizationTest extends TestCase
     public function test_admin_can_still_bulk_delete_products(): void
     {
         $product = Product::create([
-            'name'      => 'Speaker Kit',
-            'slug'      => 'speaker-kit',
-            'price'     => 250,
-            'stock'     => 5,
+            'name' => 'Speaker Kit',
+            'slug' => 'speaker-kit',
+            'price' => 250,
+            'stock' => 5,
             'is_active' => true,
         ]);
         $admin = User::factory()->create(['role' => 'admin']);

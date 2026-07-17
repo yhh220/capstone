@@ -4,6 +4,7 @@ namespace App\Logging;
 
 use App\Support\Breadcrumbs;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Str;
 use Monolog\Level;
 use Monolog\LogRecord;
 use Monolog\Processor\ProcessorInterface;
@@ -22,11 +23,11 @@ class ObservabilityProcessor implements ProcessorInterface
         // For CLI commands, generate a stable trace_id once per process and store
         // the artisan command name as the path so errors are identifiable in the log.
         if (app()->runningInConsole() && Context::get('trace_id') === null) {
-            $argv    = $_SERVER['argv'] ?? [];
+            $argv = $_SERVER['argv'] ?? [];
             $command = implode(' ', array_slice($argv, 1));
             Context::add([
-                'trace_id' => 'cli:' . \Illuminate\Support\Str::uuid()->toString(),
-                'path'     => $command ?: 'artisan',
+                'trace_id' => 'cli:'.Str::uuid()->toString(),
+                'path' => $command ?: 'artisan',
             ]);
         }
 

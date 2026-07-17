@@ -3,9 +3,9 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\SetsSeo;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductReview;
-use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +17,7 @@ class ProductDetail extends Component
     use SetsSeo, WithPagination;
 
     public Product $product;
+
     public int $quantity = 1;
 
     public int $reviewRating = 5;
@@ -43,7 +44,7 @@ class ProductDetail extends Component
 
         $imageUrl = $this->product->image ? Storage::url($this->product->image) : null;
         $description = $this->product->short_description
-            ?: 'View details and enquire about ' . $this->product->name . ' at Win Win Car Studio. Visit our showroom or chat on WhatsApp.';
+            ?: 'View details and enquire about '.$this->product->name.' at Win Win Car Studio. Visit our showroom or chat on WhatsApp.';
 
         $this->setSeo(
             title: $this->product->name,
@@ -80,11 +81,13 @@ class ProductDetail extends Component
     {
         if (! Auth::check()) {
             $this->redirect(route('login'));
+
             return;
         }
 
         if (! $this->hasCompletedPurchase()) {
             $this->addError('reviewComment', __('Only customers with a completed order can review this product.'));
+
             return;
         }
 
@@ -96,6 +99,7 @@ class ProductDetail extends Component
         $key = 'product-review:'.Auth::id().':'.$this->product->id;
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $this->addError('reviewComment', __('Please wait a moment before trying again.'));
+
             return;
         }
 

@@ -61,7 +61,7 @@ class EditBooking extends EditRecord
         // onto the same never-before-booked slot could both pass the check. Keyed
         // identically to BookingForm's lock so a customer booking and an admin
         // rescheduling onto the same slot at the same instant also serialise.
-        $lock = $startAt ? Cache::lock('booking-slot:' . $startAt->toDateTimeString(), 10) : null;
+        $lock = $startAt ? Cache::lock('booking-slot:'.$startAt->toDateTimeString(), 10) : null;
 
         if ($lock && ! $lock->get()) {
             Notification::make()
@@ -119,7 +119,7 @@ class EditBooking extends EditRecord
         $mailable = match ($booking->status) {
             'confirmed' => new BookingConfirmedMail($booking->fresh('service')),
             'cancelled' => new BookingCancelledMail($booking->fresh('service')),
-            default     => null,
+            default => null,
         };
 
         if (! $mailable) {
@@ -129,7 +129,7 @@ class EditBooking extends EditRecord
         try {
             Mail::to($booking->customer_email)->send($mailable);
         } catch (\Throwable $e) {
-            logger()->error('Booking status-change email failed from admin edit: ' . $e->getMessage());
+            logger()->error('Booking status-change email failed from admin edit: '.$e->getMessage());
 
             Notification::make()
                 ->title('Saved, but the notification email failed to send')

@@ -24,15 +24,15 @@ class OrderAdminEditTest extends TestCase
     private function order(array $overrides = []): Order
     {
         return Order::create(array_merge([
-            'order_number'    => 'WW-2026-00001',
-            'customer_name'   => 'Test',
-            'customer_email'  => 'test@example.test',
-            'customer_phone'  => '0123456789',
-            'subtotal'        => 100,
-            'shipping_fee'    => 0,
-            'total_amount'    => 100,
-            'status'          => 'pending',
-            'payment_status'  => 'paid',
+            'order_number' => 'WW-2026-00001',
+            'customer_name' => 'Test',
+            'customer_email' => 'test@example.test',
+            'customer_phone' => '0123456789',
+            'subtotal' => 100,
+            'shipping_fee' => 0,
+            'total_amount' => 100,
+            'status' => 'pending',
+            'payment_status' => 'paid',
         ], $overrides));
     }
 

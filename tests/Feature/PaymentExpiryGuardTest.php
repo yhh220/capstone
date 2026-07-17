@@ -23,23 +23,23 @@ class PaymentExpiryGuardTest extends TestCase
     private function order(User $user, \DateTimeInterface $expiresAt): Order
     {
         return Order::create([
-            'user_id'        => $user->id,
-            'order_number'   => Order::generateOrderNumber(),
-            'customer_name'  => 'Test',
+            'user_id' => $user->id,
+            'order_number' => Order::generateOrderNumber(),
+            'customer_name' => 'Test',
             'customer_email' => 'test@example.test',
             'customer_phone' => '0123456789',
-            'subtotal'       => 100,
-            'shipping_fee'   => 0,
-            'total_amount'   => 100,
-            'status'         => 'pending',
+            'subtotal' => 100,
+            'shipping_fee' => 0,
+            'total_amount' => 100,
+            'status' => 'pending',
             'payment_status' => 'pending',
-            'expires_at'     => $expiresAt,
+            'expires_at' => $expiresAt,
         ]);
     }
 
     public function test_expire_order_refuses_before_the_payment_window_lapses(): void
     {
-        $user  = User::factory()->create(['role' => 'client']);
+        $user = User::factory()->create(['role' => 'client']);
         $order = $this->order($user, now()->addMinutes(10)); // still inside the window
 
         $this->actingAs($user);
@@ -54,7 +54,7 @@ class PaymentExpiryGuardTest extends TestCase
 
     public function test_expire_order_cancels_once_the_window_has_lapsed(): void
     {
-        $user  = User::factory()->create(['role' => 'client']);
+        $user = User::factory()->create(['role' => 'client']);
         $order = $this->order($user, now()->subMinute()); // window already over
 
         $this->actingAs($user);

@@ -18,13 +18,13 @@ class PaymentHardeningTest extends TestCase
     private function order(array $overrides = []): Order
     {
         return Order::create(array_merge([
-            'order_number'   => Order::generateOrderNumber(),
-            'customer_name'  => 'Tan',
+            'order_number' => Order::generateOrderNumber(),
+            'customer_name' => 'Tan',
             'customer_email' => 't@example.test',
             'customer_phone' => '0123456789',
             'shipping_address' => ['street' => '1', 'city' => 'KL', 'postcode' => '40150', 'state' => 'Sel'],
-            'subtotal'       => 300, 'shipping_fee' => 0, 'total_amount' => 300,
-            'status'         => 'processing', 'payment_status' => 'pending', 'payment_method' => 'FPX',
+            'subtotal' => 300, 'shipping_fee' => 0, 'total_amount' => 300,
+            'status' => 'processing', 'payment_status' => 'pending', 'payment_method' => 'FPX',
         ], $overrides));
     }
 

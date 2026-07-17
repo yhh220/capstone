@@ -37,22 +37,22 @@ class DatabaseLogHandler extends AbstractProcessingHandler
             $extra = $record->extra;
 
             AppLog::create([
-                'level'       => $record->level->value,
-                'level_name'  => $record->level->toPsrLogLevel(),
-                'message'     => Str::limit($record->message, 2000),
+                'level' => $record->level->value,
+                'level_name' => $record->level->toPsrLogLevel(),
+                'message' => Str::limit($record->message, 2000),
                 // Grouping key for regression-reopen / auto-resolve / the admin
                 // "check for recurrence" action — precomputed + indexed so those
                 // are equality lookups instead of SUBSTR() table scans.
                 'fingerprint' => AppLog::fingerprintFor($record->message),
-                'channel'     => $record->channel,
-                'trace_id'    => $extra['trace_id'] ?? null,
-                'user_id'     => $extra['user_id'] ?? null,
-                'ip'          => $extra['ip'] ?? null,
-                'method'      => $extra['method'] ?? null,
-                'path'        => $extra['path'] ?? null,
-                'context'     => $this->payload($record->context, $extra),
-                'logged_at'   => $record->datetime,
-                'created_at'  => now(),
+                'channel' => $record->channel,
+                'trace_id' => $extra['trace_id'] ?? null,
+                'user_id' => $extra['user_id'] ?? null,
+                'ip' => $extra['ip'] ?? null,
+                'method' => $extra['method'] ?? null,
+                'path' => $extra['path'] ?? null,
+                'context' => $this->payload($record->context, $extra),
+                'logged_at' => $record->datetime,
+                'created_at' => now(),
             ]);
 
             // Regression detection: if the same error was previously marked fixed,
@@ -77,9 +77,9 @@ class DatabaseLogHandler extends AbstractProcessingHandler
         if (isset($context['exception']) && $context['exception'] instanceof \Throwable) {
             $e = $context['exception'];
             $context['exception'] = [
-                'class'   => $e::class,
+                'class' => $e::class,
                 'message' => $e->getMessage(),
-                'at'      => $e->getFile() . ':' . $e->getLine(),
+                'at' => $e->getFile().':'.$e->getLine(),
             ];
         }
 
@@ -87,9 +87,9 @@ class DatabaseLogHandler extends AbstractProcessingHandler
         unset($extra['trace_id'], $extra['user_id'], $extra['ip'], $extra['method'], $extra['path'], $extra['breadcrumbs']);
 
         return array_filter([
-            'context'     => $context ?: null,
+            'context' => $context ?: null,
             'breadcrumbs' => $breadcrumbs,
-            'extra'       => $extra ?: null,
+            'extra' => $extra ?: null,
         ], fn ($v) => $v !== null);
     }
 }

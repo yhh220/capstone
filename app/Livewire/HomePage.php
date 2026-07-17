@@ -27,32 +27,32 @@ class HomePage extends Component
     public function render()
     {
         static $hasProductsTable, $hasCategoriesTable, $hasBrandsTable, $hasFeedbackTable;
-        $hasProductsTable    ??= Schema::hasTable('products');
-        $hasCategoriesTable  ??= Schema::hasTable('categories');
-        $hasBrandsTable      ??= Schema::hasTable('brands');
-        $hasFeedbackTable    ??= Schema::hasTable('feedback');
+        $hasProductsTable ??= Schema::hasTable('products');
+        $hasCategoriesTable ??= Schema::hasTable('categories');
+        $hasBrandsTable ??= Schema::hasTable('brands');
+        $hasFeedbackTable ??= Schema::hasTable('feedback');
 
-        if (!$hasProductsTable || !$hasCategoriesTable) {
+        if (! $hasProductsTable || ! $hasCategoriesTable) {
             return view('livewire.home-page', [
-                'categories'      => new Collection(),
-                'featuredProducts' => new Collection(),
-                'testimonials'    => new Collection(),
+                'categories' => new Collection,
+                'featuredProducts' => new Collection,
+                'testimonials' => new Collection,
                 'showcaseProduct' => null,
-                'brands'          => new Collection(),
+                'brands' => new Collection,
                 'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
             ])->layout('layouts.app');
         }
 
         $brands = $hasBrandsTable
             ? Brand::where('is_active', true)->orderBy('sort_order')->get()
-            : new Collection();
+            : new Collection;
 
         $testimonials = $hasFeedbackTable
             ? Feedback::where('is_active', true)
                 ->orderBy('sort_order')
                 ->take(12)
                 ->get()
-            : new Collection();
+            : new Collection;
 
         $showcaseProduct = Product::where('is_active', true)
             ->where('has_3d', true)
@@ -72,15 +72,15 @@ class HomePage extends Component
             ->get();
 
         return view('livewire.home-page', [
-            'categories'      => Category::where('is_active', true)
+            'categories' => Category::where('is_active', true)
                 ->orderBy('sort_order')
                 ->orderBy('name')
                 ->take(6)
                 ->get(),
             'featuredProducts' => $featuredProducts,
-            'testimonials'    => $testimonials,
+            'testimonials' => $testimonials,
             'showcaseProduct' => $showcaseProduct,
-            'brands'          => $brands,
+            'brands' => $brands,
             'shoppingEnabled' => setting('ONLINE_SHOPPING_ENABLED') === 'true',
         ])->layout('layouts.app');
     }

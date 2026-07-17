@@ -8,6 +8,7 @@ use App\Mail\BookingConfirmationMail;
 use App\Models\Booking;
 use App\Models\Service;
 use App\Services\Booking\BookingService;
+use App\Support\Breadcrumbs;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -92,7 +93,7 @@ class BookingForm extends Component
             // Service is optional — a booking is just a visit. The customer can
             // tell us what it's about, or leave it as a general visit.
             1 => ['service_id' => 'nullable|exists:services,id'],
-            2 => ['preferred_date' => 'required|date|after_or_equal:today|before_or_equal:' . Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD)->toDateString(), 'preferred_time' => 'required|date_format:H:i'],
+            2 => ['preferred_date' => 'required|date|after_or_equal:today|before_or_equal:'.Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD)->toDateString(), 'preferred_time' => 'required|date_format:H:i'],
             // Vehicle model only matters when a specific service is chosen (so we
             // know what we're working on). For a general visit it's optional.
             3 => [
@@ -116,7 +117,7 @@ class BookingForm extends Component
 
     public function mount(): void
     {
-        $this->honeypotData = new HoneypotData();
+        $this->honeypotData = new HoneypotData;
 
         // Read ?service=ID from the query string (Livewire 4 mount() only receives route params,
         // not query strings — so we read it manually here).
@@ -147,7 +148,7 @@ class BookingForm extends Component
             'vehicle_model' => $this->service_id !== '' ? 'required|min:2|max:120' : 'nullable|max:120',
             'vehicle_plate' => 'nullable|max:30',
             'service_id' => 'nullable|exists:services,id',
-            'preferred_date' => 'required|date|after_or_equal:today|before_or_equal:' . Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD)->toDateString(),
+            'preferred_date' => 'required|date|after_or_equal:today|before_or_equal:'.Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD)->toDateString(),
             'preferred_time' => 'required|date_format:H:i',
             'notes' => 'nullable|max:1000',
         ];
@@ -155,7 +156,7 @@ class BookingForm extends Component
 
     public function prevMonth(): void
     {
-        $current = Carbon::parse($this->calendarMonth . '-01');
+        $current = Carbon::parse($this->calendarMonth.'-01');
         if ($current->gt(Carbon::today()->startOfMonth())) {
             $this->calendarMonth = $current->subMonth()->format('Y-m');
         }
@@ -163,7 +164,7 @@ class BookingForm extends Component
 
     public function nextMonth(): void
     {
-        $current = Carbon::parse($this->calendarMonth . '-01');
+        $current = Carbon::parse($this->calendarMonth.'-01');
         if ($current->lt(Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD)->startOfMonth())) {
             $this->calendarMonth = $current->addMonth()->format('Y-m');
         }
@@ -201,17 +202,17 @@ class BookingForm extends Component
 
     public function getCalendarLabelProperty(): string
     {
-        return Carbon::parse($this->calendarMonth . '-01')->translatedFormat('F Y');
+        return Carbon::parse($this->calendarMonth.'-01')->translatedFormat('F Y');
     }
 
     public function getCanGoPrevMonthProperty(): bool
     {
-        return Carbon::parse($this->calendarMonth . '-01')->gt(Carbon::today()->startOfMonth());
+        return Carbon::parse($this->calendarMonth.'-01')->gt(Carbon::today()->startOfMonth());
     }
 
     public function getCanGoNextMonthProperty(): bool
     {
-        return Carbon::parse($this->calendarMonth . '-01')->lt(Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD)->startOfMonth());
+        return Carbon::parse($this->calendarMonth.'-01')->lt(Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD)->startOfMonth());
     }
 
     /**
@@ -220,27 +221,27 @@ class BookingForm extends Component
      */
     public function getCalendarDaysProperty(): array
     {
-        $first     = Carbon::parse($this->calendarMonth . '-01')->startOfMonth();
+        $first = Carbon::parse($this->calendarMonth.'-01')->startOfMonth();
         $gridStart = $first->copy()->startOfWeek(Carbon::MONDAY);
-        $gridEnd   = $first->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY);
+        $gridEnd = $first->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY);
 
-        $today   = Carbon::today();
+        $today = Carbon::today();
         $maxDate = Carbon::today()->addMonths(self::MAX_MONTHS_AHEAD);
-        $closed  = $this->bookingService()->closedWeekdays();
+        $closed = $this->bookingService()->closedWeekdays();
 
         $days = [];
         for ($d = $gridStart->copy(); $d->lte($gridEnd); $d->addDay()) {
-            $inMonth    = $d->month === $first->month;
-            $isClosed   = in_array($d->dayOfWeek, $closed, true);
+            $inMonth = $d->month === $first->month;
+            $isClosed = in_array($d->dayOfWeek, $closed, true);
             $unavailable = $d->lt($today) || $d->gt($maxDate);
 
             $days[] = [
-                'date'       => $d->toDateString(),
-                'day'        => $d->day,
-                'inMonth'    => $inMonth,
-                'isToday'    => $d->isToday(),
-                'isClosed'   => $isClosed,
-                'isPast'     => $unavailable,
+                'date' => $d->toDateString(),
+                'day' => $d->day,
+                'inMonth' => $inMonth,
+                'isToday' => $d->isToday(),
+                'isClosed' => $isClosed,
+                'isPast' => $unavailable,
                 'selectable' => $inMonth && ! $unavailable && ! $isClosed,
                 'isSelected' => $this->preferred_date === $d->toDateString(),
             ];
@@ -341,7 +342,7 @@ class BookingForm extends Component
         // cache lock serialises every attempt at this exact slot (booking here and
         // rescheduling in EditBooking) so the second request always re-checks
         // against the first one's committed result instead of a stale "it's free".
-        $lock = Cache::lock('booking-slot:' . $startAt->toDateTimeString(), 10);
+        $lock = Cache::lock('booking-slot:'.$startAt->toDateTimeString(), 10);
 
         if (! $lock->get()) {
             $this->addError('preferred_time', __('This slot is already booked. Please pick another time.'));
@@ -387,27 +388,27 @@ class BookingForm extends Component
         $this->notifyOwner(
             'New booking request',
             [
-                'Name'    => $booking->customer_name,
-                'Phone'   => $booking->customer_phone,
-                'Email'   => $booking->customer_email,
-                'Vehicle' => trim(($booking->vehicle_model ?? '') . ' ' . ($booking->vehicle_plate ?? '')),
-                'When'    => $booking->start_at?->format('D, d M Y · g:i A'),
-                'Notes'   => $booking->notes,
+                'Name' => $booking->customer_name,
+                'Phone' => $booking->customer_phone,
+                'Email' => $booking->customer_email,
+                'Vehicle' => trim(($booking->vehicle_model ?? '').' '.($booking->vehicle_plate ?? '')),
+                'When' => $booking->start_at?->format('D, d M Y · g:i A'),
+                'Notes' => $booking->notes,
             ],
-            url('/admin/bookings/' . $booking->getKey() . '/edit'),
+            url('/admin/bookings/'.$booking->getKey().'/edit'),
             'View booking',
         );
 
         // Confirmation to the customer (only if they left an email — guest bookings
         // may not). Failures must never block a successful booking.
-        \App\Support\Breadcrumbs::push('booking', 'Booking created', ['ref' => $booking->reference]);
+        Breadcrumbs::push('booking', 'Booking created', ['ref' => $booking->reference]);
 
         if ($booking->customer_email) {
             try {
-                \App\Support\Breadcrumbs::push('mail', 'Sending booking confirmation');
+                Breadcrumbs::push('mail', 'Sending booking confirmation');
                 Mail::to($booking->customer_email)->send(new BookingConfirmationMail($booking->fresh('service')));
             } catch (\Throwable $e) {
-                logger()->error('Booking confirmation email failed: ' . $e->getMessage());
+                logger()->error('Booking confirmation email failed: '.$e->getMessage());
             }
         }
 

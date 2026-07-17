@@ -20,10 +20,10 @@ class SocialAccount extends Model
     public function providerLabel(): string
     {
         return match ($this->provider) {
-            'google'    => 'Google',
+            'google' => 'Google',
             'microsoft' => 'Microsoft',
-            'apple'     => 'Apple',
-            default     => ucfirst($this->provider),
+            'apple' => 'Apple',
+            default => ucfirst($this->provider),
         };
     }
 }

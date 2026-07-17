@@ -11,23 +11,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            if (!Schema::hasColumn('bookings', 'vehicle_model')) {
+            if (! Schema::hasColumn('bookings', 'vehicle_model')) {
                 $table->string('vehicle_model')->nullable()->after('customer_email');
             }
 
-            if (!Schema::hasColumn('bookings', 'vehicle_plate')) {
+            if (! Schema::hasColumn('bookings', 'vehicle_plate')) {
                 $table->string('vehicle_plate')->nullable()->after('vehicle_model');
             }
 
-            if (!Schema::hasColumn('bookings', 'confirm_token')) {
+            if (! Schema::hasColumn('bookings', 'confirm_token')) {
                 $table->string('confirm_token')->nullable()->after('status');
             }
 
-            if (!Schema::hasColumn('bookings', 'start_at')) {
+            if (! Schema::hasColumn('bookings', 'start_at')) {
                 $table->dateTime('start_at')->nullable()->after('preferred_time');
             }
 
-            if (!Schema::hasColumn('bookings', 'end_at')) {
+            if (! Schema::hasColumn('bookings', 'end_at')) {
                 $table->dateTime('end_at')->nullable()->after('start_at');
             }
         });

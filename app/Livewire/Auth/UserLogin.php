@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Auth;
 
+use App\Exceptions\OtpSendFailedException;
+use App\Livewire\Concerns\SetsSeo;
 use App\Models\CartItem;
 use App\Models\User;
 use App\Services\EmailOtpService;
@@ -19,7 +21,7 @@ use Spatie\Honeypot\Http\Livewire\Concerns\UsesSpamProtection;
 
 class UserLogin extends Component
 {
-    use \App\Livewire\Concerns\SetsSeo;
+    use SetsSeo;
     use UsesSpamProtection;
 
     // Tab toggle: true = Sign In, false = Register.
@@ -35,25 +37,30 @@ class UserLogin extends Component
     // Network tab), so it's bound via Alpine-only state and passed into
     // login() as a #[\SensitiveParameter] method argument instead.
     public string $loginEmail = '';
+
     public bool $remember = false;
 
     // Register fields — same reasoning: password/password_confirmation stay
     // out of the public property list, passed as method params to register().
     public string $name = '';
+
     public string $email = '';
 
     // Email-OTP verification step (shown after a valid register submission)
-    public bool   $awaitingOtp = false;
-    public string $otpEmail    = '';
-    public string $otpCode     = '';
+    public bool $awaitingOtp = false;
+
+    public string $otpEmail = '';
+
+    public string $otpCode = '';
 
     // Login 2FA step — shown after a valid password when the account has
     // email login-verification enabled. Credentials are confirmed by this
     // point; only the second factor remains, so this never reveals whether
     // 2FA is the reason a login didn't complete immediately to an attacker
     // who doesn't already have the right password.
-    public bool   $awaitingLoginOtp = false;
-    public string $loginOtpCode     = '';
+    public bool $awaitingLoginOtp = false;
+
+    public string $loginOtpCode = '';
 
     // Honeypot for Register form — powered by spatie/laravel-honeypot
     public HoneypotData $honeypotData;
@@ -64,7 +71,7 @@ class UserLogin extends Component
     // Progressive lockout thresholds: [attempts => lockout_seconds]
     // Apple-style: 5 → 30s, 10 → 60s, 15 → 300s (5min), 20 → 900s (15min), 25+ → 3600s (1hr)
     private const LOCKOUT_TIERS = [
-        5  => 30,
+        5 => 30,
         10 => 60,
         15 => 300,
         20 => 900,
@@ -73,11 +80,12 @@ class UserLogin extends Component
 
     // IP-level block after 30 attempts (bot/spray attack detection)
     private const IP_BLOCK_THRESHOLD = 30;
-    private const IP_BLOCK_SECONDS   = 3600;
+
+    private const IP_BLOCK_SECONDS = 3600;
 
     public function mount(): void
     {
-        $this->honeypotData = new HoneypotData();
+        $this->honeypotData = new HoneypotData;
         $this->setSeo(
             title: __('Login'),
             description: 'Sign in or create an account to shop and track your orders at Win Win Car Audio.',
@@ -88,9 +96,9 @@ class UserLogin extends Component
         // already sent server-side, so just surface the same challenge screen
         // the password path uses. "remember" matches social login's own default.
         if ($pendingEmail = session()->pull('social_login_pending_email')) {
-            $this->loginEmail       = $pendingEmail;
+            $this->loginEmail = $pendingEmail;
             $this->awaitingLoginOtp = true;
-            $this->remember         = true;
+            $this->remember = true;
         }
     }
 
@@ -128,29 +136,32 @@ class UserLogin extends Component
             foreach ($v->errors()->messages() as $field => $messages) {
                 $this->addError($field, $messages[0]);
             }
+
             return;
         }
 
-        $ip         = request()->ip();
-        $emailKey   = 'login_fails:email:' . strtolower($this->loginEmail);
-        $ipKey      = 'login_fails:ip:' . $ip;
-        $ipBlockKey = 'login_block:ip:' . $ip;
+        $ip = request()->ip();
+        $emailKey = 'login_fails:email:'.strtolower($this->loginEmail);
+        $ipKey = 'login_fails:ip:'.$ip;
+        $ipBlockKey = 'login_block:ip:'.$ip;
 
         // Check IP-level block first (bot/spray detection)
         if (Cache::has($ipBlockKey)) {
-            $remaining = Cache::get($ipBlockKey . ':expires', now()->timestamp) - now()->timestamp;
+            $remaining = Cache::get($ipBlockKey.':expires', now()->timestamp) - now()->timestamp;
             $minutes = max(1, (int) ceil($remaining / 60));
             $this->addError('loginEmail', __('Unusual activity detected from your network. Please try again in :minutes minutes.', ['minutes' => $minutes]));
+
             return;
         }
 
         // Check per-email progressive lockout
-        $emailFails  = (int) Cache::get($emailKey, 0);
-        $lockoutKey  = 'login_lockout:' . strtolower($this->loginEmail) . ':' . $ip;
+        $emailFails = (int) Cache::get($emailKey, 0);
+        $lockoutKey = 'login_lockout:'.strtolower($this->loginEmail).':'.$ip;
 
         if (Cache::has($lockoutKey)) {
-            $seconds = max(1, Cache::get($lockoutKey . ':expires', now()->timestamp) - now()->timestamp);
+            $seconds = max(1, Cache::get($lockoutKey.':expires', now()->timestamp) - now()->timestamp);
             $this->addError('loginEmail', $this->lockoutMessage((int) $seconds));
+
             return;
         }
 
@@ -159,6 +170,7 @@ class UserLogin extends Component
         $emailUser = User::where('email', $this->loginEmail)->first();
         if ($emailUser && ! $emailUser->hasPassword()) {
             $this->addError('loginEmail', __('This account uses Google sign-in. Please use the Google button, or set a password from your account page after signing in.'));
+
             return;
         }
 
@@ -171,14 +183,15 @@ class UserLogin extends Component
             $ipFails = (int) Cache::get($ipKey, 0) + 1;
 
             Cache::put($emailKey, $emailFails, now()->addHours(2));
-            Cache::put($ipKey,    $ipFails,    now()->addHours(2));
+            Cache::put($ipKey, $ipFails, now()->addHours(2));
 
             // IP-level block for high-volume attacks
             if ($ipFails >= self::IP_BLOCK_THRESHOLD) {
                 $expires = now()->addSeconds(self::IP_BLOCK_SECONDS)->timestamp;
-                Cache::put($ipBlockKey,              true,    now()->addSeconds(self::IP_BLOCK_SECONDS));
-                Cache::put($ipBlockKey . ':expires', $expires, now()->addSeconds(self::IP_BLOCK_SECONDS));
+                Cache::put($ipBlockKey, true, now()->addSeconds(self::IP_BLOCK_SECONDS));
+                Cache::put($ipBlockKey.':expires', $expires, now()->addSeconds(self::IP_BLOCK_SECONDS));
                 $this->addError('loginEmail', __('Unusual activity detected from your network. Please try again in 60 minutes.'));
+
                 return;
             }
 
@@ -186,9 +199,10 @@ class UserLogin extends Component
             $lockoutSeconds = $this->lockoutSecondsFor($emailFails);
             if ($lockoutSeconds > 0) {
                 $expires = now()->addSeconds($lockoutSeconds)->timestamp;
-                Cache::put($lockoutKey,              true,   now()->addSeconds($lockoutSeconds));
-                Cache::put($lockoutKey . ':expires', $expires, now()->addSeconds($lockoutSeconds));
+                Cache::put($lockoutKey, true, now()->addSeconds($lockoutSeconds));
+                Cache::put($lockoutKey.':expires', $expires, now()->addSeconds($lockoutSeconds));
                 $this->addError('loginEmail', $this->lockoutMessage($lockoutSeconds));
+
                 return;
             }
 
@@ -198,6 +212,7 @@ class UserLogin extends Component
             } else {
                 $this->addError('loginEmail', __('Invalid email or password.'));
             }
+
             return;
         }
 
@@ -208,7 +223,7 @@ class UserLogin extends Component
         // against victim accounts.
         Cache::forget($emailKey);
         Cache::forget($lockoutKey);
-        Cache::forget($lockoutKey . ':expires');
+        Cache::forget($lockoutKey.':expires');
 
         if ($emailUser->two_factor_enabled) {
             // Guard against OTP inbox flooding: someone who knows a victim's password
@@ -219,13 +234,15 @@ class UserLogin extends Component
             if ($wait <= 0) {
                 try {
                     app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_LOGIN, $emailUser->email);
-                } catch (\App\Exceptions\OtpSendFailedException $e) {
+                } catch (OtpSendFailedException $e) {
                     $this->addError('loginEmail', $e->getMessage());
+
                     return;
                 }
             }
             $this->awaitingLoginOtp = true;
-            $this->loginOtpCode     = '';
+            $this->loginOtpCode = '';
+
             return;
         }
 
@@ -247,11 +264,13 @@ class UserLogin extends Component
         if (! $user) {
             $this->awaitingLoginOtp = false;
             $this->addError('loginEmail', __('Something went wrong. Please sign in again.'));
+
             return;
         }
 
         if (! app(EmailOtpService::class)->verify(EmailOtpService::PURPOSE_LOGIN, $user->email, $this->loginOtpCode)) {
             $this->addError('loginOtpCode', __('Invalid or expired code. Please try again.'));
+
             return;
         }
 
@@ -269,18 +288,20 @@ class UserLogin extends Component
 
         $this->resetErrorBag(); // same stale-first()-message trap as login()
 
-        $otp  = app(EmailOtpService::class);
+        $otp = app(EmailOtpService::class);
         $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_LOGIN, $this->loginEmail);
 
         if ($wait > 0) {
             $this->addError('loginOtpCode', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+
             return;
         }
 
         try {
             $otp->send(EmailOtpService::PURPOSE_LOGIN, $this->loginEmail);
-        } catch (\App\Exceptions\OtpSendFailedException $e) {
+        } catch (OtpSendFailedException $e) {
             $this->addError('loginOtpCode', $e->getMessage());
+
             return;
         }
 
@@ -294,7 +315,7 @@ class UserLogin extends Component
     {
         app(EmailOtpService::class)->clear(EmailOtpService::PURPOSE_LOGIN, $this->loginEmail);
         $this->awaitingLoginOtp = false;
-        $this->loginOtpCode     = '';
+        $this->loginOtpCode = '';
         $this->resetErrorBag();
     }
 
@@ -332,8 +353,10 @@ class UserLogin extends Component
         }
         if ($seconds >= 60) {
             $minutes = (int) ceil($seconds / 60);
+
             return __('Too many failed attempts. Please try again in :minutes minutes.', ['minutes' => $minutes]);
         }
+
         return __('Too many failed attempts. Please wait :seconds seconds.', ['seconds' => $seconds]);
     }
 
@@ -354,22 +377,22 @@ class UserLogin extends Component
 
         $v = Validator::make(
             [
-                'name'                  => $this->name,
-                'email'                 => $this->email,
-                'password'              => $password,
+                'name' => $this->name,
+                'email' => $this->email,
+                'password' => $password,
                 'password_confirmation' => $passwordConfirmation,
             ],
             [
-                'name'                  => ['required', 'string', 'min:2', 'max:255'],
+                'name' => ['required', 'string', 'min:2', 'max:255'],
                 // Only ACTIVE accounts block the email; a soft-deleted one is treated as
                 // available and gets reactivated on OTP confirmation (returning customer).
-                'email'                 => ['required', 'email', 'max:255', Rule::unique('users', 'email')->whereNull('deleted_at')],
-                'password'              => ['required', 'confirmed', Password::defaults()],
+                'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->whereNull('deleted_at')],
+                'password' => ['required', 'confirmed', Password::defaults()],
                 'password_confirmation' => ['required'],
             ],
             [
                 'password.min' => __('Password must be at least 8 characters.'),
-                'name.min'     => __('Name must be at least 2 characters.'),
+                'name.min' => __('Name must be at least 2 characters.'),
             ],
         );
 
@@ -377,6 +400,7 @@ class UserLogin extends Component
             foreach ($v->errors()->messages() as $field => $messages) {
                 $this->addError($field, $messages[0]);
             }
+
             return;
         }
 
@@ -384,30 +408,32 @@ class UserLogin extends Component
 
         // Throttle by IP so registration can't be abused to mass-send OTP emails
         // (each valid submission dispatches a verification email).
-        $rlKey = 'register:' . request()->ip();
+        $rlKey = 'register:'.request()->ip();
         if (RateLimiter::tooManyAttempts($rlKey, 5)) {
             $seconds = RateLimiter::availableIn($rlKey);
             $this->addError('email', __('Too many sign-up attempts. Please try again in :seconds seconds.', ['seconds' => $seconds]));
+
             return;
         }
         RateLimiter::hit($rlKey, 600); // max 5 per 10 minutes per IP
 
         Cache::put($this->pendingKey($validated['email']), [
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
+            'name' => $validated['name'],
+            'email' => $validated['email'],
             'password' => Crypt::encryptString($validated['password']),
         ], EmailOtpService::TTL);
 
         try {
             app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_REGISTER, $validated['email']);
-        } catch (\App\Exceptions\OtpSendFailedException $e) {
+        } catch (OtpSendFailedException $e) {
             $this->addError('email', $e->getMessage());
+
             return;
         }
 
-        $this->otpEmail    = $validated['email'];
+        $this->otpEmail = $validated['email'];
         $this->awaitingOtp = true;
-        $this->otpCode     = '';
+        $this->otpCode = '';
         $this->resetErrorBag();
     }
 
@@ -424,6 +450,7 @@ class UserLogin extends Component
 
         if (! $otp->verify(EmailOtpService::PURPOSE_REGISTER, $this->otpEmail, $this->otpCode)) {
             $this->addError('otpCode', __('Invalid or expired code. Please try again.'));
+
             return;
         }
 
@@ -431,8 +458,9 @@ class UserLogin extends Component
 
         if (! $pending) {
             $this->awaitingOtp = false;
-            $this->isLoginTab  = false;
+            $this->isLoginTab = false;
             $this->addError('email', __('Your session expired. Please register again.'));
+
             return;
         }
 
@@ -440,8 +468,9 @@ class UserLogin extends Component
         if (User::where('email', $pending['email'])->exists()) {
             Cache::forget($this->pendingKey($this->otpEmail));
             $this->awaitingOtp = false;
-            $this->isLoginTab  = true;
+            $this->isLoginTab = true;
             $this->addError('loginEmail', __('This account already exists. Please sign in.'));
+
             return;
         }
 
@@ -457,16 +486,16 @@ class UserLogin extends Component
             $user->restore();
             $wasTrashed = true;
             $user->forceFill([
-                'name'              => $pending['name'],
-                'password'          => Crypt::decryptString($pending['password']),
+                'name' => $pending['name'],
+                'password' => Crypt::decryptString($pending['password']),
                 'email_verified_at' => now(),
             ])->save();
         } else {
             $user = User::forceCreate([
-                'name'              => $pending['name'],
-                'email'             => $pending['email'],
-                'password'          => Crypt::decryptString($pending['password']),
-                'role'              => 'client',
+                'name' => $pending['name'],
+                'email' => $pending['email'],
+                'password' => Crypt::decryptString($pending['password']),
+                'role' => 'client',
                 'email_verified_at' => now(),
             ]);
         }
@@ -498,25 +527,28 @@ class UserLogin extends Component
 
         $this->resetErrorBag(); // same stale-first()-message trap as login()
 
-        $otp  = app(EmailOtpService::class);
+        $otp = app(EmailOtpService::class);
         $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_REGISTER, $this->otpEmail);
 
         if ($wait > 0) {
             $this->addError('otpCode', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+
             return;
         }
 
         if (! Cache::has($this->pendingKey($this->otpEmail))) {
             $this->awaitingOtp = false;
-            $this->isLoginTab  = false;
+            $this->isLoginTab = false;
             $this->addError('email', __('Your session expired. Please register again.'));
+
             return;
         }
 
         try {
             $otp->send(EmailOtpService::PURPOSE_REGISTER, $this->otpEmail);
-        } catch (\App\Exceptions\OtpSendFailedException $e) {
+        } catch (OtpSendFailedException $e) {
             $this->addError('otpCode', $e->getMessage());
+
             return;
         }
 
@@ -534,13 +566,13 @@ class UserLogin extends Component
         }
 
         $this->awaitingOtp = false;
-        $this->otpCode     = '';
+        $this->otpCode = '';
         $this->resetErrorBag();
     }
 
     private function pendingKey(string $email): string
     {
-        return 'pending_registration:' . strtolower(trim($email));
+        return 'pending_registration:'.strtolower(trim($email));
     }
 
     public function render()

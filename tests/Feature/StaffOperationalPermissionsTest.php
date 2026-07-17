@@ -6,12 +6,18 @@ use App\Filament\Resources\Bookings\Pages\ListBookings;
 use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Filament\Resources\Products\Pages\ListProducts;
 use App\Filament\Widgets\TopProductsChart;
+use App\Mail\OrderPickupRescheduledMail;
+use App\Mail\OrderShippedMail;
 use App\Models\Booking;
+use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Contact;
 use App\Models\Feedback;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Service;
 use App\Models\User;
+use App\Services\PickupScheduleService;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -97,7 +103,7 @@ class StaffOperationalPermissionsTest extends TestCase
 
         // The customer must actually be told to come and collect — with the
         // pickup subject line, not the courier "has shipped" one.
-        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\OrderShippedMail::class, function ($mail) use ($order) {
+        Mail::assertSent(OrderShippedMail::class, function ($mail) use ($order) {
             return $mail->hasTo($order->customer_email)
                 && str_contains($mail->envelope()->subject, 'ready for pickup');
         });
@@ -108,7 +114,7 @@ class StaffOperationalPermissionsTest extends TestCase
         Mail::fake();
         $order = $this->makeOrder();
         $order->update(['payment_status' => 'paid', 'status' => 'processing', 'delivery_method' => 'pickup', 'pickup_at' => now()->addDay()]);
-        $pickup = app(\App\Services\PickupScheduleService::class);
+        $pickup = app(PickupScheduleService::class);
         $day = $pickup->availableDates()->first(fn ($candidate) => $pickup->slotsFor($candidate->format('Y-m-d'))->isNotEmpty());
         $date = $day->format('Y-m-d');
         $time = $pickup->slotsFor($date)->first();
@@ -118,7 +124,7 @@ class StaffOperationalPermissionsTest extends TestCase
             ->callTableAction('reschedulePickup', $order, ['pickup_at' => "$date $time"]);
 
         $this->assertSame("$date $time", $order->refresh()->pickup_at->format('Y-m-d H:i'));
-        Mail::assertSent(\App\Mail\OrderPickupRescheduledMail::class, fn ($mail) => $mail->hasTo($order->customer_email));
+        Mail::assertSent(OrderPickupRescheduledMail::class, fn ($mail) => $mail->hasTo($order->customer_email));
     }
 
     public function test_staff_can_confirm_a_booking(): void
@@ -236,13 +242,13 @@ class StaffOperationalPermissionsTest extends TestCase
 
         // Categories remain admin-curated. Staff maintain the fixed service
         // menu's content and order, but cannot add or remove its rows.
-        $this->assertTrue($staff->can('update', new \App\Models\Service));
-        $this->assertFalse($staff->can('create', \App\Models\Service::class));
-        $this->assertFalse($staff->can('delete', new \App\Models\Service));
-        $this->assertTrue($staff->can('create', \App\Models\Brand::class));
-        $this->assertTrue($staff->can('update', new \App\Models\Brand));
-        $this->assertTrue($staff->can('delete', new \App\Models\Brand));
-        $this->assertFalse($staff->can('update', new \App\Models\Category));
+        $this->assertTrue($staff->can('update', new Service));
+        $this->assertFalse($staff->can('create', Service::class));
+        $this->assertFalse($staff->can('delete', new Service));
+        $this->assertTrue($staff->can('create', Brand::class));
+        $this->assertTrue($staff->can('update', new Brand));
+        $this->assertTrue($staff->can('delete', new Brand));
+        $this->assertFalse($staff->can('update', new Category));
     }
 
     public function test_staff_cannot_reorder_admin_curated_tables(): void
@@ -253,9 +259,9 @@ class StaffOperationalPermissionsTest extends TestCase
         // testimonial curation (a staff duty) keeps its reorder rights.
         $staff = $this->staff();
 
-        $this->assertTrue($staff->can('reorder', \App\Models\Brand::class));
-        $this->assertFalse($staff->can('reorder', \App\Models\Category::class));
-        $this->assertTrue($staff->can('reorder', \App\Models\Service::class));
+        $this->assertTrue($staff->can('reorder', Brand::class));
+        $this->assertFalse($staff->can('reorder', Category::class));
+        $this->assertTrue($staff->can('reorder', Service::class));
         $this->assertTrue($staff->can('reorder', Feedback::class));
     }
 

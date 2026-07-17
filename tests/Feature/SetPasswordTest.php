@@ -60,6 +60,7 @@ class SetPasswordTest extends TestCase
         $code = null;
         Notification::assertSentOnDemand(EmailOtp::class, function ($n) use (&$code) {
             $code = $n->code;
+
             return true;
         });
 

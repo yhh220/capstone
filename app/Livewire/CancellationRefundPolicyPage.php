@@ -20,11 +20,11 @@ class CancellationRefundPolicyPage extends Component
 
     public function render()
     {
-        $calculator = new RefundCalculator();
+        $calculator = new RefundCalculator;
 
         return view('livewire.cancellation-refund-policy-page', [
             'fullRefundHours' => $calculator->fullRefundHours(),
-            'feePercent'      => $calculator->feePercent(),
+            'feePercent' => $calculator->feePercent(),
         ])->layout('layouts.app');
     }
 }

@@ -21,7 +21,7 @@ class OrderDeliveredMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your order has been delivered – ' . $this->order->order_number . ' | Win Win Car Audio',
+            subject: 'Your order has been delivered – '.$this->order->order_number.' | Win Win Car Audio',
         );
     }
 

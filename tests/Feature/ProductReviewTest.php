@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\ProductDetail;
 use App\Livewire\MyAccountPage;
+use App\Livewire\ProductDetail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;

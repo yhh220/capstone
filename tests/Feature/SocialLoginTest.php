@@ -10,6 +10,7 @@ use App\Notifications\EmailOtp;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\GoogleProvider;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Livewire\Livewire;
 use Mockery;
@@ -25,11 +26,11 @@ class SocialLoginTest extends TestCase
         // A provider is only "enabled" when its keys are present.
         config(['services.google.client_id' => 'test-id', 'services.google.client_secret' => 'test-secret']);
 
-        $socialUser = (new SocialiteUser())->setRaw([])->map([
+        $socialUser = (new SocialiteUser)->setRaw([])->map([
             'id' => $id, 'name' => $name, 'nickname' => null, 'email' => $email, 'avatar' => null,
         ]);
 
-        $provider = Mockery::mock(\Laravel\Socialite\Two\GoogleProvider::class);
+        $provider = Mockery::mock(GoogleProvider::class);
         $provider->shouldReceive('redirectUrl')->andReturnSelf();
         $provider->shouldReceive('user')->andReturn($socialUser);
         Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
@@ -134,6 +135,7 @@ class SocialLoginTest extends TestCase
         $code = null;
         Notification::assertSentOnDemand(EmailOtp::class, function ($n) use (&$code) {
             $code = $n->code;
+
             return true;
         });
         $this->assertNotNull($code, 'an OTP must have been sent');

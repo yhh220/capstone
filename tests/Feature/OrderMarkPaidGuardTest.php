@@ -24,14 +24,14 @@ class OrderMarkPaidGuardTest extends TestCase
     private function order(array $overrides = []): Order
     {
         return Order::create(array_merge([
-            'order_number'   => Order::generateOrderNumber(),
-            'customer_name'  => 'Test',
+            'order_number' => Order::generateOrderNumber(),
+            'customer_name' => 'Test',
             'customer_email' => 'test@example.test',
             'customer_phone' => '0123456789',
-            'subtotal'       => 100,
-            'shipping_fee'   => 0,
-            'total_amount'   => 100,
-            'status'         => 'pending',
+            'subtotal' => 100,
+            'shipping_fee' => 0,
+            'total_amount' => 100,
+            'status' => 'pending',
             'payment_status' => 'pending',
         ], $overrides));
     }
@@ -39,8 +39,8 @@ class OrderMarkPaidGuardTest extends TestCase
     public function test_a_cancelled_order_cannot_be_marked_paid(): void
     {
         $order = $this->order([
-            'status'              => 'cancelled',
-            'cancelled_by'        => 'system',
+            'status' => 'cancelled',
+            'cancelled_by' => 'system',
             'cancellation_reason' => 'Order expired',
         ]);
 

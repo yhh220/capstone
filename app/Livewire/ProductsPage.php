@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -43,10 +42,25 @@ class ProductsPage extends Component
         );
     }
 
-    public function updatedSearch(): void   { $this->resetPage(); }
-    public function updatedCategory(): void { $this->resetPage(); }
-    public function updatedMinPrice(): void { $this->resetPage(); }
-    public function updatedMaxPrice(): void { $this->resetPage(); }
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedCategory(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedMinPrice(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedMaxPrice(): void
+    {
+        $this->resetPage();
+    }
 
     public function addToCart(int $productId): void
     {
@@ -89,7 +103,7 @@ class ProductsPage extends Component
             // does not). '!' has no special meaning in either engine.
             // Escape '!' first, then the wildcards, so added markers aren't doubled.
             $escaped = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $this->search);
-            $term = '%' . $escaped . '%';
+            $term = '%'.$escaped.'%';
             // The translated columns must be searchable too: a MS/ZH visitor sees
             // name_ms/name_zh on the cards, so searching by the very name they're
             // looking at has to match — not just the English source columns.
@@ -115,8 +129,8 @@ class ProductsPage extends Component
         $cats = Category::where('is_active', true)->orderBy('name')->get();
 
         return view('livewire.products-page', [
-            'products'        => $query->paginate(12),
-            'allCategories'   => $cats,
+            'products' => $query->paginate(12),
+            'allCategories' => $cats,
             'shoppingEnabled' => $shoppingEnabled,
         ])->layout('layouts.app');
     }

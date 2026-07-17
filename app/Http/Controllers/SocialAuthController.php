@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\OtpSendFailedException;
 use App\Models\CartItem;
 use App\Models\SocialAccount;
 use App\Models\User;
 use App\Services\EmailOtpService;
+use App\Support\Breadcrumbs;
 use App\Support\SocialLogin;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
@@ -43,7 +45,7 @@ class SocialAuthController extends Controller
         $wasTrashed = false;
         $user = $this->findOrCreateUser($provider, $socialUser, $wasTrashed);
 
-        \App\Support\Breadcrumbs::push('auth', 'Social login', ['provider' => $provider, 'user' => $user->id]);
+        Breadcrumbs::push('auth', 'Social login', ['provider' => $provider, 'user' => $user->id]);
 
         // Login verification (email OTP) protects this account on the password
         // path — Google sign-in must honour the same promise instead of handing
@@ -54,7 +56,7 @@ class SocialAuthController extends Controller
         if ($user->two_factor_enabled) {
             try {
                 app(EmailOtpService::class)->send(EmailOtpService::PURPOSE_LOGIN, $user->email);
-            } catch (\App\Exceptions\OtpSendFailedException $e) {
+            } catch (OtpSendFailedException $e) {
                 return redirect()->route('login')->withErrors(['loginEmail' => $e->getMessage()]);
             }
 
@@ -91,7 +93,7 @@ class SocialAuthController extends Controller
         if ($account) {
             $account->update([
                 'provider_email' => $socialUser->getEmail(),
-                'avatar'         => $socialUser->getAvatar(),
+                'avatar' => $socialUser->getAvatar(),
             ]);
 
             // withTrashed(): $account->user is a plain belongsTo, which is hidden by
@@ -118,7 +120,7 @@ class SocialAuthController extends Controller
         //    rather than left silent (the account-deletion page promises sign-in
         //    is permanently disabled).
         $email = $socialUser->getEmail();
-        $user  = $email ? User::withTrashed()->where('email', $email)->first() : null;
+        $user = $email ? User::withTrashed()->where('email', $email)->first() : null;
 
         // A previously-deleted customer signing back in → reactivate the account.
         if ($user && $user->trashed()) {
@@ -130,17 +132,17 @@ class SocialAuthController extends Controller
         //    until they choose to add one from their account page.
         if (! $user) {
             $user = User::create([
-                'name'  => $socialUser->getName() ?: ($socialUser->getNickname() ?: 'Customer'),
+                'name' => $socialUser->getName() ?: ($socialUser->getNickname() ?: 'Customer'),
                 'email' => $email ?: "{$provider}_{$socialUser->getId()}@social.invalid",
             ]);
             $user->forceFill(['email_verified_at' => now()])->save();
         }
 
         $user->socialAccounts()->create([
-            'provider'       => $provider,
-            'provider_id'    => $socialUser->getId(),
+            'provider' => $provider,
+            'provider_id' => $socialUser->getId(),
             'provider_email' => $email,
-            'avatar'         => $socialUser->getAvatar(),
+            'avatar' => $socialUser->getAvatar(),
         ]);
 
         return $user;

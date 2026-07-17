@@ -72,11 +72,11 @@ class ProductImporter extends Importer
         $sku = $this->data['sku'] ?? null;
 
         if (blank($sku)) {
-            return new Product();
+            return new Product;
         }
 
         return Product::whereRaw('LOWER(sku) = ?', [Str::lower($sku)])->first()
-            ?? new Product();
+            ?? new Product;
     }
 
     protected function beforeSave(): void
@@ -94,7 +94,7 @@ class ProductImporter extends Importer
         // Cross-field check: sale_price must be less than price when both are set
         // and price is non-zero. The column rule 'lt:price' would reject any
         // sale_price when price=0, so the check is done here with proper guarding.
-        $price     = $this->record->price;
+        $price = $this->record->price;
         $salePrice = $this->record->sale_price;
         if ($price > 0 && $salePrice !== null && $salePrice >= $price) {
             throw new RowImportFailedException("Sale price ({$salePrice}) must be less than the regular price ({$price}).");
@@ -103,11 +103,11 @@ class ProductImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your product import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your product import has completed and '.number_format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         $failedRowsCount = $import->getFailedRowsCount();
         if ($failedRowsCount) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.number_format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         self::notifyCompletionToDatabase(

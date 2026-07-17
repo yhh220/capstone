@@ -42,8 +42,8 @@ class ShopModeService
 
                 $order->restockItems();
                 $order->update([
-                    'status'              => 'cancelled',
-                    'cancelled_by'        => 'system',
+                    'status' => 'cancelled',
+                    'cancelled_by' => 'system',
                     'cancellation_reason' => 'Online shopping was turned off — unpaid order released',
                 ]);
 
@@ -68,7 +68,7 @@ class ShopModeService
                 try {
                     Mail::to($order->customer_email)->send(new OrderCancelledMail($order));
                 } catch (\Throwable $e) {
-                    logger()->error("Shop-close cancellation email failed for {$order->order_number}: " . $e->getMessage());
+                    logger()->error("Shop-close cancellation email failed for {$order->order_number}: ".$e->getMessage());
                 }
             }
         }
@@ -82,13 +82,13 @@ class ShopModeService
                         'Online shopping turned off — unpaid orders released',
                         [
                             'Orders cancelled' => (string) count($cancelled),
-                            'Reason'           => 'Shop switched to showroom mode; unpaid orders cannot be paid while it is off.',
+                            'Reason' => 'Shop switched to showroom mode; unpaid orders cannot be paid while it is off.',
                         ],
                         url('/admin/orders'),
                         'View orders',
                     ));
                 } catch (\Throwable $e) {
-                    logger()->error('Shop-close owner alert failed: ' . $e->getMessage());
+                    logger()->error('Shop-close owner alert failed: '.$e->getMessage());
                 }
             }
         }

@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Exceptions\OtpSendFailedException;
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\CartItem;
 use App\Services\EmailOtpService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
@@ -15,52 +15,62 @@ class ProfilePage extends Component
 {
     use SetsSeo;
 
-    public string $name         = '';
-    public string $email        = '';
-    public string $phone        = '';
-    public string $gender       = '';
-    public string $addressLine  = '';
-    public string $city         = '';
-    public string $postcode     = '';
-    public string $state        = '';
+    public string $name = '';
+
+    public string $email = '';
+
+    public string $phone = '';
+
+    public string $gender = '';
+
+    public string $addressLine = '';
+
+    public string $city = '';
+
+    public string $postcode = '';
+
+    public string $state = '';
 
     // Set-password flow state (social-login accounts with no password yet)
     public bool $settingPassword = false;
 
     // Login verification (email 2FA) state
-    public bool $twoFactorEnabled   = false;
-    public bool $enablingTwoFactor  = false;
+    public bool $twoFactorEnabled = false;
+
+    public bool $enablingTwoFactor = false;
+
     public bool $disablingTwoFactor = false; // OTP path for social-only users
 
     // Account deletion OTP state (for social-only users without a password)
     public bool $deletingAccountByOtp = false;
 
     protected $rules = [
-        'name'        => 'required|string|max:255',
-        'phone'       => 'nullable|string|max:20',
-        'gender'      => 'nullable|in:male,female,other',
+        'name' => 'required|string|max:255',
+        'phone' => 'nullable|string|max:20',
+        'gender' => 'nullable|in:male,female,other',
         'addressLine' => 'nullable|string|max:500',
-        'city'        => 'nullable|string|max:255',
-        'postcode'    => 'nullable|string|max:10',
-        'state'       => 'nullable|string|max:100',
+        'city' => 'nullable|string|max:255',
+        'postcode' => 'nullable|string|max:10',
+        'state' => 'nullable|string|max:100',
     ];
 
     public function mount(): void
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             $this->redirect(route('login'));
+
             return;
         }
 
         $user = Auth::user();
-        $this->name        = $user->name ?? '';
-        $this->email       = $user->email ?? '';
-        $this->phone       = $user->phone ?? '';
-        $this->gender      = $user->gender ?? '';
+        $this->name = $user->name ?? '';
+        $this->email = $user->email ?? '';
+        $this->phone = $user->phone ?? '';
+        $this->gender = $user->gender ?? '';
         $this->addressLine = $user->address_line ?? '';
-        $this->city        = $user->city ?? '';
-        $this->postcode    = $user->postcode ?? '';
-        $this->state       = $user->state ?? '';
+        $this->city = $user->city ?? '';
+        $this->postcode = $user->postcode ?? '';
+        $this->state = $user->state ?? '';
         $this->twoFactorEnabled = $user->two_factor_enabled ?? false;
 
         $this->setSeo(
@@ -75,13 +85,13 @@ class ProfilePage extends Component
 
         $user = Auth::user();
         $user->update([
-            'name'         => $this->name,
-            'phone'        => $this->phone,
-            'gender'       => $this->gender ?: null,
+            'name' => $this->name,
+            'phone' => $this->phone,
+            'gender' => $this->gender ?: null,
             'address_line' => $this->addressLine,
-            'city'         => $this->city,
-            'postcode'     => $this->postcode,
-            'state'        => $this->state ?: null,
+            'city' => $this->city,
+            'postcode' => $this->postcode,
+            'state' => $this->state ?: null,
         ]);
 
         session()->flash('success', __('Profile updated successfully!'));
@@ -104,13 +114,13 @@ class ProfilePage extends Component
         $v = Validator::make(
             ['current_password' => $currentPassword, 'new_password' => $newPassword, 'new_password_confirmation' => $confirmation],
             [
-                'current_password'          => ['required', 'current_password'],
-                'new_password'              => ['required', 'confirmed', Password::defaults()],
+                'current_password' => ['required', 'current_password'],
+                'new_password' => ['required', 'confirmed', Password::defaults()],
                 'new_password_confirmation' => ['required'],
             ],
             [
                 'current_password.current_password' => __('Your current password is incorrect.'),
-                'new_password.min'                  => __('Password must be at least 8 characters.'),
+                'new_password.min' => __('Password must be at least 8 characters.'),
             ]
         );
 
@@ -118,6 +128,7 @@ class ProfilePage extends Component
             foreach ($v->errors()->messages() as $field => $messages) {
                 $this->addError($field, $messages[0]);
             }
+
             return;
         }
 
@@ -139,17 +150,19 @@ class ProfilePage extends Component
             return; // already has one — the Change Password form applies instead
         }
 
-        $otp  = app(EmailOtpService::class);
+        $otp = app(EmailOtpService::class);
         $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_SET_PASSWORD, $user->email);
         if ($wait > 0) {
             $this->addError('set_otp', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+
             return;
         }
 
         try {
             $otp->send(EmailOtpService::PURPOSE_SET_PASSWORD, $user->email);
-        } catch (\App\Exceptions\OtpSendFailedException $e) {
+        } catch (OtpSendFailedException $e) {
             $this->addError('set_otp', $e->getMessage());
+
             return;
         }
 
@@ -177,8 +190,8 @@ class ProfilePage extends Component
         $v = Validator::make(
             ['set_otp' => $otp, 'set_new_password' => $newPassword, 'set_new_password_confirmation' => $confirmation],
             [
-                'set_otp'                       => ['required', 'digits:6'],
-                'set_new_password'              => ['required', 'confirmed', Password::defaults()],
+                'set_otp' => ['required', 'digits:6'],
+                'set_new_password' => ['required', 'confirmed', Password::defaults()],
                 'set_new_password_confirmation' => ['required'],
             ],
             ['set_new_password.min' => __('Password must be at least 8 characters.')]
@@ -188,12 +201,14 @@ class ProfilePage extends Component
             foreach ($v->errors()->messages() as $field => $messages) {
                 $this->addError($field, $messages[0]);
             }
+
             return;
         }
 
         $otpService = app(EmailOtpService::class);
         if (! $otpService->verify(EmailOtpService::PURPOSE_SET_PASSWORD, $user->email, $otp)) {
             $this->addError('set_otp', __('Invalid or expired code. Please try again.'));
+
             return;
         }
 
@@ -218,17 +233,19 @@ class ProfilePage extends Component
             return;
         }
 
-        $otp  = app(EmailOtpService::class);
+        $otp = app(EmailOtpService::class);
         $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_ENABLE_2FA, $user->email);
         if ($wait > 0) {
             $this->addError('two_factor_otp', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+
             return;
         }
 
         try {
             $otp->send(EmailOtpService::PURPOSE_ENABLE_2FA, $user->email);
-        } catch (\App\Exceptions\OtpSendFailedException $e) {
+        } catch (OtpSendFailedException $e) {
             $this->addError('two_factor_otp', $e->getMessage());
+
             return;
         }
 
@@ -251,18 +268,20 @@ class ProfilePage extends Component
         $v = Validator::make(['two_factor_otp' => $otp], ['two_factor_otp' => ['required', 'digits:6']]);
         if ($v->fails()) {
             $this->addError('two_factor_otp', $v->errors()->first('two_factor_otp'));
+
             return;
         }
 
         $otpService = app(EmailOtpService::class);
         if (! $otpService->verify(EmailOtpService::PURPOSE_ENABLE_2FA, $user->email, $otp)) {
             $this->addError('two_factor_otp', __('Invalid or expired code. Please try again.'));
+
             return;
         }
 
         $user->forceFill(['two_factor_enabled' => true])->save();
 
-        $this->twoFactorEnabled  = true;
+        $this->twoFactorEnabled = true;
         $this->enablingTwoFactor = false;
         $this->resetErrorBag('two_factor_otp');
         session()->flash('two_factor_success', __('Login verification is now on. We will email you a code each time you sign in.'));
@@ -287,6 +306,7 @@ class ProfilePage extends Component
 
         if (! Auth::user()->hasPassword()) {
             $this->addError('two_factor_password', __('Your account uses social sign-in. Please use the email code path to turn off verification.'));
+
             return;
         }
 
@@ -298,6 +318,7 @@ class ProfilePage extends Component
 
         if ($v->fails()) {
             $this->addError('two_factor_password', $v->errors()->first('two_factor_password'));
+
             return;
         }
 
@@ -319,17 +340,19 @@ class ProfilePage extends Component
             return;
         }
 
-        $otp  = app(EmailOtpService::class);
+        $otp = app(EmailOtpService::class);
         $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_DISABLE_2FA, $user->email);
         if ($wait > 0) {
             $this->addError('disable_two_factor_otp', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+
             return;
         }
 
         try {
             $otp->send(EmailOtpService::PURPOSE_DISABLE_2FA, $user->email);
-        } catch (\App\Exceptions\OtpSendFailedException $e) {
+        } catch (OtpSendFailedException $e) {
             $this->addError('disable_two_factor_otp', $e->getMessage());
+
             return;
         }
 
@@ -352,16 +375,18 @@ class ProfilePage extends Component
         $v = Validator::make(['disable_two_factor_otp' => $otp], ['disable_two_factor_otp' => ['required', 'digits:6']]);
         if ($v->fails()) {
             $this->addError('disable_two_factor_otp', $v->errors()->first('disable_two_factor_otp'));
+
             return;
         }
 
         if (! app(EmailOtpService::class)->verify(EmailOtpService::PURPOSE_DISABLE_2FA, $user->email, $otp)) {
             $this->addError('disable_two_factor_otp', __('Invalid or expired code. Please try again.'));
+
             return;
         }
 
         $user->forceFill(['two_factor_enabled' => false])->save();
-        $this->twoFactorEnabled   = false;
+        $this->twoFactorEnabled = false;
         $this->disablingTwoFactor = false;
         $this->resetErrorBag('disable_two_factor_otp');
         session()->flash('two_factor_success', __('Login verification is now off.'));
@@ -384,6 +409,7 @@ class ProfilePage extends Component
 
         if (! Auth::user()->hasPassword()) {
             $this->addError('delete_password', __('Your account uses social sign-in. Please use the email code path to delete your account.'));
+
             return;
         }
 
@@ -397,6 +423,7 @@ class ProfilePage extends Component
             foreach ($v->errors()->messages() as $field => $messages) {
                 $this->addError($field, $messages[0]);
             }
+
             return;
         }
 
@@ -415,17 +442,19 @@ class ProfilePage extends Component
             return;
         }
 
-        $otp  = app(EmailOtpService::class);
+        $otp = app(EmailOtpService::class);
         $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_DELETE_ACCOUNT, $user->email);
         if ($wait > 0) {
             $this->addError('delete_otp', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+
             return;
         }
 
         try {
             $otp->send(EmailOtpService::PURPOSE_DELETE_ACCOUNT, $user->email);
-        } catch (\App\Exceptions\OtpSendFailedException $e) {
+        } catch (OtpSendFailedException $e) {
             $this->addError('delete_otp', $e->getMessage());
+
             return;
         }
 
@@ -447,11 +476,13 @@ class ProfilePage extends Component
         $v = Validator::make(['delete_otp' => $otp], ['delete_otp' => ['required', 'digits:6']]);
         if ($v->fails()) {
             $this->addError('delete_otp', $v->errors()->first('delete_otp'));
+
             return;
         }
 
         if (! app(EmailOtpService::class)->verify(EmailOtpService::PURPOSE_DELETE_ACCOUNT, $user->email, $otp)) {
             $this->addError('delete_otp', __('Invalid or expired code. Please try again.'));
+
             return;
         }
 

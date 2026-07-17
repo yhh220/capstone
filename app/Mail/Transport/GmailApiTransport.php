@@ -38,7 +38,7 @@ class GmailApiTransport extends AbstractTransport
             ]);
 
         if ($response->failed()) {
-            throw new TransportException('Gmail API send failed: ' . $response->body());
+            throw new TransportException('Gmail API send failed: '.$response->body());
         }
     }
 
@@ -46,14 +46,14 @@ class GmailApiTransport extends AbstractTransport
     {
         return Cache::remember('gmail_api_access_token', 3000, function () {
             $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
-                'client_id'     => $this->clientId,
+                'client_id' => $this->clientId,
                 'client_secret' => $this->clientSecret,
                 'refresh_token' => $this->refreshToken,
-                'grant_type'    => 'refresh_token',
+                'grant_type' => 'refresh_token',
             ]);
 
             if ($response->failed()) {
-                throw new TransportException('Failed to refresh Gmail API access token: ' . $response->body());
+                throw new TransportException('Failed to refresh Gmail API access token: '.$response->body());
             }
 
             return $response->json('access_token');

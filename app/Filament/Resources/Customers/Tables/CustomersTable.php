@@ -3,12 +3,14 @@
 namespace App\Filament\Resources\Customers\Tables;
 
 use App\Models\User;
+use App\Support\SocialLogin;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class CustomersTable
 {
@@ -51,22 +53,22 @@ class CustomersTable
                     ->getStateUsing(function (User $record): array {
                         $providers = $record->socialAccounts
                             ->pluck('provider')
-                            ->map(fn (string $p) => \App\Support\SocialLogin::PROVIDERS[$p] ?? ucfirst($p))
+                            ->map(fn (string $p) => SocialLogin::PROVIDERS[$p] ?? ucfirst($p))
                             ->all();
 
                         return $providers ?: ['Email / Password'];
                     })
                     ->color(fn (string $state): string => match ($state) {
-                        'Google'    => 'danger',
+                        'Google' => 'danger',
                         'Microsoft' => 'info',
-                        default     => 'gray',
+                        default => 'gray',
                     }),
                 TextColumn::make('created_at')
                     ->label('Registered')
                     ->dateTime('d M Y')
                     ->sortable(),
             ])
-            ->modifyQueryUsing(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->with('socialAccounts'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('socialAccounts'))
             ->recordActions([
                 EditAction::make()
                     ->visible(fn () => Filament::auth()->user()?->isAdmin() ?? false),

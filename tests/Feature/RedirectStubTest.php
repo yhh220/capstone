@@ -17,7 +17,6 @@ class RedirectStubTest extends TestCase
     // several tables; the redirect cases short-circuit before any DB touch.
     use RefreshDatabase;
 
-
     public function test_stub_redirects_the_homepage_to_the_new_host(): void
     {
         config(['app.redirect_to' => 'https://winwinautoaccessories.onrender.com']);

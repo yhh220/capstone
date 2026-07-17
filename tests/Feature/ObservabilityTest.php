@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Pages\SystemStatus;
 use App\Models\AppLog;
+use App\Models\Setting;
 use App\Support\Breadcrumbs;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Context;
@@ -80,7 +81,7 @@ class ObservabilityTest extends TestCase
 
         // Stripe selected but no usable test key: the silent fallback to demo
         // must surface as a problem, not hide behind a green card.
-        \App\Models\Setting::setValue('PAYMENT_MODE', 'stripe');
+        Setting::setValue('PAYMENT_MODE', 'stripe');
         config(['services.stripe.secret' => '']);
         $checks = collect(app(SystemStatus::class)->getChecks())->keyBy('name');
 

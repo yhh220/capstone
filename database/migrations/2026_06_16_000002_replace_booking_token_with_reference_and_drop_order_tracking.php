@@ -33,7 +33,7 @@ return new class extends Migration
             }
             $year = $booking->created_at ? date('Y', strtotime($booking->created_at)) : date('Y');
             $counters[$year] = ($counters[$year] ?? 0) + 1;
-            $reference = 'BK-' . $year . '-' . str_pad((string) $counters[$year], 5, '0', STR_PAD_LEFT);
+            $reference = 'BK-'.$year.'-'.str_pad((string) $counters[$year], 5, '0', STR_PAD_LEFT);
             DB::table('bookings')->where('id', $booking->id)->update(['reference' => $reference]);
         });
 

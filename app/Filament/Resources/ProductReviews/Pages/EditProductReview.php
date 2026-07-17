@@ -9,6 +9,14 @@ use Filament\Resources\Pages\EditRecord;
 class EditProductReview extends EditRecord
 {
     protected static string $resource = ProductReviewResource::class;
-    protected function getHeaderActions(): array { return [DeleteAction::make()]; }
-    protected function getRedirectUrl(): string { return $this->getResource()::getUrl('index'); }
+
+    protected function getHeaderActions(): array
+    {
+        return [DeleteAction::make()];
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

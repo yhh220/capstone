@@ -9,17 +9,16 @@ use App\Filament\Widgets\RevenueChart;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\TopProductsChart;
 use Filament\Pages\Dashboard as BaseDashboard;
-use Filament\Widgets\AccountWidget;
 
 class Dashboard extends BaseDashboard
 {
-    public function getColumns(): int | array
+    public function getColumns(): int|array
     {
         return [
             'default' => 1,
-            'sm'      => 2,
-            'md'      => 4,
-            'xl'      => 12,
+            'sm' => 2,
+            'md' => 4,
+            'xl' => 12,
         ];
     }
 

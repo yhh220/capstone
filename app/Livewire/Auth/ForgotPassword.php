@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Auth;
 
+use App\Exceptions\OtpSendFailedException;
 use App\Livewire\Concerns\SetsSeo;
 use App\Models\User;
 use App\Services\EmailOtpService;
@@ -22,9 +23,11 @@ class ForgotPassword extends Component
     /** 1 = request code · 2 = enter code + new password · 3 = done */
     public int $step = 1;
 
-    public string $email        = '';
-    public string $otpCode      = '';
-    public bool   $showPassword = false;
+    public string $email = '';
+
+    public string $otpCode = '';
+
+    public bool $showPassword = false;
 
     // password/password_confirmation are intentionally NOT public properties —
     // Livewire serializes every public property into wire:snapshot (visible in
@@ -33,10 +36,11 @@ class ForgotPassword extends Component
 
     public function mount(): void
     {
-        $this->honeypotData = new HoneypotData();
+        $this->honeypotData = new HoneypotData;
 
         if (Auth::check()) {
             $this->redirect(route('home'), navigate: false);
+
             return;
         }
 
@@ -65,17 +69,19 @@ class ForgotPassword extends Component
         // Per-IP throttle so the form can't be looped over many emails to blast
         // OTP mail / burn the SMTP quota. Applied to every attempt (whether or
         // not the email exists) so it never reveals which emails have accounts.
-        $ip       = request()->ip();
-        $key      = 'pwreset:' . $ip;
-        $dailyKey = 'pwreset-daily:' . $ip;
+        $ip = request()->ip();
+        $key = 'pwreset:'.$ip;
+        $dailyKey = 'pwreset-daily:'.$ip;
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
             $this->addError('email', __('Too many submissions. Please wait :seconds seconds before trying again.', ['seconds' => $seconds]));
+
             return;
         }
         if (RateLimiter::tooManyAttempts($dailyKey, 15)) {
             $this->addError('email', __('You have reached today’s message limit. Please WhatsApp us directly instead.'));
+
             return;
         }
 
@@ -90,13 +96,14 @@ class ForgotPassword extends Component
         ) {
             try {
                 $otp->send(EmailOtpService::PURPOSE_RESET, $this->email);
-            } catch (\App\Exceptions\OtpSendFailedException $e) {
+            } catch (OtpSendFailedException $e) {
                 $this->addError('email', $e->getMessage());
+
                 return;
             }
         }
 
-        $this->step    = 2;
+        $this->step = 2;
         $this->otpCode = '';
         session()->flash('reset_sent', __('If an account exists for that email, a 6-digit code has been sent.'));
     }
@@ -109,25 +116,28 @@ class ForgotPassword extends Component
         $this->resetErrorBag(); // same stale-first()-message trap as sendCode()
 
         // Resends count toward both the per-IP burst cap and the daily cap.
-        $ip       = request()->ip();
-        $key      = 'pwreset:' . $ip;
-        $dailyKey = 'pwreset-daily:' . $ip;
+        $ip = request()->ip();
+        $key = 'pwreset:'.$ip;
+        $dailyKey = 'pwreset-daily:'.$ip;
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
             $this->addError('otpCode', __('Too many submissions. Please wait :seconds seconds before trying again.', ['seconds' => $seconds]));
+
             return;
         }
         if (RateLimiter::tooManyAttempts($dailyKey, 15)) {
             $this->addError('otpCode', __('You have reached today’s message limit. Please WhatsApp us directly instead.'));
+
             return;
         }
 
-        $otp  = app(EmailOtpService::class);
+        $otp = app(EmailOtpService::class);
         $wait = $otp->resendAvailableIn(EmailOtpService::PURPOSE_RESET, $this->email);
 
         if ($wait > 0) {
             $this->addError('otpCode', __('Please wait :seconds seconds before requesting a new code.', ['seconds' => $wait]));
+
             return;
         }
 
@@ -137,8 +147,9 @@ class ForgotPassword extends Component
         if (User::where('email', $this->email)->exists()) {
             try {
                 $otp->send(EmailOtpService::PURPOSE_RESET, $this->email);
-            } catch (\App\Exceptions\OtpSendFailedException $e) {
+            } catch (OtpSendFailedException $e) {
                 $this->addError('otpCode', $e->getMessage());
+
                 return;
             }
         }
@@ -157,13 +168,13 @@ class ForgotPassword extends Component
 
         $v = Validator::make(
             [
-                'otpCode'               => $this->otpCode,
-                'password'              => $password,
+                'otpCode' => $this->otpCode,
+                'password' => $password,
                 'password_confirmation' => $passwordConfirmation,
             ],
             [
-                'otpCode'               => ['required', 'digits:6'],
-                'password'              => ['required', 'confirmed', Password::defaults()],
+                'otpCode' => ['required', 'digits:6'],
+                'password' => ['required', 'confirmed', Password::defaults()],
                 'password_confirmation' => ['required'],
             ],
             [
@@ -175,6 +186,7 @@ class ForgotPassword extends Component
             foreach ($v->errors()->messages() as $field => $messages) {
                 $this->addError($field, $messages[0]);
             }
+
             return;
         }
 
@@ -182,6 +194,7 @@ class ForgotPassword extends Component
 
         if (! $otp->verify(EmailOtpService::PURPOSE_RESET, $this->email, $this->otpCode)) {
             $this->addError('otpCode', __('Invalid or expired code. Please try again.'));
+
             return;
         }
 
@@ -189,6 +202,7 @@ class ForgotPassword extends Component
 
         if (! $user) {
             $this->addError('otpCode', __('Invalid or expired code. Please try again.'));
+
             return;
         }
 

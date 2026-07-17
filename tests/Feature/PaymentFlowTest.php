@@ -18,28 +18,28 @@ class PaymentFlowTest extends TestCase
     private function makeOrder(User $user, Product $product, ?\DateTimeInterface $expiresAt = null): Order
     {
         $order = Order::create([
-            'user_id'        => $user->id,
-            'order_number'   => Order::generateOrderNumber(),
-            'customer_name'  => $user->name,
+            'user_id' => $user->id,
+            'order_number' => Order::generateOrderNumber(),
+            'customer_name' => $user->name,
             'customer_email' => $user->email,
             'customer_phone' => '0123456789',
             'shipping_address' => ['street' => '1 Jln', 'city' => 'KL', 'postcode' => '50000', 'state' => 'KL'],
-            'subtotal'       => 600,
-            'shipping_fee'   => 0,
-            'total_amount'   => 600,
-            'status'         => 'pending',
+            'subtotal' => 600,
+            'shipping_fee' => 0,
+            'total_amount' => 600,
+            'status' => 'pending',
             'payment_status' => 'pending',
             'payment_method' => 'FPX - Maybank2u',
-            'expires_at'     => $expiresAt,
+            'expires_at' => $expiresAt,
         ]);
 
         OrderItem::create([
-            'order_id'     => $order->id,
-            'product_id'   => $product->id,
+            'order_id' => $order->id,
+            'product_id' => $product->id,
             'product_name' => $product->name,
-            'quantity'     => 2,
-            'unit_price'   => 300,
-            'subtotal'     => 600,
+            'quantity' => 2,
+            'unit_price' => 300,
+            'subtotal' => 600,
         ]);
 
         return $order;
